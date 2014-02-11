@@ -45,6 +45,9 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
         domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils();
 
+    /**
+     * @param {!ops.OpRemoveHyperlink.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -55,13 +58,17 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var range = odtDocument.convertCursorToDomRange(position, length),
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            range = odtDocument.convertCursorToDomRange(position, length),
             links = odfUtils.getHyperlinkElements(range),
             node;
 
         runtime.assert(links.length === 1, "The given range should only contain a single link.");
-        node = domUtils.mergeIntoParent(links[0]);
+        node = domUtils.mergeIntoParent(/**@type{!Node}*/(links[0]));
         range.detach();
 
         odtDocument.getOdfCanvas().refreshSize();
@@ -74,6 +81,9 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveHyperlink.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveHyperlink",
@@ -84,3 +94,18 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
         };
     };
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    length:number
+}}*/
+ops.OpRemoveHyperlink.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    length:number
+}}*/
+ops.OpRemoveHyperlink.InitSpec;

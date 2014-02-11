@@ -46,10 +46,17 @@ ops.OpInsertTable = function OpInsertTable() {
     "use strict";
 
     var memberid, timestamp, initialRows, initialColumns, position, tableName, tableStyleName,
-        tableColumnStyleName, tableCellStyleMatrix,
-        /** @const */ tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
-        /** @const */ textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+        tableColumnStyleName,
+        /**@type{!Array.<!Array.<string>>}*/
+        tableCellStyleMatrix,
+        /**@const*/
+        tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+        /**@const*/
+        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
 
+    /**
+     * @param {!ops.OpInsertTable.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -76,15 +83,15 @@ ops.OpInsertTable = function OpInsertTable() {
             rowStyles = tableCellStyleMatrix[0];
         } else if (tableCellStyleMatrix.length === 3) {
             switch (row) {
-                case 0:
-                    rowStyles = tableCellStyleMatrix[0];
-                    break;
-                case initialRows - 1:
-                    rowStyles = tableCellStyleMatrix[2];
-                    break;
-                default:
-                    rowStyles = tableCellStyleMatrix[1];
-                    break;
+            case 0:
+                rowStyles = tableCellStyleMatrix[0];
+                break;
+            case initialRows - 1:
+                rowStyles = tableCellStyleMatrix[2];
+                break;
+            default:
+                rowStyles = tableCellStyleMatrix[1];
+                break;
             }
         } else {
             rowStyles = tableCellStyleMatrix[row];
@@ -95,12 +102,12 @@ ops.OpInsertTable = function OpInsertTable() {
         }
         if (rowStyles.length === 3) {
             switch (column) {
-                case 0:
-                    return rowStyles[0];
-                case initialColumns - 1:
-                    return rowStyles[2];
-                default:
-                    return rowStyles[1];
+            case 0:
+                return rowStyles[0];
+            case initialColumns - 1:
+                return rowStyles[2];
+            default:
+                return rowStyles[1];
             }
         }
         return rowStyles[column];
@@ -146,8 +153,12 @@ ops.OpInsertTable = function OpInsertTable() {
         return tableNode;
     }
 
-    this.execute = function (odtDocument) {
-        var domPosition = odtDocument.getTextNodeAtStep(position),
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            domPosition = odtDocument.getTextNodeAtStep(position),
             rootNode = odtDocument.getRootNode(),
             previousSibling,
             tableNode;
@@ -174,6 +185,9 @@ ops.OpInsertTable = function OpInsertTable() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpInsertTable.Spec}
+     */
     this.spec = function () {
         return {
             optype: "InsertTable",
@@ -188,5 +202,29 @@ ops.OpInsertTable = function OpInsertTable() {
             tableCellStyleMatrix: tableCellStyleMatrix
         };
     };
-
 };
+/**@typedef{{
+    optype:string,
+    memberid:string,
+    timestamp:number,
+    position:number,
+    initialRows:number,
+    initialColumns:number,
+    tableName:string,
+    tableStyleName:string,
+    tableColumnStyleName:string,
+    tableCellStyleMatrix:!Array.<!Array.<string>>
+}}*/
+ops.OpInsertTable.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    initialRows:number,
+    initialColumns:number,
+    tableName:string,
+    tableStyleName:string,
+    tableColumnStyleName:string,
+    tableCellStyleMatrix:!Array.<!Array.<string>>
+}}*/
+ops.OpInsertTable.InitSpec;

@@ -47,6 +47,9 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
 
     var memberid, timestamp, styleName, styleFamily;
 
+    /**
+     * @param {!ops.OpRemoveStyle.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -57,8 +60,12 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var styleNode = odtDocument.getStyleElement(styleName, styleFamily);
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            styleNode = odtDocument.getStyleElement(styleName, styleFamily);
 
         if (!styleNode) {
             return false;
@@ -71,6 +78,9 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveStyle",
@@ -89,3 +99,10 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
     styleFamily:string
  }}*/
 ops.OpRemoveStyle.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    styleName:string,
+    styleFamily:string
+ }}*/
+ops.OpRemoveStyle.InitSpec;

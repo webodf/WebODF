@@ -57,8 +57,10 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
             ops.OperationRouter.signalProcessingBatchStart,
             ops.OperationRouter.signalProcessingBatchEnd
         ]),
+        /**@type{!ops.OperationFactory}*/
         operationFactory,
         playbackFunction,
+        /**@type{number}*/
         groupIdentifier = 0;
 
     /**
@@ -95,8 +97,9 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
         // TODO redesign this concept to work with collaborative editing
         groupIdentifier += 1;
         events.emit(ops.OperationRouter.signalProcessingBatchStart, {});
-        operations.forEach(function(op) {
-            var timedOp,
+        operations.forEach(function (op) {
+            var /**@type{?ops.Operation}*/
+                timedOp,
                 opspec = op.spec();
 
             opspec.timestamp = (new Date()).getTime();
@@ -109,6 +112,9 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
         events.emit(ops.OperationRouter.signalProcessingBatchEnd, {});
     };
 
+    /**
+     * @param {function()} cb
+     */
     this.close = function (cb) {
         cb();
     };
@@ -118,7 +124,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
      * @param {!Function} cb
      * @return {undefined}
      */
-    this.subscribe = function(eventId, cb) {
+    this.subscribe = function (eventId, cb) {
         events.subscribe(eventId, cb);
     };
 
@@ -127,7 +133,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
      * @param {!Function} cb
      * @return {undefined}
      */
-    this.unsubscribe = function(eventId, cb) {
+    this.unsubscribe = function (eventId, cb) {
         events.unsubscribe(eventId, cb);
     };
 

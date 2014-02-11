@@ -104,6 +104,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getDocumentElement = function () {
         return odfCanvas.odfContainer().rootElement;
     };
+    /**
+     * @return {!Document}
+     */
     this.getDOMDocument = function () {
         return /**@type{!Document}*/(this.getDocumentElement().ownerDocument);
     };
@@ -288,7 +291,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * Convert a cursor range to a DOM range
      * @param {!number} position
      * @param {!number} length
-     * @return {Range}
+     * @return {!Range}
      */
     this.convertCursorToDomRange = function (position, length) {
         var range = getDOMDocument().createRange(),
@@ -411,7 +414,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {?Node} node
-     * @return {?Node}
+     * @return {?Element}
      */
     function getParagraphElement(node) {
         return odfUtils.getParagraphElement(node);
@@ -832,13 +835,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!string} memberid
      * @param {!number} position
      * @param {!number} length
-     * @param {!string} selectionType
+     * @param {!string=} selectionType
      * @return {undefined}
      */
     this.moveCursor = function (memberid, position, length, selectionType) {
         var cursor = cursors[memberid],
             selectionRange = self.convertCursorToDomRange(position, length);
-        if (cursor && selectionRange) {
+        if (cursor) {
             cursor.setSelectedRange(selectionRange, length >= 0);
             cursor.setSelectionType(selectionType || ops.OdtCursor.RangeSelection);
         }

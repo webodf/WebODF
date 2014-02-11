@@ -62,7 +62,7 @@ gui.StyleSummary = function StyleSummary(styles) {
             /**@type{Array.<!string>}*/values;
         if (!propertyValues.hasOwnProperty(cacheKey)) {
             values = [];
-            styles.forEach(function(style) {
+            styles.forEach(function (style) {
                 var styleSection = style[section],
                     value = styleSection && styleSection[propertyName];
                 if (values.indexOf(value) === -1) {
@@ -85,14 +85,14 @@ gui.StyleSummary = function StyleSummary(styles) {
      * @return {!function():!boolean} Returns true if all values are in the accepted property values
      */
     function lazilyLoaded(section, propertyName, acceptedPropertyValues) {
-        return function() {
+        return function () {
             var existingPropertyValues = getPropertyValues(section, propertyName);
             // As a small optimization, check accepted vs. existing lengths first.
             // If there are more existing values than accepted, this function should return
             // false as there are definitely some non-acceptable values.
             return acceptedPropertyValues.length >= existingPropertyValues.length
                 // Next, ensure each existing property value appears in the accepted properties array
-                && existingPropertyValues.every(function(v) { return acceptedPropertyValues.indexOf(v) !== -1; });
+                && existingPropertyValues.every(function (v) { return acceptedPropertyValues.indexOf(v) !== -1; });
         };
     }
 
@@ -139,7 +139,7 @@ gui.StyleSummary = function StyleSummary(styles) {
      * Returns the common font size in the supplied styles; otherwise undefined if there is no common font size
      * @return {number|undefined}
      */
-    this.fontSize = function() {
+    this.fontSize = function () {
         var stringFontSize = getCommonValue('style:text-properties', 'fo:font-size');
         return /**@type{number|undefined}*/(stringFontSize && parseFloat(stringFontSize)); // TODO: support other units besides pt!
     };
@@ -148,7 +148,7 @@ gui.StyleSummary = function StyleSummary(styles) {
      * Returns the common font name in the supplied styles; otherwise undefined if there is no common font name
      * @return {string|undefined}
      */
-    this.fontName = function() {
+    this.fontName = function () {
         return getCommonValue('style:text-properties', 'style:font-name');
     };
 
@@ -175,4 +175,24 @@ gui.StyleSummary = function StyleSummary(styles) {
      * @return {!boolean}
      */
     this.isAlignedJustified = lazilyLoaded("style:paragraph-properties", "fo:text-align", ["justify"]);
+    /**
+     * @type{!Object.<string,function():*>}
+     */
+    this.text = {
+        isBold: this.isBold,
+        isItalic: this.isItalic,
+        hasUnderline: this.hasUnderline,
+        hasStrikeThrough: this.hasStrikeThrough,
+        fontSize: this.fontSize,
+        fontName: this.fontName
+    };
+    /**
+     * @type{!Object.<string,function():*>}
+     */
+    this.paragraph = {
+        isAlignedLeft: this.isAlignedLeft,
+        isAlignedCenter: this.isAlignedCenter,
+        isAlignedRight: this.isAlignedRight,
+        isAlignedJustified: this.isAlignedJustified
+    };
 };

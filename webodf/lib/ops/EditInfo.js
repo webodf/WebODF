@@ -45,7 +45,7 @@
  */
 ops.EditInfo = function EditInfo(container, odtDocument) {
     "use strict";
-    var /**@type {Element}*/
+    var /**@type {!Element}*/
         editInfoNode,
         /**@type {!Object.<string,{time:Date}>}*/
         editHistory = {};
@@ -56,6 +56,7 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
     function sortEdits() {
         var /**@type {!Array.<{memberid:string,time:Date}>}*/
             arr = [],
+            /**@type{string}*/
             memberid;
         for (memberid in editHistory) {
             if (editHistory.hasOwnProperty(memberid)) {
@@ -74,7 +75,7 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
     }
 
     /**
-     * @return {Element}
+     * @return {!Element}
      */
     this.getNode = function () {
         return editInfoNode;
@@ -125,7 +126,7 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
      * @param {!function(!Object=)} callback, passing an error object in case of error
      * @return {undefined}
      */
-    this.destroy = function(callback) {
+    this.destroy = function (callback) {
         // TODO: have EditInfo cleaned up if the paragraph is deleted, not happening right now
         // workaround: check if the container is still in the DOM
         if (container.parentNode) {

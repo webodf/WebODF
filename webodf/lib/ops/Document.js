@@ -95,3 +95,8 @@ ops.Document.prototype.unsubscribe = function (eventid, cb) { "use strict"; };
  * @return {!ops.Canvas}
  */
 ops.Document.prototype.getCanvas = function () { "use strict"; };
+/**
+ * @param {string|!Node} inputMemberId
+ * @return {!core.PositionFilter}
+ */
+ops.Document.prototype.createRootFilter = function (inputMemberId) { "use strict"; };

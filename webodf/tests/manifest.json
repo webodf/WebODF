@@ -51,6 +51,7 @@
         "odf.Formatting"
     ],
     "gui.TrivialUndoManagerTests": [
+        "core.PositionFilterChain",
         "core.UnitTester",
         "gui.TrivialUndoManager",
         "ops.Document",

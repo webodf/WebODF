@@ -48,6 +48,9 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     var memberid, timestamp, position, styleName,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
 
+    /**
+     * @param {!ops.OpSetParagraphStyle.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -58,8 +61,13 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var iterator, paragraphNode;
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            iterator,
+            paragraphNode;
 
         iterator = odtDocument.getIteratorAtPosition(position);
         paragraphNode = odtDocument.getParagraphElement(iterator.container());
@@ -83,6 +91,9 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpSetParagraphStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "SetParagraphStyle",
@@ -101,3 +112,10 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     styleName:string
 }}*/
 ops.OpSetParagraphStyle.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    styleName:string
+}}*/
+ops.OpSetParagraphStyle.InitSpec;

@@ -457,7 +457,7 @@ odf.Formatting = function Formatting() {
         // The complete style is built up by starting at the base known style and merging each new entry
         // on top of it, so the inner-most style properties override the outer-most
         styleChain.forEach(function (elementStyleSet) {
-            Object.keys(/**@type {!Object}*/(elementStyleSet)).forEach(function (styleFamily) {
+            Object.keys(/**@type{!Object}*/(elementStyleSet)).forEach(function (styleFamily) {
                 // Expect there to only be a single style for a given family per element (e.g., 1 text, 1 paragraph)
                 var styleName = Object.keys(elementStyleSet[styleFamily])[0],
                     styleSummary = {
@@ -471,7 +471,7 @@ odf.Formatting = function Formatting() {
 
                 styleElement = getStyleElement(styleName, styleFamily);
                 if (styleElement) {
-                    parentStyle = getInheritedStyleAttributes(/**@type {!Element}*/(styleElement));
+                    parentStyle = getInheritedStyleAttributes(/**@type{!Element}*/(styleElement));
                     mergedChildStyle = utils.mergeObjects(parentStyle, mergedChildStyle);
                     styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name');
                     styleSummary.isCommonStyle = isCommonStyleElement(styleElement);

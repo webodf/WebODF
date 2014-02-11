@@ -446,8 +446,8 @@
 
         /**
          * Merge all child nodes into the targetNode's parent and remove the targetNode entirely
-         * @param {Node} targetNode
-         * @return {Node} parent of targetNode
+         * @param {!Node} targetNode
+         * @return {!Node} parent of targetNode
          */
         function mergeIntoParent(targetNode) {
             var parent = targetNode.parentNode;
@@ -460,10 +460,10 @@
         this.mergeIntoParent = mergeIntoParent;
 
         /**
-         * Removes all unwanted nodes from targetNodes includes itself.
-         * @param {Node} targetNode
-         * @param {function(Node):!boolean} shouldRemove check whether a node should be removed or not
-         * @return {Node} parent of targetNode
+         * Removes all unwanted nodes from targetNode includes itself.
+         * @param {!Node} targetNode
+         * @param {function(!Node):!boolean} shouldRemove check whether a node should be removed or not
+         * @return {?Node} parent of targetNode
          */
         function removeUnwantedNodes(targetNode, shouldRemove) {
             var parent = targetNode.parentNode,
@@ -474,8 +474,8 @@
                 removeUnwantedNodes(node, shouldRemove);
                 node = next;
             }
-            if (shouldRemove(targetNode)) {
-                parent = mergeIntoParent(targetNode);
+            if (parent && shouldRemove(targetNode)) {
+                mergeIntoParent(targetNode);
             }
             return parent;
         }

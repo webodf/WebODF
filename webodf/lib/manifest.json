@@ -222,6 +222,7 @@
         "gui.Caret",
         "gui.CaretManager",
         "gui.EditInfoMarker",
+        "gui.SelectionViewManager",
         "gui.ShadowCursor",
         "ops.EditInfo",
         "ops.Member",
@@ -238,6 +239,7 @@
     "gui.SvgSelectionView": [
         "core.Async",
         "core.DomUtils",
+        "core.PositionFilter",
         "core.ScheduledTask",
         "gui.SelectionMover",
         "gui.SelectionView",
@@ -355,6 +357,7 @@
     "ops.Canvas": [
     ],
     "ops.Document": [
+        "core.PositionFilter",
         "ops.Canvas"
     ],
     "ops.EditInfo": [
@@ -392,21 +395,25 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfContainer",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpAddCursor": [
+        "ops.Document",
         "ops.OdtCursor",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpAddMember": [
+        "ops.Document",
         "ops.Member",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpAddStyle": [
         "odf.Namespaces",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -416,6 +423,7 @@
         "odf.OdfContainer",
         "odf.OdfUtils",
         "odf.TextStyleApplicator",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -423,23 +431,28 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpInsertImage": [
         "odf.Namespaces",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpInsertTable": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpInsertText": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpMoveCursor": [
+        "ops.Document",
         "ops.OdtCursor",
         "ops.OdtDocument",
         "ops.Operation"
@@ -448,26 +461,34 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfContainer",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveBlob": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveCursor": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveHyperlink": [
         "core.DomUtils",
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveMember": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpRemoveStyle": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -475,32 +496,42 @@
         "core.DomUtils",
         "odf.Namespaces",
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpSetBlob": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpSetParagraphStyle": [
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpSplitParagraph": [
         "odf.OdfUtils",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpUpdateMember": [
         "odf.Namespaces",
+        "ops.Document",
+        "ops.Member",
         "ops.OdtDocument",
         "ops.Operation",
         "xmldom.XPath"
     ],
     "ops.OpUpdateMetadata": [
+        "ops.Document",
+        "ops.OdtDocument",
         "ops.Operation"
     ],
     "ops.OpUpdateParagraphStyle": [
         "odf.Namespaces",
+        "ops.Document",
         "ops.OdtDocument",
         "ops.Operation"
     ],
@@ -547,6 +578,7 @@
         "ops.OpRemoveText",
         "ops.OpSetParagraphStyle",
         "ops.OpSplitParagraph",
+        "ops.OpUpdateMetadata",
         "ops.OpUpdateParagraphStyle"
     ],
     "ops.OperationTransformer": [

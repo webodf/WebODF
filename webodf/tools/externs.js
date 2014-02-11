@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global Packages, HTMLStyleElement, window, XMLHttpRequest, HTMLStyleElement, Document, NodeFilter, Range*/
+/*global Packages, HTMLStyleElement, window, XMLHttpRequest, HTMLStyleElement, Document, HTMLDocument, NodeFilter, Range*/
 /*jslint nomen: false, emptyblock: true, unparam: true */
 /**
  * @constructor
@@ -643,3 +643,13 @@ TextEvent.prototype.data;
  * @type {?HTMLScriptElement}
  */
 HTMLDocument.prototype.currentScript;
+/**
+ * @type {?Element}
+ */
+Document.prototype.activeElement;
+/**
+ * @param {number} x
+ * @param {number} y
+ * @return {Range}
+ */
+Document.prototype.caretRangeFromPoint = function (x, y) {"use strict"; };

@@ -62,7 +62,7 @@ gui.SelectionView.prototype.hide = function() { "use strict"; };
 
 /**
  * Clear all overlay from the DOM
- * @param {function(?string)} callback
+ * @param {function(!Object=)} callback
  * @return {undefined}
  */
 gui.SelectionView.prototype.destroy = function (callback) { "use strict"; };

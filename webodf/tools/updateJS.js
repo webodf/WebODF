@@ -40,70 +40,13 @@ function Main(cmakeListPath) {
     var pathModule = require("path"),
         fs = require("fs"),
         buildDir = pathModule.dirname(cmakeListPath),
-        /**
-         * List of files that are 100% typed. When working on making WebODF more
-         * typed, choose a file from CMakeLists.txt that is listed as only
-         * depending on typed files and add it to this list. The run the
-         * typecheck-target to find where type annotations are needed.
-         */
-        typedFiles = [
-            "core/Async.js",
-            "core/Base64.js",
-            "core/ByteArray.js",
-            "core/ByteArrayWriter.js",
-            "core/CSSUnits.js",
-            "core/Cursor.js",
-            "core/DomUtils.js",
-            "core/EventNotifier.js",
-            "core/LoopWatchDog.js",
-            "core/PositionFilter.js",
-            "core/PositionFilterChain.js",
-            "core/PositionIterator.js",
-            "core/RawInflate.js",
-            "core/ScheduledTask.js",
-            "core/StepIterator.js",
-            "core/UnitTester.js",
-            "core/Utils.js",
-            "core/Zip.js",
-            "gui/AnnotationViewManager.js",
-            "gui/Avatar.js",
-            "gui/Caret.js",
-            "gui/Clipboard.js",
-            "gui/EditInfoHandle.js",
-            "gui/HyperlinkClickHandler.js",
-            "gui/ImageSelector.js",
-            "gui/KeyboardHandler.js",
-            "gui/MimeDataExporter.js",
-            "gui/SelectionMover.js",
-            "gui/ShadowCursor.js",
-            "gui/StyleSummary.js",
-            "gui/TrivialUndoManager.js",
-            "gui/UndoManager.js",
-            "gui/UndoStateRules.js",
-            "odf/FontLoader.js",
-            "odf/Formatting.js",
-            "odf/Namespaces.js",
-            "odf/ObjectNameGenerator.js",
-            "odf/OdfCanvas.js",
-            "odf/OdfContainer.js",
-            "odf/OdfNodeFilter.js",
-            "odf/OdfUtils.js",
-            "odf/Style2CSS.js",
-            "odf/StyleInfo.js",
-            "odf/TextSerializer.js",
-            "odf/TextStyleApplicator.js",
-            "ops/Canvas.js",
-            "ops/Document.js",
-            "ops/Member.js",
-            "ops/OdtCursor.js",
-            "ops/OdtDocument.js",
-            "ops/Operation.js",
-            "ops/Server.js",
-            "ops/StepsTranslator.js",
-            "ops/TextPositionFilter.js",
-            "xmldom/LSSerializer.js",
-            "xmldom/LSSerializerFilter.js",
-            "xmldom/XPath.js"
+        // these files are not compiled into webodf.js
+        ignoredFiles = [
+            "core/RawDeflate.js",
+            "odf/CommandLineTools.js",
+            "xmldom/RelaxNG.js",
+            "xmldom/RelaxNG2.js",
+            "xmldom/RelaxNGParser.js"
         ],
         jslintconfig;
 
@@ -313,59 +256,38 @@ function Main(cmakeListPath) {
      * @return {!Array.<string>} list
      */
     function createOrderedList(list, deps, defined) {
-        var sorted = [], i, p, l = list.length, depsPresent, missing,
-            lastLength = -1;
-        function isUndefined(dep) {
-            return !defined.hasOwnProperty(dep);
-        }
-        while (sorted.length < l && sorted.length !== lastLength) {
-            lastLength = sorted.length;
-            for (i = 0; i < l; i += 1) {
-                p = pathModule.normalize(list[i]);
-                if (!defined.hasOwnProperty(p)) {
-                    missing = deps[p].filter(isUndefined);
-                    depsPresent = missing.length === 0;
-                    if (depsPresent) {
-                        sorted.push(p);
-                        defined[p] = true;
-                    } else if (missing.length === 1 && deps[missing[0]].indexOf(p) !== -1) {
-                        // resolve simple circular problem
-                        sorted.push(p);
-                        defined[p] = true;
-                        sorted.push(missing[0]);
-                        defined[missing[0]] = true;
-                        console.log("Circular dependency: "
-                            + missing + " <> " + p);
-                    }
-                }
+        var sorted = [],
+            stack = {};
+        /**
+         * @param {string} n
+         * @param {string} parent
+         */
+        function visit(n, parent) {
+            if (defined[n]) {
+                return;
             }
-        }
-        if (sorted.length === lastLength) {
-            console.log("Unresolvable circular dependency:");
-            for (i = 0; i < l; i += 1) {
-                p = pathModule.normalize(list[i]);
-                if (!defined.hasOwnProperty(p)) {
-                    console.log(p + " misses " + deps[p].filter(isUndefined));
-                }
+            if (stack[n]) {
+                throw "Circular dependency caused by " + n + " and " + parent;
             }
-            process.exit(1);
+            stack[n] = true;
+            var d = deps[n], i, l = d.length;
+            for (i = 0; i < l; i += 1) {
+                visit(d[i], n);
+            }
+            stack[n] = false;
+            defined[n] = true;
+            sorted.push(n);
         }
+        list.forEach(visit);
         return sorted;
     }
 
-    function createCMakeLists(typed, almostTyped, remaining) {
+    function createCMakeLists(typed) {
         var path = cmakeListPath, content;
-        content = "set(TYPEDLIBJSFILES\n" +
+        content = "set(LIBJSFILES\n" +
                 "    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js\n" +
                 "    lib/runtime.js\n    lib/" +
-                typed.join("\n    lib/") + "\n)\n" +
-                "set(UNTYPEDLIBJSFILES" +
-                "\n# These files depend only on files that are 100% typed." +
-                "\n    lib/" +
-                almostTyped.join("\n    lib/") +
-                "\n# These files depend on files that are not 100% typed." +
-                "\n    lib/" +
-                remaining.join("\n    lib/") + "\n)";
+                typed.join("\n    lib/") + "\n)\n";
         saveIfDifferent(path, content, function () {
             console.log("JS file dependencies were updated.");
             process.exit(1);
@@ -383,33 +305,13 @@ function Main(cmakeListPath) {
 
     function updateCMakeLists(deps) {
         var lib = deps.lib,
-            defined = {},
-            sortedTyped = createOrderedList(typedFiles, lib, defined),
-            almostTyped,
-            definedCopy,
-            remaining;
-        definedCopy = {};
-        Object.keys(defined).forEach(function (key) {
-            definedCopy[key] = true;
+            sortedTyped,
+            compiledFiles;
+        compiledFiles = Object.keys(lib).filter(function (path) {
+            return ignoredFiles.indexOf(path) === -1;
         });
-        almostTyped = Object.keys(lib).filter(function (key) {
-            return !defined.hasOwnProperty(key) &&
-                lib[key].every(function (dep) {
-                    return defined.hasOwnProperty(dep);
-                });
-        }).sort();
-        almostTyped.forEach(function (key) {
-            defined[key] = true;
-        });
-        remaining = Object.keys(lib).filter(function (key) {
-            return !defined.hasOwnProperty(key);
-        });
-        remaining = createOrderedList(remaining, lib, defined);
-        createCMakeLists(
-            sortedTyped.map(deNormalizePath),
-            almostTyped.map(deNormalizePath),
-            remaining.map(deNormalizePath)
-        );
+        sortedTyped = createOrderedList(compiledFiles, lib, {});
+        createCMakeLists(sortedTyped.map(deNormalizePath));
     }
 
     function updateKarmaConfig(deps) {

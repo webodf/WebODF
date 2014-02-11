@@ -47,7 +47,8 @@
  */
 gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     "use strict";
-    var selectionViews = {};
+    var /**@type{!Object.<string,gui.SelectionView>}*/
+        selectionViews = {};
 
     /**
      * @param {!string} memberId
@@ -62,7 +63,7 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
      * @return {!Array.<!gui.SelectionView>}
      */
     function getSelectionViews() {
-        return Object.keys(selectionViews).map(function(memberid) { return selectionViews[memberid]; });
+        return Object.keys(selectionViews).map(function (memberid) { return selectionViews[memberid]; });
     }
     this.getSelectionViews = getSelectionViews;
 
@@ -73,7 +74,7 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     function removeSelectionView(memberId) {
         if (selectionViews.hasOwnProperty(memberId)) {
             /*jslint emptyblock: true*/
-            selectionViews[memberId].destroy(function() { });
+            selectionViews[memberId].destroy(function () { });
             /*jslint emptyblock: false*/
             delete selectionViews[memberId];
         }
@@ -131,6 +132,9 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
         return selectionView;
     };
 
+    /**
+     * @param {function(string=)} callback
+     */
     this.destroy = function (callback) {
         var selectionViewArray = getSelectionViews();
 
@@ -139,7 +143,7 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
                 callback(err);
             } else {
                 if (i < selectionViewArray.length) {
-                    selectionViewArray[i].destroy(function(err) { destroySelectionView(i + 1, err); });
+                    selectionViewArray[i].destroy(function (err) { destroySelectionView(i + 1, err); });
                 } else {
                     callback();
                 }

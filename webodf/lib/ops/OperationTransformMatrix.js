@@ -61,33 +61,40 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * Returns a list with all attributes in setProperties that refer to styleName
-     * @param {?Object|undefined} setProperties
-     * @param {!string} styleName
+     * @param {Object} setProperties
+     * @param {string} styleName
      * @return {!Array.<!string>}
      */
     function getStyleReferencingAttributes(setProperties, styleName) {
         var attributes = [];
+        /**
+         * @param {string} attributeName
+         */
+        function check(attributeName) {
+            if (setProperties[attributeName] === styleName) {
+                attributes.push(attributeName);
+            }
+        }
         if (setProperties) {
-            ['style:parent-style-name','style:next-style-name'].forEach(function(attributeName) {
-                if (setProperties[attributeName] === styleName) {
-                    attributes.push(attributeName);
-                }
-            });
+            ['style:parent-style-name', 'style:next-style-name'].forEach(check);
         }
         return attributes;
     }
     /**
-     * @param {?Object|undefined} setProperties
-     * @param {!string} deletedStyleName
-     * @return {undefined}
+     * @param {Object} setProperties
+     * @param {string} deletedStyleName
      */
     function dropStyleReferencingAttributes(setProperties, deletedStyleName) {
+        /**
+         * @param {string} attributeName
+         */
+        function del(attributeName) {
+            if (setProperties[attributeName] === deletedStyleName) {
+                delete setProperties[attributeName];
+            }
+        }
         if (setProperties) {
-            ['style:parent-style-name','style:next-style-name'].forEach(function(attributeName) {
-                if (setProperties[attributeName] === deletedStyleName) {
-                    delete setProperties[attributeName];
-                }
-            });
+            ['style:parent-style-name', 'style:next-style-name'].forEach(del);
         }
     }
 
@@ -111,29 +118,33 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {?Object} minorSetProperties
-     * @param {?Object} minorRemovedProperties
-     * @param {?Object} majorSetProperties
-     * @param {?Object} majorRemovedProperties
+     * @param {?Object.<string,*>} minorSetProperties
+     * @param {?{attributes:string}} minorRemovedProperties
+     * @param {?Object.<string,*>} majorSetProperties
+     * @param {?{attributes:string}} majorRemovedProperties
      * @return {!{majorChanged:boolean,minorChanged:boolean}}
      */
     function dropOverruledAndUnneededAttributes(minorSetProperties, minorRemovedProperties, majorSetProperties, majorRemovedProperties) {
-        var value, i, name,
+        var i, name,
             majorChanged = false, minorChanged = false,
-            overrulingPropertyValue,
             removedPropertyNames,
-            majorRemovedPropertyNames =
-                majorRemovedProperties && majorRemovedProperties.attributes ?
-                    majorRemovedProperties.attributes.split(',') : [];
+            /**@type{!Array.<string>}*/
+            majorRemovedPropertyNames = [];
+        if (majorRemovedProperties && majorRemovedProperties.attributes) {
+            majorRemovedPropertyNames = majorRemovedProperties.attributes.split(',');
+        }
 
         // iterate over all properties and see which get overwritten or deleted
         // by the overruling, so they have to be dropped
         if (minorSetProperties && (majorSetProperties || majorRemovedPropertyNames.length > 0)) {
-            Object.keys(minorSetProperties).forEach(function(key) {
-                value = minorSetProperties[key];
+            Object.keys(minorSetProperties).forEach(function (key) {
+                var value = minorSetProperties[key],
+                    overrulingPropertyValue;
                 // TODO: support more than one level
                 if (typeof value !== "object") {
-                    overrulingPropertyValue = majorSetProperties && majorSetProperties[key];
+                    if (majorSetProperties) {
+                        overrulingPropertyValue = majorSetProperties[key];
+                    }
                     if (overrulingPropertyValue !== undefined) {
                         // drop overruled
                         delete minorSetProperties[key];
@@ -145,7 +156,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
                             delete majorSetProperties[key];
                             majorChanged = true;
                         }
-                    } else if (majorRemovedPropertyNames && majorRemovedPropertyNames.indexOf(key) !== -1) {
+                    } else if (majorRemovedPropertyNames.indexOf(key) !== -1) {
                         // drop overruled
                         delete minorSetProperties[key];
                         minorChanged = true;
@@ -161,7 +172,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             for (i = 0; i < removedPropertyNames.length; i += 1) {
                 name = removedPropertyNames[i];
                 if ((majorSetProperties && majorSetProperties[name] !== undefined) ||
-                    (majorRemovedPropertyNames && majorRemovedPropertyNames.indexOf(name) !== -1)) {
+                        (majorRemovedPropertyNames && majorRemovedPropertyNames.indexOf(name) !== -1)) {
                     // drop
                     removedPropertyNames.splice(i, 1);
                     i -= 1;
@@ -188,7 +199,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @return {!boolean}
      */
     function hasProperties(properties) {
-        var key;
+        var /**@type{string}*/
+            key;
 
         for (key in properties) {
             if (properties.hasOwnProperty(key)) {
@@ -200,11 +212,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * Estimates if there are any properties set in the given properties object.
-     * @param {!Object} properties
+     * @param {!{attributes:string}} properties
      * @return {!boolean}
      */
     function hasRemovedProperties(properties) {
-        var key;
+        var /**@type{string}*/
+            key;
 
         for (key in properties) {
             if (properties.hasOwnProperty(key)) {
@@ -218,36 +231,38 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} minorOpspec
-     * @param {!Object} majorOpspec
-     * @param {!string} propertiesName
+     * @param {Object.<string,Object.<string,*>>} minorSet
+     * @param {Object.<string,{attributes:string}>} minorRem
+     * @param {Object.<string,Object.<string,*>>} majorSet
+     * @param {Object.<string,{attributes:string}>} majorRem
+     * @param {string} propertiesName
      * @return {?{majorChanged:boolean,minorChanged:boolean}}
      */
-    function dropOverruledAndUnneededProperties(minorOpspec, majorOpspec, propertiesName) {
-        var minorSP = minorOpspec.setProperties ? minorOpspec.setProperties[propertiesName] : null,
-            minorRP = minorOpspec.removedProperties ? minorOpspec.removedProperties[propertiesName] : null,
-            majorSP = majorOpspec.setProperties ? majorOpspec.setProperties[propertiesName] : null,
-            majorRP = majorOpspec.removedProperties ? majorOpspec.removedProperties[propertiesName] : null,
+    function dropOverruledAndUnneededProperties(minorSet, minorRem, majorSet, majorRem, propertiesName) {
+        var minorSP = minorSet ? minorSet[propertiesName] : null,
+            minorRP = minorRem ? minorRem[propertiesName] : null,
+            majorSP = majorSet ? majorSet[propertiesName] : null,
+            majorRP = majorRem ? majorRem[propertiesName] : null,
             result;
 
         result = dropOverruledAndUnneededAttributes(minorSP, minorRP, majorSP, majorRP);
 
         // remove empty setProperties
         if (minorSP && !hasProperties(minorSP)) {
-            delete minorOpspec.setProperties[propertiesName];
+            delete minorSet[propertiesName];
         }
         // remove empty removedProperties
         if (minorRP && !hasRemovedProperties(minorRP)) {
-            delete minorOpspec.removedProperties[propertiesName];
+            delete minorRem[propertiesName];
         }
 
         // remove empty setProperties
         if (majorSP && !hasProperties(majorSP)) {
-            delete majorOpspec.setProperties[propertiesName];
+            delete majorSet[propertiesName];
         }
         // remove empty removedProperties
         if (majorRP && !hasRemovedProperties(majorRP)) {
-            delete majorOpspec.removedProperties[propertiesName];
+            delete majorRem[propertiesName];
         }
 
         return result;
@@ -315,13 +330,19 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
             // might need original opspecs?
             if (applyDirectStylingSpecA.position !== applyDirectStylingSpecB.position ||
-                applyDirectStylingSpecA.length !== applyDirectStylingSpecB.length) {
+                    applyDirectStylingSpecA.length !== applyDirectStylingSpecB.length) {
                 originalMajorSpec = cloneOpspec(majorSpec);
                 originalMinorSpec = cloneOpspec(minorSpec);
             }
 
             // for the part that is overlapping reduce setProperties by the overruled properties
-            dropResult = dropOverruledAndUnneededProperties(minorSpec, majorSpec, 'style:text-properties');
+            dropResult = dropOverruledAndUnneededProperties(
+                minorSpec.setProperties,
+                null,
+                majorSpec.setProperties,
+                null,
+                'style:text-properties'
+            );
 
             if (dropResult.majorChanged || dropResult.minorChanged) {
                 // split the less-priority op into several ops for the overlapping and non-overlapping ranges
@@ -618,16 +639,20 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             minorSpec = hasAPriority ? updateParagraphStyleSpecB : updateParagraphStyleSpecA;
 
             // any properties which are set by other update op need to be dropped
-            dropOverruledAndUnneededProperties(minorSpec, majorSpec, 'style:paragraph-properties');
-            dropOverruledAndUnneededProperties(minorSpec, majorSpec, 'style:text-properties');
+            dropOverruledAndUnneededProperties(minorSpec.setProperties,
+                minorSpec.removedProperties, majorSpec.setProperties,
+                majorSpec.removedProperties, 'style:paragraph-properties');
+            dropOverruledAndUnneededProperties(minorSpec.setProperties,
+                minorSpec.removedProperties, majorSpec.setProperties,
+                majorSpec.removedProperties, 'style:text-properties');
             dropOverruledAndUnneededAttributes(minorSpec.setProperties || null,
-                                minorSpec.removedProperties || null,
-                                majorSpec.setProperties || null,
-                                majorSpec.removedProperties || null);
+                /**@type{{attributes: string}}*/(minorSpec.removedProperties) || null,
+                majorSpec.setProperties || null,
+                /**@type{{attributes: string}}*/(majorSpec.removedProperties) || null);
 
             // check if there are any changes left and the major op has not become a noop
             if (!(majorSpec.setProperties && hasProperties(majorSpec.setProperties)) &&
-                !(majorSpec.removedProperties && hasRemovedProperties(majorSpec.removedProperties))) {
+                    !(majorSpec.removedProperties && hasRemovedProperties(majorSpec.removedProperties))) {
                 // set major spec to noop
                 if (hasAPriority) {
                     updateParagraphStyleSpecAResult = [];
@@ -637,7 +662,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             }
             // check if there are any changes left and the minor op has not become a noop
             if (!(minorSpec.setProperties && hasProperties(minorSpec.setProperties)) &&
-                !(minorSpec.removedProperties && hasRemovedProperties(minorSpec.removedProperties))) {
+                    !(minorSpec.removedProperties && hasRemovedProperties(minorSpec.removedProperties))) {
                 // set minor spec to noop 
                 if (hasAPriority) {
                     updateParagraphStyleSpecBResult = [];
@@ -654,8 +679,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {!Object} updateMetadataSpecA 
-     * @param {!Object} updateMetadataSpecB 
+     * @param {!ops.OpUpdateMetadata.Spec} updateMetadataSpecA
+     * @param {!ops.OpUpdateMetadata.Spec} updateMetadataSpecB
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -671,11 +696,11 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         dropOverruledAndUnneededAttributes(minorSpec.setProperties || null,
                             minorSpec.removedProperties || null,
                             majorSpec.setProperties || null,
-                            majorSpec.removedProperties ||null);
+                            majorSpec.removedProperties || null);
 
         // check if there are any changes left and the major op has not become a noop
         if (!(majorSpec.setProperties && hasProperties(majorSpec.setProperties)) &&
-            !(majorSpec.removedProperties && hasRemovedProperties(majorSpec.removedProperties))) {
+                !(majorSpec.removedProperties && hasRemovedProperties(majorSpec.removedProperties))) {
             // set major spec to noop
             if (hasAPriority) {
                 updateMetadataSpecAResult = [];
@@ -685,7 +710,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         }
         // check if there are any changes left and the minor op has not become a noop
         if (!(minorSpec.setProperties && hasProperties(minorSpec.setProperties)) &&
-            !(minorSpec.removedProperties && hasRemovedProperties(minorSpec.removedProperties))) {
+                !(minorSpec.removedProperties && hasRemovedProperties(minorSpec.removedProperties))) {
             // set minor spec to noop 
             if (hasAPriority) {
                 updateMetadataSpecBResult = [];
@@ -696,7 +721,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
         return {
             opSpecsA:  updateMetadataSpecAResult,
-            opSpecsB:  updateMetadataSpecBResult 
+            opSpecsB:  updateMetadataSpecBResult
         };
     }
 
@@ -741,7 +766,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
-     * @param {!Object} removeTextSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformMoveCursorRemoveText(moveCursorSpec, removeTextSpec) {
@@ -1073,10 +1098,10 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
          * Empty cells in this matrix mean there is no such transformation
          * possible, and should be handled as if the method returns "null".
          *
-         * @type {!Object.<!string,!Object.<!string,!Function>>}
+         * @type {!Object.<string,!Object.<string,function(!Object,!Object,boolean=):?{opSpecsA:!Array.<!{optype:string}>, opSpecsB:!Array.<!{optype:string}>}>>}
          */
-        transformations =
-    {
+        transformations;
+    transformations = {
         "AddCursor": {
             "AddCursor":            passUnchanged,
             "AddMember":            passUnchanged,
@@ -1175,7 +1200,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       passUnchanged,
             "UpdateMetadata":       passUnchanged,
-            "UpdateParagraphStyle": passUnchanged 
+            "UpdateParagraphStyle": passUnchanged
         },
         "RemoveStyle": {
             "RemoveStyle":          transformRemoveStyleRemoveStyle,
@@ -1229,11 +1254,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     this.extendTransformations = function (moreTransformations) {
         Object.keys(moreTransformations).forEach(function (optypeA) {
             var moreTransformationsOptypeAMap = moreTransformations[optypeA],
+                /**@type{!Object.<string,!Function>}*/
                 optypeAMap,
                 isExtendingOptypeAMap = transformations.hasOwnProperty(optypeA);
 
             runtime.log((isExtendingOptypeAMap ? "Extending" : "Adding") + " map for optypeA: " + optypeA);
-            if (! isExtendingOptypeAMap) {
+            if (!isExtendingOptypeAMap) {
                 transformations[optypeA] = {};
             }
             optypeAMap = transformations[optypeA];
@@ -1249,12 +1275,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * TODO: priority could be read from op spec, here be an attribute from-server
-     * @param {!Object} opSpecA op with lower priority in case of tie breaking
-     * @param {!Object} opSpecB op with higher priority in case of tie breaking
-     * @return {?{opSpecsA:!Array.<!Object>,
-     *            opSpecsB:!Array.<!Object>}}
+     * @param {!{optype:string}} opSpecA op with lower priority in case of tie breaking
+     * @param {!{optype:string}} opSpecB op with higher priority in case of tie breaking
+     * @return {?{opSpecsA:!Array.<!{optype:string}>,
+     *            opSpecsB:!Array.<!{optype:string}>}}
      */
-    this.transformOpspecVsOpspec = function(opSpecA, opSpecB) {
+    this.transformOpspecVsOpspec = function (opSpecA, opSpecB) {
         var isOptypeAAlphaNumericSmaller = (opSpecA.optype <= opSpecB.optype),
             helper, transformationFunctionMap, transformationFunction, result;
 

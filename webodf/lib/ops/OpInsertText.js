@@ -54,8 +54,18 @@ ops.OpInsertText = function OpInsertText() {
 
     var space = " ",
         tab = "\t",
-        memberid, timestamp, position, text, moveCursor;
+        memberid,
+        timestamp,
+        /**@type{number}*/
+        position,
+        /**@type{boolean}*/
+        moveCursor,
+        /**@type{string}*/
+        text;
 
+    /**
+     * @param {!ops.OpInsertText.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -94,9 +104,14 @@ ops.OpInsertText = function OpInsertText() {
         return text[index] === space && (index === 0 || index === text.length - 1 || text[index - 1] === space);
     }
 
-    this.execute = function (odtDocument) {
-        var domPosition,
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            domPosition,
             previousNode,
+            /**@type{!Element}*/
             parentElement,
             nextNode = null,
             ownerDocument = odtDocument.getDOMDocument(),
@@ -108,6 +123,9 @@ ops.OpInsertText = function OpInsertText() {
             cursor = odtDocument.getCursor(memberid),
             i;
 
+        /**
+         * @param {string} toInsertText
+         */
         function insertTextNode(toInsertText) {
             parentElement.insertBefore(ownerDocument.createTextNode(toInsertText), nextNode);
         }
@@ -118,7 +136,7 @@ ops.OpInsertText = function OpInsertText() {
         if (domPosition) {
             previousNode = domPosition.textNode;
             nextNode = previousNode.nextSibling;
-            parentElement = previousNode.parentNode;
+            parentElement = /**@type{!Element}*/(previousNode.parentNode);
             paragraphElement = odtDocument.getParagraphElement(previousNode);
 
             // first do the insertion with any contained tabs or spaces
@@ -207,6 +225,9 @@ ops.OpInsertText = function OpInsertText() {
         return false;
     };
 
+    /**
+     * @return {!ops.OpInsertText.Spec}
+     */
     this.spec = function () {
         return {
             optype: "InsertText",
@@ -227,3 +248,11 @@ ops.OpInsertText = function OpInsertText() {
     moveCursor:boolean
 }}*/
 ops.OpInsertText.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    text:string,
+    moveCursor:(string|boolean|undefined)
+}}*/
+ops.OpInsertText.InitSpec;

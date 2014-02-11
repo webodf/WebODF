@@ -87,10 +87,16 @@ gui.UndoStateRules = function UndoStateRules() {
 
     /**
      * @param {!ops.Operation} op
-     * @return {number}
+     * @return {number|undefined}
      */
     function getOpPosition(op) {
-        return op.spec().position;
+        var key = "position",
+            spec = op.spec(),
+            value;
+        if (spec.hasOwnProperty(key)) {
+            value = /**@type{number}*/(spec[key]);
+        }
+        return value;
     }
 
     /**

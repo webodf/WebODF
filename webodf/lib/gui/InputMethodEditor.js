@@ -38,7 +38,7 @@
 /*global runtime, gui, core, ops, Node*/
 
 
-(function() {
+(function () {
     "use strict";
 
     /**
@@ -86,7 +86,10 @@
             eventManager.addFilter("keypress", suppressIncorrectKeyPress);
         }
 
-        this.destroy = function(callback) {
+        /**
+         * @param {function()} callback
+         */
+        this.destroy = function (callback) {
             eventManager.unsubscribe("textInput", clearSuppression);
             eventManager.unsubscribe("compositionend", trapComposedValue);
             eventManager.removeFilter("keypress", suppressIncorrectKeyPress);
@@ -110,13 +113,16 @@
     gui.InputMethodEditor = function InputMethodEditor(inputMemberId, odtDocument, eventManager) {
         var window = runtime.getWindow(),
             cursorns = "urn:webodf:names:cursor",
+            /**@type{ops.OdtCursor}*/
             localCursor = null,
             eventTrap = eventManager.getEventTrap(),
             async = new core.Async(),
             domUtils = new core.DomUtils(),
             FAKE_CONTENT = "b",
+            /**@type{!core.ScheduledTask}*/
             processUpdates,
             pendingEvent = false,
+            /**@type{string}*/
             pendingData = "",
             events = new core.EventNotifier([gui.InputMethodEditor.signalCompositionStart,
                                                 gui.InputMethodEditor.signalCompositionEnd]),
@@ -173,6 +179,9 @@
             }
         }
 
+        /**
+         * @param {string} data
+         */
         function addCompositionData(data) {
             pendingEvent = true;
             pendingData += data;
@@ -183,6 +192,7 @@
 
         function resetWindowSelection() {
             var selection = window.getSelection(),
+                node,
                 textNode,
                 doc = eventTrap.ownerDocument;
 
@@ -202,14 +212,14 @@
                 // Repeated text entry events can result in lots of empty text nodes
                 eventTrap.removeChild(eventTrap.firstChild);
             }
-            textNode = eventTrap.firstChild;
-            if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+            node = eventTrap.firstChild;
+            if (!node || node.nodeType !== Node.TEXT_NODE) {
                 while (eventTrap.firstChild) {
                     // Opera puts a random BR tag in as the first node for some reason...
                     eventTrap.removeChild(eventTrap.firstChild);
                 }
                 // Content is necessary for cut/copy/paste to be enabled
-                textNode = eventTrap.appendChild(doc.createTextNode(""));
+                node = eventTrap.appendChild(doc.createTextNode(""));
             }
 
             // If there is a local cursor, and it is collapsed, collapse the window selection as well.
@@ -217,6 +227,7 @@
             // A browser selection in an editable area is necessary to allow cut/copy events to fire
             // It doesn't have to be an accurate selection however as the SessionController will override
             // the default browser handling.
+            textNode = /**@type{!Text}*/(node);
             if (localCursor && localCursor.getSelectedRange().collapsed) {
                 textNode.deleteData(0, textNode.length);
             } else {
@@ -241,11 +252,17 @@
             }
         }
 
+        /**
+         * @param {!CompositionEvent} e
+         */
         function compositionEnd(e) {
             lastCompositionData = e.data;
             addCompositionData(e.data);
         }
 
+        /**
+         * @param {!Text} e
+         */
         function textInput(e) {
             if (e.data !== lastCompositionData) {
                 // Chrome/Safari fire a compositionend event with data & a textInput event with data
@@ -293,7 +310,10 @@
             }
         };
 
-        this.destroy = function(callback) {
+        /**
+         * @param {function()} callback
+         */
+        this.destroy = function (callback) {
             eventManager.unsubscribe('compositionstart', compositionStart);
             eventManager.unsubscribe('compositionend', compositionEnd);
             eventManager.unsubscribe('textInput', textInput);
@@ -336,7 +356,7 @@
          * Sets to true when in edit mode; otherwise false
          * @param {!boolean} editable
          */
-        this.setEditing = function(editable) {
+        this.setEditing = function (editable) {
             isEditable = editable;
             synchronizeEventStatus();
         };
@@ -351,7 +371,14 @@
             eventManager.subscribe('focus', resetWindowSelection);
 
             filters.push(new DetectSafariCompositionError(eventManager));
-            cleanup = filters.map(function(filter) { return filter.destroy; });
+            /**
+             * @param {{destroy:function()}} filter
+             * return {function()}
+             */
+            function getDestroy(filter) {
+                return filter.destroy;
+            }
+            cleanup = filters.map(getDestroy);
 
             // Negative tab index still allows focus, but removes accessibility by keyboard
             eventTrap.setAttribute("tabindex", -1);

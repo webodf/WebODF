@@ -132,8 +132,8 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * the current root, starting at the specified node.
      * The iterator is constrained within the root element for the current cursor position so
      * iteration will stop once the root is entirely walked in the requested direction
-     * @param cursorNode
-     * @param forward
+     * @param {!Element} cursorNode
+     * @param {boolean} forward
      * @return {boolean}
      */
     function hasPositionInDirection(cursorNode, forward) {
@@ -161,7 +161,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * one character to the left of the current selection, that character will be removed instead.
      * @return {!boolean}
      */
-    this.removeTextByBackspaceKey = function() {
+    this.removeTextByBackspaceKey = function () {
         var cursor = odtDocument.getCursor(inputMemberId),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op = null;
@@ -191,7 +191,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * one character to the right of the current selection, that character will be removed instead.
      * @return {!boolean}
      */
-    this.removeTextByDeleteKey = function() {
+    this.removeTextByDeleteKey = function () {
         var cursor = odtDocument.getCursor(inputMemberId),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op = null;
@@ -218,7 +218,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * Removes the currently selected content
      * @return {!boolean}
      */
-    this.removeCurrentSelection = function() {
+    this.removeCurrentSelection = function () {
         var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op;
         if (selection.length !== 0) {

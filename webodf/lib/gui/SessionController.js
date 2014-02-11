@@ -37,16 +37,7 @@
 
 /*global runtime, core, gui, Node, ops, odf */
 
-
-/**
- * @constructor
- * @param {!ops.Session} session
- * @param {!string} inputMemberId
- * @param {!ops.OdtCursor} shadowCursor
- * @param {!{directParagraphStylingEnabled:boolean}=} args
- * @return {?}
- */
-gui.SessionController = (function () {
+(function () {
     "use strict";
 
     var /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
@@ -63,6 +54,7 @@ gui.SessionController = (function () {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
             async = new core.Async(),
+            /**@type{!core.DomUtils}*/
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
             mimeDataExporter = new gui.MimeDataExporter(),
@@ -70,9 +62,11 @@ gui.SessionController = (function () {
             keyDownHandler = new gui.KeyboardHandler(),
             keyPressHandler = new gui.KeyboardHandler(),
             keyUpHandler = new gui.KeyboardHandler(),
+            /**@type{boolean}*/
             clickStartedWithinCanvas = false,
             objectNameGenerator = new odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             isMouseMoved = false,
+            /**@type{core.PositionFilter}*/
             mouseDownRootFilter = null,
             handleMouseClickTimeoutId,
             undoManager = null,
@@ -85,10 +79,12 @@ gui.SessionController = (function () {
             imageController = new gui.ImageController(session, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            /**@type{!core.ScheduledTask}*/
             drawShadowCursorTask,
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, odtDocument, eventManager),
+            /**@type{number}*/
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
             hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
@@ -125,9 +121,14 @@ gui.SessionController = (function () {
             hadFocus = undefined;
         }
 
+        /**
+         * param {{target:(!Element|undefined),srcElement:(!Element|undefined)}} e
+         * @param {!Event} e
+         * @return {Node}
+         */
         function getTarget(e) {
             // e.srcElement because IE10 likes to be different...
-            return e.target || e.srcElement;
+            return /**@type{Node}*/(e.target) || e.srcElement || null;
         }
 
         /**
@@ -155,7 +156,7 @@ gui.SessionController = (function () {
             if (doc.caretRangeFromPoint) {
                 c = doc.caretRangeFromPoint(x, y);
                 result = {
-                    container: c.startContainer,
+                    container: /**@type{!Node}*/(c.startContainer),
                     offset: c.startOffset
                 };
             } else if (doc.caretPositionFromPoint) {
@@ -392,15 +393,15 @@ gui.SessionController = (function () {
          * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
          * events that occur when the user releases the mouse button outside the canvas.
          * This filter limits selection changes to mouse down events that start inside the canvas
-         * @param e
+         * @param {!Event} e
          */
         function handleMouseDown(e) {
             var target = getTarget(e),
                 cursor = odtDocument.getCursor(inputMemberId);
-            clickStartedWithinCanvas = target && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
+            clickStartedWithinCanvas = target !== null && domUtils.containsNode(odtDocument.getOdfCanvas().getElement(), target);
             if (clickStartedWithinCanvas) {
                 isMouseMoved = false;
-                mouseDownRootFilter = odtDocument.createRootFilter(target);
+                mouseDownRootFilter = odtDocument.createRootFilter(/**@type{!Node}*/(target));
                 clickCount = e.detail;
                 if (cursor && e.shiftKey) {
                     // Firefox seems to get rather confused about the window selection when shift+extending it.
@@ -452,6 +453,9 @@ gui.SessionController = (function () {
             };
         }
 
+        /**
+         * @param {!Event} event
+         */
         function handleMouseClickEvent(event) {
             var target = getTarget(event),
                 eventDetails = {
@@ -462,7 +466,7 @@ gui.SessionController = (function () {
                 };
             drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
             if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
-                selectionController.selectImage(target.parentNode);
+                selectionController.selectImage(/**@type{!Node}*/(target.parentNode));
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (imageSelector.isSelectorElement(target)) {
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
@@ -476,7 +480,7 @@ gui.SessionController = (function () {
                     // the click is processed. Set 0 timeout here so the newly clicked position can be updated
                     // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
                     // out the caret position from two coordinates.
-                    handleMouseClickTimeoutId = runtime.setTimeout(function() {
+                    handleMouseClickTimeoutId = runtime.setTimeout(function () {
                         var selection = mutableSelection(window.getSelection()),
                             selectionRange,
                             position,
@@ -497,7 +501,7 @@ gui.SessionController = (function () {
                             // In FireFox if an image has no text around it, click on either side of the
                             // image resulting the same selection get returned. focusNode: image, focusOffset: 0
                             // Move the cursor to the next walkable position when clicking on the right side of an image
-                            frameNode = selection.anchorNode.parentNode;
+                            frameNode = /**@type{!Element}*/(selection.anchorNode.parentNode);
                             rect = frameNode.getBoundingClientRect();
                             if (event.clientX > rect.right) {
                                 position = getNextWalkablePosition(frameNode);
@@ -533,7 +537,7 @@ gui.SessionController = (function () {
         }
 
         /**
-         * @param {!Event} e
+         * @param {!MouseEvent} e
          * @return {undefined}
          */
         function handleDragStart(e) {
@@ -544,7 +548,7 @@ gui.SessionController = (function () {
                 return;
             }
 
-            mimeDataExporter.exportRangeToDataTransfer(e.dataTransfer, selectedRange);
+            mimeDataExporter.exportRangeToDataTransfer(/**@type{!DataTransfer}*/(e.dataTransfer), selectedRange);
         }
 
         function handleDragEnd() {
@@ -558,6 +562,9 @@ gui.SessionController = (function () {
             isMouseMoved = false;
         }
 
+        /**
+         * @param {!Event} e
+         */
         function handleContextMenu(e) {
             // TODO Various browsers have different default behaviours on right click
             // We can detect this at runtime without doing any kind of platform sniffing
@@ -568,12 +575,15 @@ gui.SessionController = (function () {
             handleMouseClickEvent(e);
         }
 
+        /**
+         * @param {!Event} event
+         */
         function handleMouseUp(event) {
-            var target = getTarget(event),
+            var target = /**@type{!Element}*/(getTarget(event)),
                 annotationNode = null;
 
             if (target.className === "annotationRemoveButton") {
-                annotationNode = domUtils.getElementsByTagNameNS(target.parentNode, odf.Namespaces.officens, 'annotation')[0];
+                annotationNode = domUtils.getElementsByTagNameNS(/**@type{!Element}*/(target.parentNode), odf.Namespaces.officens, 'annotation')[0];
                 annotationController.removeAnnotation(annotationNode);
                 eventManager.focus();
             } else {
@@ -601,18 +611,23 @@ gui.SessionController = (function () {
          * @return {!Function}
          */
         function returnTrue(fn) {
-            return function() {
+            return function () {
                 fn();
                 return true;
             };
         }
 
         /**
-         * Executes the given function only on range selection only
-         * @param {!Function} fn
-         * @return {!Function}
+         * Executes the given function on range selection only
+         * @param {function(T):(boolean|undefined)} fn
+         * @return {function(T):(boolean|undefined)}
+         * @template T
          */
         function rangeSelectionOnly(fn) {
+            /**
+             * @param {*} e
+             * return {function(*):(boolean|undefined)
+             */
             return function (e) {
                 var selectionType = odtDocument.getCursor(inputMemberId).getSelectionType();
                 if (selectionType === ops.OdtCursor.RangeSelection) {
@@ -709,14 +724,19 @@ gui.SessionController = (function () {
             }
 
             // the default action is to insert text into the document
-            keyPressHandler.setDefault(rangeSelectionOnly(function (e) {
+            /**
+             * @param {!KeyboardEvent} e
+             * @return {boolean|undefined}
+             */
+            function handler(e) {
                 var text = stringFromKeyPress(e);
                 if (text && !(e.altKey || e.ctrlKey || e.metaKey)) {
                     textController.insertText(text);
                     return true;
                 }
                 return false;
-            }));
+            }
+            keyPressHandler.setDefault(rangeSelectionOnly(handler));
             keyPressHandler.bind(keyCode.Enter, modifier.None, rangeSelectionOnly(textController.enqueueParagraphSplittingOps));
         };
 
@@ -869,7 +889,7 @@ gui.SessionController = (function () {
          * Return the keyboard event handlers
          * @return {{keydown: gui.KeyboardHandler, keypress: gui.KeyboardHandler}}
          */
-        this.getKeyboardHandlers = function() {
+        this.getKeyboardHandlers = function () {
             return {
                 keydown: keyDownHandler,
                 keypress: keyPressHandler
@@ -880,7 +900,7 @@ gui.SessionController = (function () {
          * @param {!function(!Object=)} callback passing an error object in case of error
          * @return {undefined}
          */
-        this.destroy = function(callback) {
+        this.destroy = function (callback) {
             var destroyCallbacks = [drawShadowCursorTask.destroy, directFormattingController.destroy, inputMethodEditor.destroy];
             runtime.clearTimeout(handleMouseClickTimeoutId);
             async.destroyAll(destroyCallbacks, callback);

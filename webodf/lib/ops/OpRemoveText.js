@@ -51,12 +51,17 @@ ops.OpRemoveText = function OpRemoveText() {
         position,
         /**@type {number}*/
         length,
+        /**@type{!odf.OdfUtils}*/
         odfUtils,
+        /**@type{!core.DomUtils}*/
         domUtils,
         editinfons = 'urn:webodf:names:editinfo',
         /**@type {!Object.<!string, !boolean>}*/
         odfNodeNamespaceMap = {};
 
+    /**
+     * @param {!ops.OpRemoveText.InitSpec} data
+     */
     this.init = function (data) {
         runtime.assert(data.length >= 0, "OpRemoveText only supports positive lengths");
         memberid = data.memberid;
@@ -151,7 +156,7 @@ ops.OpRemoveText = function OpRemoveText() {
         /**
          * Merge all child nodes into the node's parent and remove the node entirely
          * @param {!Node} targetNode Node to merge into parent
-         * @return {!Node} Final parent node collapsing ended at
+         * @return {?Node} Final parent node collapsing ended at
          */
         function mergeChildrenIntoParent(targetNode) {
             var parent;
@@ -162,7 +167,7 @@ ops.OpRemoveText = function OpRemoveText() {
                 // removes all odf nodes
                 parent = domUtils.removeUnwantedNodes(targetNode, shouldRemove);
             }
-            if (isCollapsibleContainer(parent)) {
+            if (parent && isCollapsibleContainer(parent)) {
                 return mergeChildrenIntoParent(parent);
             }
             return parent;
@@ -174,10 +179,10 @@ ops.OpRemoveText = function OpRemoveText() {
      * Merges the 'second' paragraph into the 'first' paragraph.
      * If the first paragraph is empty, it will be replaced by the second
      * paragraph instead (all non-odt elements will be migrated however).
-     * @param {!Node} first Paragraph to merge content into
-     * @param {!Node} second Paragraph to merge content from
+     * @param {!Element} first Paragraph to merge content into
+     * @param {!Element} second Paragraph to merge content from
      * @param {!CollapsingRules} collapseRules
-     * @return {!Node} Destination paragraph
+     * @return {!Element} Destination paragraph
      */
     function mergeParagraphs(first, second, collapseRules) {
         var child,
@@ -196,7 +201,7 @@ ops.OpRemoveText = function OpRemoveText() {
             }
             source = first;
             destination = second;
-            insertionPoint = destination.getElementsByTagNameNS(editinfons, 'editinfo')[0] || destination.firstChild;
+            insertionPoint = destination.getElementsByTagNameNS(editinfons, 'editinfo').item(0) || destination.firstChild;
         }
 
         while (source.firstChild) {
@@ -216,8 +221,12 @@ ops.OpRemoveText = function OpRemoveText() {
         return destination;
     }
 
-    this.execute = function (odtDocument) {
-        var paragraphElement,
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            paragraphElement,
             destinationParagraph,
             range,
             textNodes,
@@ -240,9 +249,15 @@ ops.OpRemoveText = function OpRemoveText() {
             collapseRules.mergeChildrenIntoParent(element);
         });
 
-        destinationParagraph = paragraphs.reduce(function (destination, paragraph) {
+        /**
+         * @param {!Element} destination
+         * @param {!Element} paragraph
+         * @return {!Element}
+         */
+        function merge(destination, paragraph) {
             return mergeParagraphs(destination, paragraph, collapseRules);
-        });
+        }
+        destinationParagraph = paragraphs.reduce(merge);
 
         odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position, length: length});
         odtDocument.downgradeWhitespacesAtPosition(position);
@@ -264,6 +279,9 @@ ops.OpRemoveText = function OpRemoveText() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpRemoveText.Spec}
+     */
     this.spec = function () {
         return {
             optype: "RemoveText",
@@ -282,3 +300,10 @@ ops.OpRemoveText = function OpRemoveText() {
     length:number
 }}*/
 ops.OpRemoveText.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    position:number,
+    length:number
+}}*/
+ops.OpRemoveText.InitSpec;

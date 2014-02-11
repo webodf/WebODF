@@ -140,7 +140,7 @@ odf.OdfUtils = function OdfUtils() {
     /**
      * Gets the href attribute of text:a element
      * @param {!Element} element
-     * @return {?string}
+     * @return {!string}
      */
     this.getHyperlinkTarget = function (element) {
         return element.getAttributeNS(xlinkns, 'href');
@@ -159,13 +159,13 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * @param {?Node} node
-     * @return {?Node}
+     * @return {?Element}
      */
     function getParagraphElement(node) {
         while (node && !isParagraph(node)) {
             node = node.parentNode;
         }
-        return node;
+        return /**@type{?Element}*/(node);
     }
     this.getParagraphElement = getParagraphElement;
 
@@ -769,7 +769,7 @@ odf.OdfUtils = function OdfUtils() {
      *                         content. This includes whitespace only elements
      *                         used in pretty-formatted xml as LibreOffice
      *                         produces in flat ODT files.
-     * @return {!Array.<Node>}
+     * @return {!Array.<!Element|!Text>}
      */
     function getTextElements(range, includePartial, includeInsignificantWhitespace) {
         var elements;
@@ -783,7 +783,7 @@ odf.OdfUtils = function OdfUtils() {
             // do not return anything inside an character element or an inline root such as an annotation
             if (isCharacterElement(node.parentNode) || isInlineRoot(node.parentNode)) {
                 result = NodeFilter.FILTER_REJECT;
-            } else  if (node.nodeType === Node.TEXT_NODE) {
+            } else if (node.nodeType === Node.TEXT_NODE) {
                 if (includeInsignificantWhitespace || isSignificantTextContent(/**@type{!Text}*/(node))) {
                         // Text nodes should only be returned if they are
                         // fully contained within the range.
@@ -800,7 +800,7 @@ odf.OdfUtils = function OdfUtils() {
         }
 
         /*jslint bitwise:true*/
-        elements = domUtils.getNodesInRange(range, nodeFilter, NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);
+        elements = domUtils.getNodesInRange(range, nodeFilter, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
         /*jslint bitwise:false*/
         if (!includePartial) {
             removePartiallyContainedNodes(range, elements);

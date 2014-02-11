@@ -47,14 +47,19 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
     "use strict";
 
     var /**@const@type{!number}*/cmPerPixel = 0.0264583333333334, // since 1px always equals 0.75pt in css2.1
-        /**@const@type{!Object.<!string, !string>}*/fileExtensionByMimetype = {
+        /**@const
+           @type{!Object.<!string, !string>}*/
+        fileExtensionByMimetype = {
             "image/gif": ".gif",
             "image/jpeg": ".jpg",
             "image/png": ".png"
         },
-        /**@const@type{!string}*/textns = odf.Namespaces.textns,
+        /**@const
+           @type{!string}*/
+        textns = odf.Namespaces.textns,
         odtDocument = session.getOdtDocument(),
         formatting = odtDocument.getFormatting(),
+        /**@type{Object.<string,!{width: number, height: number}>}*/
         paragraphStyleToPageContentSizeMap = {};
 
     /**

@@ -51,6 +51,9 @@ ops.OpAddStyle = function OpAddStyle() {
         /**@type{Object}*/setProperties,
         /** @const */stylens = odf.Namespaces.stylens;
 
+    /**
+     * @param {!ops.OpAddStyle.InitSpec} data
+     */
     this.init = function (data) {
         memberid = data.memberid;
         timestamp = data.timestamp;
@@ -66,8 +69,12 @@ ops.OpAddStyle = function OpAddStyle() {
     this.isEdit = true;
     this.group = undefined;
 
-    this.execute = function (odtDocument) {
-        var odfContainer = odtDocument.getOdfCanvas().odfContainer(),
+    /**
+     * @param {!ops.Document} document
+     */
+    this.execute = function (document) {
+        var odtDocument = /**@type{ops.OdtDocument}*/(document),
+            odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             formatting = odtDocument.getFormatting(),
             dom = odtDocument.getDOMDocument(),
             styleNode = dom.createElementNS(stylens, 'style:style');
@@ -96,6 +103,9 @@ ops.OpAddStyle = function OpAddStyle() {
         return true;
     };
 
+    /**
+     * @return {!ops.OpAddStyle.Spec}
+     */
     this.spec = function () {
         return {
             optype: "AddStyle",
@@ -118,3 +128,12 @@ ops.OpAddStyle = function OpAddStyle() {
     setProperties:Object
 }}*/
 ops.OpAddStyle.Spec;
+/**@typedef{{
+    memberid:string,
+    timestamp:(number|undefined),
+    styleName:string,
+    styleFamily:string,
+    isAutomaticStyle:(boolean|string),
+    setProperties:Object
+}}*/
+ops.OpAddStyle.InitSpec;

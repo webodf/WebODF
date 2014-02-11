@@ -65,7 +65,7 @@ gui.SessionViewOptions = function () {
     this.caretBlinksOnRangeSelect = true;
 };
 
-gui.SessionView = (function () {
+(function () {
     "use strict";
 
     /**
@@ -86,12 +86,16 @@ gui.SessionView = (function () {
      * for shadow cursors.
      * @constructor
      * @param {!gui.SessionViewOptions} viewOptions
+     * @param {string} localMemberId
      * @param {!ops.Session} session
      * @param {!gui.CaretManager} caretManager
+     * @param {!gui.SelectionViewManager} selectionViewManager
      */
-    function SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager) {
-        var avatarInfoStyles,
+    gui.SessionView = function SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager) {
+        var /**@type{!HTMLStyleElement}*/
+            avatarInfoStyles,
             editInfons = 'urn:webodf:names:editinfo',
+            /**@type{!Object.<string,!gui.EditInfoMarker>}*/
             editInfoMap = {},
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
             showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true),
@@ -119,7 +123,7 @@ gui.SessionView = (function () {
                 nodeMatch = createAvatarInfoNodeMatch(nodeName, memberId, pseudoClass) + "{";
 
             while (node) {
-                if ((node.nodeType === Node.TEXT_NODE) && (node.data.indexOf(nodeMatch) === 0)) {
+                if (node.nodeType === Node.TEXT_NODE && /**@type{!Text}*/(node).data.indexOf(nodeMatch) === 0) {
                     return node;
                 }
                 node = node.nextSibling;
@@ -171,17 +175,17 @@ gui.SessionView = (function () {
             var editInfo,
                 editInfoMarker,
                 id = '',
-                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
+                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo').item(0);
 
             if (editInfoNode) {
-                id = editInfoNode.getAttributeNS(editInfons, 'id');
+                id = /**@type{!Element}*/(editInfoNode).getAttributeNS(editInfons, 'id');
                 editInfoMarker = editInfoMap[id];
             } else {
                 id = Math.random().toString();
                 editInfo = new ops.EditInfo(element, session.getOdtDocument());
                 editInfoMarker = new gui.EditInfoMarker(editInfo, showEditInfoMarkers);
 
-                editInfoNode = element.getElementsByTagNameNS(editInfons, 'editinfo')[0];
+                editInfoNode = /**@type{!Element}*/(element.getElementsByTagNameNS(editInfons, 'editinfo').item(0));
                 editInfoNode.setAttributeNS(editInfons, 'id', id);
                 editInfoMap[id] = editInfoMarker;
             }
@@ -195,7 +199,9 @@ gui.SessionView = (function () {
          * @return {undefined}
          */
         function setEditInfoMarkerVisibility(visible) {
-            var editInfoMarker, keyname;
+            var editInfoMarker,
+                /**@type{string}*/
+                keyname;
 
             for (keyname in editInfoMap) {
                 if (editInfoMap.hasOwnProperty(keyname)) {
@@ -215,7 +221,7 @@ gui.SessionView = (function () {
          * @return {undefined}
          */
         function setCaretAvatarVisibility(visible) {
-            caretManager.getCarets().forEach(function(caret) {
+            caretManager.getCarets().forEach(function (caret) {
                 if (visible) {
                     caret.showHandle();
                 } else {
@@ -325,6 +331,10 @@ gui.SessionView = (function () {
             runtime.log("+++ View here +++ eagerly created an Caret for '" + memberId + "'! +++");
         }
 
+        /**
+         * @param {!ops.OdtCursor} cursor
+         * @return {undefined}
+         */
         function onCursorMoved(cursor) {
             var memberId = cursor.getMemberId(),
                 localSelectionView = selectionViewManager.getSelectionView(localMemberId),
@@ -361,7 +371,7 @@ gui.SessionView = (function () {
         }
 
         /**
-         * @param {!Object} info
+         * @param {!{paragraphElement:!Element,memberId:string,timeStamp:number}} info
          * @return {undefined}
          */
         function onParagraphChanged(info) {
@@ -372,9 +382,12 @@ gui.SessionView = (function () {
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
-        this.destroy = function(callback) {
+        this.destroy = function (callback) {
             var odtDocument = session.getOdtDocument(),
-                editInfoArray = Object.keys(editInfoMap).map(function(keyname) { return editInfoMap[keyname]; });
+                /**@type{!Array.<!gui.EditInfoMarker>}*/
+                editInfoArray = Object.keys(editInfoMap).map(function (keyname) {
+                    return editInfoMap[keyname];
+                });
 
             odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
             odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
@@ -389,12 +402,14 @@ gui.SessionView = (function () {
 
             avatarInfoStyles.parentNode.removeChild(avatarInfoStyles);
 
-            (function destroyEditInfo(i, err){
+            (function destroyEditInfo(i, err) {
                 if (err) {
                     callback(err);
                 } else {
-                    if(i < editInfoArray.length) {
-                        editInfoArray[i].destroy(function(err){ destroyEditInfo(i+1, err);});
+                    if (i < editInfoArray.length) {
+                        editInfoArray[i].destroy(function (err) {
+                            destroyEditInfo(i + 1, err);
+                        });
                     } else {
                         callback();
                     }
@@ -404,7 +419,7 @@ gui.SessionView = (function () {
 
         function init() {
             var odtDocument = session.getOdtDocument(),
-                head = document.getElementsByTagName('head')[0];
+                head = document.getElementsByTagName('head').item(0);
 
             odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
             odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
@@ -418,7 +433,7 @@ gui.SessionView = (function () {
             odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, selectionViewManager.rerenderSelectionViews);
 
             // Add a css sheet for user info-edited styling
-            avatarInfoStyles = document.createElementNS(head.namespaceURI, 'style');
+            avatarInfoStyles = /**@type{!HTMLStyleElement}*/(document.createElementNS(head.namespaceURI, 'style'));
             avatarInfoStyles.type = 'text/css';
             avatarInfoStyles.media = 'screen, print, handheld, projection';
             avatarInfoStyles.appendChild(document.createTextNode('@namespace editinfo url(urn:webodf:names:editinfo);'));
@@ -426,7 +441,5 @@ gui.SessionView = (function () {
             head.appendChild(avatarInfoStyles);
         }
         init();
-    }
-
-    return SessionView;
+    };
 }());
