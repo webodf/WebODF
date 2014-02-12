@@ -1,0 +1,410 @@
+{
+    "core.Async": [
+    ],
+    "core.Base64": [
+    ],
+    "core.ByteArray": [
+    ],
+    "core.ByteArrayWriter": [
+    ],
+    "core.CSSUnits": [
+    ],
+    "core.Cursor": [
+        "core.DomUtils"
+    ],
+    "core.Destroyable": [
+    ],
+    "core.DomUtils": [
+    ],
+    "core.EventNotifier": [
+    ],
+    "core.LoopWatchDog": [
+    ],
+    "core.PositionFilter": [
+        "core.PositionIterator"
+    ],
+    "core.PositionFilterChain": [
+        "core.PositionFilter"
+    ],
+    "core.PositionIterator": [
+    ],
+    "core.RawDeflate": [
+    ],
+    "core.RawInflate": [
+    ],
+    "core.ScheduledTask": [
+        "core.Destroyable"
+    ],
+    "core.StepIterator": [
+        "core.PositionFilter"
+    ],
+    "core.UnitTester": [
+    ],
+    "core.Utils": [
+    ],
+    "core.Zip": [
+        "core.Base64",
+        "core.ByteArray",
+        "core.ByteArrayWriter",
+        "core.RawInflate"
+    ],
+    "gui.AnnotationController": [
+        "ops.Session"
+    ],
+    "gui.AnnotationViewManager": [
+        "odf.OdfContainer",
+        "odf.OdfUtils"
+    ],
+    "gui.Avatar": [
+        "core.Destroyable"
+    ],
+    "gui.Caret": [
+        "core.Async",
+        "core.ScheduledTask",
+        "gui.Avatar",
+        "ops.OdtCursor"
+    ],
+    "gui.CaretManager": [
+        "gui.Caret",
+        "gui.SessionController"
+    ],
+    "gui.Clipboard": [
+        "gui.MimeDataExporter"
+    ],
+    "gui.DirectFormattingController": [
+        "gui.StyleSummary",
+        "ops.Session"
+    ],
+    "gui.EditInfoHandle": [
+        "core.Destroyable"
+    ],
+    "gui.EditInfoMarker": [
+        "gui.EditInfoHandle",
+        "ops.EditInfo"
+    ],
+    "gui.EventManager": [
+        "ops.OdtDocument"
+    ],
+    "gui.HyperlinkClickHandler": [
+        "odf.OdfUtils",
+        "xmldom.XPath"
+    ],
+    "gui.HyperlinkController": [
+        "ops.Session"
+    ],
+    "gui.ImageController": [
+        "ops.Session"
+    ],
+    "gui.ImageSelector": [
+        "odf.OdfCanvas"
+    ],
+    "gui.InputMethodEditor": [
+        "gui.EventManager"
+    ],
+    "gui.KeyboardHandler": [
+    ],
+    "gui.MimeDataExporter": [
+        "odf.OdfNodeFilter",
+        "odf.TextSerializer"
+    ],
+    "gui.PlainTextPasteboard": [
+        "ops.OpInsertText",
+        "ops.OpRemoveText",
+        "ops.OpSplitParagraph"
+    ],
+    "gui.SelectionController": [
+        "odf.WordBoundaryFilter",
+        "ops.Session"
+    ],
+    "gui.SelectionMover": [
+        "core.Cursor",
+        "core.LoopWatchDog",
+        "core.PositionFilter",
+        "odf.OdfUtils"
+    ],
+    "gui.SelectionView": [
+        "gui.ShadowCursor"
+    ],
+    "gui.SelectionViewManager": [
+        "core.Destroyable",
+        "gui.SelectionView"
+    ],
+    "gui.SessionController": [
+        "gui.AnnotationController",
+        "gui.Clipboard",
+        "gui.DirectFormattingController",
+        "gui.HyperlinkClickHandler",
+        "gui.HyperlinkController",
+        "gui.ImageController",
+        "gui.ImageSelector",
+        "gui.InputMethodEditor",
+        "gui.KeyboardHandler",
+        "gui.PlainTextPasteboard",
+        "gui.SelectionController",
+        "gui.TextController",
+        "gui.UndoManager"
+    ],
+    "gui.SessionView": [
+        "gui.CaretManager",
+        "gui.EditInfoMarker",
+        "gui.SelectionViewManager"
+    ],
+    "gui.ShadowCursor": [
+        "ops.OdtCursor"
+    ],
+    "gui.StyleSummary": [
+    ],
+    "gui.SvgSelectionView": [
+        "gui.SelectionView",
+        "ops.OdtDocument"
+    ],
+    "gui.TextController": [
+        "ops.Session"
+    ],
+    "gui.TrivialUndoManager": [
+        "core.DomUtils",
+        "core.EventNotifier",
+        "gui.UndoManager",
+        "gui.UndoStateRules"
+    ],
+    "gui.UndoManager": [
+        "ops.Operation"
+    ],
+    "gui.UndoStateRules": [
+        "ops.Operation"
+    ],
+    "odf.CommandLineTools": [
+        "odf.OdfCanvas"
+    ],
+    "odf.FontLoader": [
+        "odf.OdfContainer"
+    ],
+    "odf.Formatting": [
+        "core.Utils",
+        "odf.OdfContainer",
+        "odf.OdfUtils"
+    ],
+    "odf.Namespaces": [
+    ],
+    "odf.ObjectNameGenerator": [
+        "core.Utils",
+        "odf.OdfContainer"
+    ],
+    "odf.OdfCanvas": [
+        "core.Async",
+        "core.ScheduledTask",
+        "gui.AnnotationViewManager",
+        "odf.FontLoader",
+        "odf.Formatting",
+        "odf.Style2CSS",
+        "ops.Canvas"
+    ],
+    "odf.OdfContainer": [
+        "core.DomUtils",
+        "core.Zip",
+        "odf.OdfNodeFilter",
+        "odf.StyleInfo",
+        "xmldom.LSSerializer"
+    ],
+    "odf.OdfNodeFilter": [
+        "xmldom.LSSerializerFilter"
+    ],
+    "odf.OdfUtils": [
+        "core.DomUtils",
+        "odf.Namespaces"
+    ],
+    "odf.Style2CSS": [
+        "core.CSSUnits",
+        "odf.OdfUtils",
+        "xmldom.XPath"
+    ],
+    "odf.StyleInfo": [
+        "odf.Namespaces",
+        "xmldom.XPath"
+    ],
+    "odf.TextSerializer": [
+        "odf.OdfUtils",
+        "xmldom.LSSerializerFilter"
+    ],
+    "odf.TextStyleApplicator": [
+        "core.LoopWatchDog",
+        "odf.Formatting",
+        "odf.ObjectNameGenerator"
+    ],
+    "odf.WordBoundaryFilter": [
+        "ops.OdtDocument"
+    ],
+    "ops.Canvas": [
+    ],
+    "ops.Document": [
+        "core.PositionFilter",
+        "ops.Canvas"
+    ],
+    "ops.EditInfo": [
+        "ops.OdtDocument"
+    ],
+    "ops.Member": [
+    ],
+    "ops.OdtCursor": [
+        "core.EventNotifier",
+        "gui.SelectionMover",
+        "ops.Document"
+    ],
+    "ops.OdtDocument": [
+        "core.PositionFilterChain",
+        "core.StepIterator",
+        "odf.OdfCanvas",
+        "ops.Member",
+        "ops.OdtCursor",
+        "ops.Operation",
+        "ops.StepsTranslator",
+        "ops.TextPositionFilter"
+    ],
+    "ops.OpAddAnnotation": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpAddCursor": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpAddMember": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpAddStyle": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpApplyDirectStyling": [
+        "odf.TextStyleApplicator",
+        "ops.OdtDocument"
+    ],
+    "ops.OpApplyHyperlink": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpInsertImage": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpInsertTable": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpInsertText": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpMoveCursor": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveAnnotation": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveBlob": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveCursor": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveHyperlink": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveMember": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveStyle": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpRemoveText": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpSetBlob": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpSetParagraphStyle": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpSplitParagraph": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpUpdateMember": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpUpdateMetadata": [
+        "ops.OdtDocument"
+    ],
+    "ops.OpUpdateParagraphStyle": [
+        "ops.OdtDocument"
+    ],
+    "ops.Operation": [
+        "ops.Document"
+    ],
+    "ops.OperationFactory": [
+        "ops.OpAddAnnotation",
+        "ops.OpAddCursor",
+        "ops.OpAddMember",
+        "ops.OpAddStyle",
+        "ops.OpApplyDirectStyling",
+        "ops.OpApplyHyperlink",
+        "ops.OpInsertImage",
+        "ops.OpInsertTable",
+        "ops.OpInsertText",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveAnnotation",
+        "ops.OpRemoveBlob",
+        "ops.OpRemoveCursor",
+        "ops.OpRemoveHyperlink",
+        "ops.OpRemoveMember",
+        "ops.OpRemoveStyle",
+        "ops.OpRemoveText",
+        "ops.OpSetBlob",
+        "ops.OpSetParagraphStyle",
+        "ops.OpSplitParagraph",
+        "ops.OpUpdateMember",
+        "ops.OpUpdateMetadata",
+        "ops.OpUpdateParagraphStyle"
+    ],
+    "ops.OperationRouter": [
+        "ops.OperationFactory"
+    ],
+    "ops.OperationTransformMatrix": [
+        "ops.OpAddStyle",
+        "ops.OpApplyDirectStyling",
+        "ops.OpInsertText",
+        "ops.OpMoveCursor",
+        "ops.OpRemoveCursor",
+        "ops.OpRemoveStyle",
+        "ops.OpRemoveText",
+        "ops.OpSetParagraphStyle",
+        "ops.OpSplitParagraph",
+        "ops.OpUpdateMetadata",
+        "ops.OpUpdateParagraphStyle"
+    ],
+    "ops.OperationTransformer": [
+        "ops.OperationFactory",
+        "ops.OperationTransformMatrix"
+    ],
+    "ops.Server": [
+    ],
+    "ops.Session": [
+        "ops.TrivialOperationRouter"
+    ],
+    "ops.StepsTranslator": [
+        "core.PositionFilter",
+        "odf.OdfUtils"
+    ],
+    "ops.TextPositionFilter": [
+        "core.PositionFilter",
+        "odf.OdfUtils"
+    ],
+    "ops.TrivialOperationRouter": [
+        "ops.OperationRouter"
+    ],
+    "xmldom.LSSerializer": [
+        "xmldom.LSSerializerFilter"
+    ],
+    "xmldom.LSSerializerFilter": [
+    ],
+    "xmldom.RelaxNG": [
+    ],
+    "xmldom.RelaxNG2": [
+    ],
+    "xmldom.RelaxNGParser": [
+    ],
+    "xmldom.XPath": [
+    ]
+}
