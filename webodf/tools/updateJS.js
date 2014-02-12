@@ -35,6 +35,8 @@
  */
 /*global runtime, process, require, console*/
 
+var exitCode = 0;
+
 function Main(cmakeListPath) {
     "use strict";
     var pathModule = require("path"),
@@ -61,47 +63,6 @@ function Main(cmakeListPath) {
         if (a.indexOf(value) === -1) {
             a.push(value);
         }
-    }
-
-    function addLoop(list, circs, l) {
-        var i;
-        for (i = 1; i < l; i += 1) {
-            add(circs, list[i - 1], list[i]);
-        }
-        add(circs, list[l - 1], list[0]);
-    }
-
-    /**
-     * Function to help find loops/circles in the dependency graph.
-     */
-    function findLoops(v, occs, list, circs, pos) {
-        var i, name, j, l = v.length;
-        for (i = 0; i < l; i += 1) {
-            name = v[i];
-            j = list.lastIndexOf(name, pos);
-            if (j === 0) {
-                addLoop(list, circs, pos);
-            } else if (j === -1 && occs.hasOwnProperty(name)) {
-                list[pos] = name;
-                findLoops(occs[name], occs, list, circs, pos + 1);
-            }
-        }
-    }
-
-    /**
-     * Find loops/circles in the dependency graph.
-     */
-    function findCircles(occs) {
-        var name,
-            list = [],
-            circs = {};
-        for (name in occs) {
-            if (occs.hasOwnProperty(name)) {
-                list[0] = name;
-                findLoops(occs[name], occs, list, circs, 1);
-            }
-        }
-        return circs;
     }
 
     /**
@@ -133,71 +94,62 @@ function Main(cmakeListPath) {
         return (/ \* @implements ops\.Operation\b/).test(fileContent);
     }
 
-    /**
-     * Retrieve all the classes deriving from ops.Operation..
-     */
-    function getOperations(files) {
-        return Object.keys(files).filter(function (key) {
-            return isOperation(files[key]);
-        });
+    function getStyle(path, content, colors) {
+        var constructor = content.indexOf("@constructor") !== -1,
+            iface = content.indexOf("@interface") !== -1,
+            style = (iface && !constructor) ? "\"\"" : "filled",
+            group = path.split("/"),
+            color;
+        group = group.length > 1 ? group[0] : "";
+        color = colors.indexOf(group);
+        if (color === -1) {
+            color = colors.length;
+            colors.push(group);
+        }
+        return " [color=" + (color + 1) + ", style=" + style + "];\n";
     }
 
     /**
-     * Print a .dot dependency graph.
+     * Create a dot file.
+     * This function returns a string that can be saved to a .dot file.
      */
-    function print(occs, out, files) {
-        var i, j, m, n, done = {}, d;
-        out.write("digraph webodf {\n");
+    function createDotFile(occs, files) {
+        var i, j, m, n, done = {}, out, content, colors = [];
+        out = "# This is a graphviz file.\n";
+        out += "# dot -Tsvg dependencies.dot > dependencies.svg\n";
+        out += "# dot -Tpng dependencies.dot > dependencies.png\n";
+        out += "digraph webodf {\n";
+        out += "node [colorscheme=pastel19]\n"; // pastel19, set312 or accent8
         for (i in occs) {
             if (occs.hasOwnProperty(i)) {
                 m = occs[i];
                 for (j = 0; j < m.length; j += 1) {
-                    i = isOperation(files[i]) ? "{Operation}" : i;
+                    content = files["lib/" + i];
+                    i = isOperation(content) ? "{Operation}" : i;
+                    if (!done[i]) {
+                        done[i] = {};
+                        out += '"' + i + '"' + getStyle(i, content, colors);
+                    }
                     n = m[j];
-                    if (occs[n].length) {
-                        n = isOperation(files[n]) ? "{Operation}" : n;
-                        if (!done.hasOwnProperty(i) || !done[i].hasOwnProperty(n)) {
-                            out.write('"' + i + '" -> "' + n + '";\n');
-                            d = done[i] = done[i] || {};
-                            d[n] = 1;
+                    content = files["lib/" + n];
+                    // omit leaf nodes unless they are interfaces
+                    if (occs[n].length || content.indexOf("@interface") !== -1) {
+                        n = isOperation(content) ? "{Operation}" : n;
+                        if (!done[i].hasOwnProperty(n)) {
+                            if (!done[n]) {
+                                done[n] = {};
+                                out += '"' + n + '"' + getStyle(n, content, colors);
+                            }
+                            out += '"' + i + '" -> "' + n + '";\n';
+                            done[i][n] = 1;
                         }
                     }
                 }
             }
         }
-        out.write("}\n");
+        out += "}\n";
+        return out;
     }
-
-    function mergeOperations(files, occs) {
-        var ops = getOperations(files), i, j, v;
-        for (i = 0; i < ops.length; i += 1) {
-            v = occs[i];
-            for (j = 0; j < v.length; j += 1) {
-                add(occs, "{Operations}", v[j]);
-            }
-            delete occs[i];
-        }
-    }
-
-    /**
-     * Analyze the given files and create a graphviz dependency graph.
-     */
-    this.analyze = function (files) {
-        var list = Object.keys(files),
-            occs = {},
-            classname,
-            i;
-        for (i = 0; i < list.length; i += 1) {
-            occs[list[i]] = [];
-        }
-        for (i = 0; i < list.length; i += 1) {
-            classname = list[i];
-            findOccurances(classname, [classname], files, occs);
-        }
-        mergeOperations(files, occs);
-        occs = findCircles(occs);
-        print(occs, process.stdout, files);
-    };
 
     /**
      * @param {string} path 
@@ -290,7 +242,7 @@ function Main(cmakeListPath) {
                 typed.join("\n    lib/") + "\n)\n";
         saveIfDifferent(path, content, function () {
             console.log("JS file dependencies were updated.");
-            process.exit(1);
+            exitCode = 1;
         });
     }
 
@@ -309,14 +261,15 @@ function Main(cmakeListPath) {
             compiledFiles;
         compiledFiles = Object.keys(lib).filter(function (path) {
             return ignoredFiles.indexOf(path) === -1;
-        });
+        }).sort();
         sortedTyped = createOrderedList(compiledFiles, lib, {});
         createCMakeLists(sortedTyped.map(deNormalizePath));
     }
 
     function updateKarmaConfig(deps) {
         var path = "tools/karma.conf.js",
-            modules = createOrderedList(Object.keys(deps.lib), deps.lib, {});
+            lib = deps.lib,
+            modules = createOrderedList(Object.keys(deps.lib).sort(), lib, {});
         fs.readFile(path, "utf8", function (err, content) {
             if (err) {
                 throw err;
@@ -352,6 +305,37 @@ function Main(cmakeListPath) {
         }
         out += "}";
         return out;
+    }
+
+    /**
+     * Remove dependencies that depend on other dependencies.
+     * @param {!Object.<string,!Array.<string>>} deps
+     */
+    function reduce(deps) {
+        // return true if a depends on b
+        function dependsOn(a, b) {
+            return a === b || deps[b].some(function (c) {
+                return dependsOn(a, c);
+            });
+        }
+        Object.keys(deps).forEach(function (key) {
+            var d = deps[key],
+                i = 0,
+                dep,
+                redundant;
+            function f(a) {
+                return dep !== a && dependsOn(dep, a);
+            }
+            while (i < d.length) {
+                dep = d[i];
+                redundant = d.some(f);
+                if (redundant) {
+                    d.splice(i, 1);
+                } else {
+                    i += 1;
+                }
+            }
+        });
     }
 
     /**
@@ -411,6 +395,11 @@ function Main(cmakeListPath) {
                 d[j] = occs[classname].map(prefixDir).sort();
             }
         }
+        saveIfDifferent(pathModule.join(buildDir, "dependencies-full.dot"),
+                createDotFile(deps.lib, files));
+        reduce(deps.lib);
+        saveIfDifferent(pathModule.join(buildDir, "dependencies.dot"),
+                createDotFile(deps.lib, files));
         for (i = 0; i < dirs.length; i += 1) {
             d = dirs[i];
             j = deps[d.split(pathModule.sep)[0]];
@@ -564,7 +553,7 @@ function Main(cmakeListPath) {
                     console.log(path + ":" + err.line + ":" + err.character +
                           ": error: " + err.reason);
                 }
-                process.exit(1);
+                exitCode = 1;
             }
         });
     }
@@ -607,6 +596,9 @@ function main(f) {
             }
         });
         f.createManifestsAndCMakeLists(files, ["lib" + pathModule.sep, "tests" + pathModule.sep]);
+    });
+    process.on('exit', function () {
+        process.exit(exitCode);
     });
 }
 
