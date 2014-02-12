@@ -394,6 +394,8 @@ function Main(cmakeListPath) {
                 d[j] = occs[classname].map(prefixDir).sort();
             }
         }
+        saveIfDifferent(pathModule.join(buildDir, "dependencies-full.dot"),
+                print(deps.lib, files));
         reduce(deps.lib);
         saveIfDifferent(pathModule.join(buildDir, "dependencies.dot"),
                 print(deps.lib, files));
