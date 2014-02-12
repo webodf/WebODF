@@ -110,9 +110,10 @@ function Main(cmakeListPath) {
     }
 
     /**
-     * Print a .dot dependency graph.
+     * Create a dot file.
+     * This function returns a string that can be saved to a .dot file.
      */
-    function print(occs, files) {
+    function createDotFile(occs, files) {
         var i, j, m, n, done = {}, out, content, colors = [];
         out = "# This is a graphviz file.\n";
         out += "# dot -Tsvg dependencies.dot > dependencies.svg\n";
@@ -395,10 +396,10 @@ function Main(cmakeListPath) {
             }
         }
         saveIfDifferent(pathModule.join(buildDir, "dependencies-full.dot"),
-                print(deps.lib, files));
+                createDotFile(deps.lib, files));
         reduce(deps.lib);
         saveIfDifferent(pathModule.join(buildDir, "dependencies.dot"),
-                print(deps.lib, files));
+                createDotFile(deps.lib, files));
         for (i = 0; i < dirs.length; i += 1) {
             d = dirs[i];
             j = deps[d.split(pathModule.sep)[0]];
