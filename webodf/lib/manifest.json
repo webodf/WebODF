@@ -171,12 +171,10 @@
     ],
     "gui.SelectionController": [
         "core.DomUtils",
-        "core.PositionFilter",
         "core.PositionFilterChain",
-        "core.PositionIterator",
         "core.StepIterator",
-        "gui.SelectionMover",
         "odf.OdfUtils",
+        "odf.WordBoundaryFilter",
         "ops.OdtCursor",
         "ops.OpMoveCursor",
         "ops.Operation",
@@ -371,6 +369,12 @@
         "odf.Formatting",
         "odf.Namespaces",
         "odf.ObjectNameGenerator"
+    ],
+    "odf.WordBoundaryFilter": [
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "odf.OdfUtils",
+        "ops.OdtDocument"
     ],
     "ops.Canvas": [
     ],

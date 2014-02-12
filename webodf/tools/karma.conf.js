@@ -90,6 +90,7 @@ module.exports = function (config) {
             'lib/ops/OperationFactory.js',
             'lib/ops/OperationRouter.js',
             'lib/ops/TrivialOperationRouter.js',
+            'lib/odf/WordBoundaryFilter.js',
             'lib/ops/Session.js',
             'lib/gui/AnnotationController.js',
             'lib/gui/Avatar.js',

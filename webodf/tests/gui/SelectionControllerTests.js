@@ -44,6 +44,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
     var r = runner,
         t,
         testarea,
+        textns = odf.Namespaces.textns,
         inputMemberId = "Joe";
 
     /**
@@ -57,6 +58,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         var self = this;
         this.odfContainer = function () { return self; };
         this.getContentElement = function () { return node.getElementsByTagNameNS(odf.Namespaces.officens, 'text')[0]; };
+        this.getElement = function () { return node; };
         this.rootElement = node;
     }
 
@@ -98,9 +100,20 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         t.odtDocument = new ops.OdtDocument(new MockOdfCanvas(node));
         t.session = new MockSession(t.odtDocument);
         t.selectionController = new gui.SelectionController(t.session, inputMemberId);
+        t.selectionToRange = t.selectionController.selectionToRange;
+        t.rangeToSelection = t.selectionController.rangeToSelection;
         t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
         return node;
+    }
+
+    /**
+     * Gets the position of the local cursor in cursor steps
+     * @return {!{position: !number, length: number}}
+     */
+    function getCursorPosition() {
+        var selection = t.rangeToSelection(t.cursor.getSelectedRange(), t.cursor.hasForwardSelection());
+        return t.odtDocument.convertDomToCursorRange(selection);
     }
 
     /**
@@ -158,6 +171,16 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
     function moveCursorBeforeWord_SimpleText_Punctuation() {
         t.movementPositions = getMovementByWordsPositions("<text:p>the quick, re,d fox.</text:p>", -1);
         r.shouldBe(t, "t.movementPositions", "[19, 16, 14, 13, 11, 9, 4, 0]");
+    }
+
+    function moveCursorPastWord_SimpleText_NonLatin() {
+        t.movementPositions = getMovementByWordsPositions("<text:p>the tes阿t rèd fox.</text:p>", 1);
+        r.shouldBe(t, "t.movementPositions", "[4, 10, 14, 17, 18]");
+    }
+
+    function moveCursorBeforeWord_SimpleText_NonLatin() {
+        t.movementPositions = getMovementByWordsPositions("<text:p>the tes阿t rèd fox.</text:p>", -1);
+        r.shouldBe(t, "t.movementPositions", "[17, 14, 10, 4, 0]");
     }
 
     function moveCursorPastWord_TextSplitBySpans() {
@@ -240,6 +263,44 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.movementPositions", "[14, 10, 4, 0]");
     }
 
+    function extendCursorBeforeWord_IsWithinWord() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1],
+            selection = t.selectionToRange({
+                anchorNode: text,
+                anchorOffset: 5,
+                focusNode: text,
+                focusOffset: 5
+            });
+        t.selectionController.selectRange(selection.range, selection.hasForwardSelection);
+
+        t.selectionController.extendSelectionBeforeWord();
+
+        t.cursorPosition = getCursorPosition();
+        r.shouldBe(t, "t.cursorPosition.position", "5");
+        r.shouldBe(t, "t.cursorPosition.length", "-1");
+    }
+
+    function extendCursorPastWord_IsWithinWord() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1],
+            selection = t.selectionToRange({
+                anchorNode: text,
+                anchorOffset: 5,
+                focusNode: text,
+                focusOffset: 5
+            });
+        t.selectionController.selectRange(selection.range, selection.hasForwardSelection);
+
+        t.selectionController.extendSelectionPastWord();
+
+        t.cursorPosition = getCursorPosition();
+        r.shouldBe(t, "t.cursorPosition.position", "5");
+        r.shouldBe(t, "t.cursorPosition.length", "3");
+    }
+
     function moveCursorToDocumentEnd_Simple() {
         t.position = undefined;
         createOdtDocument("<text:p>the <text:a>q</text:a><text:a><text:span>u</text:span></text:a>ick red fox</text:p>");
@@ -250,6 +311,90 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             t.position = t.session.operations[0].spec().position;
         }
         r.shouldBe(t, "t.position", "17");
+    }
+
+    function expandToWordBoundaries_CollapsedInWord() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 5,
+            focusNode: text,
+            focusOffset: 5
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
+    function expandToWordBoundaries_CollasedAtWordStart() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 4,
+            focusNode: text,
+            focusOffset: 4
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
+    function expandToWordBoundaries_CollasedAtWordEnd() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 7,
+            focusNode: text,
+            focusOffset: 7
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
+    }
+
+    function expandToWordBoundaries_AlreadyAtWordBoundaries() {
+        var doc = createOdtDocument("<text:p>one two three</text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[0],
+            text = p.childNodes[1];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 4,
+            focusNode: text,
+            focusOffset: 7
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "4");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "7");
     }
 
     this.setUp = function () {
@@ -267,6 +412,8 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             moveCursorBeforeWord_SimpleText,
             moveCursorPastWord_SimpleText_Punctuation,
             moveCursorBeforeWord_SimpleText_Punctuation,
+            moveCursorBeforeWord_SimpleText_NonLatin,
+            moveCursorPastWord_SimpleText_NonLatin,
 
             moveCursorPastWord_TextSplitBySpans,
             moveCursorBeforeWord_TextSplitBySpans,
@@ -286,7 +433,15 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             moveCursorPastWord_TextWithinLinkAndSpan,
             moveCursorBeforeWord_TextWithinLinkAndSpan,
 
-            moveCursorToDocumentEnd_Simple
+            extendCursorBeforeWord_IsWithinWord,
+            extendCursorPastWord_IsWithinWord,
+
+            moveCursorToDocumentEnd_Simple,
+
+            expandToWordBoundaries_CollapsedInWord,
+            expandToWordBoundaries_CollasedAtWordStart,
+            expandToWordBoundaries_CollasedAtWordEnd,
+            expandToWordBoundaries_AlreadyAtWordBoundaries
         ]);
     };
     this.asyncTests = function () {
