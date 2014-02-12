@@ -313,17 +313,6 @@
         };
 
         /**
-         * @param {function()} callback
-         */
-        this.destroy = function (callback) {
-            eventManager.unsubscribe('compositionstart', compositionStart);
-            eventManager.unsubscribe('compositionend', compositionEnd);
-            eventManager.unsubscribe('textInput', textInput);
-            eventManager.unsubscribe('keypress', flushEvent);
-            async.destroyAll(cleanup, callback);
-        };
-
-        /**
          * Prevent the event trap from receiving focus
          */
         function suppressFocus() {
@@ -361,6 +350,21 @@
         this.setEditing = function (editable) {
             isEditable = editable;
             synchronizeEventStatus();
+        };
+
+        /**
+         * @param {function()} callback
+         */
+        this.destroy = function (callback) {
+            eventManager.unsubscribe('compositionstart', compositionStart);
+            eventManager.unsubscribe('compositionend', compositionEnd);
+            eventManager.unsubscribe('textInput', textInput);
+            eventManager.unsubscribe('keypress', flushEvent);
+            eventManager.unsubscribe('mousedown', suppressFocus);
+            eventManager.unsubscribe('mouseup', synchronizeEventStatus);
+            eventManager.unsubscribe('focus', resetWindowSelection);
+
+            async.destroyAll(cleanup, callback);
         };
 
         function init() {
