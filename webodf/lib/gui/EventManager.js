@@ -43,6 +43,7 @@
  * class provides a mechanism for returning event focus back to the SessionController when it has been lost to
  * an external source.
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.OdtDocument} odtDocument
  */
 gui.EventManager = function EventManager(odtDocument) {
@@ -307,6 +308,25 @@ gui.EventManager = function EventManager(odtDocument) {
         if (hasFocus()) {
             eventTrap.blur();
         }
+    };
+
+    /**
+      * @param {!function(!Object=)} callback passing an error object in case of error
+      * @return {undefined}
+      */
+    this.destroy = function (callback) {
+        var eventTrapParentNode = eventTrap.parentNode;
+
+        // InputMethodEditor moves the eventTrap around,
+        // so do not rely on still being a child of the current canvas element
+        if (eventTrapParentNode) {
+            eventTrapParentNode.removeChild(eventTrap);
+        }
+
+        // TODO: drop left eventDelegates, complain about those not unsubscribed
+        // Also investigate if delegates need to proper unlisten from events in any case
+
+        callback();
     };
 
     function init() {

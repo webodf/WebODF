@@ -152,7 +152,6 @@ define("webodf/editor/Editor", [
                         }
                     });
                     session.enqueue([op]);
-                    editorSession.sessionController.registerLocalCursor();
                     editorReadyCallback();
                 });
             };
@@ -318,6 +317,7 @@ define("webodf/editor/Editor", [
                 runtime.assert(editorSession, "editorSession should exist here.");
 
                 tools.setEditorSession(editorSession);
+                editorSession.sessionController.insertLocalCursor();
                 editorSession.sessionController.startEditing();
             };
 
@@ -331,6 +331,7 @@ define("webodf/editor/Editor", [
 
                 tools.setEditorSession(undefined);
                 editorSession.sessionController.endEditing();
+                editorSession.sessionController.removeLocalCursor();
             };
 
             /**
