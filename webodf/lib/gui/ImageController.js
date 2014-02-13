@@ -58,9 +58,7 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
            @type{!string}*/
         textns = odf.Namespaces.textns,
         odtDocument = session.getOdtDocument(),
-        formatting = odtDocument.getFormatting(),
-        /**@type{Object.<string,!{width: number, height: number}>}*/
-        paragraphStyleToPageContentSizeMap = {};
+        formatting = odtDocument.getFormatting();
 
     /**
      * @param {!string} name
@@ -232,24 +230,25 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
         var paragraphElement,
             styleName,
             pageContentSize,
-            originalSize,
-            newSize;
+            imageSize;
 
         runtime.assert(widthInPx > 0 && heightInPx > 0, "Both width and height of the image should be greater than 0px.");
-
-        // TODO: resize the image to fit in a cell if paragraphElement is in a table-cell
-        paragraphElement = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
-        styleName = paragraphElement.getAttributeNS(textns, 'style-name');
-        if (!paragraphStyleToPageContentSizeMap.hasOwnProperty(styleName)) {
-            paragraphStyleToPageContentSizeMap[styleName] = formatting.getContentSize(styleName, 'paragraph');
-        }
-
-        pageContentSize = paragraphStyleToPageContentSizeMap[styleName];
-        originalSize = {
+        // TODO unit conversion assumes page dimensions are in cm which is not a requirement of the spec
+        imageSize = {
             width: widthInPx * cmPerPixel,
             height: heightInPx * cmPerPixel
         };
-        newSize = trimmedSize(originalSize, pageContentSize);
-        insertImageInternal(mimetype, content, newSize.width, newSize.height);
+        // TODO: resize the image to fit in a cell if paragraphElement is in a table-cell
+        paragraphElement = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
+        styleName = paragraphElement.getAttributeNS(textns, 'style-name');
+        if (styleName) {
+            // TODO cope with no paragraph style name being specified (i.e., use the default paragraph style)
+            pageContentSize = formatting.getContentSize(styleName, 'paragraph');
+            if (pageContentSize) {
+                imageSize = trimmedSize(imageSize, pageContentSize);
+            }
+        }
+
+        insertImageInternal(mimetype, content, imageSize.width, imageSize.height);
     };
 };

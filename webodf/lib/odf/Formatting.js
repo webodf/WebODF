@@ -576,34 +576,75 @@ odf.Formatting = function Formatting() {
     };
 
     /**
+     * Find a master page definition with the specified name
+     * @param {!string} pageName
+     * @return {?Element}
+     */
+    function getMasterPageElement(pageName) {
+        var node = odfContainer.rootElement.masterStyles.firstElementChild;
+        while (node) {
+            if (node.namespaceURI === stylens
+                && node.localName === "master-page"
+                && node.getAttributeNS(stylens, "name") === pageName) {
+                break;
+            }
+            node = node.nextElementSibling;
+        }
+        return node;
+    }
+
+    /**
      * Gets the associated page layout style node for the given style and family.
      * @param {!string} styleName
      * @param {!string} styleFamily either 'paragraph' or 'table'
      * @return {?Element}
      */
     function getPageLayoutStyleElement(styleName, styleFamily) {
-        var masterPageName, layoutName, pageLayoutElements, node, i,
+        var masterPageName,
+            layoutName,
+            pageLayoutElements,
+            /**@type{?Element}*/
+            node,
+            i,
             styleElement = getStyleElement(styleName, styleFamily);
 
         runtime.assert(styleFamily === "paragraph" || styleFamily === "table",
-            "styleFamily has to be either paragraph or table");
+            "styleFamily must be either paragraph or table");
 
         if (styleElement) {
-            masterPageName = styleElement.getAttributeNS(stylens, "master-page-name") || "Standard";
-            node = odfContainer.rootElement.masterStyles.lastElementChild;
-            while (node) {
-                if (node.getAttributeNS(stylens, "name") === masterPageName) {
-                    break;
+            masterPageName = styleElement.getAttributeNS(stylens, "master-page-name");
+            if (masterPageName) {
+                node = getMasterPageElement(masterPageName);
+                if (!node) {
+                    runtime.log("WARN: No master page definition found for " + masterPageName);
                 }
-                node = node.previousElementSibling;
+            }
+            // TODO If element has no master-page-name defined find the master-page-name from closest previous sibling
+            // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1417948_253892949
+            if (!node) {
+                // Fallback 1: LibreOffice usually puts a page layout in called "Standard"
+                node = getMasterPageElement("Standard");
+            }
+            if (!node) {
+                // Fallback 2: Find any page style
+                node = /**@type{?Element}*/(odfContainer.rootElement.masterStyles.getElementsByTagNameNS(stylens, "master-page")[0]);
+                if (!node) {
+                    // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-style_master-page
+                    // "All documents shall contain at least one master page element."
+                    runtime.log("WARN: Document has no master pages defined");
+                }
             }
 
-            layoutName = node.getAttributeNS(stylens, "page-layout-name");
-            pageLayoutElements = domUtils.getElementsByTagNameNS(odfContainer.rootElement.automaticStyles, stylens, "page-layout");
-            for (i = 0; i < pageLayoutElements.length; i += 1) {
-                node = pageLayoutElements[i];
-                if (node.getAttributeNS(stylens, "name") === layoutName) {
-                    return /** @type {!Element} */(node);
+            if (node) {
+                // It would be surprising if we still haven't found a page by now. Still, better safe than sorry!
+                // Note, all warnings are already logged in the above conditions
+                layoutName = node.getAttributeNS(stylens, "page-layout-name");
+                pageLayoutElements = domUtils.getElementsByTagNameNS(odfContainer.rootElement.automaticStyles, stylens, "page-layout");
+                for (i = 0; i < pageLayoutElements.length; i += 1) {
+                    node = pageLayoutElements[i];
+                    if (node.getAttributeNS(stylens, "name") === layoutName) {
+                        return /** @type {!Element} */(node);
+                    }
                 }
             }
         }
@@ -650,31 +691,40 @@ odf.Formatting = function Formatting() {
      * Gets the width and height of content area in centimeters.
      * @param {string} styleName
      * @param {string} styleFamily
-     * @return {!{width: number, height: number}}
+     * @return {!{width: number, height: number}|undefined}
      */
     this.getContentSize = function(styleName, styleFamily) {
-        var pageLayoutElement, props, printOrientation,
-            defaultOrientedPageWidth, defaultOrientedPageHeight, pageWidth, pageHeight,
-            margin, marginLeft, marginRight, marginTop, marginBottom,
-            padding, paddingLeft, paddingRight, paddingTop, paddingBottom;
+        var pageLayoutElement,
+            props,
+            defaultOrientedPageWidth,
+            defaultOrientedPageHeight,
+            pageWidth,
+            pageHeight,
+            margin,
+            marginLeft,
+            marginRight,
+            marginTop,
+            marginBottom,
+            padding,
+            paddingLeft,
+            paddingRight,
+            paddingTop,
+            paddingBottom;
 
         pageLayoutElement = getPageLayoutStyleElement(styleName, styleFamily);
         if (!pageLayoutElement) {
-            pageLayoutElement = domUtils.getDirectChild(odfContainer.rootElement.styles,
-                    stylens, "default-page-layout");
+            pageLayoutElement = domUtils.getDirectChild(odfContainer.rootElement.styles, stylens, "default-page-layout");
         }
-        props = domUtils.getDirectChild(pageLayoutElement, stylens,
-                "page-layout-properties");
+        props = domUtils.getDirectChild(pageLayoutElement, stylens, "page-layout-properties");
         if (props) {
-            printOrientation = props.getAttributeNS(stylens, "print-orientation") || "portrait";
             // set page's default width and height based on print orientation
-            if (printOrientation === "portrait") {
-                defaultOrientedPageWidth  = defaultPageFormatSettings.width;
-                defaultOrientedPageHeight = defaultPageFormatSettings.height;
-            } else  {
+            if (props.getAttributeNS(stylens, "print-orientation") === "landscape") {
                 // swap the default width and height around in landscape
                 defaultOrientedPageWidth = defaultPageFormatSettings.height;
                 defaultOrientedPageHeight = defaultPageFormatSettings.width;
+            } else {
+                defaultOrientedPageWidth = defaultPageFormatSettings.width;
+                defaultOrientedPageHeight = defaultPageFormatSettings.height;
             }
 
             pageWidth = lengthInCm(props.getAttributeNS(fons, "page-width"), defaultOrientedPageWidth);
@@ -699,10 +749,11 @@ odf.Formatting = function Formatting() {
             } else {
                 paddingLeft = paddingRight = paddingTop = paddingBottom = padding;
             }
-        }
-        return {
-            width: pageWidth - marginLeft - marginRight - paddingLeft - paddingRight,
-            height: pageHeight - marginTop - marginBottom - paddingTop - paddingBottom
-        };
+            return {
+                width: pageWidth - marginLeft - marginRight - paddingLeft - paddingRight,
+                height: pageHeight - marginTop - marginBottom - paddingTop - paddingBottom
+            };
+        } // TODO hardcode a page layout in WebODF to fall back if no master pages are found
+        return undefined;
     };
 };

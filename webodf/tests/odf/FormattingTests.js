@@ -71,6 +71,9 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "    </style:style>";
         xml += "    <style:style style:name='PEmpty' style:display-name='PEmpty Display' style:family='paragraph' style:master-page-name='Index'>";
         xml += "    </style:style>";
+        xml += "    <style:style style:name='PMissingDefinition' style:display-name='Missing Def' style:family='paragraph' style:master-page-name='Missing'>";
+        xml += "        <style:text-properties fo:font-name='PMissingDefinition Font' />";
+        xml += "    </style:style>";
         xml += "    <style:style style:name='P2' style:display-name='P1 Display' style:family='paragraph'>";
         xml += "        <style:text-properties fo:font-name='P2 Font' />";
         xml += "    </style:style>";
@@ -287,6 +290,21 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.contentSize = t.formatting.getContentSize("P2", "paragraph");
         r.shouldBe(t, "t.contentSize", "({'width':25.7,'height':17.001})");
     }
+    function getContentSize_MissingPageDefinition_DocumentHasStandard() {
+        createDocument("<text:p style:name='PMissingDefinition'/>", "<style:page-layout style:name='pm1' scope='document-styles'><style:page-layout-properties style:print-orientation='landscape' /></style:page-layout>");
+        t.contentSize = t.formatting.getContentSize("PMissingDefinition", "paragraph");
+        r.shouldBe(t, "t.contentSize", "({'width':25.7,'height':17.001})");
+    }
+    function getContentSize_NoMasterPageDefined() {
+        var doc = createDocument("<text:p style:name='P2'/>"),
+            pageDefinitions = doc.getElementsByTagNameNS(namespace.style, "master-page");
+
+        while (pageDefinitions[0]) {
+            pageDefinitions[0].parentNode.removeChild(pageDefinitions[0]);
+        }
+        t.contentSize = t.formatting.getContentSize("P2", "paragraph");
+        r.shouldBe(t, "t.contentSize", "undefined");
+    }
 
     function getAppliedStyles_SimpleHierarchy() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>");
@@ -450,6 +468,8 @@ odf.FormattingTests = function FormattingTests(runner) {
 
             getContentSize_PageSizePaddingAndMarginSpecified,
             getContentSize_PageSizePaddingAndMarginNotSpecified,
+            getContentSize_MissingPageDefinition_DocumentHasStandard,
+            getContentSize_NoMasterPageDefined,
 
             getAppliedStyles_SimpleHierarchy,
             getAppliedStyles_NestedHierarchy,
