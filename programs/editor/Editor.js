@@ -539,9 +539,25 @@ define("webodf/editor/Editor", [
                     bar.style.WebkitTransform = 'translateY(' + y + 'px)';
                 }
 
+                /**
+                 * FIXME: At the moment both the toolbar and the canvas
+                 * container are absolutely positioned. Changing them to
+                 * relative positioning to ensure that they do not overlap
+                 * causes scrollbars *within* the container to disappear.
+                 * Not sure why this happens, and a proper CSS fix has not
+                 * been found yet, so for now we need to reposition
+                 * the container using Js.
+                 * @return {undefined}
+                 */
+                function repositionContainer() {
+                    container.style.top = document.getElementById('toolbar').getBoundingClientRect().height + 'px';
+                }
+                repositionContainer();
+
                 runtime.getWindow().addEventListener('scroll', translateToolbar);
                 runtime.getWindow().addEventListener('focusout', translateToolbar);
                 runtime.getWindow().addEventListener('touchmove', translateToolbar);
+                runtime.getWindow().addEventListener('resize', repositionContainer);
             }
 
             init();
