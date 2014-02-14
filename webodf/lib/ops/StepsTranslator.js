@@ -244,10 +244,10 @@
          * Process known step to DOM position points for possible caching
          * @param {!number} steps Current steps offset from position 0
          * @param {!core.PositionIterator} iterator
-         * @param {!boolean} isWalkable True if the current node and offset is considered a walkable position by the filter
+         * @param {!boolean} isStep True if the current node and offset is accepted by the position filter
          * @return {undefined}
          */
-        this.updateCache = function(steps, iterator, isWalkable) {
+        this.updateCache = function(steps, iterator, isStep) {
             var stablePoint,
                 cacheBucket,
                 existingCachePoint,
@@ -256,7 +256,7 @@
 
             if (iterator.isBeforeNode() && odfUtils.isParagraph(node)) {
                 stablePoint = true;
-                if (!isWalkable) {
+                if (!isStep) {
                     // Paragraph bookmarks indicate "first position in the paragraph"
                     // If the current stable point is before the first walkable position (as often happens)
                     // simply increase the step number by 1 to move to within the paragraph node
@@ -480,7 +480,7 @@
         this.convertStepsToDomPoint = function (steps) {
             var /**@type{!number}*/
                 stepsFromRoot,
-                isWalkable;
+                isStep;
 
             if (isNaN(steps)) {
                 throw new TypeError("Requested steps is not numeric (" + steps + ")");
@@ -492,11 +492,11 @@
             stepsFromRoot = stepsCache.setToClosestStep(steps, iterator);
             
             while (stepsFromRoot < steps && iterator.nextPosition()) {
-                isWalkable = filter.acceptPosition(iterator) === FILTER_ACCEPT;
-                if (isWalkable) {
+                isStep = filter.acceptPosition(iterator) === FILTER_ACCEPT;
+                if (isStep) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator, isWalkable);
+                stepsCache.updateCache(stepsFromRoot, iterator, isStep);
             }
             if (stepsFromRoot !== steps) {
                 throw new RangeError("Requested steps (" + steps + ") exceeds available steps (" + stepsFromRoot + ")");
@@ -556,7 +556,7 @@
                 destinationNode,
                 destinationOffset,
                 rounding = 0,
-                isWalkable;
+                isStep;
 
             verifyRootNode();
             if (!domUtils.containsNode(rootNode, node)) {
@@ -586,11 +586,11 @@
 
             while (!(iterator.container() === destinationNode && iterator.unfilteredDomOffset() === destinationOffset)
                     && iterator.nextPosition()) {
-                isWalkable = filter.acceptPosition(iterator) === FILTER_ACCEPT;
-                if (isWalkable) {
+                isStep = filter.acceptPosition(iterator) === FILTER_ACCEPT;
+                if (isStep) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator, isWalkable);
+                stepsCache.updateCache(stepsFromRoot, iterator, isStep);
             }
             return stepsFromRoot + rounding;
         };
@@ -601,16 +601,16 @@
          */
         this.prime = function () {
             var stepsFromRoot,
-                isWalkable;
+                isStep;
 
             verifyRootNode();
             stepsFromRoot = stepsCache.setToClosestStep(0, iterator);
             while (iterator.nextPosition()) {
-                isWalkable = filter.acceptPosition(iterator) === FILTER_ACCEPT;
-                if (isWalkable) {
+                isStep = filter.acceptPosition(iterator) === FILTER_ACCEPT;
+                if (isStep) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator, isWalkable);
+                stepsCache.updateCache(stepsFromRoot, iterator, isStep);
             }
         };
 
