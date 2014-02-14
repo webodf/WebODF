@@ -50,10 +50,13 @@ add_custom_command(
 add_custom_target(webodf.css.js-target DEPENDS webodf.css.js)
 
 if (Java_JAVA_EXECUTABLE)
+  # Windows has a command-line limit of around 8,000 chars, soCC flags are passed into the compiler using a file to help
+  # keep the length of the compilation command as small as possible.
+  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/cc-flags.txt "--warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3")
   # nonStandardJsDocs is not used because we use @licstart @licend and @source
   # ideally we would enable --jscomp_error reportUnknownTypes
   # -XX:+TieredCompilation reduces compilation time by about 30%
-  set(SHARED_CLOSURE_ARGS -XX:+TieredCompilation -jar ${CLOSURE_JAR} --warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3)
+  set(SHARED_CLOSURE_ARGS -XX:+TieredCompilation -jar ${CLOSURE_JAR} --flagfile ${CMAKE_CURRENT_BINARY_DIR}/cc-flags.txt)
 
   foreach(JSFILE ${LIBJSFILES})
     if (IS_ABSOLUTE ${JSFILE})
@@ -165,7 +168,12 @@ if (Java_JAVA_EXECUTABLE)
         DEPENDS ${LIBJSFILES} JsDoc
   )
   add_custom_target(doc DEPENDS docs/index.html)
+
   add_custom_target(simplenodetest ALL
+      # Node's search path for node_modules starts from the main package and works up towards the root.
+      # In order to see these node modules, they need to be somewhere in this path
+      # See http://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders for more detail
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules/xmldom ${CMAKE_CURRENT_BINARY_DIR}/node_modules/xmldom
       COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
       DEPENDS NodeJS simplecompiled.js-target
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests

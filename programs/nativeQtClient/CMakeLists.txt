@@ -8,8 +8,12 @@ QT4_WRAP_CPP(NATIVEQTCLIENT_MOC
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/application.qrc
         "<RCC><qresource prefix='/'>")
 foreach(FILE ${HTML5UIFILES} ${LIBJSFILES} index.html scripts.js webodf.css)
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/application.qrc
-        "<file>www/${FILE}</file>\n")
+    if (IS_ABSOLUTE ${FILE})
+        GET_FILENAME_COMPONENT(_wwwfile ${FILE} NAME)
+    else (IS_ABSOLUTE ${FILE})
+        SET(_wwwfile ${FILE})
+    endif (IS_ABSOLUTE ${FILE})
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/application.qrc "<file>www/${_wwwfile}</file>\n")
 endforeach(FILE ${HTML5UIFILES})
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/application.qrc
         "</qresource></RCC>")

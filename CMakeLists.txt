@@ -288,25 +288,31 @@ set(HTML5UIFILES
 
 set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
 
+# COPY_FILES (varname srcdir tgtdir files)
+# Creates a target that copies the listed files from the srcdir to the tgtdir,
+# preserving their relative path.
+# Absolute files will be copied into the root of tgtdir without any additional subdirs
 macro(COPY_FILES _varname _srcdir _tgtdir)
   foreach(_file ${ARGN})
     if (IS_ABSOLUTE ${_file})
       SET(_subdir "")
       SET(_srcfile ${_file})
+      GET_FILENAME_COMPONENT(_dstfile ${_file} NAME)
     else (IS_ABSOLUTE ${_file})
       GET_FILENAME_COMPONENT(_subdir ${_file} PATH)
       SET(_srcfile ${_srcdir}/${_file})
+      SET(_dstfile ${_file})
     endif (IS_ABSOLUTE ${_file})
     FILE(MAKE_DIRECTORY ${_tgtdir}/${_subdir})
     add_custom_command(
-      OUTPUT ${_tgtdir}/${_file}
+      OUTPUT ${_tgtdir}/${_dstfile}
       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
         ${_srcfile}
-        ${_tgtdir}/${_file}
+        ${_tgtdir}/${_dstfile}
       DEPENDS
         ${_srcfile}
     )
-    set(${_varname} ${${_varname}} ${_tgtdir}/${_file})
+    set(${_varname} ${${_varname}} ${_tgtdir}/${_dstfile})
   endforeach(_file)
 endmacro(COPY_FILES _directory _files)
 

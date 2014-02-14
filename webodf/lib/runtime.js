@@ -1671,6 +1671,9 @@ var ops = {};
                 throw "Circular dependency detected for " + n + ".";
             }
             stack[n] = true;
+            if (!dependencies[n]) {
+                throw "Missing dependency information for class " + n + ".";
+            }
             var d = dependencies[n], deps = d.deps, i, l = deps.length;
             for (i = 0; i < l; i += 1) {
                 visit(deps[i]);
