@@ -40,14 +40,15 @@
 
 (function () {
     "use strict";
-    var /**@type{!{rangeBCRIgnoresElementBCR: boolean, unscaledRangeClientRects: boolean}}*/
+    var /**@type{!{rangeBCRIgnoresElementBCR: boolean, unscaledRangeClientRects: boolean, elementBCRIgnoresBodyScroll: !boolean}}*/
         browserQuirks;
 
     /**
      * Detect various browser quirks
      * unscaledRangeClientRects - Firefox doesn't apply parent css transforms to any range client rectangles
      * rangeBCRIgnoresElementBCR - Internet explorer returns 0 client rects for an empty element that has fixed dimensions
-     * @return {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean}}
+     * elementBCRIgnoresBodyScroll - iOS safari returns false client rects for an element that do not correlate with a scrolled body
+     * @return {!{unscaledRangeClientRects: !boolean, rangeBCRIgnoresElementBCR: !boolean, elementBCRIgnoresBodyScroll: !boolean}}
      */
     function getBrowserQuirks() {
         var range,
@@ -57,14 +58,23 @@
             testElement,
             detectedQuirks,
             window,
-            document;
+            document,
+            docElement,
+            body,
+            docOverflow,
+            bodyOverflow,
+            bodyHeight,
+            bodyScroll;
 
         if (browserQuirks === undefined) {
             window = runtime.getWindow();
             document = window && window.document;
+            docElement = document.documentElement;
+            body = document.body;
             browserQuirks = {
                 rangeBCRIgnoresElementBCR: false,
-                unscaledRangeClientRects: false
+                unscaledRangeClientRects: false,
+                elementBCRIgnoresBodyScroll: false
             };
             if (document) {
                 testContainer = document.createElement("div");
@@ -75,7 +85,7 @@
 
                 testElement = document.createElement("div");
                 testContainer.appendChild(testElement);
-                document.body.appendChild(testContainer);
+                body.appendChild(testContainer);
                 range = document.createRange();
                 range.selectNode(testElement);
                 // Internet explorer (v10 and others?) will omit the element's own client rect from
@@ -90,9 +100,33 @@
                 // Depending on the browser, client rects can sometimes have sub-pixel rounding effects, so
                 // add some wiggle room for this. The scale is 200%, so there is no issues with false positives here
                 browserQuirks.unscaledRangeClientRects = Math.abs(directBoundingRect.height - rangeBoundingRect.height) > 2;
-                range.detach();
 
-                document.body.removeChild(testContainer);
+                testContainer.style.transform = "";
+                testContainer.style["-webkit-transform"] = "";
+                // Backup current values for documentElement and body's overflows, body height, and body scroll.
+                docOverflow = docElement.style.overflow;
+                bodyOverflow = body.style.overflow;
+                bodyHeight = body.style.height;
+                bodyScroll = body.scrollTop;
+                // Set new values for the backed up properties
+                docElement.style.overflow = "visible";
+                body.style.overflow = "visible";
+                body.style.height = "200%";
+                body.scrollTop = body.scrollHeight;
+                // After extending the body's height to twice and scrolling by that amount,
+                // if the element's new BCR is not the same as the range's BCR, then
+                // Houston we have a Quirk! This problem has been seen on iOS7, which
+                // seems to report the correct BCR for a range but ignores body scroll
+                // effects on an element...
+                browserQuirks.elementBCRIgnoresBodyScroll = (range.getBoundingClientRect().top !== testElement.getBoundingClientRect().top);
+                // Restore backed up property values
+                body.scrollTop = bodyScroll;
+                body.style.height = bodyHeight;
+                body.style.overflow = bodyOverflow;
+                docElement.style.overflow = docOverflow;
+
+                range.detach();
+                body.removeChild(testContainer);
                 detectedQuirks = Object.keys(browserQuirks).map(
                     /**
                      * @param {!string} quirk
@@ -601,13 +635,24 @@
             var doc = /**@type{!Document}*/(node.ownerDocument),
                 quirks = getBrowserQuirks(),
                 range,
-                element;
+                element,
+                rect,
+                body = doc.body;
 
             if (quirks.unscaledRangeClientRects === false
                     || quirks.rangeBCRIgnoresElementBCR) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     element = /**@type{!Element}*/(node);
-                    return element.getBoundingClientRect();
+                    rect = element.getBoundingClientRect();
+                    if (quirks.elementBCRIgnoresBodyScroll) {
+                        return /**@type{?ClientRect}*/({
+                            left: rect.left + body.scrollLeft,
+                            right: rect.right + body.scrollLeft,
+                            top: rect.top + body.scrollTop,
+                            bottom: rect.bottom + body.scrollTop
+                        });
+                    }
+                    return rect;
                 }
             }
             range = getSharedRange(doc);
