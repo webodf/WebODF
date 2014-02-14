@@ -283,26 +283,17 @@ cursor|cursor > .handle:after {
     width: 1px;
     outline: none;
     opacity: 0;
+    color: rgba(255, 255, 255, 0); /* hide the blinking caret by setting the colour to fully transparent */
+    overflow: hidden; /* The overflow visibility is used to hide and show characters being entered */
 }
 
 /* within a cursor */
-cursor|cursor > #eventTrap {
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    color: rgba(255, 255, 255, 0); /* hide the blinking caret by setting the colour to fully transparent */
-    overflow: hidden; /* The overflow visibility is used to hide and show characters being entered */
-    min-height: 1px; /* trap must be visible in order to receive focus */
-    height: auto; /* but ideally is the same height as the surrounding cursor */
-    width: 1px; /* trap must be visible in order to receive focus */
+cursor|cursor > #composer {
+    text-decoration: underline;
 }
 
-cursor|cursor[cursor|composing="true"] > #eventTrap {
+cursor|cursor[cursor|composing="true"] > #composer {
     display: inline-block;
-    position: static;
-    color: inherit; /* make colour non-transparent again to show the entered text */
-    overflow: visible; /* The overflow visibility is used to hide and show characters being entered */
     height: auto;
     width: auto;
 }

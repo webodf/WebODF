@@ -118,6 +118,10 @@
             /**@type{ops.OdtCursor}*/
             localCursor = null,
             eventTrap = eventManager.getEventTrap(),
+            /**@type{!Document}*/
+            doc = /**@type{!Document}*/(eventTrap.ownerDocument),
+            /**@type{!Element}*/
+            compositionElement,
             async = new core.Async(),
             domUtils = new core.DomUtils(),
             FAKE_CONTENT = "b",
@@ -168,6 +172,7 @@
                     localCursor.getNode().setAttributeNS(cursorns, "composing", "true");
                 } else {
                     localCursor.getNode().removeAttributeNS(cursorns, "composing");
+                    compositionElement.textContent = "";
                 }
             }
         }
@@ -195,8 +200,7 @@
         function resetWindowSelection() {
             var selection = window.getSelection(),
                 node,
-                textNode,
-                doc = eventTrap.ownerDocument;
+                textNode;
 
             flushEvent();
             if (!domUtils.containsNode(getSizerElement(), eventTrap)) {
@@ -276,6 +280,15 @@
         }
 
         /**
+         * Synchronizes the eventTrap's text with
+         * the compositionElement's text.
+         * @return {undefined}
+         */
+        function synchronizeCompositionText() {
+            compositionElement.textContent = eventTrap.textContent;
+        }
+
+        /**
          * Handle a cursor registration event
          * @param {!ops.OdtCursor} cursor
          * @return {undefined}
@@ -283,6 +296,9 @@
         this.registerCursor = function (cursor) {
             if (cursor.getMemberId() === inputMemberId) {
                 localCursor = cursor;
+                localCursor.getNode().appendChild(compositionElement);
+                eventManager.subscribe('input', synchronizeCompositionText);
+                eventManager.subscribe('compositionupdate', synchronizeCompositionText);
             }
         };
 
@@ -293,6 +309,9 @@
          */
         this.removeCursor = function (memberid) {
             if (localCursor && memberid ===  inputMemberId) {
+                localCursor.getNode().removeChild(compositionElement);
+                eventManager.unsubscribe('input', synchronizeCompositionText);
+                eventManager.unsubscribe('compositionupdate', synchronizeCompositionText);
                 localCursor = null;
             }
         };
@@ -374,6 +393,11 @@
             // Negative tab index still allows focus, but removes accessibility by keyboard
             getSizerElement().appendChild(eventTrap);
             eventTrap.setAttribute("tabindex", -1);
+
+            // Initialize the composition element
+            compositionElement = doc.createElement('span');
+            compositionElement.setAttribute('id', 'composer');
+
             processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
             cleanup.push(processUpdates.destroy);
         }
