@@ -145,6 +145,7 @@
 
             /**
              * @param {!core.PositionIterator} iterator
+             * @return {undefined}
              */
             this.setIteratorPosition = function (iterator) {
                 iterator.setUnfilteredPosition(rootNode, 0);
@@ -176,6 +177,7 @@
 
         /**
          * @param {!Element} node
+         * @return {undefined}
          */
         function clearNodeId(node) {
             node.removeAttributeNS(coordinatens, "nodeId");
@@ -195,7 +197,7 @@
 
         /**
          * @param {!Element} node
-         * @return {string}
+         * @return {!string}
          */
         function setNodeId(node) {
             var nodeId = nextNodeId.toString();
@@ -243,6 +245,7 @@
          * @param {!number} steps Current steps offset from position 0
          * @param {!core.PositionIterator} iterator
          * @param {!boolean} isWalkable True if the current node and offset is considered a walkable position by the filter
+         * @return {undefined}
          */
         this.updateCache = function(steps, iterator, isWalkable) {
             var stablePoint,
@@ -368,6 +371,7 @@
          * Update all cached bookmarks starting just beyond the specified step
          * @param {!number} inflectionStep Step beyond which the changes occurs. Bookmarks beyond step+1 will be updated
          * @param {!function(number):number} getUpdatedSteps Callback to get an updated number of bookmark steps
+         * @return {undefined}
          */
         this.updateCacheAtPoint = function (inflectionStep, getUpdatedSteps) {
             var affectedBookmarks = [],
@@ -391,6 +395,7 @@
 
             /**
              * @param {!ParagraphBookmark} bookmark
+             * @return {undefined}
              */
             function handle(bookmark) {
                 var originalCacheBucket = getDestinationBucket(bookmark.steps),
@@ -430,11 +435,11 @@
 
     /**
      *
+     * @constructor
      * @param {!function():!Node} getRootNode
      * @param {!function(!Node):!core.PositionIterator} newIterator
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
-     * @constructor
      */
     ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter, bucketSize) {
         var rootNode = getRootNode(),
@@ -453,6 +458,7 @@
          * This makes things very sad, and kills baby kittens.
          * Unfortunately, no-one has had time yet to write a *real* undo stack... so we just need
          * to cope with it for now.
+         * @return {undefined}
          */
         function verifyRootNode() {
             // TODO Remove when a proper undo manager arrives
@@ -591,6 +597,7 @@
 
         /**
          * Iterates over all available positions starting at the root node and primes the cache
+         * @return {undefined}
          */
         this.prime = function () {
             var stepsFromRoot,
@@ -609,6 +616,7 @@
 
         /**
          * @param {!{position: !number, length: !number}} eventArgs
+         * @return {undefined}
          */
         this.handleStepsInserted = function (eventArgs) {
             verifyRootNode();
@@ -627,6 +635,7 @@
 
         /**
          * @param {!{position: !number, length: !number}} eventArgs
+         * @return {undefined}
          */
         this.handleStepsRemoved = function (eventArgs) {
             verifyRootNode();
