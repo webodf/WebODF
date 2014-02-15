@@ -474,17 +474,37 @@
                     clientX: event.clientX,
                     clientY: event.clientY,
                     target: target
-                };
+                },
+                range,
+                wasCollapsed,
+                frameNode,
+                pos;
             drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
-            if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode)) {
+            // We don't want to just select the image if it is a range selection hence ensure the selection is collapsed.
+            if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode) && window.getSelection().isCollapsed) {
                 selectionController.selectImage(/**@type{!Node}*/(target.parentNode));
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (imageSelector.isSelectorElement(target)) {
                 eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
             } else if (clickStartedWithinCanvas) {
                 if (isMouseMoved) {
-                    selectionController.selectRange(shadowCursor.getSelectedRange(),
-                        shadowCursor.hasForwardSelection(), event.detail);
+                    range = shadowCursor.getSelectedRange();
+                    wasCollapsed = range.collapsed;
+                    // Resets the endContainer and endOffset when a forward selection end up on an image;
+                    // Otherwise the image will not be selected because endContainer: image, endOffset 0 is not a valid
+                    // cursor position.
+                    if (odfUtils.isImage(range.endContainer) && range.endOffset === 0
+                            && odfUtils.isCharacterFrame(range.endContainer.parentNode)) {
+                        frameNode = /**@type{!Element}*/(range.endContainer.parentNode);
+                        pos = getNextWalkablePosition(frameNode);
+                        if (pos) {
+                            range.setEnd(pos.container, pos.offset);
+                            if (wasCollapsed) {
+                                range.collapse(false); // collapses the range to its end
+                            }
+                        }
+                    }
+                    selectionController.selectRange(range, shadowCursor.hasForwardSelection(), event.detail);
                     eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
                 } else {
                     // Clicking in already selected text won't update window.getSelection() until just after
@@ -493,9 +513,8 @@
                     // out the caret position from two coordinates.
                     handleMouseClickTimeoutId = runtime.setTimeout(function () {
                         var selection = mutableSelection(window.getSelection()),
-                            selectionRange,
                             position,
-                            frameNode,
+                            selectionRange,
                             rect;
                         if (!selection.anchorNode && !selection.focusNode) {
                             // chrome & safari will report null for focus and anchor nodes after a right-click in text selection
@@ -508,11 +527,12 @@
                             }
                         }
 
-                        if (odfUtils.isImage(selection.focusNode) && selection.focusOffset === 0) {
+                        if (odfUtils.isImage(selection.focusNode) && selection.focusOffset === 0
+                                && odfUtils.isCharacterFrame(selection.focusNode.parentNode)) {
                             // In FireFox if an image has no text around it, click on either side of the
                             // image resulting the same selection get returned. focusNode: image, focusOffset: 0
                             // Move the cursor to the next walkable position when clicking on the right side of an image
-                            frameNode = /**@type{!Element}*/(selection.anchorNode.parentNode);
+                            frameNode = /**@type{!Element}*/(selection.focusNode.parentNode);
                             rect = frameNode.getBoundingClientRect();
                             if (event.clientX > rect.right) {
                                 position = getNextWalkablePosition(frameNode);
@@ -521,7 +541,8 @@
                                     selection.anchorOffset = selection.focusOffset = position.offset;
                                 }
                             }
-                        } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1) {
+                        } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1
+                                && odfUtils.isCharacterFrame(selection.focusNode)) {
                             // When click on the right side of an image that has no text elements, non-FireFox browsers
                             // will return focusNode: frame, focusOffset: 1 as the selection. Since this is not a valid cursor
                             // position, move the cursor to the next walkable position after the frame node.
