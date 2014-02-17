@@ -1594,10 +1594,11 @@ var ops = {};
 /*jslint sloppy: true*/
 (function () {
     /**
-     * @param {string} dir
+     * @param {string} dir  Needs to be non-empty, use "." to denote same directory
      * @param {!Object.<string,!{dir:string, deps:!Array.<string>}>} dependencies
+     * @param {!boolean=} expectFail  Set to true if it is not known if there is a manifest
      */
-    function loadDependenciesFromManifest(dir, dependencies) {
+    function loadDependenciesFromManifest(dir, dependencies, expectFail) {
         "use strict";
         var path = dir + "/manifest.json",
             content,
@@ -1605,10 +1606,16 @@ var ops = {};
             manifest,
             /**@type{string}*/
             m;
+        runtime.log("Loading manifest: "+path);
         try {
             content = runtime.readFileSync(path, "utf-8");
         } catch (/**@type{string}*/e) {
-            console.log(String(e));
+            if (expectFail) {
+                runtime.log("No loadable manifest found.");
+            } else {
+                console.log(String(e));
+                throw e;
+            }
             return;
         }
         list = JSON.parse(/**@type{string}*/(content));
@@ -1628,8 +1635,11 @@ var ops = {};
             dependencies = [],
             paths = runtime.libraryPaths(),
             i;
-        if (runtime.currentDirectory()) {
-            loadDependenciesFromManifest(runtime.currentDirectory(), dependencies);
+        // Convenience: try to load any possible manifest in the current directory
+        // but only if it not also included in the library paths
+        if (runtime.currentDirectory() && paths.indexOf(runtime.currentDirectory()) === -1) {
+            // there is no need to have a manifest there, so allow loading to fail
+            loadDependenciesFromManifest(runtime.currentDirectory(), dependencies, true);
         }
         for (i = 0; i < paths.length; i += 1) {
             loadDependenciesFromManifest(paths[i], dependencies);
@@ -1874,9 +1884,13 @@ var ops = {};
         var script = argv[0];
         runtime.readFile(script, "utf8", function (err, code) {
             var path = "",
+                pathEndIndex = script.lastIndexOf("/"),
                 codestring = /**@type{string}*/(code);
-            if (script.indexOf("/") !== -1) {
-                path = script.substring(0, script.indexOf("/"));
+
+            if (pathEndIndex !== -1) {
+                path = script.substring(0, pathEndIndex);
+            } else {
+                path = ".";
             }
             runtime.setCurrentDirectory(path);
             function inner_run() {
