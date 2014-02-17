@@ -319,8 +319,13 @@
          * @return {!boolean}
          */
         function undo() {
+            var hadFocusBefore;
             if (undoManager) {
+                hadFocusBefore = eventManager.hasFocus();
                 undoManager.moveBackward(1);
+                if (hadFocusBefore) {
+                    eventManager.focus();
+                }
                 return true;
             }
 
@@ -331,8 +336,13 @@
          * @return {!boolean}
          */
         function redo() {
+            var hadFocusBefore;
             if (undoManager) {
+                hadFocusBefore = eventManager.hasFocus();
                 undoManager.moveForward(1);
+                if (hadFocusBefore) {
+                    eventManager.focus();
+                }
                 return true;
             }
 
@@ -648,6 +658,8 @@
             var op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
             session.enqueue([op]);
+            // Immediately capture focus when the local cursor is inserted
+            eventManager.focus();
         }
         this.insertLocalCursor = insertLocalCursor;
 
