@@ -57,13 +57,6 @@
 var webodfEditor = (function () {
     "use strict";
 
-    runtime.currentDirectory = function () {
-        return "../../webodf/lib";
-    };
-    runtime.libraryPaths = function () {
-        return [ runtime.currentDirectory() ];
-    };
-
     var editorInstance = null,
         serverFactory = null,
         server = null,

@@ -43,10 +43,6 @@ define("webodf/editor/EditorSession", [
 ], function (fontsCSS) { // fontsCSS is retrieved as a string, using dojo's text retrieval AMD plugin
     "use strict";
 
-    runtime.libraryPaths = function () {
-        return [ "../../webodf/lib" ];
-    };
-
     runtime.loadClass("core.DomUtils");
     runtime.loadClass("odf.OdfUtils");
     runtime.loadClass("ops.OdtDocument");
