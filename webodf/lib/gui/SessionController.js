@@ -319,8 +319,13 @@
          * @return {!boolean}
          */
         function undo() {
+            var hadFocusBefore;
             if (undoManager) {
+                hadFocusBefore = eventManager.hasFocus();
                 undoManager.moveBackward(1);
+                if (hadFocusBefore) {
+                    eventManager.focus();
+                }
                 return true;
             }
 
@@ -331,8 +336,13 @@
          * @return {!boolean}
          */
         function redo() {
+            var hadFocusBefore;
             if (undoManager) {
+                hadFocusBefore = eventManager.hasFocus();
                 undoManager.moveForward(1);
+                if (hadFocusBefore) {
+                    eventManager.focus();
+                }
                 return true;
             }
 
