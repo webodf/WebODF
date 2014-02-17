@@ -196,8 +196,6 @@ gui.CaretManager = function CaretManager(sessionController) {
 
             // wire up the cursor update to caret visibility update
             cursor.subscribe(ops.OdtCursor.signalCursorUpdated, scheduleCaretVisibilityCheck);
-            // Pass event focus to the session controller
-            sessionController.getEventManager().focus();
         } else {
             cursor.subscribe(ops.OdtCursor.signalCursorUpdated, caret.handleUpdate);
         }

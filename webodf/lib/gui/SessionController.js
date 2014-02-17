@@ -658,6 +658,8 @@
             var op = new ops.OpAddCursor();
             op.init({memberid: inputMemberId});
             session.enqueue([op]);
+            // Immediately capture focus when the local cursor is inserted
+            eventManager.focus();
         }
         this.insertLocalCursor = insertLocalCursor;
 
