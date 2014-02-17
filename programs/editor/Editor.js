@@ -367,11 +367,50 @@ define("webodf/editor/Editor", [
             };
 
             /**
+             * Applies a CSS transformation to the toolbar
+             * to ensure that if there is a body-scroll,
+             * the toolbar remains visible at the top of
+             * the screen.
+             * The bodyscroll quirk has been observed on
+             * iOS, generally when the keyboard appears.
+             * But this workaround should function on
+             * other platforms that exhibit this behaviour
+             * as well.
+             * @return {undefined}
+             */
+            function translateToolbar() {
+                var bar = document.getElementById('toolbar'),
+                    y = document.body.scrollTop;
+
+                bar.style.WebkitTransformOrigin = "center top";
+                bar.style.WebkitTransform = 'translateY(' + y + 'px)';
+            }
+
+            /**
+             * FIXME: At the moment both the toolbar and the canvas
+             * container are absolutely positioned. Changing them to
+             * relative positioning to ensure that they do not overlap
+             * causes scrollbars *within* the container to disappear.
+             * Not sure why this happens, and a proper CSS fix has not
+             * been found yet, so for now we need to reposition
+             * the container using Js.
+             * @return {undefined}
+             */
+            function repositionContainer() {
+                document.getElementById('container').style.top = document.getElementById('toolbar').getBoundingClientRect().height + 'px';
+            }
+
+            /**
              * @param {!function(!Object=)} callback, passing an error object in case of error
              * @return {undefined}
              */
             this.destroy = function (callback) {
                 var destroyMemberListView = memberListView ? memberListView.destroy : function(cb) { cb(); };
+
+                window.removeEventListener('scroll', translateToolbar);
+                window.removeEventListener('focusout', translateToolbar);
+                window.removeEventListener('touchmove', translateToolbar);
+                window.removeEventListener('resize', repositionContainer);
 
                 // TODO: decide if some forced close should be done here instead of enforcing proper API usage
                 runtime.assert(!session, "session should not exist here.");
@@ -519,45 +558,12 @@ define("webodf/editor/Editor", [
                     pendingMemberId = null;
                 });
 
-                /**
-                 * Applies a CSS transformation to the toolbar
-                 * to ensure that if there is a body-scroll,
-                 * the toolbar remains visible at the top of
-                 * the screen.
-                 * The bodyscroll quirk has been observed on
-                 * iOS, generally when the keyboard appears.
-                 * But this workaround should function on
-                 * other platforms that exhibit this behaviour
-                 * as well.
-                 * @return {undefined}
-                 */
-                function translateToolbar() {
-                    var bar = document.getElementById('toolbar'),
-                        y = document.body.scrollTop;
-
-                    bar.style.WebkitTransformOrigin = "center top";
-                    bar.style.WebkitTransform = 'translateY(' + y + 'px)';
-                }
-
-                /**
-                 * FIXME: At the moment both the toolbar and the canvas
-                 * container are absolutely positioned. Changing them to
-                 * relative positioning to ensure that they do not overlap
-                 * causes scrollbars *within* the container to disappear.
-                 * Not sure why this happens, and a proper CSS fix has not
-                 * been found yet, so for now we need to reposition
-                 * the container using Js.
-                 * @return {undefined}
-                 */
-                function repositionContainer() {
-                    container.style.top = document.getElementById('toolbar').getBoundingClientRect().height + 'px';
-                }
                 repositionContainer();
 
-                runtime.getWindow().addEventListener('scroll', translateToolbar);
-                runtime.getWindow().addEventListener('focusout', translateToolbar);
-                runtime.getWindow().addEventListener('touchmove', translateToolbar);
-                runtime.getWindow().addEventListener('resize', repositionContainer);
+                window.addEventListener('scroll', translateToolbar);
+                window.addEventListener('focusout', translateToolbar);
+                window.addEventListener('touchmove', translateToolbar);
+                window.addEventListener('resize', repositionContainer);
             }
 
             init();
