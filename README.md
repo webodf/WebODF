@@ -6,7 +6,7 @@ It makes it easy to add Open Document Format (ODF) support to your website and t
 
 * Visit the project homepage at: [WebODF](http://webodf.org)
 * Want a live demo? Visit: [WebODF Demo](http://webodf.org/demo/)
-* Get in contact, by the [mailing list](https://lists.opendocsociety.org/mailman/listinfo/webodf) or [IRC](irc://freenode.net/webodf) ([Web version](http://webchat.freenode.net/?nick=webodfcurious&channels=webodf))
+* Get in contact, by the [mailing list](https://lists.opendocsociety.org/mailman/listinfo/webodf) or IRC (#webodf auf freenode, [Web access](http://webchat.freenode.net/?nick=webodfcurious_gh&channels=webodf))
 
 ### License
 
