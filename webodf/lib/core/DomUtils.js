@@ -591,6 +591,23 @@
         this.getElementsByTagNameNS = getElementsByTagNameNS;
 
         /**
+         * Get an array of nodes below the specified node with the specific name tag name.
+         * @param {!Element|!Document} node
+         * @param {!string} tagName
+         * @return {!Array.<!Element>}
+         */
+        function getElementsByTagName(node, tagName) {
+            var e = [], list, i, l;
+            list = node.getElementsByTagName(tagName);
+            e.length = l = list.length;
+            for (i = 0; i < l; i += 1) {
+                e[i] = /**@type{!Element}*/(list.item(i));
+            }
+            return e;
+        }
+        this.getElementsByTagName = getElementsByTagName;
+
+        /**
          * Whether a node contains another node
          * Wrapper around Node.contains
          * http://www.w3.org/TR/domcore/#dom-node-contains
