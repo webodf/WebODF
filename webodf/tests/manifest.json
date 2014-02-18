@@ -111,6 +111,11 @@
         "odf.Namespaces",
         "odf.StyleTree"
     ],
+    "odf.MaliciousDocumentTests": [
+        "core.Async",
+        "core.UnitTester",
+        "odf.OdfContainer"
+    ],
     "odf.ObjectNameGeneratorTests": [
         "core.UnitTester",
         "odf.ObjectNameGenerator",

@@ -41,6 +41,7 @@ runtime.loadClass("gui.UndoStateRulesTests");
 runtime.loadClass("odf.FormattingTests");
 runtime.loadClass("odf.LayoutTests");
 runtime.loadClass("odf.ListStyleToCssTests");
+runtime.loadClass("odf.MaliciousDocumentTests");
 runtime.loadClass("odf.ObjectNameGeneratorTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("odf.OdfUtilsTests");
@@ -91,6 +92,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(odf.ObjectNameGeneratorTests);
     tests.push(odf.FormattingTests);
     tests.push(odf.ListStyleToCssTests);
+    tests.push(odf.MaliciousDocumentTests);
     tests.push(odf.OdfContainerTests);
     tests.push(odf.StyleInfoTests);
     tests.push(odf.StyleParseUtilsTests);
