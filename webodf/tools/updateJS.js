@@ -124,14 +124,14 @@ function Main(cmakeListPath) {
             if (occs.hasOwnProperty(i)) {
                 m = occs[i];
                 for (j = 0; j < m.length; j += 1) {
-                    content = files["lib/" + i];
+                    content = files[pathModule.join("lib", i)];
                     i = isOperation(content) ? "{Operation}" : i;
                     if (!done[i]) {
                         done[i] = {};
                         out += '"' + i + '"' + getStyle(i, content, colors);
                     }
                     n = m[j];
-                    content = files["lib/" + n];
+                    content = files[pathModule.join("lib", n)];
                     // omit leaf nodes unless they are interfaces
                     if (occs[n].length || content.indexOf("@interface") !== -1) {
                         n = isOperation(content) ? "{Operation}" : n;
@@ -597,6 +597,10 @@ function main(f) {
             }
         });
         f.createManifestsAndCMakeLists(files, ["lib" + pathModule.sep, "tests" + pathModule.sep]);
+    });
+    process.on("uncaughtException", function (err) {
+        console.log(err);
+        throw err;
     });
     process.on('exit', function () {
         process.exit(exitCode);
