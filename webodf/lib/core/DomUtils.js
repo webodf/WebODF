@@ -723,6 +723,12 @@
         /**
          * Maps attributes and elements in the properties object over top of the node.
          * Supports recursion and deep mapping.
+         *
+         * Supported value types are:
+         * - string (mapped to an attribute string on node)
+         * - number (mapped to an attribute string on node)
+         * - object (deep mapped to a new child node on node)
+         *
          * @param {!Element} node
          * @param {!Object.<string,*>} properties
          * @param {!function(!string):?string} nsResolver
@@ -734,21 +740,27 @@
                     localName = parts[1],
                     ns = nsResolver(prefix),
                     value = properties[key],
+                    valueType = typeof value,
                     element;
 
-                if (typeof value === "object" && Object.keys(/**@type{!Object}*/(value)).length) {
-                    if (ns) {
-                        element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0])
-                            || node.ownerDocument.createElementNS(ns, key);
-                    } else {
-                        element = /**@type{!Element|undefined}*/(node.getElementsByTagName(localName)[0])
-                            || node.ownerDocument.createElement(key);
+                if (valueType === "object") {
+                    // Only create the destination sub-element if there are values to populate it with
+                    if (Object.keys(/**@type{!Object}*/(value)).length) {
+                        if (ns) {
+                            element = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(ns, localName)[0])
+                                || node.ownerDocument.createElementNS(ns, key);
+                        } else {
+                            element = /**@type{!Element|undefined}*/(node.getElementsByTagName(localName)[0])
+                                || node.ownerDocument.createElement(key);
+                        }
+                        node.appendChild(element);
+                        mapObjOntoNode(element, /**@type{!Object}*/(value), nsResolver);
                     }
-                    node.appendChild(element);
-                    mapObjOntoNode(element, /**@type{!Object}*/(value), nsResolver);
                 } else if (ns) {
-                    // If the prefix is unknown or unsupported, simply ignore it for now
+                    runtime.assert(valueType === "number" || valueType === "string",
+                        "attempting to map unsupported type '" + valueType + "' (key: " + key + ")");
                     node.setAttributeNS(ns, key, String(value));
+                    // If the prefix is unknown or unsupported, simply ignore it for now
                 }
             });
         }

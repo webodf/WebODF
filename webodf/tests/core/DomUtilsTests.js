@@ -611,6 +611,15 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         range.detach();
     }
 
+    function mapObjOntoNode_EmptyObject() {
+        t.node = document.createElement("span");
+
+        t.utils.mapObjOntoNode(t.node, {"prefix:empty-obj":{}}, function(prefix) { return prefix; });
+
+        r.shouldBe(t, "t.node.hasAttributeNS('prefix','empty-obj')", "false");
+        r.shouldBe(t, "t.node.getElementsByTagNameNS('prefix','empty-obj').length", "0");
+    }
+
     this.tests = function () {
         return r.name([
             normalizeTextNodes_TextWithTextSilblings,
@@ -647,7 +656,9 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             getNodesInRange_EndContainerSkippedByFilter_CompletesIteration,
             getNodesInRange_NodeStartToNodeEnd_ReturnsNode,
             getNodesInRange_NodeEndToNodeStart_ReturnsTouchedNode,
-            getNodesInRange_NodeEndToNodeEnd_ReturnsBracketedNode
+            getNodesInRange_NodeEndToNodeEnd_ReturnsBracketedNode,
+
+            mapObjOntoNode_EmptyObject
         ]);
     };
     this.asyncTests = function () {

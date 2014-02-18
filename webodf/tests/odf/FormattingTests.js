@@ -69,6 +69,8 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "    <style:style style:name='P1' style:display-name='P1 Display' style:family='paragraph' style:master-page-name='Index'>";
         xml += "        <style:text-properties fo:font-name='P1 Font' />";
         xml += "    </style:style>";
+        xml += "    <style:style style:name='PEmpty' style:display-name='PEmpty Display' style:family='paragraph' style:master-page-name='Index'>";
+        xml += "    </style:style>";
         xml += "    <style:style style:name='P2' style:display-name='P1 Display' style:family='paragraph'>";
         xml += "        <style:text-properties fo:font-name='P2 Font' />";
         xml += "    </style:style>";
@@ -125,6 +127,15 @@ odf.FormattingTests = function FormattingTests(runner) {
         t.formatting.setOdfContainer(container);
         t.range = t.body.ownerDocument.createRange();
         return t.body.firstChild.childNodes[2].firstChild;
+    }
+
+    /**
+     * Return an array containing all attribute names defined for the node
+     * @param {!Node} node
+     * @return {!Array.<!string>}
+     */
+    function getAttributeNames(node) {
+        return Array.prototype.slice.call(node.attributes).map(function(attr) { return attr.name; });
     }
 
     /**
@@ -192,6 +203,25 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.paragraphProperties.getAttributeNS(t.ns.fo, 'background-color')", "'red'");
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-size')", "'12pt'");
         r.shouldBe(t, "t.textProperties.getAttributeNS(t.ns.fo, 'font-name')", "'P1 Font'");
+    }
+    function updateStyle_UpdatesStyleElement_EmptyObjectOnSource() {
+        createDocument("<text:p/>");
+        t.element = t.formatting.getStyleElement("PEmpty", "paragraph");
+
+        t.formatting.updateStyle(t.element, {
+            "style:family" : "frog",
+            "style:paragraph-properties": { "fo:background-color" : "red" },
+            "style:text-properties": {}
+        });
+
+        t.attributeNames = getAttributeNames(t.element);
+        r.shouldBe(t, "t.attributeNames", "['style:name', 'style:display-name', 'style:family', 'style:master-page-name']");
+        r.shouldBe(t, "t.element.getAttributeNS(t.ns.style, 'family')", "'frog'");
+
+        t.paragraphProperties = t.element.getElementsByTagNameNS(t.ns.style, 'paragraph-properties')[0];
+        t.textProperties = t.element.getElementsByTagNameNS(t.ns.style, 'text-properties')[0];
+        r.shouldBe(t, "t.paragraphProperties.getAttributeNS(t.ns.fo, 'background-color')", "'red'");
+        r.shouldBe(t, "t.textProperties", "undefined");
     }
     function updateStyle_IgnoresUnknownElementPrefixes() {
         var i;
@@ -410,6 +440,7 @@ odf.FormattingTests = function FormattingTests(runner) {
 
             updateStyle_UpdatesStyleElement,
             updateStyle_IgnoresUnknownElementPrefixes,
+            updateStyle_UpdatesStyleElement_EmptyObjectOnSource,
 
             createDerivedStyleObject_Style,
             createDerivedStyleObject_AutomaticStyle_Inherited,
