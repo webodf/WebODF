@@ -49,13 +49,6 @@ function ODFViewerPlugin() {
         lib.src = './webodf.js';
         lib.type = 'text/javascript';
         lib.onload = function () {
-            runtime.currentDirectory = function () {
-                return "../../webodf/lib";
-            };
-            runtime.libraryPaths = function () {
-                return [ runtime.currentDirectory() ];
-            };
-
             runtime.loadClass('gui.HyperlinkClickHandler');
             runtime.loadClass('odf.OdfCanvas');
             runtime.loadClass('ops.Session');
