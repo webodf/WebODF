@@ -23,7 +23,7 @@ if (QT4_FOUND)
 	COPY_FILES(tests_qtjsruntimetest ${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}/_qtjsruntimetest ${TESTS_TESTFILES} )
 	add_custom_target(qtjsruntimetest ALL
-		COMMAND ${CMAKE_BINARY_DIR}/programs/qtjsruntime/qtjsruntime ${RUNTIME} tests.js
+		COMMAND qtjsruntime ${RUNTIME} tests.js
 		WORKING_DIRECTORY _qtjsruntimetest
 		DEPENDS NodeJS ${tests_qtjsruntimetest} qtjsruntime manifest.json-target
 	)
