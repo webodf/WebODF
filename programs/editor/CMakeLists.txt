@@ -1,24 +1,43 @@
 COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
-    collabeditor.html
-    collabeditor.js
-    welcome.odt
-    FileSaver.js
-    localeditor.js
-    localeditor.html
-    index.html
+    # general
     Editor.js
     editor.css
     Tools.js
     avatar-joe.png
     EditorSession.js
+    Translator.js
+    # only local editor
+    FileSaver.js
+    localeditor.js
+    localeditor.html
+    # only collab editor
     SessionListView.js
     MemberListView.js
-    Translator.js
+    collabeditor.html
+    collabeditor.js
+    document-save.png
+    network-disconnect.png
+    vcs-locally-modified.png
+    # example data
+    welcome.odt
+    # demo-only
+    index.html
 )
 
-COPY_FILES(EDITORDEPS_webodf ${CMAKE_SOURCE_DIR}/webodf
-    ${CMAKE_CURRENT_BINARY_DIR} ${LIBJSFILES})
+add_custom_target(more-editor-deps-target
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/translations/ translations/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/
+)
+
+# creates a copy of the compiled webodf.js in the editor build dir
+add_custom_target(editor-webodf.js-target
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js .
+)
+add_dependencies(editor-webodf.js-target webodf.js-target)
+
 
 SET(DOJO_DEPS ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps)
 
@@ -26,10 +45,6 @@ add_custom_command(
     OUTPUT dojo-amalgamation.js
 
     # from our sources
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/translations/ translations/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/dojo-deps/ dojo-deps/
 
     # from dojo download (DEPENDS Dojo)
@@ -37,9 +52,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/dijit/ dojo-deps/src/dijit/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/dojox/ dojo-deps/src/dojox/
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${DOJO}/util/ dojo-deps/src/util/
-
-    # from webodf.js target (DEPENDS webodf.js)
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js .
 
     # now do the dojo magic...
     COMMAND ${NODE} ${DOJO_DEPS}/src/dojo/dojo.js load=build
@@ -64,14 +76,13 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ dojox/widget/ColorPicker/
 
     COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/webodf/tools/dojoNlsCompile.js dojo-deps/dist de ru > dojobundle.js
-    COMMAND ${CMAKE_COMMAND} -E make_directory translations/
 
     COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/libexec/mergeIntoDojo.js dojobuild=${DOJO_DEPS}/dist/dojo/dojo.js dojobundle.js > dojo-amalgamation.js
 
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
-	DEPENDS NodeJS ${EDITORDEPS} ${EDITORDEPS_webodf} Dojo webodf.js-target
+    DEPENDS NodeJS Dojo
 )
 
-add_custom_target(editor-compiled.js-target DEPENDS dojo-amalgamation.js)
+add_custom_target(editor-compiled.js-target DEPENDS dojo-amalgamation.js editor-webodf.js-target ${EDITORDEPS} more-editor-deps-target)
