@@ -129,13 +129,9 @@ if(WIN32)
         EXPECTED_MD5 ${NODE_BIN_MD5}
     )
     set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node.exe)
-
-    add_custom_command(
-        OUTPUT "${NODE}"
-        COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix
-        COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin
-        COMMAND ${CMAKE_COMMAND} ARGS -E copy ${EXTERNALS_DOWNLOAD_DIR}/node-download.exe
-            "${NODE}"
+    execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin
+      COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNALS_DOWNLOAD_DIR}/node-download.exe "${NODE}"
     )
     add_custom_target(NodeJS DEPENDS "${NODE}")
 else(WIN32)
