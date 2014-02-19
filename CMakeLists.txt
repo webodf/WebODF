@@ -153,16 +153,20 @@ else(WIN32)
     else()
         message(STATUS "good Node.JS found: " ${NODEJS_VERSION} " (" ${REQUIRED_NODEJS_VERSION} " required.)")
     endif()
-
-    # copy node_modules directory from source to build
-    # (this is needed if a module is required in there)
-    add_custom_target(copy_node_modules ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules ${CMAKE_BINARY_DIR}/node_modules
-        COMMENT copying node_modules from source to build
-    )
     set(NODE ${NODEJS_EXECUTABLE})
     add_custom_target(NodeJS DEPENDS "${NODEJS_EXECUTABLE}")
 endif(WIN32)
+
+# copy node_modules directory from source to build
+# (this is needed if a module is required in there)
+
+# Node's search path for node_modules starts from the main package and works up towards the root.
+# In order to see these node modules, they need to be somewhere in this path
+# See http://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders for more detail
+add_custom_target(copy_node_modules ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules ${CMAKE_BINARY_DIR}/node_modules
+    COMMENT copying node_modules from source to build
+)
 
 
 # JSCoverage

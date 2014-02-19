@@ -168,12 +168,7 @@ if (Java_JAVA_EXECUTABLE)
         DEPENDS ${LIBJSFILES} JsDoc
   )
   add_custom_target(doc DEPENDS docs/index.html)
-
   add_custom_target(simplenodetest ALL
-      # Node's search path for node_modules starts from the main package and works up towards the root.
-      # In order to see these node modules, they need to be somewhere in this path
-      # See http://nodejs.org/api/modules.html#modules_loading_from_node_modules_folders for more detail
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/node_modules/xmldom ${CMAKE_CURRENT_BINARY_DIR}/node_modules/xmldom
       COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
       DEPENDS NodeJS simplecompiled.js-target
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
