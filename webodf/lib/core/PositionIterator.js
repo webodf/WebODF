@@ -330,38 +330,35 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
      * returns false.
      */
     function moveToAcceptedNode() {
-        var filterResult = FILTER_ACCEPT,
-            node = walker.currentNode,
+        var node = walker.currentNode,
+            filterResult,
             moveResult;
 
         // Ensure currentNode is not within a rejected subtree by crawling each parent node
         // up to the root and verifying it is either accepted or skipped by the nodeFilter.
         // NOTE: The root is deliberately not checked as it is the container iteration happens within.
-        while (node && node !== root && filterResult === FILTER_ACCEPT) {
-            filterResult = nodeFilter(node);
-            // TODO this should really crawl up to the highest rejected node below the root and stop there
-            if (filterResult === FILTER_REJECT) {
-                // Set currentPos to 1 to indicate iteration on the currentNode is complete.
-                // This will cause the next call to self.nextPosition() to jump to the next
-                // available sibling or parent
-                currentPos = 1;
-                walker.currentNode = node;
-                break;
-            }
+        filterResult = nodeFilter(node);
+        if (node !== root) {
             node = node.parentNode;
+            while (node && node !== root) {
+                if (nodeFilter(node) === FILTER_REJECT) {
+                    walker.currentNode = node;
+                    filterResult = FILTER_REJECT;
+                }
+                node = node.parentNode;
+            }
         }
 
-        if (filterResult === FILTER_ACCEPT) {
+        if (filterResult === FILTER_REJECT) {
+            // Set currentPos will be 1, so nextPosition will jump to the next sibling or parent
+            currentPos = 1;
+            moveResult = self.nextPosition();
+        } else if (filterResult === FILTER_ACCEPT) {
             moveResult = true;
         } else {
-            // filterResult could either be reject or skip
-            // Either way, the current position is not valid!
-
-            // When filterResult === REJECT, currentPos will be 1, which means nextPosition
-            // will jump to the next sibling
-
-            // When filterResult === SKIP, currentPos might be 0, which means nextPosition
-            // can jump to the first accepted child inside the node
+            // filterResult === FILTER_SKIP
+            // FILTER_SKIP indicates children of the current node are acceptable.
+            // currentPos is left unchanged as nextPosition can advance to an accepted child inside the node
             moveResult = self.nextPosition();
         }
         if (moveResult) {

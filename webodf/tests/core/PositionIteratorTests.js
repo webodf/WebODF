@@ -404,7 +404,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
     function testSetUnfilteredPosition_ChildOfNestedInvalidNodes_ImmediatelyMovesToNextValidPosition() {
-        createWalker('<p><b id="b1"><b id="b1.1"><a id="a0"/></b></b><a id="a1"/></p>');
+        createWalker('<p><b id="b1"><b id="b1.1"><a id="a0"/></b>AAA</b><a id="a1"/></p>');
         t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0].childNodes[0].childNodes[0], 0); // a0
         r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
         r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
@@ -432,6 +432,38 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         createWalker('<p id="p1"><c id="c1"><c id="c2"><a id="a1"/></c></c></p>');
         t.iterator.setUnfilteredPosition(t.doc.documentElement.firstChild, 0);
         r.shouldBe(t, "t.iterator.getCurrentNode() && t.iterator.getCurrentNode().getAttribute('id')", "'a1'");
+    }
+    function testSetUnfilteredPosition_FirstStepInRejectedRootNode() {
+        createWalker('<p><b id="b1"><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/></b></p>');
+        t.iterator = new core.PositionIterator(t.doc.documentElement.firstChild, 0,
+            filter);
+        t.iterator.setUnfilteredPosition(t.doc.documentElement, 0);
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement.firstChild");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "4");
+
+        t.hasNextStep = t.iterator.nextPosition();
+        r.shouldBe(t, "t.hasNextStep", "false");
+    }
+
+    function setPositionBeforeElement_ChildOfNestedInvalidNodes_ImmediatelyMovesToNextValidPosition() {
+        createWalker('<p><b id="b1"><b id="b1.1"><a id="a0"/></b>AAA</b><a id="a1"/></p>');
+        t.iterator.setPositionBeforeElement(t.doc.documentElement.childNodes[0].childNodes[0].childNodes[0]); // a0
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
+
+        t.iterator.nextPosition();
+        r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
+    }
+
+    function setPositionBeforeElement_FirstStepInFilteredRootNode() {
+        createWalker('<b id="b1"><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/></b>');
+        t.iterator.setPositionBeforeElement(t.doc.documentElement);
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "4");
+
+        t.hasNextStep = t.iterator.nextPosition();
+        r.shouldBe(t, "t.hasNextStep", "false");
     }
 
     /**
@@ -551,6 +583,10 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             testSetUnfilteredPosition_ChildOfSkippedNode,
             testSetUnfilteredPosition_NestedChildOfSkippedNode,
             testSetUnfilteredPosition_RoundTripStability,
+            testSetUnfilteredPosition_FirstStepInRejectedRootNode,
+
+            setPositionBeforeElement_ChildOfNestedInvalidNodes_ImmediatelyMovesToNextValidPosition,
+            setPositionBeforeElement_FirstStepInFilteredRootNode,
 
             testSetPositionFunctionsEquivalence_StartAtRejectedNode,
             testSetPositionFunctionsEquivalence_StartAtAcceptedNode,
