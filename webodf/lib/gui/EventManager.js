@@ -315,13 +315,7 @@ gui.EventManager = function EventManager(odtDocument) {
       * @return {undefined}
       */
     this.destroy = function (callback) {
-        var eventTrapParentNode = eventTrap.parentNode;
-
-        // InputMethodEditor moves the eventTrap around,
-        // so do not rely on still being a child of the current sizer element
-        if (eventTrapParentNode) {
-            eventTrapParentNode.removeChild(eventTrap);
-        }
+        eventTrap.parentNode.removeChild(eventTrap);
 
         // TODO: drop left eventDelegates, complain about those not unsubscribed
         // Also investigate if delegates need to proper unlisten from events in any case

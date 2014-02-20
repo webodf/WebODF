@@ -93,7 +93,9 @@
             modifier = gui.KeyboardHandler.Modifier,
             keyCode = gui.KeyboardHandler.KeyCode,
             isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
-            isIOS = ["iPad", "iPod", "iPhone"].indexOf(window.navigator.platform) !== -1;
+            isIOS = ["iPad", "iPod", "iPhone"].indexOf(window.navigator.platform) !== -1,
+            /**@type{?gui.IOSSafariSupport}*/
+            iOSSafariSupport;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -972,13 +974,21 @@
          * @return {undefined}
          */
         this.destroy = function (callback) {
-            var destroyCallbacks = [
+            var destroyCallbacks = [];
+
+            if (iOSSafariSupport) {
+                destroyCallbacks.push(iOSSafariSupport.destroy);
+            }
+
+            destroyCallbacks = destroyCallbacks.concat([
                 drawShadowCursorTask.destroy,
                 redrawRegionSelectionTask.destroy,
                 directFormattingController.destroy,
                 inputMethodEditor.destroy,
                 eventManager.destroy,
-                destroy];
+                destroy
+            ]);
+
             runtime.clearTimeout(handleMouseClickTimeoutId);
             async.destroyAll(destroyCallbacks, callback);
         };
@@ -1028,6 +1038,10 @@
                 keyDownHandler.bind(keyCode.Left, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionBeforeWord));
                 keyDownHandler.bind(keyCode.Right, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionPastWord));
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
+            }
+
+            if (isIOS) {
+                iOSSafariSupport = new gui.IOSSafariSupport(eventManager);
             }
 
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);
