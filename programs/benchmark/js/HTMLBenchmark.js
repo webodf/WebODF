@@ -50,11 +50,12 @@ define([
     "PreloadDocument",
     "BoldCurrentSelection",
     "AlignCurrentSelectionJustified",
-    "MoveCursorToEnd"
+    "MoveCursorToEnd",
+    "MoveCursorToStart"
 ], function (Benchmark, HTMLResultsRenderer,
              OpenDocument, EnterEditMode, MoveCursorToEndDirect,InsertLetterA, RemovePositions, MoveCursorLeft,
              SelectEntireDocument, RemoveCurrentSelection, PreloadDocument, BoldCurrentSelection,
-             AlignCurrentSelectionJustified, MoveCursorToEnd) {
+             AlignCurrentSelectionJustified, MoveCursorToEnd, MoveCursorToStart) {
     "use strict";
 
     /**
@@ -111,6 +112,9 @@ define([
         benchmark.actions.push(new OpenDocument(config.fileUrl));
         benchmark.actions.push(new EnterEditMode());
         benchmark.actions.push(new MoveCursorToEnd());
+        benchmark.actions.push(new MoveCursorToStart());
+        benchmark.actions.push(new InsertLetterA(100));
+        benchmark.actions.push(new RemovePositions(100, true));
         benchmark.actions.push(new MoveCursorToEndDirect());
         benchmark.actions.push(new InsertLetterA(1));
         benchmark.actions.push(new InsertLetterA(100));
