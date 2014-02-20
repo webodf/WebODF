@@ -109,17 +109,19 @@
      * @constructor
      * @implements {core.Destroyable}
      * @param {!string} inputMemberId
-     * @param {!ops.OdtDocument} odtDocument
      * @param {!gui.EventManager} eventManager
      */
-    gui.InputMethodEditor = function InputMethodEditor(inputMemberId, odtDocument, eventManager) {
+    gui.InputMethodEditor = function InputMethodEditor(inputMemberId, eventManager) {
         var window = runtime.getWindow(),
             cursorns = "urn:webodf:names:cursor",
             /**@type{ops.OdtCursor}*/
             localCursor = null,
             eventTrap = eventManager.getEventTrap(),
+            /**@type{!Document}*/
+            doc = /**@type{!Document}*/(eventTrap.ownerDocument),
+            /**@type{!Element}*/
+            compositionElement,
             async = new core.Async(),
-            domUtils = new core.DomUtils(),
             FAKE_CONTENT = "b",
             /**@type{!core.ScheduledTask}*/
             processUpdates,
@@ -146,17 +148,6 @@
         this.unsubscribe = events.unsubscribe;
 
         /**
-         * Get the current canvas element. The current trivial undo manager replaces the root element
-         * of the ODF container with a clone from a previous state. This results in the root element
-         * being changed. As such, it can't be stored, and should be queried on each use.
-         * @return {!Element}
-         */
-        function getCanvasElement() {
-            // TODO Remove when a proper undo manager arrives
-            return odtDocument.getOdfCanvas().getElement();
-        }
-
-        /**
          * Set the local cursor's current composition state. If there is no local cursor,
          * this function will do nothing
          * @param {!boolean} state
@@ -168,6 +159,7 @@
                     localCursor.getNode().setAttributeNS(cursorns, "composing", "true");
                 } else {
                     localCursor.getNode().removeAttributeNS(cursorns, "composing");
+                    compositionElement.textContent = "";
                 }
             }
         }
@@ -195,20 +187,9 @@
         function resetWindowSelection() {
             var selection = window.getSelection(),
                 node,
-                textNode,
-                doc = eventTrap.ownerDocument;
+                textNode;
 
             flushEvent();
-            if (!domUtils.containsNode(getCanvasElement(), eventTrap)) {
-                // TODO Remove when a proper undo manager arrives
-                // The undo manager can replace the root element, discarding the original.
-                // The event trap node is still valid, and simply needs to be re-attached
-                // after this occurs.
-
-                // Don't worry about the local caret yet. The event trap will eventually be moved to
-                // a new valid local caret when it is registered upon cursor re-registration
-                getCanvasElement().appendChild(eventTrap);
-            }
 
             while (eventTrap.childNodes.length > 1) {
                 // Repeated text entry events can result in lots of empty text nodes
@@ -276,39 +257,39 @@
         }
 
         /**
+         * Synchronizes the eventTrap's text with
+         * the compositionElement's text.
+         * @return {undefined}
+         */
+        function synchronizeCompositionText() {
+            compositionElement.textContent = eventTrap.textContent;
+        }
+
+        /**
          * Handle a cursor registration event
          * @param {!ops.OdtCursor} cursor
+         * @return {undefined}
          */
         this.registerCursor = function (cursor) {
-            var cursorNode, hasFocus;
             if (cursor.getMemberId() === inputMemberId) {
-                hasFocus = eventManager.hasFocus();
                 localCursor = cursor;
-                cursorNode = localCursor.getNode();
-                cursorNode.insertBefore(eventTrap, cursorNode.firstChild);
-                if (hasFocus) {
-                    // Relocating the event trap will reset the window selection
-                    // Restore this again if the document previously had focus
-                    eventManager.focus();
-                }
+                localCursor.getNode().appendChild(compositionElement);
+                eventManager.subscribe('input', synchronizeCompositionText);
+                eventManager.subscribe('compositionupdate', synchronizeCompositionText);
             }
         };
 
         /**
          * Handle a cursor removal event
          * @param {!string} memberid Member id of the removed cursor
+         * @return {undefined}
          */
         this.removeCursor = function (memberid) {
-            var hasFocus;
             if (localCursor && memberid ===  inputMemberId) {
-                hasFocus = eventManager.hasFocus();
+                localCursor.getNode().removeChild(compositionElement);
+                eventManager.unsubscribe('input', synchronizeCompositionText);
+                eventManager.unsubscribe('compositionupdate', synchronizeCompositionText);
                 localCursor = null;
-                getCanvasElement().appendChild(eventTrap);
-                if (hasFocus) {
-                    // Relocating the event trap will reset the window selection
-                    // Restore this again if the document previously had focus
-                    eventManager.focus();
-                }
             }
         };
 
@@ -386,8 +367,10 @@
             }
             cleanup = filters.map(getDestroy);
 
-            // Negative tab index still allows focus, but removes accessibility by keyboard
-            eventTrap.setAttribute("tabindex", -1);
+            // Initialize the composition element
+            compositionElement = doc.createElement('span');
+            compositionElement.setAttribute('id', 'composer');
+
             processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
             cleanup.push(processUpdates.destroy);
         }

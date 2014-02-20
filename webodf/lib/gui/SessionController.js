@@ -84,7 +84,7 @@
             /**@type{!core.ScheduledTask}*/
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
-            inputMethodEditor = new gui.InputMethodEditor(inputMemberId, odtDocument, eventManager),
+            inputMethodEditor = new gui.InputMethodEditor(inputMemberId, eventManager),
             /**@type{number}*/
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
@@ -92,38 +92,12 @@
             selectionController = new gui.SelectionController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,
             keyCode = gui.KeyboardHandler.KeyCode,
-            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
-            hadFocus;
+            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
 
-        function saveFocus() {
-            hadFocus = eventManager.hasFocus();
-            if (hadFocus) {
-                // Performing operations while the event manager has focus causes the browser to
-                // spend a lot of effort maintaining the global window selection.
-                // Avoid this by discarding focus before any operation
-                eventManager.blur();
-            }
-        }
-
         /**
-         * Execution of an operation can cause the focus to be lost if the local cursor
-         * shifts around. Restore focus back to the event trap if it was in focus before
-         * the operation.
-         */
-        function restoreFocus() {
-            if (hadFocus) {
-                // Only restore focus if previously in focus to prevent
-                // stealing focus when a remote operation occurs
-                eventManager.focus();
-            }
-            hadFocus = undefined;
-        }
-
-        /**
-         * param {{target:(!Element|undefined),srcElement:(!Element|undefined)}} e
          * @param {!Event} e
          * @return {Node}
          */
@@ -319,12 +293,23 @@
          * @return {!boolean}
          */
         function undo() {
-            var hadFocusBefore;
+            var eventTrap = eventManager.getEventTrap(),
+                sizer,
+                hadFocusBefore;
+
             if (undoManager) {
                 hadFocusBefore = eventManager.hasFocus();
                 undoManager.moveBackward(1);
-                if (hadFocusBefore) {
-                    eventManager.focus();
+                sizer = odtDocument.getOdfCanvas().getSizer();
+                if (!domUtils.containsNode(sizer, eventTrap)) {
+                    // TODO Remove when a proper undo manager arrives
+                    // The undo manager can replace the root element, discarding the original.
+                    // The event trap node is still valid, and simply needs to be re-attached
+                    // after this occurs.
+                    sizer.appendChild(eventTrap);
+                    if (hadFocusBefore) {
+                        eventManager.focus();
+                    }
                 }
                 return true;
             }
@@ -963,8 +948,6 @@
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
             odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
-            odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchStart, saveFocus);
-            odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, restoreFocus);
 
             callback();
         }
@@ -1048,8 +1031,6 @@
             odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, inputMethodEditor.registerCursor);
             odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
-            odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchStart, saveFocus);
-            odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchEnd, restoreFocus);
         }
 
         init();
