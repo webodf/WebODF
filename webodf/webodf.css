@@ -503,6 +503,7 @@ office|annotation > dc|date {
     font-style: normal;
     font-family: sans-serif;
     border: 4px solid transparent;
+    color: black;
 }
 office|annotation > text|list {
     display: block;
