@@ -64,11 +64,16 @@ gui.IOSSafariSupport = function (eventManager) {
      */
     this.destroy = function (callback) {
         eventManager.unsubscribe('focus', suppressFocusScrollIfKeyboardOpen);
+        eventTrap.removeAttribute("autocapitalize");
         callback();
     };
 
     function init() {
         eventManager.subscribe('focus', suppressFocusScrollIfKeyboardOpen);
+        // FIXME: This can be removed once we have better/any iOS IME support.
+        // Till then, we need to avoid typing all-caps because the keyboard
+        // thinks that the eventTrap is empty and therefore a new line has begun.
+        eventTrap.setAttribute("autocapitalize", "off");
     }
     init();
 };
