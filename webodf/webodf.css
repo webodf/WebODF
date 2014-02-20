@@ -232,6 +232,7 @@ cursor|cursor {
        the cursor as reference for its absolute position */
     position: relative;
     z-index: 1;
+    pointer-events: none;
 }
 
 cursor|cursor > .caret {
