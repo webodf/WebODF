@@ -84,7 +84,7 @@
             /**@type{!core.ScheduledTask}*/
             redrawRegionSelectionTask,
             pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
-            inputMethodEditor = new gui.InputMethodEditor(inputMemberId, odtDocument, eventManager),
+            inputMethodEditor = new gui.InputMethodEditor(inputMemberId, eventManager),
             /**@type{number}*/
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
@@ -293,12 +293,23 @@
          * @return {!boolean}
          */
         function undo() {
-            var hadFocusBefore;
+            var eventTrap = eventManager.getEventTrap(),
+                sizer,
+                hadFocusBefore;
+
             if (undoManager) {
                 hadFocusBefore = eventManager.hasFocus();
                 undoManager.moveBackward(1);
-                if (hadFocusBefore) {
-                    eventManager.focus();
+                sizer = odtDocument.getOdfCanvas().getSizer();
+                if (!domUtils.containsNode(sizer, eventTrap)) {
+                    // TODO Remove when a proper undo manager arrives
+                    // The undo manager can replace the root element, discarding the original.
+                    // The event trap node is still valid, and simply needs to be re-attached
+                    // after this occurs.
+                    sizer.appendChild(eventTrap);
+                    if (hadFocusBefore) {
+                        eventManager.focus();
+                    }
                 }
                 return true;
             }

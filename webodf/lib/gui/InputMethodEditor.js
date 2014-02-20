@@ -109,10 +109,9 @@
      * @constructor
      * @implements {core.Destroyable}
      * @param {!string} inputMemberId
-     * @param {!ops.OdtDocument} odtDocument
      * @param {!gui.EventManager} eventManager
      */
-    gui.InputMethodEditor = function InputMethodEditor(inputMemberId, odtDocument, eventManager) {
+    gui.InputMethodEditor = function InputMethodEditor(inputMemberId, eventManager) {
         var window = runtime.getWindow(),
             cursorns = "urn:webodf:names:cursor",
             /**@type{ops.OdtCursor}*/
@@ -123,7 +122,6 @@
             /**@type{!Element}*/
             compositionElement,
             async = new core.Async(),
-            domUtils = new core.DomUtils(),
             FAKE_CONTENT = "b",
             /**@type{!core.ScheduledTask}*/
             processUpdates,
@@ -148,17 +146,6 @@
          * @type {Function}
          */
         this.unsubscribe = events.unsubscribe;
-
-        /**
-         * Get the current sizer element. The current trivial undo manager replaces the root element
-         * of the ODF container with a clone from a previous state. This results in the root element
-         * being changed. As such, it can't be stored, and should be queried on each use.
-         * @return {!Element}
-         */
-        function getSizerElement() {
-            // TODO Remove when a proper undo manager arrives
-            return odtDocument.getOdfCanvas().getSizer();
-        }
 
         /**
          * Set the local cursor's current composition state. If there is no local cursor,
@@ -203,16 +190,6 @@
                 textNode;
 
             flushEvent();
-            if (!domUtils.containsNode(getSizerElement(), eventTrap)) {
-                // TODO Remove when a proper undo manager arrives
-                // The undo manager can replace the root element, discarding the original.
-                // The event trap node is still valid, and simply needs to be re-attached
-                // after this occurs.
-
-                // Don't worry about the local caret yet. The event trap will eventually be moved to
-                // a new valid local caret when it is registered upon cursor re-registration
-                getSizerElement().appendChild(eventTrap);
-            }
 
             while (eventTrap.childNodes.length > 1) {
                 // Repeated text entry events can result in lots of empty text nodes
@@ -389,10 +366,6 @@
                 return filter.destroy;
             }
             cleanup = filters.map(getDestroy);
-
-            // Negative tab index still allows focus, but removes accessibility by keyboard
-            getSizerElement().appendChild(eventTrap);
-            eventTrap.setAttribute("tabindex", -1);
 
             // Initialize the composition element
             compositionElement = doc.createElement('span');
