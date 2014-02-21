@@ -249,9 +249,8 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
 
         t.textElements = t.odfUtils.getTextElements(t.range, false, false);
 
-        r.shouldBe(t, "t.textElements.length", "3");
+        r.shouldBe(t, "t.textElements.length", "2");
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]");
-        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1]");
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]");
     }
     function getTextElements_InlineRoots_ExcludesCursorContent() {
