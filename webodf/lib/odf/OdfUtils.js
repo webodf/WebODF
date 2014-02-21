@@ -781,7 +781,7 @@ odf.OdfUtils = function OdfUtils() {
         function nodeFilter(node) {
             var result = NodeFilter.FILTER_REJECT;
             // do not return anything inside an character element or an inline root such as an annotation
-            if (isCharacterElement(node.parentNode) || isInlineRoot(node.parentNode)) {
+            if (isCharacterElement(node.parentNode) || isInlineRoot(node)) {
                 result = NodeFilter.FILTER_REJECT;
             } else if (node.nodeType === Node.TEXT_NODE) {
                 if (includeInsignificantWhitespace || isSignificantTextContent(/**@type{!Text}*/(node))) {
