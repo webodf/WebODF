@@ -7,7 +7,7 @@ QT4_WRAP_CPP(NATIVEQTCLIENT_MOC
 )
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/application.qrc
         "<RCC><qresource prefix='/'>")
-foreach(FILE ${HTML5UIFILES} ${LIBJSFILES} index.html scripts.js webodf.css)
+foreach(FILE ${HTML5UIFILES} index.html scripts.js webodf.js)
     if (IS_ABSOLUTE ${FILE})
         GET_FILENAME_COMPONENT(_wwwfile ${FILE} NAME)
     else (IS_ABSOLUTE ${FILE})
@@ -25,12 +25,16 @@ COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
     ${CMAKE_CURRENT_BINARY_DIR}/www index.html)
 COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/webodf
     ${CMAKE_CURRENT_BINARY_DIR}/www webodf.css)
-COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/webodf
-    ${CMAKE_CURRENT_BINARY_DIR}/www ${LIBJSFILES})
 QT4_ADD_RESOURCES(NATIVEQTCLIENT_RES
     ${CMAKE_CURRENT_BINARY_DIR}/application.qrc)
 
 add_custom_target(nativeQtClientDepencencies DEPENDS ${NATIVEDEPS})
+
+# creates a copy of the compiled webodf.js in the nativeQtClient build dir
+add_custom_target(nativeQtClient-webodf.js-target
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/webodf/webodf.js ${CMAKE_CURRENT_BINARY_DIR}/www
+)
+add_dependencies(nativeQtClient-webodf.js-target webodf.js-target)
 
 add_executable(nativeQtClient
     main.cpp
@@ -40,4 +44,4 @@ add_executable(nativeQtClient
     ${NATIVEQTCLIENT_RES})
 
 target_link_libraries(nativeQtClient ${QT_LIBRARIES})
-add_dependencies(nativeQtClient nativeQtClientDepencencies)
+add_dependencies(nativeQtClient nativeQtClient-webodf.js-target nativeQtClientDepencencies)
