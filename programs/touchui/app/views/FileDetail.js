@@ -40,7 +40,7 @@ runtime.loadClass("odf.Namespaces");
 Ext.define('WebODFApp.view.FileDetail', (function () {
     "use strict";
     var panel,
-        xpath = new xmldom.XPath(),
+        xpath = xmldom.XPath,
         fileDetail,
         title,
         image,
