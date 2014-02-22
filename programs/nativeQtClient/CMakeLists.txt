@@ -36,7 +36,7 @@ add_custom_target(nativeQtClient-webodf.js-target
 )
 add_dependencies(nativeQtClient-webodf.js-target webodf.js-target)
 
-add_executable(nativeQtClient
+add_executable(nativeQtClient EXCLUDE_FROM_ALL
     main.cpp
     odfview.cpp
     ../qtjsruntime/nativeio.cpp
