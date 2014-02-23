@@ -8,27 +8,28 @@ configure_file(webodfversion.js.in ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
 
 set(TESTJSFILES tests/core/ZipTests.js
     tests/core/Base64Tests.js
-    tests/core/DomUtilsTests.js
     tests/core/CursorTests.js
-    tests/core/StepIteratorTests.js
+    tests/core/DomUtilsTests.js
     tests/core/PositionIteratorTests.js
     tests/core/RuntimeTests.js
-    tests/gui/UndoStateRulesTests.js
-    tests/gui/TrivialUndoManagerTests.js
+    tests/core/StepIteratorTests.js
     tests/gui/SelectionControllerTests.js
     tests/gui/StyleSummaryTests.js
-    tests/odf/OdfUtilsTests.js
-    tests/odf/ObjectNameGeneratorTests.js
+    tests/gui/TrivialUndoManagerTests.js
+    tests/gui/UndoStateRulesTests.js
     tests/odf/FormattingTests.js
+    tests/odf/LayoutTests.js
+    tests/odf/ObjectNameGeneratorTests.js
     tests/odf/OdfContainerTests.js
+    tests/odf/OdfUtilsTests.js
     tests/odf/StyleInfoTests.js
     tests/odf/TextStyleApplicatorTests.js
     tests/ops/OdtDocumentTests.js
     tests/ops/OperationTests.js
-    tests/ops/TransformerTests.js
-    tests/ops/TransformationTests.js
     tests/ops/SessionTests.js
     tests/ops/StepsTranslatorTests.js
+    tests/ops/TransformationTests.js
+    tests/ops/TransformerTests.js
     tests/xmldom/LSSerializerTests.js
     tests/xmldom/XPathTests.js
     tests/tests.js
