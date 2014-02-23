@@ -891,29 +891,61 @@
 
     /**
      * @param {!Document} document
-     * @return {!HTMLStyleElement}
+     * @return {!Element}
      */
     function addWebODFStyleSheet(document) {
+        /**
+         * @param {!string} css
+         * @param {!HTMLHeadElement} head
+         * @return {!Element}
+         */
+        function addCSS(css, head) {
+            var e = document.createElementNS(head.namespaceURI, 'style');
+            e.setAttribute('media', 'screen, print, handheld, projection');
+            e.setAttribute('type', 'text/css');
+            e.appendChild(document.createTextNode(css));
+            head.appendChild(e);
+            return e;
+        }
         var head = /**@type{!HTMLHeadElement}*/(document.getElementsByTagName('head')[0]),
+            /**@type{?Element}*/
             style,
-            href;
+            href,
+            count = document.styleSheets.length;
+        // make sure this is only added once per HTML document, e.g. in case of
+        // multiple odfCanvases
+        style = head.firstElementChild;
+        while (style) {
+            if (style.getAttribute("webodfcss")) {
+                return style;
+            }
+            style = style.nextElementSibling;
+        }
         if (String(typeof webodf_css) !== "undefined") {
-            style = document.createElementNS(head.namespaceURI, 'style');
-            style.setAttribute('media', 'screen, print, handheld, projection');
-            style.appendChild(document.createTextNode(webodf_css));
+            style = addCSS(webodf_css, head);
         } else {
             style = document.createElementNS(head.namespaceURI, 'link');
             href = "webodf.css";
             if (runtime.currentDirectory) {
-                href = runtime.currentDirectory() + "/../" + href;
+                href = runtime.currentDirectory();
+                if (href.length > 0 && href.substr(-1) !== "/") {
+                    href += "/";
+                }
+                href += "../webodf.css";
             }
             style.setAttribute('href', href);
             style.setAttribute('rel', 'stylesheet');
+            style.setAttribute('type', 'text/css');
+            head.appendChild(style);
+            // if the css was not loaded, with <link/>, read and add the css
+            // this is a workaround for behaviour of qtjsruntime
+            if (count === document.styleSheets.length) {
+                head.removeChild(style);
+                style = addCSS(/**@type{!string}*/(runtime.readFileSync(href, "utf-8")), head);
+            }
         }
-        style.setAttribute('type', 'text/css');
-        // TODO: make sure this is only added once per HTML document, e.g. in case of multiple odfCanvases
-        head.appendChild(style);
-        return /**@type {!HTMLStyleElement}*/(style);
+        style.setAttribute('webodfcss', 'true');
+        return style;
     }
     /**
      * @param {!Document} document Put and ODF Canvas inside this element.
@@ -966,7 +998,7 @@
             showAnnotationRemoveButton = false,
             /**@type{gui.AnnotationViewManager}*/
             annotationViewManager = null,
-            /**@type{!HTMLStyleElement}*/
+            /**@type{!Element}*/
             webodfcss,
             /**@type{!HTMLStyleElement}*/
             fontcss,

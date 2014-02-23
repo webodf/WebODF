@@ -22,10 +22,12 @@ add_custom_target(nodetest ALL
 if (QT4_FOUND)
 	COPY_FILES(tests_qtjsruntimetest ${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}/_qtjsruntimetest ${TESTS_TESTFILES} )
+    COPY_FILES(tests_qtjsruntimetest2 ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_BINARY_DIR} webodf.css)
 	add_custom_target(qtjsruntimetest ALL
 		COMMAND qtjsruntime ${RUNTIME} tests.js
 		WORKING_DIRECTORY _qtjsruntimetest
-		DEPENDS NodeJS ${tests_qtjsruntimetest} qtjsruntime manifest.json-target
+		DEPENDS NodeJS ${tests_qtjsruntimetest} ${tests_qtjsruntimetest2} qtjsruntime manifest.json-target
 	)
 endif (QT4_FOUND)
 

@@ -209,8 +209,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.steps", "6");
     }
     function testCountLinesStepsDown_OverWrap() {
-        createOdtDocument("<text:p text:style-name='width30px'>ABCD FGHIJ</text:p>");
-        appendCssRule("text|p[text|style-name=width30px] { width: 30px; }\n"); // Width calculated to wrap at first space
+        createOdtDocument("<text:p text:style-name='width4em'>ABCD FGHIJ</text:p>");
+        appendCssRule("text|p[text|style-name=width4em] { width: 4em; }\n"); // Width calculated to wrap at first space
         setCursorPosition(4);
         t.steps = t.counter.countLinesSteps(1, t.filter);
         r.shouldBe(t, "t.steps", "6");
@@ -252,8 +252,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.steps", "3");
     }
     function testCountStepsToLineBoundary_Forward_OverWrapping() {
-        createOdtDocument("<text:p text:style-name='width30px'>ABC DEF</text:p>");
-        appendCssRule("text|p[text|style-name=width30px] { width: 30px; }\n"); // Width calculated to wrap at first space
+        createOdtDocument("<text:p text:style-name='width3em'>ABC DEF</text:p>");
+        appendCssRule("text|p[text|style-name=width3em] { width: 3em; }\n"); // Width calculated to wrap at first space
         setCursorPosition(0);
         t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
         r.shouldBe(t, "t.steps", "3");
@@ -302,8 +302,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.steps", "-3");
     }
     function testCountStepsToLineBoundary_Backward_OverWrapping() {
-        createOdtDocument("<text:p text:style-name='width30px'>ABC DEF</text:p>");
-        appendCssRule("text|p[text|style-name=width30px] { width: 30px; }\n"); // Width calculated to wrap at first space
+        createOdtDocument("<text:p text:style-name='width3em'>ABC DEF</text:p>");
+        appendCssRule("text|p[text|style-name=width3em] { width: 3em; }\n"); // Width calculated to wrap at first space
         setCursorPosition(6);
         t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
         r.shouldBe(t, "t.steps", "-2");
