@@ -1,4 +1,3 @@
-# prepare
 
 FILE( GLOB_RECURSE TESTS_TESTFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
@@ -16,8 +15,9 @@ COPY_FILES(tests_nodetests ${CMAKE_CURRENT_SOURCE_DIR}
 add_custom_target(nodetest ALL
 	COMMAND ${NODE} ${RUNTIME} tests.js
 	WORKING_DIRECTORY _nodetest
-    DEPENDS NodeJS ${tests_nodetests} manifest.json-target
+    DEPENDS ${tests_nodetests}
 )
+add_dependencies(NodeJS manifest.json-target)
 
 if (QT4_FOUND)
 	COPY_FILES(tests_qtjsruntimetest ${CMAKE_CURRENT_SOURCE_DIR}
@@ -27,7 +27,8 @@ if (QT4_FOUND)
 	add_custom_target(qtjsruntimetest ALL
 		COMMAND qtjsruntime ${RUNTIME} tests.js
 		WORKING_DIRECTORY _qtjsruntimetest
-		DEPENDS NodeJS ${tests_qtjsruntimetest} ${tests_qtjsruntimetest2} qtjsruntime manifest.json-target
+        DEPENDS ${tests_qtjsruntimetest} ${tests_qtjsruntimetest2}
 	)
+    add_dependencies(qtjsruntimetest NodeJS qtjsruntime manifest.json-target)
 endif (QT4_FOUND)
 
