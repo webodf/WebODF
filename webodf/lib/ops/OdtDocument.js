@@ -59,9 +59,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**!Object.<!ops.Member>*/
         members = {},
         eventNotifier = new core.EventNotifier([
-            ops.OdtDocument.signalMemberAdded,
-            ops.OdtDocument.signalMemberUpdated,
-            ops.OdtDocument.signalMemberRemoved,
+            ops.Document.signalMemberAdded,
+            ops.Document.signalMemberUpdated,
+            ops.Document.signalMemberRemoved,
             ops.Document.signalCursorAdded,
             ops.Document.signalCursorRemoved,
             ops.Document.signalCursorMoved,
@@ -924,9 +924,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     init();
 };
 
-/**@const*/ops.OdtDocument.signalMemberAdded =   "member/added";
-/**@const*/ops.OdtDocument.signalMemberUpdated =   "member/updated";
-/**@const*/ops.OdtDocument.signalMemberRemoved =   "member/removed";
 /**@const*/ops.OdtDocument.signalParagraphChanged = "paragraph/changed";
 /**@const*/ops.OdtDocument.signalTableAdded = "table/added";
 /**@const*/ops.OdtDocument.signalCommonStyleCreated = "style/created";

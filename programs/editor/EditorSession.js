@@ -581,9 +581,9 @@ define("webodf/editor/EditorSession", [
 
             head.removeChild(fontStyles);
 
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, onMemberAdded);
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, onMemberUpdated);
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberRemoved, onMemberRemoved);
+            odtDocument.unsubscribe(ops.Document.signalMemberAdded, onMemberAdded);
+            odtDocument.unsubscribe(ops.Document.signalMemberUpdated, onMemberUpdated);
+            odtDocument.unsubscribe(ops.Document.signalMemberRemoved, onMemberRemoved);
             odtDocument.unsubscribe(ops.Document.signalCursorAdded, onCursorAdded);
             odtDocument.unsubscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorMoved);
@@ -640,9 +640,9 @@ define("webodf/editor/EditorSession", [
             self.availableFonts = getAvailableFonts();
             selectionViewManager.registerCursor(shadowCursor, true);
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
-            odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, onMemberAdded);
-            odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, onMemberUpdated);
-            odtDocument.subscribe(ops.OdtDocument.signalMemberRemoved, onMemberRemoved);
+            odtDocument.subscribe(ops.Document.signalMemberAdded, onMemberAdded);
+            odtDocument.subscribe(ops.Document.signalMemberUpdated, onMemberUpdated);
+            odtDocument.subscribe(ops.Document.signalMemberRemoved, onMemberRemoved);
             odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorMoved);

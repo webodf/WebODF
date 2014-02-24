@@ -106,3 +106,9 @@ ops.Document.signalCursorAdded =   "cursor/added";
 ops.Document.signalCursorRemoved = "cursor/removed";
 /**@const*/
 ops.Document.signalCursorMoved =   "cursor/moved";
+/**@const*/
+ops.Document.signalMemberAdded =   "member/added";
+/**@const*/
+ops.Document.signalMemberUpdated = "member/updated";
+/**@const*/
+ops.Document.signalMemberRemoved = "member/removed";

@@ -390,8 +390,8 @@ gui.SessionViewOptions = function () {
                     return editInfoMap[keyname];
                 });
 
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
+            odtDocument.unsubscribe(ops.Document.signalMemberAdded, renderMemberData);
+            odtDocument.unsubscribe(ops.Document.signalMemberUpdated, renderMemberData);
             odtDocument.unsubscribe(ops.Document.signalCursorAdded, onCursorAdded);
             odtDocument.unsubscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
@@ -422,8 +422,8 @@ gui.SessionViewOptions = function () {
             var odtDocument = session.getOdtDocument(),
                 head = document.getElementsByTagName('head').item(0);
 
-            odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
-            odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
+            odtDocument.subscribe(ops.Document.signalMemberAdded, renderMemberData);
+            odtDocument.subscribe(ops.Document.signalMemberUpdated, renderMemberData);
             odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
             odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);

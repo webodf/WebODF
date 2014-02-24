@@ -56,7 +56,7 @@ ops.OpRemoveMember = function OpRemoveMember() {
         }
 
         odtDocument.removeMember(memberid);
-        odtDocument.emit(ops.OdtDocument.signalMemberRemoved, memberid);
+        odtDocument.emit(ops.Document.signalMemberRemoved, memberid);
 
         return true;
     };

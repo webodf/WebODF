@@ -64,7 +64,7 @@ ops.OpAddMember = function OpAddMember() {
 
         member = new ops.Member(memberid, setProperties);
         odtDocument.addMember(member);
-        odtDocument.emit(ops.OdtDocument.signalMemberAdded, member);
+        odtDocument.emit(ops.Document.signalMemberAdded, member);
 
         return true;
     };
