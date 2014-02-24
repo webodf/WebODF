@@ -25,7 +25,10 @@ body {
     display: none;
 }
 
-#benchmarkResults .elapsed {
+#benchmarkResults .elapsed,
+#benchmarkResults .speed,
+#benchmarkResults .pages
+{
     text-align: right;
 }
 

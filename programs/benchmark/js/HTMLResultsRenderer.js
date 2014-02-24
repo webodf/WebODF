@@ -36,48 +36,21 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-define(function() {
+define(["HTMLActionResult"], function(HTMLActionResult) {
         "use strict";
 
         /**
-         * @param {!Benchmark} benchmark
          * @constructor
+         * @param {!Benchmark} benchmark
+         * @param {!HTMLTableElement} outputTable
          */
-        function HTMLResultsRenderer(benchmark) {
-            var outputTable = document.getElementById("benchmarkResults");
-
-            /**
-             * @param {!Text} node
-             * @param {!string} newValue
-             */
-            function setText(node, newValue) {
-                node.replaceData(0, node.length, newValue);
-            }
+        function HTMLResultsRenderer(benchmark, outputTable) {
+            var results = [],
+                pxPerCm;
 
             function onStart() {
                 benchmark.actions.forEach(function(action, index) {
-                    var tr = document.createElement('tr'),
-                        cells = ["action", "status", "elapsed"].map(function(clazz) {
-                            var td = document.createElement('td'),
-                                text = document.createTextNode("");
-                            td.className = clazz;
-                            td.appendChild(text);
-                            tr.appendChild(td);
-                            return text;
-                        });
-
-                    outputTable.appendChild(tr);
-                    setText(cells[0], (index + 1) + ". " + action.state.description);
-
-                    action.subscribe("start", function() {
-                        setText(cells[1], "running");
-                        setText(cells[2], "");
-                    });
-
-                    action.subscribe("complete", function(state) {
-                        setText(cells[1], state.status ? "done" : "failed");
-                        setText(cells[2], state.elapsedTime);
-                    });
+                    results.push(new HTMLActionResult(action, index, outputTable, pxPerCm));
                 });
             }
 
@@ -96,6 +69,18 @@ define(function() {
             };
 
             function init() {
+                var parent,
+                    testChild;
+
+                // Determine how many px per cm on the current screen
+                parent = outputTable.parentNode;
+                testChild = document.createElement("div");
+                testChild.style.width = "1cm";
+                testChild.style.height = "1cm";
+                parent.appendChild(testChild);
+                pxPerCm = testChild.getBoundingClientRect().width;
+                parent.removeChild(testChild);
+
                 benchmark.subscribe("start", onStart);
                 benchmark.subscribe("complete", onComplete);
             }

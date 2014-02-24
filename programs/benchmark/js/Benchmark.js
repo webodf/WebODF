@@ -44,10 +44,10 @@ define(["OdfBenchmarkContext"], function(OdfBenchmarkContext) {
 
         /**
          * @constructor
+         * @param {!HTMLElement} canvasElement
          */
-        function Benchmark() {
+        function Benchmark(canvasElement) {
             var self = this,
-                canvasElement = document.getElementById("canvas"),
                 context = new OdfBenchmarkContext(),
                 events = new core.EventNotifier(["start", "complete"]),
                 currentActionIndex,

@@ -100,9 +100,11 @@ define([
      */
     function HTMLBenchmark() {
         var loadingScreen = document.getElementById('loadingScreen'),
+            canvasElement = document.getElementById("canvas"),
+            benchmarkResults = document.getElementById("benchmarkResults"),
             config = getConfiguration(),
-            benchmark = new Benchmark(),
-            renderer = new HTMLResultsRenderer(benchmark);
+            benchmark = new Benchmark(canvasElement),
+            renderer = new HTMLResultsRenderer(benchmark, benchmarkResults);
 
         renderer.setBackgroundColour(config.colour);
 
