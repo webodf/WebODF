@@ -890,31 +890,72 @@
     }
 
     /**
+     * @param {!HTMLHeadElement} head
+     * @return {?HTMLStyleElement}
+     */
+    function findWebODFStyleSheet(head) {
+        var style = head.firstElementChild;
+        while (style && !(style.localName === "style"
+                && style.hasAttribute("webodfcss"))) {
+            style = style.nextElementSibling;
+        }
+        return /**@type{?HTMLStyleElement}*/(style);
+    }
+
+    /**
      * @param {!Document} document
      * @return {!HTMLStyleElement}
      */
     function addWebODFStyleSheet(document) {
         var head = /**@type{!HTMLHeadElement}*/(document.getElementsByTagName('head')[0]),
+            css,
+            /**@type{?HTMLStyleElement}*/
             style,
-            href;
-        if (String(typeof webodf_css) !== "undefined") {
-            style = document.createElementNS(head.namespaceURI, 'style');
-            style.setAttribute('media', 'screen, print, handheld, projection');
-            style.appendChild(document.createTextNode(webodf_css));
+            href,
+            count = document.styleSheets.length;
+        // make sure this is only added once per HTML document, e.g. in case of
+        // multiple odfCanvases
+        style = findWebODFStyleSheet(head);
+        if (style) {
+            count = parseInt(style.getAttribute("webodfcss"), 10);
+            style.setAttribute("webodfcss", count + 1);
+            return style;
+        }
+        if (String(typeof webodf_css) === "string") {
+            css = /**@type{!string}*/(webodf_css);
         } else {
-            style = document.createElementNS(head.namespaceURI, 'link');
             href = "webodf.css";
             if (runtime.currentDirectory) {
-                href = runtime.currentDirectory() + "/../" + href;
+                href = runtime.currentDirectory();
+                if (href.length > 0 && href.substr(-1) !== "/") {
+                    href += "/";
+                }
+                href += "../webodf.css";
             }
-            style.setAttribute('href', href);
-            style.setAttribute('rel', 'stylesheet');
+            css = /**@type{!string}*/(runtime.readFileSync(href, "utf-8"));
         }
+        style = /**@type{!HTMLStyleElement}*/(document.createElementNS(head.namespaceURI, 'style'));
+        style.setAttribute('media', 'screen, print, handheld, projection');
         style.setAttribute('type', 'text/css');
-        // TODO: make sure this is only added once per HTML document, e.g. in case of multiple odfCanvases
+        style.setAttribute('webodfcss', '1');
+        style.appendChild(document.createTextNode(css));
         head.appendChild(style);
-        return /**@type {!HTMLStyleElement}*/(style);
+        return style;
     }
+
+    /**
+     * @param {!HTMLStyleElement} webodfcss
+     * @return {undefined}
+     */
+    function removeWebODFStyleSheet(webodfcss) {
+        var count = parseInt(webodfcss.getAttribute("webodfcss"), 10);
+        if (count === 1) {
+             webodfcss.parentNode.removeChild(webodfcss);
+        } else {
+             webodfcss.setAttribute("count", count - 1);
+        }
+    }
+
     /**
      * @param {!Document} document Put and ODF Canvas inside this element.
      * @return {!HTMLStyleElement}
@@ -1579,7 +1620,7 @@
                 sizer = null;
             }
             // remove all styles
-            head.removeChild(webodfcss);
+            removeWebODFStyleSheet(webodfcss);
             head.removeChild(fontcss);
             head.removeChild(stylesxmlcss);
             head.removeChild(positioncss);
