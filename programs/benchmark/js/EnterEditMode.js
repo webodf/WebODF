@@ -71,9 +71,9 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             var session,
                 sessionController,
                 shadowCursor,
@@ -83,7 +83,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
 
             action.start();
 
-            session = new ops.Session(sharedState.odfCanvas);
+            session = new ops.Session(context.odfCanvas);
             shadowCursor = new gui.ShadowCursor(session.getOdtDocument());
             sessionController = new gui.SessionController(session, localMemberId, shadowCursor, sessionControllerOptions);
             sessionController.setUndoManager(undoManager);
@@ -104,8 +104,11 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
 
             sessionController.insertLocalCursor();
             sessionController.startEditing();
-            sharedState.sessionController = sessionController;
 
+            context.session = session;
+            context.sessionController = sessionController;
+
+            action.stop();
             action.complete(true);
         };
     }

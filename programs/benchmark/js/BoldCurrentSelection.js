@@ -51,13 +51,15 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
+            context.recordDistanceFromCurrentSelection(state);
             action.start();
-            sharedState.sessionController.getDirectFormattingController().setBold(true);
+            context.sessionController.getDirectFormattingController().setBold(true);
+            action.stop();
             action.complete(true);
-        }
+        };
     }
 
     return BoldCurrentSelection;

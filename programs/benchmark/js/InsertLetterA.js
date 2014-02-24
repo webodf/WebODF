@@ -52,14 +52,17 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             var count;
+            context.storeCurrentPosition(state);
             action.start();
             for (count = 0; count < times; count += 1) {
-                sharedState.sessionController.getTextController().insertText('A');
+                context.sessionController.getTextController().insertText('A');
             }
+            action.stop();
+            context.recordDistanceFromPreviousPosition(state);
             action.complete(true);
         }
     }

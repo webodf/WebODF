@@ -49,6 +49,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             action = new BenchmarkAction(state);
 
         function onDocumentDownloaded() {
+            action.stop();
             action.complete(true);
         }
 
@@ -56,9 +57,9 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             action.start();
             runtime.readFile(docUrl, 'binary', onDocumentDownloaded);
         };

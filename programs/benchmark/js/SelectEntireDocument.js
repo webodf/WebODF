@@ -51,13 +51,15 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             action.start();
-            sharedState.sessionController.getSelectionController().extendSelectionToEntireDocument();
+            context.sessionController.getSelectionController().extendSelectionToEntireDocument();
+            action.stop();
+            context.recordDistanceFromCurrentSelection(state);
             action.complete(true);
-        }
+        };
     }
 
     return SelectEntireDocument;

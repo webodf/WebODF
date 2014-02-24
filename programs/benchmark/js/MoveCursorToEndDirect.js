@@ -51,18 +51,22 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             var canvasElement,
                 range;
+
+            context.storeCurrentPosition(state);
             action.start();
 
-            canvasElement = sharedState.odfCanvas.getElement();
+            canvasElement = context.odfCanvas.getElement();
             range = canvasElement.ownerDocument.createRange();
             range.setStart(canvasElement, canvasElement.childNodes.length);
-            sharedState.sessionController.getSelectionController().selectRange(range, true, 1);
+            context.sessionController.getSelectionController().selectRange(range, true, 1);
 
+            action.stop();
+            context.recordDistanceFromPreviousPosition(state);
             action.complete(true);
         }
     }

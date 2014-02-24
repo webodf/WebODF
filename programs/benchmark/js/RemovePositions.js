@@ -53,18 +53,20 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             var count;
+            context.recordDistanceFromLength(state, useBackspace ? -times : times);
             action.start();
             for (count = 0; count < times; count += 1) {
                 if (useBackspace) {
-                    sharedState.sessionController.getTextController().removeTextByBackspaceKey();
+                    context.sessionController.getTextController().removeTextByBackspaceKey();
                 } else {
-                    sharedState.sessionController.getTextController().removeTextByDeleteKey();
+                    context.sessionController.getTextController().removeTextByDeleteKey();
                 }
             }
+            action.stop();
             action.complete(true);
         }
     }
