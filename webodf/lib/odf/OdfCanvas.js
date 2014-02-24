@@ -890,39 +890,26 @@
     }
 
     /**
-     * @param {!string} css
      * @param {!HTMLHeadElement} head
-     * @return {!Element}
-     */
-    function addCSS(css, head) {
-        var doc = head.ownerDocument,
-            e = doc.createElementNS(head.namespaceURI, 'style');
-        e.setAttribute('media', 'screen, print, handheld, projection');
-        e.setAttribute('type', 'text/css');
-        e.appendChild(doc.createTextNode(css));
-        head.appendChild(e);
-        return e;
-    }
-
-    /**
-     * @param {!HTMLHeadElement} head
-     * @return {?Element}
+     * @return {?HTMLStyleElement}
      */
     function findWebODFStyleSheet(head) {
         var style = head.firstElementChild;
-        while (style && !style.hasAttribute("webodfcss")) {
+        while (style && !(style.localName === "style"
+                && style.hasAttribute("webodfcss"))) {
             style = style.nextElementSibling;
         }
-        return style;
+        return /**@type{?HTMLStyleElement}*/(style);
     }
 
     /**
      * @param {!Document} document
-     * @return {!Element}
+     * @return {!HTMLStyleElement}
      */
     function addWebODFStyleSheet(document) {
         var head = /**@type{!HTMLHeadElement}*/(document.getElementsByTagName('head')[0]),
-            /**@type{?Element}*/
+            css,
+            /**@type{?HTMLStyleElement}*/
             style,
             href,
             count = document.styleSheets.length;
@@ -934,10 +921,9 @@
             style.setAttribute("webodfcss", count + 1);
             return style;
         }
-        if (String(typeof webodf_css) !== "undefined") {
-            style = addCSS(webodf_css, head);
+        if (String(typeof webodf_css) === "string") {
+            css = /**@type{!string}*/(webodf_css);
         } else {
-            style = document.createElementNS(head.namespaceURI, 'link');
             href = "webodf.css";
             if (runtime.currentDirectory) {
                 href = runtime.currentDirectory();
@@ -946,23 +932,19 @@
                 }
                 href += "../webodf.css";
             }
-            style.setAttribute('href', href);
-            style.setAttribute('rel', 'stylesheet');
-            style.setAttribute('type', 'text/css');
-            head.appendChild(style);
-            // if the css was not loaded, with <link/>, read and add the css
-            // this is a workaround for behaviour of qtjsruntime
-            if (count === document.styleSheets.length) {
-                head.removeChild(style);
-                style = addCSS(/**@type{!string}*/(runtime.readFileSync(href, "utf-8")), head);
-            }
+            css = /**@type{!string}*/(runtime.readFileSync(href, "utf-8"));
         }
+        style = /**@type{!HTMLStyleElement}*/(document.createElementNS(head.namespaceURI, 'style'));
+        style.setAttribute('media', 'screen, print, handheld, projection');
+        style.setAttribute('type', 'text/css');
         style.setAttribute('webodfcss', '1');
+        style.appendChild(document.createTextNode(css));
+        head.appendChild(style);
         return style;
     }
 
     /**
-     * @param {!Element} webodfcss
+     * @param {!HTMLStyleElement} webodfcss
      * @return {undefined}
      */
     function removeWebODFStyleSheet(webodfcss) {
@@ -1025,7 +1007,7 @@
             showAnnotationRemoveButton = false,
             /**@type{gui.AnnotationViewManager}*/
             annotationViewManager = null,
-            /**@type{!Element}*/
+            /**@type{!HTMLStyleElement}*/
             webodfcss,
             /**@type{!HTMLStyleElement}*/
             fontcss,
