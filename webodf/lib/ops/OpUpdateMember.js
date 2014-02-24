@@ -97,7 +97,7 @@ ops.OpUpdateMember = function OpUpdateMember() {
             }
         }
 
-        odtDocument.emit(ops.OdtDocument.signalMemberUpdated, member);
+        odtDocument.emit(ops.Document.signalMemberUpdated, member);
         return true;
     };
 

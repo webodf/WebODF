@@ -76,7 +76,7 @@ ops.OpMoveCursor = function OpMoveCursor() {
         selectedRange = odtDocument.convertCursorToDomRange(position, length);
         cursor.setSelectedRange(selectedRange, length >= 0);
         cursor.setSelectionType(selectionType);
-        odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+        odtDocument.emit(ops.Document.signalCursorMoved, cursor);
         return true;
     };
 

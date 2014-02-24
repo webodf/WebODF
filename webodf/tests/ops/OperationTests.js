@@ -416,8 +416,8 @@ ops.OperationTests = function OperationTests(runner) {
             }
 
             return {
-                setUp: function () {t.odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, appendToCursor); },
-                tearDown: function () {t.odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, appendToCursor); }
+                setUp: function () {t.odtDocument.subscribe(ops.Document.signalCursorAdded, appendToCursor); },
+                tearDown: function () {t.odtDocument.unsubscribe(ops.Document.signalCursorAdded, appendToCursor); }
             };
         },
         "RemoveAnnotation_ranged" : function () {

@@ -390,12 +390,12 @@ gui.SessionViewOptions = function () {
                     return editInfoMap[keyname];
                 });
 
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
-            odtDocument.unsubscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
+            odtDocument.unsubscribe(ops.Document.signalMemberAdded, renderMemberData);
+            odtDocument.unsubscribe(ops.Document.signalMemberUpdated, renderMemberData);
+            odtDocument.unsubscribe(ops.Document.signalCursorAdded, onCursorAdded);
+            odtDocument.unsubscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
-            odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+            odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorMoved);
 
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, selectionViewManager.rerenderSelectionViews);
             odtDocument.unsubscribe(ops.OdtDocument.signalTableAdded, selectionViewManager.rerenderSelectionViews);
@@ -422,12 +422,12 @@ gui.SessionViewOptions = function () {
             var odtDocument = session.getOdtDocument(),
                 head = document.getElementsByTagName('head').item(0);
 
-            odtDocument.subscribe(ops.OdtDocument.signalMemberAdded, renderMemberData);
-            odtDocument.subscribe(ops.OdtDocument.signalMemberUpdated, renderMemberData);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
+            odtDocument.subscribe(ops.Document.signalMemberAdded, renderMemberData);
+            odtDocument.subscribe(ops.Document.signalMemberUpdated, renderMemberData);
+            odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
+            odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
-            odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+            odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorMoved);
 
             odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, selectionViewManager.rerenderSelectionViews);
             odtDocument.subscribe(ops.OdtDocument.signalTableAdded, selectionViewManager.rerenderSelectionViews);

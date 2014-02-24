@@ -170,7 +170,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
 
         if (cursor && moveCursor) {
             odtDocument.moveCursor(memberid, position + 1, 0);
-            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+            odtDocument.emit(ops.Document.signalCursorMoved, cursor);
         }
 
         odtDocument.fixCursorPositions();

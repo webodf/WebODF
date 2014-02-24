@@ -72,7 +72,7 @@ ops.OpAddCursor = function OpAddCursor() {
 
         cursor = new ops.OdtCursor(memberid, odtDocument);
         odtDocument.addCursor(cursor);
-        odtDocument.emit(ops.OdtDocument.signalCursorAdded, cursor);
+        odtDocument.emit(ops.Document.signalCursorAdded, cursor);
         return true;
     };
 

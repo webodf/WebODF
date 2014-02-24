@@ -154,8 +154,10 @@
     "gui.StyleSummary": [
     ],
     "gui.SvgSelectionView": [
+        "core.Async",
+        "core.ScheduledTask",
         "gui.SelectionView",
-        "ops.OdtDocument"
+        "odf.OdfNodeFilter"
     ],
     "gui.TextController": [
         "ops.Session"

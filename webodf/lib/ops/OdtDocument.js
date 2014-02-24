@@ -59,12 +59,12 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**!Object.<!ops.Member>*/
         members = {},
         eventNotifier = new core.EventNotifier([
-            ops.OdtDocument.signalMemberAdded,
-            ops.OdtDocument.signalMemberUpdated,
-            ops.OdtDocument.signalMemberRemoved,
-            ops.OdtDocument.signalCursorAdded,
-            ops.OdtDocument.signalCursorRemoved,
-            ops.OdtDocument.signalCursorMoved,
+            ops.Document.signalMemberAdded,
+            ops.Document.signalMemberUpdated,
+            ops.Document.signalMemberRemoved,
+            ops.Document.signalCursorAdded,
+            ops.Document.signalCursorRemoved,
+            ops.Document.signalCursorMoved,
             ops.OdtDocument.signalParagraphChanged,
             ops.OdtDocument.signalParagraphStyleModified,
             ops.OdtDocument.signalCommonStyleCreated,
@@ -684,7 +684,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
             if (cursorMoved) {
                 cursor.setSelectedRange(selectedRange, cursor.hasForwardSelection());
-                self.emit(ops.OdtDocument.signalCursorMoved, cursor);
+                self.emit(ops.Document.signalCursorMoved, cursor);
             }
         });
     };
@@ -823,7 +823,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         if (cursor) {
             cursor.removeFromDocument();
             delete cursors[memberid];
-            self.emit(ops.OdtDocument.signalCursorRemoved, memberid);
+            self.emit(ops.Document.signalCursorRemoved, memberid);
             return true;
         }
         return false;
@@ -924,12 +924,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     init();
 };
 
-/**@const*/ops.OdtDocument.signalMemberAdded =   "member/added";
-/**@const*/ops.OdtDocument.signalMemberUpdated =   "member/updated";
-/**@const*/ops.OdtDocument.signalMemberRemoved =   "member/removed";
-/**@const*/ops.OdtDocument.signalCursorAdded =   "cursor/added";
-/**@const*/ops.OdtDocument.signalCursorRemoved = "cursor/removed";
-/**@const*/ops.OdtDocument.signalCursorMoved =   "cursor/moved";
 /**@const*/ops.OdtDocument.signalParagraphChanged = "paragraph/changed";
 /**@const*/ops.OdtDocument.signalTableAdded = "table/added";
 /**@const*/ops.OdtDocument.signalCommonStyleCreated = "style/created";

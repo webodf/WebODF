@@ -187,16 +187,16 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
      * @return {undefined}
      */
     this.destroy = function(callback) {
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-        odtDocument.unsubscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+        odtDocument.unsubscribe(ops.Document.signalCursorAdded, onCursorAdded);
+        odtDocument.unsubscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorMoved);
         callback();
     };
 
     function init() {
-        odtDocument.subscribe(ops.OdtDocument.signalCursorAdded, onCursorAdded);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorRemoved, onCursorRemoved);
-        odtDocument.subscribe(ops.OdtDocument.signalCursorMoved, onCursorMoved);
+        odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
+        odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
+        odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorMoved);
         updatedCachedValues();
     }
 

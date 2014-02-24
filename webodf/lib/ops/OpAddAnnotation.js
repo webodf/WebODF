@@ -183,7 +183,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
             paragraphElement = domUtils.getElementsByTagNameNS(annotation, odf.Namespaces.textns, "p")[0];
             selectedRange.selectNodeContents(paragraphElement);
             cursor.setSelectedRange(selectedRange, false);
-            odtDocument.emit(ops.OdtDocument.signalCursorMoved, cursor);
+            odtDocument.emit(ops.Document.signalCursorMoved, cursor);
         }
         // Track this annotation
         odtDocument.getOdfCanvas().addAnnotation(annotation);
