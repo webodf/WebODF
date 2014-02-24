@@ -890,23 +890,37 @@
     }
 
     /**
+     * @param {!string} css
+     * @param {!HTMLHeadElement} head
+     * @return {!Element}
+     */
+    function addCSS(css, head) {
+        var doc = head.ownerDocument,
+            e = doc.createElementNS(head.namespaceURI, 'style');
+        e.setAttribute('media', 'screen, print, handheld, projection');
+        e.setAttribute('type', 'text/css');
+        e.appendChild(doc.createTextNode(css));
+        head.appendChild(e);
+        return e;
+    }
+
+    /**
+     * @param {!HTMLHeadElement} head
+     * @return {?Element}
+     */
+    function findWebODFStyleSheet(head) {
+        var style = head.firstElementChild;
+        while (style && !style.hasAttribute("webodfcss")) {
+            style = style.nextElementSibling;
+        }
+        return style;
+    }
+
+    /**
      * @param {!Document} document
      * @return {!Element}
      */
     function addWebODFStyleSheet(document) {
-        /**
-         * @param {!string} css
-         * @param {!HTMLHeadElement} head
-         * @return {!Element}
-         */
-        function addCSS(css, head) {
-            var e = document.createElementNS(head.namespaceURI, 'style');
-            e.setAttribute('media', 'screen, print, handheld, projection');
-            e.setAttribute('type', 'text/css');
-            e.appendChild(document.createTextNode(css));
-            head.appendChild(e);
-            return e;
-        }
         var head = /**@type{!HTMLHeadElement}*/(document.getElementsByTagName('head')[0]),
             /**@type{?Element}*/
             style,
@@ -914,12 +928,11 @@
             count = document.styleSheets.length;
         // make sure this is only added once per HTML document, e.g. in case of
         // multiple odfCanvases
-        style = head.firstElementChild;
-        while (style) {
-            if (style.getAttribute("webodfcss")) {
-                return style;
-            }
-            style = style.nextElementSibling;
+        style = findWebODFStyleSheet(head);
+        if (style) {
+            count = parseInt(style.getAttribute("webodfcss"), 10);
+            style.setAttribute("webodfcss", count + 1);
+            return style;
         }
         if (String(typeof webodf_css) !== "undefined") {
             style = addCSS(webodf_css, head);
@@ -944,9 +957,23 @@
                 style = addCSS(/**@type{!string}*/(runtime.readFileSync(href, "utf-8")), head);
             }
         }
-        style.setAttribute('webodfcss', 'true');
+        style.setAttribute('webodfcss', '1');
         return style;
     }
+
+    /**
+     * @param {!Element} webodfcss
+     * @return {undefined}
+     */
+    function removeWebODFStyleSheet(webodfcss) {
+        var count = parseInt(webodfcss.getAttribute("webodfcss"), 10);
+        if (count === 1) {
+             webodfcss.parentNode.removeChild(webodfcss);
+        } else {
+             webodfcss.setAttribute("count", count - 1);
+        }
+    }
+
     /**
      * @param {!Document} document Put and ODF Canvas inside this element.
      * @return {!HTMLStyleElement}
@@ -1611,7 +1638,7 @@
                 sizer = null;
             }
             // remove all styles
-            head.removeChild(webodfcss);
+            removeWebODFStyleSheet(webodfcss);
             head.removeChild(fontcss);
             head.removeChild(stylesxmlcss);
             head.removeChild(positioncss);
