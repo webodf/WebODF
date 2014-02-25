@@ -389,6 +389,7 @@
         "ops.TrivialOperationRouter"
     ],
     "ops.StepsCache": [
+        "core.LoopWatchDog",
         "core.PositionFilter",
         "odf.OdfUtils"
     ],
