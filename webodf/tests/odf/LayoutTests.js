@@ -42,7 +42,8 @@
 odf.LayoutTests = function LayoutTests(runner) {
     "use strict";
     var r = runner, t, tests,
-        xpath = xmldom.XPath;
+        xpath = xmldom.XPath,
+        odfUtils = new odf.OdfUtils();
     /**
      * @param {!Element} node
      * @return {!{count:!number,values:!Object.<!string,!string>,xpath:!string}}
@@ -168,13 +169,18 @@ odf.LayoutTests = function LayoutTests(runner) {
      * @return {!number}
      */
     function convertToPx(val) {
-        var n = -1;
+        var n = -1, length;
         if (typeof val === "number") {
             n = val;
-        } else if (val.substr(-2) === "px") {
-            n = parseFloat(val.substr(0, val.length - 2));
-        } else if (val.substr(-2) === "cm") {
-            n = parseFloat(val.substr(0, val.length - 2)) / 2.54 * 96;
+        } else {
+            length = odfUtils.parseLength(val);
+            if (length && length.unit === "px") {
+                n = length.value;
+            } else if (length && length.unit === "cm") {
+                n = length.value / 2.54 * 96;
+            } else {
+                throw "Unit " + length.unit + " not supported.";
+            }
         }
         return n;
     }
@@ -228,16 +234,9 @@ odf.LayoutTests = function LayoutTests(runner) {
     function checkNodesLayout(check) {
         var root = t.odfContainer.rootElement,
             nodes,
-            ns = {
-                draw: "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-                office: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-                text: "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
-            },
             i;
-        function resolve(prefix) {
-            return ns[prefix];
-        }
-        nodes = xpath.getODFElementsWithXPath(root, check.xpath, resolve);
+        nodes = xpath.getODFElementsWithXPath(root, check.xpath,
+                odf.Namespaces.lookupNamespaceURI);
         t.nodeCount = nodes.length;
         r.shouldBe(t, "t.nodeCount", String(check.count));
         for (i = 0; i < nodes.length; i += 1) {

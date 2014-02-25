@@ -73,6 +73,7 @@
         "odf.Namespaces",
         "odf.OdfCanvas",
         "odf.OdfContainer",
+        "odf.OdfUtils",
         "xmldom.XPath"
     ],
     "odf.ObjectNameGeneratorTests": [
