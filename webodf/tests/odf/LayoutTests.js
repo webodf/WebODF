@@ -36,13 +36,17 @@
 /*global runtime, core, odf, NodeFilter, Node, xmldom*/
 /**
  * @constructor
- * @param {core.UnitTestRunner} runner
+ * @param {!core.UnitTestRunner} runner
  * @implements {core.UnitTest}
  */
 odf.LayoutTests = function LayoutTests(runner) {
     "use strict";
     var r = runner, t, tests,
         xpath = xmldom.XPath;
+    /**
+     * @param {!Element} node
+     * @return {!{count:!number,values:!Object.<!string,!string>,xpath:!string}}
+     */
     function parseCheck(node) {
         var values = {}, c = node.firstElementChild;
         while (c) {
@@ -55,6 +59,11 @@ odf.LayoutTests = function LayoutTests(runner) {
             xpath: node.getAttribute("xpath")
         };
     }
+    /**
+     * @param {!string} name
+     * @param {!Element} node
+     * @return {!{isFailing:!boolean,input:!Element,name:!string,layoutChecks:!Array}}
+     */
     function parseTest(name, node) {
         var isFailing = node.getAttribute("isFailing") === "true",
             input = node.firstElementChild,
@@ -75,6 +84,11 @@ odf.LayoutTests = function LayoutTests(runner) {
             layoutChecks: layoutChecks
         };
     }
+    /**
+     * @param {!string} url
+     * @param {!Object.<!string,{isFailing:!boolean,input:!Element,name:!string}>} tests
+     * @return {undefined}
+     */
     function loadTests(url, tests) {
         var s = /**@type{!string}*/(runtime.readFileSync(url, "utf-8")),
             xml = runtime.parseXML(s),
@@ -95,6 +109,10 @@ odf.LayoutTests = function LayoutTests(runner) {
             n = n.nextElementSibling;
         }
     }
+    /**
+     * @param {!Array.<!string>} urls
+     * @return {!Object.<!string,{isFailing:!boolean,input:!Element,name:!string}>}
+     */
     function loadTestFiles(urls) {
         var optests = {}, i;
         for (i = 0; i < urls.length; i += 1) {
@@ -102,6 +120,11 @@ odf.LayoutTests = function LayoutTests(runner) {
         }
         return optests;
     }
+    /**
+     * @param {!Element} odfNode
+     * @param {!NodeList} childList
+     * @return {undefined}
+     */
     function replaceChildren(odfNode, childList) {
         var doc = odfNode.ownerDocument, i, c;
         while (odfNode.firstChild) {
@@ -114,6 +137,11 @@ odf.LayoutTests = function LayoutTests(runner) {
             }
         }
     }
+    /**
+     * @param {!Object.<!string,{isFailing:!boolean,input:!Element,name:!string}>} test
+     * @param {!function():undefined} callback
+     * @return {undefined}
+     */
     function fillDocument(test, callback) {
         var officens = odf.Namespaces.officens,
             odfContainer = new odf.OdfContainer("", null),
@@ -135,6 +163,10 @@ odf.LayoutTests = function LayoutTests(runner) {
             t.odfCanvas.load(path);
         });
     }
+    /**
+     * @param {!string|!number} val
+     * @return {!number}
+     */
     function convertToPx(val) {
         var n = -1;
         if (typeof val === "number") {
@@ -146,11 +178,22 @@ odf.LayoutTests = function LayoutTests(runner) {
         }
         return n;
     }
+    /**
+     * @param {!string|!number} a
+     * @param {!string} b
+     * @return {!boolean}
+     */
     function compareLengths(a, b) {
-        a = convertToPx(a);
-        b = convertToPx(b);
-        return Math.abs((a - b) / b) < 0.01;
+        var na, nb;
+        na = convertToPx(a);
+        nb = convertToPx(b);
+        return Math.abs((na - nb) / nb) < 0.01;
     }
+    /**
+     * @param {!string|!number} a
+     * @param {!string} b
+     * @return {undefined}
+     */
     function compareValues(a, b) {
         if (typeof a === "number" || a.substr(-2) === "px") {
             if (compareLengths(a, b)) {
@@ -161,6 +204,11 @@ odf.LayoutTests = function LayoutTests(runner) {
         t.b = b;
         r.shouldBe(t, "t.a", "t.b");
     }
+    /**
+     * @param {!{count:!number,values:!Object.<!string,!string>,xpath:!string}} check
+     * @param {!Element} node
+     * @return {undefined}
+     */
     function checkNodeLayout(check, node) {
         var window = runtime.getWindow(),
             style = window.getComputedStyle(node),
@@ -173,13 +221,17 @@ odf.LayoutTests = function LayoutTests(runner) {
             }
         }
     }
+    /**
+     * @param {!{count:!number,values:!Object.<!string,!string>,xpath:!string}} check
+     * @return {undefined}
+     */
     function checkNodesLayout(check) {
         var root = t.odfContainer.rootElement,
             nodes,
             ns = {
-                d: "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
-                o: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
-                t: "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+                draw: "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0",
+                office: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
+                text: "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
             },
             i;
         function resolve(prefix) {
@@ -192,6 +244,11 @@ odf.LayoutTests = function LayoutTests(runner) {
             checkNodeLayout(check, nodes[i]);
         }
     }
+    /**
+     * @param {!Object.<!string,{isFailing:!boolean,input:!Element,name:!string}>} test
+     * @param {!function():undefined} callback
+     * @return {undefined}
+     */
     function runTest(test, callback) {
         var i;
         function check() {
@@ -202,12 +259,21 @@ odf.LayoutTests = function LayoutTests(runner) {
         }
         fillDocument(test, check);
     }
+    /**
+     * @param {!string} name
+     * @param {!Object.<!string,{isFailing:!boolean,input:!Element,name:!string}>} test
+     * @return {!{f:!function():undefined,name:!string,expectFail:!boolean}}
+     */
     function makeTestIntoFunction(name, test) {
         var f = function (callback) {
             runTest(test, callback);
         };
         return {f: f, name: name, expectFail: test.isFailing};
     }
+    /**
+     * @param {!Object.<!string,{isFailing:!boolean,input:!Element,name:!string}>} tests
+     * @return {!Array.<!{f:!function():undefined,name:!string,expectFail:!boolean}>}
+     */
     function makeTestsIntoFunction(tests) {
         var functions = [], i;
         for (i in tests) {

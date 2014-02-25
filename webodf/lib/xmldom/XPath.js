@@ -62,7 +62,7 @@ xmldom.XPathIterator.prototype.reset = function () {"use strict"; };
 xmldom.XPathAtom;
 
 /**
- * @return {!{getODFElementsWithXPath:function(!Element,!string,!function(string):?string):!Array.<Element>}}
+ * @return {!{getODFElementsWithXPath:function(!Element,!string,!function(string):?string):!Array.<!Element>}}
  */
 function createXPathSingleton() {
     "use strict";
@@ -410,7 +410,7 @@ function createXPathSingleton() {
      * @param {!Element} node
      * @param {!string} xpath
      * @param {!function(string):?string} namespaceResolver
-     * @return {!Array.<Element>}
+     * @return {!Array.<!Element>}
      */
     function getODFElementsWithXPath(node, xpath, namespaceResolver) {
         var doc = node.ownerDocument,
@@ -439,6 +439,6 @@ function createXPathSingleton() {
 /**
  * Wrapper for XPath functions
  * @const
- * @type {!{getODFElementsWithXPath:function(!Element,!string,!function(string):?string):!Array.<Element>}}
+ * @type {!{getODFElementsWithXPath:function(!Element,!string,!function(string):?string):!Array.<!Element>}}
  */
 xmldom.XPath = createXPathSingleton();
