@@ -193,6 +193,8 @@ odf.LayoutTests = function LayoutTests(runner) {
         var na, nb;
         na = convertToPx(a);
         nb = convertToPx(b);
+        // check that the difference is less than one percent.
+        // the % of allowed error may become configurable in the future.
         return Math.abs((na - nb) / nb) < 0.01;
     }
     /**
@@ -222,6 +224,8 @@ odf.LayoutTests = function LayoutTests(runner) {
             value;
         for (i in check.values) {
             if (check.values.hasOwnProperty(i)) {
+                // get value from computed style (e.g. margin-left) or from
+                // node properties (e.g. clientWidth).
                 value = style[i] || node[i];
                 compareValues(value, check.values[i]);
             }
