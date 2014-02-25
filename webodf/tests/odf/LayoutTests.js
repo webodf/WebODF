@@ -161,7 +161,7 @@ odf.LayoutTests = function LayoutTests(runner) {
         }
         odfContainer.saveAs(path, function () {
             t.odfCanvas.addListener("statereadychange", handler);
-            t.odfCanvas.load(path);
+            t.odfCanvas.setOdfContainer(odfContainer);
         });
     }
     /**
