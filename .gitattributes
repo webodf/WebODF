@@ -1,0 +1,24 @@
+# Set default behaviour for some text-like files, in case users don't have core.autocrlf set.
+
+
+*.cmake  text eol=lf
+*.c  text eol=lf
+*.conf  text eol=lf
+*.cpp  text eol=lf
+*.css  text eol=lf
+*.h  text eol=lf
+*.html  text eol=lf
+*.in  text eol=lf
+*.java  text eol=lf
+*.js  text eol=lf
+*.json  text eol=lf
+*.md  text eol=lf
+*.py  text eol=lf
+*.qrc  text eol=lf
+*.rdf  text eol=lf
+*.rng  text eol=lf
+*.sh  text eol=lf
+*.txt  text eol=lf
+*.ui  text eol=lf
+*.xml  text eol=lf
+*.xsl  text eol=lf
