@@ -91,6 +91,9 @@
     "gui.HyperlinkController": [
         "ops.Session"
     ],
+    "gui.IOSSafariSupport": [
+        "gui.EventManager"
+    ],
     "gui.ImageController": [
         "ops.Session"
     ],
@@ -134,6 +137,7 @@
         "gui.DirectFormattingController",
         "gui.HyperlinkClickHandler",
         "gui.HyperlinkController",
+        "gui.IOSSafariSupport",
         "gui.ImageController",
         "gui.ImageSelector",
         "gui.InputMethodEditor",

@@ -92,7 +92,10 @@
             selectionController = new gui.SelectionController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,
             keyCode = gui.KeyboardHandler.KeyCode,
-            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1;
+            isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
+            isIOS = ["iPad", "iPod", "iPhone"].indexOf(window.navigator.platform) !== -1,
+            /**@type{?gui.IOSSafariSupport}*/
+            iOSSafariSupport;
 
         runtime.assert(window !== null,
             "Expected to be run in an environment which has a global window, like a browser.");
@@ -450,16 +453,70 @@
         }
 
         /**
+         * Causes a cursor movement to the position hinted by a mouse click
+         * event.
          * @param {!Event} event
+         * @return {undefined}
+         */
+        function moveByMouseClickEvent(event) {
+            var selection = mutableSelection(window.getSelection()),
+                position,
+                selectionRange,
+                rect,
+                frameNode;
+
+            if (!selection.anchorNode && !selection.focusNode) {
+                // chrome & safari will report null for focus and anchor nodes after a right-click in text selection
+                position = caretPositionFromPoint(event.clientX, event.clientY);
+                if (position) {
+                    selection.anchorNode = /**@type{!Node}*/(position.container);
+                    selection.anchorOffset = position.offset;
+                    selection.focusNode = selection.anchorNode;
+                    selection.focusOffset = selection.anchorOffset;
+                }
+            }
+
+            if (odfUtils.isImage(selection.focusNode) && selection.focusOffset === 0
+                && odfUtils.isCharacterFrame(selection.focusNode.parentNode)) {
+                // In FireFox if an image has no text around it, click on either side of the
+                // image resulting the same selection get returned. focusNode: image, focusOffset: 0
+                // Move the cursor to the next walkable position when clicking on the right side of an image
+                frameNode = /**@type{!Element}*/(selection.focusNode.parentNode);
+                rect = frameNode.getBoundingClientRect();
+                if (event.clientX > rect.right) {
+                    position = getNextWalkablePosition(frameNode);
+                    if (position) {
+                        selection.anchorNode = selection.focusNode = position.container;
+                        selection.anchorOffset = selection.focusOffset = position.offset;
+                    }
+                }
+            } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1
+                && odfUtils.isCharacterFrame(selection.focusNode)) {
+                // When click on the right side of an image that has no text elements, non-FireFox browsers
+                // will return focusNode: frame, focusOffset: 1 as the selection. Since this is not a valid cursor
+                // position, move the cursor to the next walkable position after the frame node.
+                position = getNextWalkablePosition(selection.focusNode);
+                if (position) {
+                    selection.anchorNode = selection.focusNode = position.container;
+                    selection.anchorOffset = selection.focusOffset = position.offset;
+                }
+            }
+
+            // Need to check the selection again in case the caret position didn't return any result
+            if (selection.anchorNode && selection.focusNode) {
+                selectionRange = selectionController.selectionToRange(selection);
+                selectionController.selectRange(selectionRange.range,
+                    selectionRange.hasForwardSelection, event.detail);
+            }
+            eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
+        }
+
+        /**
+         * @param {!Event} event
+         * @return {undefined}
          */
         function handleMouseClickEvent(event) {
             var target = getTarget(event),
-                eventDetails = {
-                    detail: event.detail,
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                    target: target
-                },
                 range,
                 wasCollapsed,
                 frameNode,
@@ -496,56 +553,16 @@
                     // the click is processed. Set 0 timeout here so the newly clicked position can be updated
                     // by the browser. Unfortunately this is only working in Firefox. For other browsers, we have to work
                     // out the caret position from two coordinates.
-                    handleMouseClickTimeoutId = runtime.setTimeout(function () {
-                        var selection = mutableSelection(window.getSelection()),
-                            position,
-                            selectionRange,
-                            rect;
-                        if (!selection.anchorNode && !selection.focusNode) {
-                            // chrome & safari will report null for focus and anchor nodes after a right-click in text selection
-                            position = caretPositionFromPoint(eventDetails.clientX, eventDetails.clientY);
-                            if (position) {
-                                selection.anchorNode = /**@type{!Node}*/(position.container);
-                                selection.anchorOffset = position.offset;
-                                selection.focusNode = selection.anchorNode;
-                                selection.focusOffset = selection.anchorOffset;
-                            }
-                        }
-
-                        if (odfUtils.isImage(selection.focusNode) && selection.focusOffset === 0
-                                && odfUtils.isCharacterFrame(selection.focusNode.parentNode)) {
-                            // In FireFox if an image has no text around it, click on either side of the
-                            // image resulting the same selection get returned. focusNode: image, focusOffset: 0
-                            // Move the cursor to the next walkable position when clicking on the right side of an image
-                            frameNode = /**@type{!Element}*/(selection.focusNode.parentNode);
-                            rect = frameNode.getBoundingClientRect();
-                            if (event.clientX > rect.right) {
-                                position = getNextWalkablePosition(frameNode);
-                                if (position) {
-                                    selection.anchorNode = selection.focusNode = position.container;
-                                    selection.anchorOffset = selection.focusOffset = position.offset;
-                                }
-                            }
-                        } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1
-                                && odfUtils.isCharacterFrame(selection.focusNode)) {
-                            // When click on the right side of an image that has no text elements, non-FireFox browsers
-                            // will return focusNode: frame, focusOffset: 1 as the selection. Since this is not a valid cursor
-                            // position, move the cursor to the next walkable position after the frame node.
-                            position = getNextWalkablePosition(selection.focusNode);
-                            if (position) {
-                                selection.anchorNode = selection.focusNode = position.container;
-                                selection.anchorOffset = selection.focusOffset = position.offset;
-                            }
-                        }
-
-                        // Need to check the selection again in case the caret position didn't return any result
-                        if (selection.anchorNode && selection.focusNode) {
-                            selectionRange = selectionController.selectionToRange(selection);
-                            selectionController.selectRange(selectionRange.range,
-                                selectionRange.hasForwardSelection, eventDetails.detail);
-                        }
-                        eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-                    }, 0);
+                    // In iOS, however, it is not possible to assign focus within a timeout. But in that case
+                    // we do not even need a timeout, because we do not use native selections at all there,
+                    // therefore for that platform, just directly move by the mouse click and give focus.
+                    if (isIOS) {
+                        moveByMouseClickEvent(event);
+                    } else {
+                        handleMouseClickTimeoutId = runtime.setTimeout(function () {
+                            moveByMouseClickEvent(event);
+                        }, 0);
+                    }
                 }
             }
             clickCount = 0;
@@ -957,13 +974,21 @@
          * @return {undefined}
          */
         this.destroy = function (callback) {
-            var destroyCallbacks = [
+            var destroyCallbacks = [];
+
+            if (iOSSafariSupport) {
+                destroyCallbacks.push(iOSSafariSupport.destroy);
+            }
+
+            destroyCallbacks = destroyCallbacks.concat([
                 drawShadowCursorTask.destroy,
                 redrawRegionSelectionTask.destroy,
                 directFormattingController.destroy,
                 inputMethodEditor.destroy,
                 eventManager.destroy,
-                destroy];
+                destroy
+            ]);
+
             runtime.clearTimeout(handleMouseClickTimeoutId);
             async.destroyAll(destroyCallbacks, callback);
         };
@@ -1013,6 +1038,10 @@
                 keyDownHandler.bind(keyCode.Left, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionBeforeWord));
                 keyDownHandler.bind(keyCode.Right, modifier.CtrlShift, rangeSelectionOnly(selectionController.extendSelectionPastWord));
                 keyDownHandler.bind(keyCode.A, modifier.Ctrl, rangeSelectionOnly(selectionController.extendSelectionToEntireDocument));
+            }
+
+            if (isIOS) {
+                iOSSafariSupport = new gui.IOSSafariSupport(eventManager);
             }
 
             eventManager.subscribe("keydown", keyDownHandler.handleEvent);

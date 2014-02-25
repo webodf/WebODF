@@ -303,7 +303,7 @@
             // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
             // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
             eventManager.blur();
-            eventTrap.setAttribute("contenteditable", false);
+            eventTrap.setAttribute('disabled', true);
         }
 
         /**
@@ -318,7 +318,11 @@
                 // the IME state after the content editable flag has been updated.
                 eventManager.blur();
             }
-            eventTrap.setAttribute("contenteditable", isEditable);
+            if (isEditable) {
+                eventTrap.removeAttribute('disabled');
+            } else {
+                eventTrap.setAttribute('disabled', true);
+            }
             if (hasFocus) {
                 eventManager.focus();
             }

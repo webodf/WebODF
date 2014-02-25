@@ -68,7 +68,7 @@ gui.EventManager = function EventManager(odtDocument) {
         },
         /**@type{!Object.<string,!EventDelegate>}*/
         eventDelegates = {},
-        /**@type{!HTMLDivElement}*/
+        /**@type{!HTMLInputElement}*/
         eventTrap;
 
     /**
@@ -315,13 +315,7 @@ gui.EventManager = function EventManager(odtDocument) {
       * @return {undefined}
       */
     this.destroy = function (callback) {
-        var eventTrapParentNode = eventTrap.parentNode;
-
-        // InputMethodEditor moves the eventTrap around,
-        // so do not rely on still being a child of the current sizer element
-        if (eventTrapParentNode) {
-            eventTrapParentNode.removeChild(eventTrap);
-        }
+        eventTrap.parentNode.removeChild(eventTrap);
 
         // TODO: drop left eventDelegates, complain about those not unsubscribed
         // Also investigate if delegates need to proper unlisten from events in any case
@@ -334,7 +328,7 @@ gui.EventManager = function EventManager(odtDocument) {
             doc = sizerElement.ownerDocument;
 
         runtime.assert(Boolean(window), "EventManager requires a window object to operate correctly");
-        eventTrap = /**@type{!HTMLDivElement}*/(doc.createElement("div"));
+        eventTrap = /**@type{!HTMLInputElement}*/(doc.createElement("input"));
         eventTrap.id = "eventTrap";
         // Negative tab index still allows focus, but removes accessibility by keyboard
         eventTrap.setAttribute("tabindex", -1);
