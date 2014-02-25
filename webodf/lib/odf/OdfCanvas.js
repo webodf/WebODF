@@ -1016,15 +1016,15 @@
             /**@type{!HTMLStyleElement}*/
             positioncss,
             shadowContent,
-            /**@type{number}*/
-            zoomLevel = 1,
             /**@type{!Object.<string,!Array.<!Function>>}*/
             eventHandlers = {},
             waitingForDoneTimeoutId,
             /**@type{!core.ScheduledTask}*/redrawContainerTask,
             shouldRefreshCss = false,
             shouldRerenderAnnotations = false,
-            loadingQueue = new LoadingQueue();
+            loadingQueue = new LoadingQueue(),
+            /**@type{!gui.ZoomHelper}*/
+            zoomHelper;
 
         /**
          * Load all the images that are inside an odf element.
@@ -1127,33 +1127,20 @@
          */
         function fixContainerSize() {
             var minHeight,
-                odfdoc = sizer.firstChild;
+                odfdoc = sizer.firstChild,
+                zoomLevel = zoomHelper.getZoomLevel();
+
             if (!odfdoc) {
                 return;
             }
 
-            /*
-                When zoom > 1,
-                - origin needs to be 'center top'
-                When zoom < 1
-                - origin needs to be 'left top'
-            */
-            if (zoomLevel > 1) {
-                sizer.style.MozTransformOrigin = 'center top';
-                sizer.style.WebkitTransformOrigin = 'center top';
-                sizer.style.OTransformOrigin = 'center top';
-                sizer.style.msTransformOrigin = 'center top';
-            } else {
-                sizer.style.MozTransformOrigin = 'left top';
-                sizer.style.WebkitTransformOrigin = 'left top';
-                sizer.style.OTransformOrigin = 'left top';
-                sizer.style.msTransformOrigin = 'left top';
-            }
-
-            sizer.style.WebkitTransform = 'scale(' + zoomLevel + ')';
-            sizer.style.MozTransform = 'scale(' + zoomLevel + ')';
-            sizer.style.OTransform = 'scale(' + zoomLevel + ')';
-            sizer.style.msTransform = 'scale(' + zoomLevel + ')';
+            // All zooming of the sizer within the canvas
+            // is done relative to the top-left corner.
+            sizer.style.WebkitTransformOrigin = "0% 0%";
+            sizer.style.MozTransformOrigin = "0% 0%";
+            sizer.style.msTransformOrigin = "0% 0%";
+            sizer.style.OTransformOrigin = "0% 0%";
+            sizer.style.transformOrigin = "0% 0%";
 
             if (annotationViewManager) {
                 minHeight = annotationViewManager.getMinimumHeightForAnnotationPane();
@@ -1200,6 +1187,14 @@
             sizer = /**@type{!HTMLDivElement}*/(doc.createElementNS(element.namespaceURI, 'div'));
             sizer.style.display = "inline-block";
             sizer.style.background = "white";
+            // When the window is shrunk such that the
+            // canvas container has a horizontal scrollbar,
+            // zooming out seems to not make the scrollable
+            // width disappear. This extra scrollable
+            // width seems to be proportional to the
+            // annotation pane's width. Setting the 'float'
+            // of the sizer to 'left' fixes this in webkit.
+            sizer.style.setProperty("float", "left", "important");
             sizer.appendChild(odfnode);
             element.appendChild(sizer);
 
@@ -1229,7 +1224,10 @@
             loadLists(odfnode.body, css, element.namespaceURI);
 
             sizer.insertBefore(shadowContent, sizer.firstChild);
-            fixContainerSize();
+
+            zoomHelper = new gui.ZoomHelper(sizer);
+            zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, fixContainerSize);
+            self.setZoomLevel(1);
         }
 
         /**
@@ -1490,14 +1488,13 @@
          * @return {undefined}
          */
         this.setZoomLevel = function (zoom) {
-            zoomLevel = zoom;
-            fixContainerSize();
+            zoomHelper.setZoomLevel(zoom);
         };
         /**
          * @return {!number}
          */
         this.getZoomLevel = function () {
-            return zoomLevel;
+            return zoomHelper ? zoomHelper.getZoomLevel() : 1;
         };
         /**
          * @param {!number} width
@@ -1505,22 +1502,24 @@
          * @return {undefined}
          */
         this.fitToContainingElement = function (width, height) {
-            var realWidth = element.offsetWidth / zoomLevel,
-                realHeight = element.offsetHeight / zoomLevel;
-            zoomLevel = width / realWidth;
-            if (height / realHeight < zoomLevel) {
-                zoomLevel = height / realHeight;
+            var zoomLevel = zoomHelper.getZoomLevel(),
+                realWidth = element.offsetWidth / zoomLevel,
+                realHeight = element.offsetHeight / zoomLevel,
+                zoom;
+
+            zoom = width / realWidth;
+            if (height / realHeight < zoom) {
+                zoom = height / realHeight;
             }
-            fixContainerSize();
+            zoomHelper.setZoomLevel(zoom);
         };
         /**
          * @param {!number} width
          * @return {undefined}
          */
         this.fitToWidth = function (width) {
-            var realWidth = element.offsetWidth / zoomLevel;
-            zoomLevel = width / realWidth;
-            fixContainerSize();
+            var realWidth = element.offsetWidth / zoomHelper.getZoomLevel();
+            zoomHelper.setZoomLevel(width / realWidth);
         };
         /**
          * @param {!number} width
@@ -1528,7 +1527,8 @@
          * @return {undefined}
          */
         this.fitSmart = function (width, height) {
-            var realWidth, realHeight, newScale;
+            var realWidth, realHeight, newScale,
+                zoomLevel = zoomHelper.getZoomLevel();
 
             realWidth = element.offsetWidth / zoomLevel;
             realHeight = element.offsetHeight / zoomLevel;
@@ -1540,18 +1540,15 @@
                 }
             }
 
-            zoomLevel = Math.min(1.0, newScale);
-
-            fixContainerSize();
+            zoomHelper.setZoomLevel(Math.min(1.0, newScale));
         };
         /**
          * @param {!number} height
          * @return {undefined}
          */
         this.fitToHeight = function (height) {
-            var realHeight = element.offsetHeight / zoomLevel;
-            zoomLevel = height / realHeight;
-            fixContainerSize();
+            var realHeight = element.offsetHeight / zoomHelper.getZoomLevel();
+            zoomHelper.setZoomLevel(height / realHeight);
         };
         /**
          * @return {undefined}
@@ -1615,9 +1612,11 @@
             if (annotationsPane && annotationsPane.parentNode) {
                 annotationsPane.parentNode.removeChild(annotationsPane);
             }
-            if (sizer) {
-                element.removeChild(sizer);
-                sizer = null;
+            if (sizer && zoomHelper) {
+                zoomHelper.destroy(function () {
+                    element.removeChild(sizer);
+                    sizer = null;
+                });
             }
             // remove all styles
             removeWebODFStyleSheet(webodfcss);
