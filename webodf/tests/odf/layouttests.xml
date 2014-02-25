@@ -1,0 +1,100 @@
+<layouttests
+    xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+    xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+    xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+    xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+>
+ <test name="simple">
+  <input>
+   <office:document-styles>
+    <office:automatic-styles>
+     <style:style style:name="onecol" style:family="section">
+      <style:section-properties>
+       <style:columns fo:column-count="1"/>
+      </style:section-properties>
+     </style:style>
+     <style:page-layout style:name="onecol">
+      <style:page-layout-properties
+       fo:page-width="10cm" fo:page-height="20cm" fo:margin="2cm"
+       fo:margin-top="2cm" fo:margin-bottom="2cm" fo:margin-left="2cm"
+       fo:margin-right="2cm">
+       <style:columns fo:column-count="1">
+        <style:column style:rel-width="1*" fo:start-indent="0cm"
+         fo:end-indent="5mm" />
+        <style:column style:rel-width="1*" fo:start-indent="5mm"
+         fo:end-indent="0cm" />
+       </style:columns>
+      </style:page-layout-properties>
+     </style:page-layout>
+    </office:automatic-styles>
+    <office:master-styles>
+     <style:master-page style:name="Standard" style:page-layout-name="onecol" />
+    </office:master-styles>
+   </office:document-styles>
+   <office:text>
+    <text:p>Lorem ipsum.</text:p>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="office:body">
+    <width value="10cm"/>
+   </check>
+   <check xpath=".//office:text">
+    <margin-left value="2cm"/>
+    <margin-right value="2cm"/>
+    <width value="6cm"/>
+   </check>
+   <check xpath=".//text:p">
+    <clientWidth value="6cm"/>
+    <width value="6cm"/>
+    <font-variant value="normal"/>
+   </check>
+  </layoutchecks>
+ </test>
+ <test name="simpleFrame">
+  <input>
+   <office:document-styles>
+    <office:automatic-styles>
+     <style:style style:name="onecol" style:family="section"/>
+     <style:page-layout style:name="onecol">
+      <style:page-layout-properties
+       fo:page-width="10cm" fo:page-height="20cm" fo:margin="2cm"
+       fo:margin-top="2cm" fo:margin-bottom="2cm" fo:margin-left="2cm"
+       fo:margin-right="2cm"/>
+     </style:page-layout>
+    </office:automatic-styles>
+    <office:master-styles>
+     <style:master-page style:name="Standard" style:page-layout-name="onecol" />
+    </office:master-styles>
+   </office:document-styles>
+   <office:text>
+    <text:p><draw:frame text:anchor-type="paragraph" draw:z-index="0" svg:width="4cm" svg:height="2cm" svg:x="1cm" svg:y="1cm">
+     <draw:text-box>
+      <text:p>frame</text:p>
+     </draw:text-box>
+    </draw:frame></text:p>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="office:body">
+    <width value="10cm"/>
+   </check>
+   <check xpath=".//draw:frame">
+    <width value="4cm"/>
+    <height value="2cm"/>
+   </check>
+   <check xpath=".//office:text">
+    <margin-left value="2cm"/>
+    <margin-right value="2cm"/>
+    <width value="6cm"/>
+   </check>
+   <check xpath=".//office:text/text:p">
+    <clientWidth value="6cm"/>
+    <width value="6cm"/>
+    <font-variant value="normal"/>
+   </check>
+  </layoutchecks>
+ </test>
+</layouttests>

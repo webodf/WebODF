@@ -935,7 +935,11 @@
                 /**@type{string}*/
                 s = createDocumentElement("document-settings");
             serializer.filter = new odf.OdfNodeFilter();
-            s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
+            // <office:settings/> should have at least one child element
+            if (self.rootElement.settings.firstElementChild) {
+                s += serializer.writeToString(self.rootElement.settings,
+                    odf.Namespaces.namespaceMap);
+            }
             s += "</office:document-settings>";
             return s;
         }
@@ -1173,6 +1177,11 @@
             addToplevelElement("masterStyles",    "master-styles");
             addToplevelElement("body");
             root.body.appendChild(text);
+            partMimetypes["/"] = "application/vnd.oasis.opendocument.text";
+            partMimetypes["settings.xml"] = "text/xml";
+            partMimetypes["meta.xml"] = "text/xml";
+            partMimetypes["styles.xml"] = "text/xml";
+            partMimetypes["content.xml"] = "text/xml";
 
             setState(OdfContainer.DONE);
             return emptyzip;

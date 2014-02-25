@@ -68,6 +68,14 @@
         "odf.Formatting",
         "odf.Namespaces"
     ],
+    "odf.LayoutTests": [
+        "core.UnitTester",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "odf.OdfUtils",
+        "xmldom.XPath"
+    ],
     "odf.ObjectNameGeneratorTests": [
         "core.UnitTester",
         "odf.ObjectNameGenerator",

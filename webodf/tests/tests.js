@@ -36,29 +36,30 @@
 /*global runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
 
 runtime.loadClass("core.Base64Tests");
-runtime.loadClass("core.DomUtilsTests");
 runtime.loadClass("core.CursorTests");
+runtime.loadClass("core.DomUtilsTests");
 runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.StepIteratorTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
-runtime.loadClass("gui.UndoStateRulesTests");
-runtime.loadClass("gui.TrivialUndoManagerTests");
 runtime.loadClass("gui.SelectionControllerTests");
 runtime.loadClass("gui.StyleSummaryTests");
-runtime.loadClass("ops.OdtDocumentTests");
-runtime.loadClass("ops.SessionTests");
-runtime.loadClass("ops.OperationTests");
-runtime.loadClass("ops.StepsTranslatorTests");
-runtime.loadClass("odf.OdfUtilsTests");
-runtime.loadClass("odf.ObjectNameGeneratorTests");
-runtime.loadClass("ops.TransformerTests");
-runtime.loadClass("ops.TransformationTests");
+runtime.loadClass("gui.TrivialUndoManagerTests");
+runtime.loadClass("gui.UndoStateRulesTests");
 runtime.loadClass("odf.FormattingTests");
+runtime.loadClass("odf.LayoutTests");
+runtime.loadClass("odf.ObjectNameGeneratorTests");
 runtime.loadClass("odf.OdfContainerTests");
+runtime.loadClass("odf.OdfUtilsTests");
 runtime.loadClass("odf.StyleInfoTests");
 runtime.loadClass("odf.TextStyleApplicatorTests");
+runtime.loadClass("ops.OdtDocumentTests");
+runtime.loadClass("ops.OperationTests");
+runtime.loadClass("ops.SessionTests");
+runtime.loadClass("ops.StepsTranslatorTests");
+runtime.loadClass("ops.TransformationTests");
+runtime.loadClass("ops.TransformerTests");
 runtime.loadClass("xmldom.LSSerializerTests");
 runtime.loadClass("xmldom.XPathTests");
 
@@ -97,6 +98,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.LSSerializerTests);
     tests.push(xmldom.XPathTests);
+    tests.push(odf.LayoutTests);
     tests.push(ops.SessionTests);
     tests.push(ops.OperationTests);
     tests.push(ops.TransformationTests);
