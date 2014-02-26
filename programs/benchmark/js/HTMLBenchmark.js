@@ -102,10 +102,12 @@ define([
         var loadingScreen = document.getElementById('loadingScreen'),
             canvasElement = document.getElementById("canvas"),
             benchmarkResults = document.getElementById("benchmarkResults"),
+            version = document.getElementById("version"),
             config = getConfiguration(),
             benchmark = new Benchmark(canvasElement),
             renderer = new HTMLResultsRenderer(benchmark, benchmarkResults);
 
+        version.textContent = benchmark.getWebODFVersion();
         renderer.setBackgroundColour(config.colour);
 
         loadingScreen.style.display = "none";

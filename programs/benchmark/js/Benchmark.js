@@ -84,6 +84,16 @@ define(["OdfBenchmarkContext"], function(OdfBenchmarkContext) {
                 currentActionIndex = -1;
                 executeNextAction();
             };
+
+            /**
+             * @returns {!string}
+             */
+            this.getWebODFVersion = function() {
+                return (typeof webodf_version !== "undefined"
+                    ? String(webodf_version)
+                    : "uncompiled"
+                    );
+            };
         }
 
         return Benchmark;
