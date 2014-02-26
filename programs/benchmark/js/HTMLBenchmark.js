@@ -101,7 +101,7 @@ define([
     function HTMLBenchmark() {
         var loadingScreen = document.getElementById('loadingScreen'),
             canvasElement = document.getElementById("canvas"),
-            benchmarkResults = document.getElementById("benchmarkResults"),
+            benchmarkResults = document.getElementById("benchmarkResults").getElementsByTagName("tbody")[0],
             version = document.getElementById("version"),
             config = getConfiguration(),
             benchmark = new Benchmark(canvasElement),

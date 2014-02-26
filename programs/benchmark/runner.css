@@ -12,8 +12,12 @@ body {
     max-width: 100%;
     /*width: 400px;*/
     float: left;
-    background-color: #70a186;
+    background-color: #49A34B;
     padding: 0 10px;
+}
+
+#benchmarkView h1 {
+    text-align: center;
 }
 
 #documentView {
@@ -21,14 +25,62 @@ body {
     overflow: auto;
 }
 
+#benchmarkResults {
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+#benchmarkResults td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#benchmarkResults thead {
+    font-weight: bold;
+    font-size: small;
+}
+
+#benchmarkResults thead td {
+    text-align: center;
+}
+
+#benchmarkResults thead td:not(:last-of-type) {
+    border-right: 1px solid white;
+}
+
+#benchmarkResults tbody td {
+    border-right: 1px solid white;
+}
+
+#benchmarkResults tbody td:first-of-type {
+    border-left: 1px solid white;
+}
+
+#benchmarkResults tbody tr {
+    border-top: 1px solid white;
+}
+
+#benchmarkResults tbody tr:hover td {
+    background-color: #5AB953;
+}
+
+#benchmarkResults tbody tr:nth-child(2n+0) {
+    background-color: #E6FFBF;
+}
+
+#benchmarkResults tbody tr:nth-child(2n+1) {
+    background-color: #BEEE9E;
+}
+
 #benchmarkResults .status {
     display: none;
 }
 
-#benchmarkResults .elapsed,
-#benchmarkResults .speed,
-#benchmarkResults .pages
+#benchmarkResults tbody .elapsed,
+#benchmarkResults tbody .speed,
+#benchmarkResults tbody .pages
 {
+    padding-left: 1em;
     text-align: right;
 }
 
