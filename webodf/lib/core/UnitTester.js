@@ -644,21 +644,25 @@ core.UnitTester = function UnitTester() {
             var fname = todo[0].name,
                 expectFail = (todo[0].expectFail === true);
             lastFailCount = runner.countFailedTests();
-            test.setUp();
-            logger.startTest(testName, fname);
-            if (expectFail) {
-                runner.beginExpectFail();
-            }
-            t(function () {
-                if (expectFail) {
-                    runner.endExpectFail();
-                }
-                report(logger.endTest());
-                test.tearDown();
-                testResults[fname] = lastFailCount ===
-                    runner.countFailedTests();
+            if (testNames.length && testNames.indexOf(fname) === -1) {
                 runAsyncTests(todo.slice(1));
-            });
+            } else {
+                test.setUp();
+                logger.startTest(testName, fname);
+                if (expectFail) {
+                    runner.beginExpectFail();
+                }
+                t(function () {
+                    if (expectFail) {
+                        runner.endExpectFail();
+                    }
+                    report(logger.endTest());
+                    test.tearDown();
+                    testResults[fname] = lastFailCount ===
+                        runner.countFailedTests();
+                    runAsyncTests(todo.slice(1));
+                });
+            }
         }
         runAsyncTests(test.asyncTests());
     };
