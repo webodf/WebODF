@@ -45,7 +45,8 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         domUtils = new core.DomUtils(),
         textns = odf.Namespaces.textns,
         r = runner,
-        testarea;
+        testarea,
+        CACHE_STEP_SIZE = 5;
 
     function roundDown(step) {
         return step === ops.StepsTranslator.PREVIOUS_STEP;
@@ -141,7 +142,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         };
         t.translator = new ops.StepsTranslator(function() { return testarea; },
             gui.SelectionMover.createPositionIterator,
-            t.filter, 5);
+            t.filter, CACHE_STEP_SIZE);
     };
     this.tearDown = function () {
         t = {};
@@ -599,6 +600,31 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         verifyParagraphBoundaries(paragraphs);
     }
 
+    function handleStepsRemoved_AdjustsTrailingParagraph() {
+        // Arrange:
+        var doc = createDoc("<text:p>12345</text:p><text:p>12345</text:p><text:p>12345</text:p><text:p>trailingA</text:p><text:p>trailingB</text:p>"),
+            paragraphs = extractParagraphBoundaries(doc),
+            parent = paragraphs[0].node.parentNode,
+            removedLength = paragraphs[1].length + 1 + paragraphs[2].length + 1; // +1 for each paragraph boundary crossed
+
+        t.translator.prime();
+        t.filter.popCallCount();
+
+        parent.removeChild(paragraphs[1].node);
+        parent.removeChild(paragraphs[2].node);
+
+        // Act:
+        t.translator.handleStepsRemoved({
+            position: paragraphs[1].start,
+            length: removedLength
+        });
+
+        // Assert:
+        paragraphs[3].start -= removedLength;
+        paragraphs[4].start -= removedLength;
+        verifyParagraphBoundaries([paragraphs[0], paragraphs[3], paragraphs[4]]);
+    }
+
     this.tests = function () {
         return r.name([
             convertStepsToDomPoint_At0,
@@ -636,7 +662,8 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             handleStepsInserted_InsertParagraphAtDocumentEnd,
             handleStepsRemoved_RemoveMultipleStepsIndividually,
             handleStepsRemoved_RemoveMultipleParagraphsIndividually,
-            handleStepsRemoved_AtDocumentStart
+            handleStepsRemoved_AtDocumentStart,
+            handleStepsRemoved_AdjustsTrailingParagraph
         ]);
     };
     this.asyncTests = function () {

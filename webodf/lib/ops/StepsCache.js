@@ -281,6 +281,7 @@
          * @return {undefined}
          */
         function insertBookmark(previousBookmark, newBookmark) {
+            var nextBookmark;
             // Check if the newBookmark is already in the chain at the correct location. Don't bother updating
             // if it is in place.
             if (previousBookmark !== newBookmark && previousBookmark.nextBookmark !== newBookmark) {
@@ -288,9 +289,15 @@
                 // multiple bookmarks somehow end up sharing the same step. This is NOT expected to happen in practice,
                 // but could be caused by an undiscovered bug.
                 removeBookmark(newBookmark);
+                // Assign this value before we override it just below
+                nextBookmark = previousBookmark.nextBookmark;
+
                 newBookmark.nextBookmark = previousBookmark.nextBookmark;
                 newBookmark.previousBookmark = previousBookmark;
                 previousBookmark.nextBookmark = newBookmark;
+                if (nextBookmark) {
+                    nextBookmark.previousBookmark = newBookmark;
+                }
             }
         }
 
