@@ -57,11 +57,14 @@ define(function() {
             startedAt = new Date().getTime();
         };
 
+        this.stop = function() {
+            state.elapsedTime = new Date().getTime() - startedAt;
+        };
+
         /**
          * @param {!boolean} result
          */
         this.complete = function(result) {
-            state.elapsedTime = new Date().getTime() - startedAt;
             state.status = result;
             events.emit("complete", state);
         };

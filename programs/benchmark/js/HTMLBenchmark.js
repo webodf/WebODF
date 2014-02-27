@@ -99,14 +99,18 @@ define([
      * @constructor
      */
     function HTMLBenchmark() {
-        var loadingScreen = document.getElementById('loadingScreen'),
+        var loadingScreenElement = document.getElementById('loadingScreen'),
+            canvasElement = document.getElementById("canvas"),
+            benchmarkResultsElement = document.getElementById("benchmarkResults").getElementsByTagName("tbody")[0],
+            versionElement = document.getElementById("version"),
             config = getConfiguration(),
-            benchmark = new Benchmark(),
-            renderer = new HTMLResultsRenderer(benchmark);
+            benchmark = new Benchmark(canvasElement),
+            renderer = new HTMLResultsRenderer(benchmark, benchmarkResultsElement);
 
+        versionElement.textContent = benchmark.getWebODFVersion();
         renderer.setBackgroundColour(config.colour);
 
-        loadingScreen.style.display = "none";
+        loadingScreenElement.style.display = "none";
 
         benchmark.actions.push(new PreloadDocument(config.fileUrl));
         benchmark.actions.push(new OpenDocument(config.fileUrl));

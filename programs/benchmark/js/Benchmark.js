@@ -36,35 +36,19 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-define([], function() {
+define(["OdfBenchmarkContext"], function(OdfBenchmarkContext) {
         "use strict";
-
-        /**
-         * @constructor
-         * @struct
-         */
-        function SharedState() {
-            /**
-             * @type {!odf.OdfCanvas}
-             */
-            this.odfCanvas = null;
-
-            /**
-             * @type {!gui.SessionController}
-             */
-            this.sessionController = null;
-        }
 
         runtime.loadClass("core.EventNotifier");
         runtime.loadClass("odf.OdfCanvas");
 
         /**
          * @constructor
+         * @param {!HTMLElement} canvasElement
          */
-        function Benchmark() {
+        function Benchmark(canvasElement) {
             var self = this,
-                canvasElement = document.getElementById("canvas"),
-                sharedState = new SharedState(),
+                context = new OdfBenchmarkContext(),
                 events = new core.EventNotifier(["start", "complete"]),
                 currentActionIndex,
                 lastProfileAction;
@@ -79,7 +63,7 @@ define([], function() {
                 if (currentAction) {
                     lastProfileAction = currentAction.state.description;
                     console.profile(lastProfileAction);
-                    currentAction.start(sharedState);
+                    currentAction.start(context);
                 } else {
                     events.emit("complete", {});
                 }
@@ -96,9 +80,19 @@ define([], function() {
                 });
 
                 events.emit("start", {});
-                sharedState.odfCanvas = new odf.OdfCanvas(canvasElement);
+                context.odfCanvas = new odf.OdfCanvas(canvasElement);
                 currentActionIndex = -1;
                 executeNextAction();
+            };
+
+            /**
+             * @returns {!string}
+             */
+            this.getWebODFVersion = function() {
+                return (typeof webodf_version !== "undefined"
+                    ? String(webodf_version)
+                    : "uncompiled"
+                    );
             };
         }
 

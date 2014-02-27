@@ -49,6 +49,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             action = new BenchmarkAction(state);
 
         function onDocumentLoaded() {
+            action.stop();
             action.complete(true);
         }
 
@@ -56,12 +57,12 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.state = state;
 
         /**
-         * @param {!SharedState} sharedState
+         * @param {!OdfBenchmarkContext} context
          */
-        this.start = function(sharedState) {
+        this.start = function(context) {
             action.start();
-            sharedState.odfCanvas.addListener("statereadychange", onDocumentLoaded);
-            sharedState.odfCanvas.load(docUrl);
+            context.odfCanvas.addListener("statereadychange", onDocumentLoaded);
+            context.odfCanvas.load(docUrl);
         };
     }
 
