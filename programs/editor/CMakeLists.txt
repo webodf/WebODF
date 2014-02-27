@@ -1,4 +1,5 @@
 SET(COMMON_EDITOR_FILES
+    avatar-bella.png
     Tools.js
     avatar-joe.png
     EditorSession.js
