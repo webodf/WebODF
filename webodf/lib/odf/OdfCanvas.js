@@ -224,13 +224,17 @@
      **/
     function handleStyles(odfcontainer, formatting, stylesxmlcss) {
         // update the css translation of the styles
-        var style2css = new odf.Style2CSS();
+        var style2css = new odf.Style2CSS(),
+            styleTree = new odf.StyleTree(
+                odfcontainer.rootElement.styles,
+                odfcontainer.rootElement.automaticStyles).getStyleTree();
+
         style2css.style2css(
             odfcontainer.getDocumentType(),
+            odfcontainer.rootElement,
             /**@type{!CSSStyleSheet}*/(stylesxmlcss.sheet),
             formatting.getFontMap(),
-            odfcontainer.rootElement.styles,
-            odfcontainer.rootElement.automaticStyles
+            styleTree
         );
     }
 
