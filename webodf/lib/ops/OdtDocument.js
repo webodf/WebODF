@@ -132,7 +132,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         var odfContainer = odfCanvas.odfContainer();
         // TODO Replace with a neater hack for reloading the Odt tree
         // Once this is fixed, SelectionView.addOverlays & StepsTranslator.verifyRootNode can be largely removed
-        // Also checkout some swear words in EventManager which re-adds the event trap
         odfContainer.setRootElement(documentElement);
         odfCanvas.setOdfContainer(odfContainer, true);
         odfCanvas.refreshCSS();

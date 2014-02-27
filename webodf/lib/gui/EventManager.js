@@ -57,11 +57,11 @@ gui.EventManager = function EventManager(odtDocument) {
             // Epiphany 3.6.1 requires this to allow the paste event to fire
             "beforepaste": true
         },
-        // Events that should be bound to the global window rather than the sizer element
+        // Events that should be bound to the global window rather than the canvas element
         bindToWindow = {
-            // Capture selections that start outside the sizer element and end within the sizer element
+            // Capture selections that start outside the canvas element and end within the canvas element
             "mousedown": true,
-            // Capture selections that start inside the sizer element and end outside of the element or even window
+            // Capture selections that start inside the canvas element and end outside of the element or even window
             "mouseup": true,
             // Focus is a non-bubbling event, and we'll usually pass focus to the event trap
             "focus": true
@@ -69,18 +69,8 @@ gui.EventManager = function EventManager(odtDocument) {
         /**@type{!Object.<string,!EventDelegate>}*/
         eventDelegates = {},
         /**@type{!HTMLInputElement}*/
-        eventTrap;
-
-    /**
-     * Get the current sizer element. The current trivial undo manager replaces the root element
-     * of the ODF container with a clone from a previous state. This results in the root element
-     * being changed. As such, it can't be stored, and should be queried on each use.
-     * @return {!Element}
-     */
-    function getSizerElement() {
-        // TODO Remove when a proper undo manager arrives
-        return odtDocument.getOdfCanvas().getSizer();
-    }
+        eventTrap,
+        canvasElement = odtDocument.getCanvas().getElement();
 
     /**
      * Ensures events that may bubble through multiple sources are only handled once.
@@ -187,10 +177,8 @@ gui.EventManager = function EventManager(odtDocument) {
      * @return {EventDelegate}
      */
     function getDelegateForEvent(eventName, shouldCreate) {
-        var delegate = eventDelegates[eventName] || null,
-            sizerElement;
+        var delegate = eventDelegates[eventName] || null;
         if (!delegate && shouldCreate) {
-            sizerElement = getSizerElement();
             delegate = eventDelegates[eventName] = new EventDelegate();
             if (bindToWindow[eventName]) {
                 // Internet explorer will only supply mouse up & down on the window object
@@ -198,8 +186,7 @@ gui.EventManager = function EventManager(odtDocument) {
                 listenEvent(window, eventName, delegate.handleEvent);
             }
             listenEvent(eventTrap, eventName, delegate.handleEvent);
-            // TODO this needs to be rebound if sizerElement changes
-            listenEvent(sizerElement, eventName, delegate.handleEvent);
+            listenEvent(canvasElement, eventName, delegate.handleEvent);
         }
         return delegate;
     }
@@ -324,7 +311,7 @@ gui.EventManager = function EventManager(odtDocument) {
     };
 
     function init() {
-        var sizerElement = getSizerElement(),
+        var sizerElement = odtDocument.getOdfCanvas().getSizer(),
             doc = sizerElement.ownerDocument;
 
         runtime.assert(Boolean(window), "EventManager requires a window object to operate correctly");
