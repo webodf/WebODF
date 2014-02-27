@@ -130,6 +130,7 @@ define("webodf/editor/Tools", [
                         widget.startup();
                     });
                     sessionSubscribers.push(undoRedoMenu);
+                    undoRedoMenu.onToolDone = onToolDone;
                 }
 
                 // Add annotation

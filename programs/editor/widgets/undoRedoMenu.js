@@ -59,6 +59,7 @@ define("webodf/editor/widgets/undoRedoMenu",
                 onClick: function () {
                     if (editorSession) {
                         editorSession.undo();
+                        self.onToolDone();
                     }
                 }
             });
@@ -71,6 +72,7 @@ define("webodf/editor/widgets/undoRedoMenu",
                 onClick: function () {
                     if (editorSession) {
                         editorSession.redo();
+                        self.onToolDone();
                     }
                 }
             });
@@ -108,6 +110,8 @@ define("webodf/editor/widgets/undoRedoMenu",
                     // TODO: checkUndoButtons(editorSession.getundoredoavailablalalo());
                 }
             };
+
+            this.onToolDone = function () {};
 
             // init
             callback(widget);
