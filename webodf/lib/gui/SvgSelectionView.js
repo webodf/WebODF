@@ -589,11 +589,11 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
                         && cursor.getSelectionType() === ops.OdtCursor.RangeSelection
                         && !range.collapsed;
         if (shouldShow) {
+            addOverlay();
             shouldShow = repositionOverlays(range);
         }
         if (shouldShow) {
             overlay.style.display = "block";
-            addOverlay();
         } else {
             overlay.style.display = "none";
         }

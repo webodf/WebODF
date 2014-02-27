@@ -39,61 +39,57 @@
 /*global define,require*/
 
 define("webodf/editor/widgets/undoRedoMenu",
-    ["webodf/editor/EditorSession"],
+    ["webodf/editor/EditorSession", "dijit/form/Button"],
 
-    function (EditorSession) {
+    function (EditorSession, Button) {
         "use strict";
 
         return function UndoRedoMenu(callback) {
-            var editorSession,
+            var self = this,
+                editorSession,
                 undoButton,
-                redoButton;
+                redoButton,
+                widget = {};
 
-            function makeWidget(callback) {
-                require(["dijit/form/Button"], function (Button) {
-                    var widget = {};
+            undoButton = new Button({
+                label: runtime.tr('Undo'),
+                showLabel: false,
+                disabled: true, // TODO: get current session state
+                iconClass: "dijitEditorIcon dijitEditorIconUndo",
+                onClick: function () {
+                    if (editorSession) {
+                        editorSession.undo();
+                        self.onToolDone();
+                    }
+                }
+            });
 
-                    undoButton = new Button({
-                        label: runtime.tr('Undo'),
-                        showLabel: false,
-                        disabled: true, // TODO: get current session state
-                        iconClass: "dijitEditorIcon dijitEditorIconUndo",
-                        onClick: function () {
-                            if (editorSession) {
-                                editorSession.undo();
-                            }
-                        }
-                    });
+            redoButton = new Button({
+                label: runtime.tr('Redo'),
+                showLabel: false,
+                disabled: true, // TODO: get current session state
+                iconClass: "dijitEditorIcon dijitEditorIconRedo",
+                onClick: function () {
+                    if (editorSession) {
+                        editorSession.redo();
+                        self.onToolDone();
+                    }
+                }
+            });
 
-                    redoButton = new Button({
-                        label: runtime.tr('Redo'),
-                        showLabel: false,
-                        disabled: true, // TODO: get current session state
-                        iconClass: "dijitEditorIcon dijitEditorIconRedo",
-                        onClick: function () {
-                            if (editorSession) {
-                                editorSession.redo();
-                            }
-                        }
-                    });
-
-                    widget.children = [undoButton, redoButton];
-                    widget.startup = function () {
-                        widget.children.forEach(function (element) {
-                            element.startup();
-                        });
-                    };
-
-                    widget.placeAt = function (container) {
-                        widget.children.forEach(function (element) {
-                            element.placeAt(container);
-                        });
-                        return widget;
-                    };
-
-                    return callback(widget);
+            widget.children = [undoButton, redoButton];
+            widget.startup = function () {
+                widget.children.forEach(function (element) {
+                    element.startup();
                 });
-            }
+            };
+
+            widget.placeAt = function (container) {
+                widget.children.forEach(function (element) {
+                    element.placeAt(container);
+                });
+                return widget;
+            };
 
             function checkUndoButtons(e) {
                 if (undoButton) {
@@ -115,9 +111,9 @@ define("webodf/editor/widgets/undoRedoMenu",
                 }
             };
 
+            this.onToolDone = function () {};
+
             // init
-            makeWidget(function (widget) {
-                return callback(widget);
-            });
+            callback(widget);
         };
     });

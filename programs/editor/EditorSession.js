@@ -538,18 +538,12 @@ define("webodf/editor/EditorSession", [
             self.emit(EditorSession.signalUndoStackChanged, e);
         }
 
-        this.hasUndoManager = function () {
-            return Boolean(self.sessionController.getUndoManager());
-        };
-
         this.undo = function () {
-            var undoManager = self.sessionController.getUndoManager();
-            undoManager.moveBackward(1);
+            self.sessionController.undo();
         };
 
         this.redo = function () {
-            var undoManager = self.sessionController.getUndoManager();
-            undoManager.moveForward(1);
+            self.sessionController.redo();
         };
 
         /**
