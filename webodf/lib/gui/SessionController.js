@@ -319,6 +319,8 @@
 
             return false;
         }
+        // TODO it will soon be time to grow an UndoController
+        this.undo = undo;
 
         /**
          * @return {!boolean}
@@ -336,6 +338,8 @@
 
             return false;
         }
+        // TODO it will soon be time to grow an UndoController
+        this.redo = redo;
 
         function updateShadowCursor() {
             var selection = window.getSelection(),
