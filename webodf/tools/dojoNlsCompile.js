@@ -48,19 +48,22 @@
  */
 (function() {
 	"use strict";
-	var fs = require("fs"),
-	log=function(x) {
+	var path = require("path"),
+		fs = require("fs"),
+		log=function(x) {
 		process.stderr.write(x);
 		process.stderr.write("\n");
 	},
 	output_file,
+	pathSeparatorTest = path.sep !== "/" ? /\// : /[\/\\]/,
 	file_list = [],
 	stat,
 	start=process.argv[1],
 	langs = process.argv;
 	langs.shift(); // node interpreter
-	// skip all arguments containing a /
-	while (langs[0] && langs[0].match(/\//)) {
+	// skip all arguments containing a path separator or a /
+	// Need to cope with both as Windows can handle either one
+	while (langs[0] && langs[0].match(pathSeparatorTest)) {
 		start = langs.shift();
 	}
 
