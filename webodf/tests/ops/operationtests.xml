@@ -808,7 +808,7 @@
   </ops>
   <after><office:text><text:p>hello</text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
- <test name="SplitParagraph_InSpaceBlock_LeadingSpace" isFailing="true">
+ <test name="SplitParagraph_InSpaceBlock_LeadingSpace">
   <before><office:text><text:p>hello <text:s> </text:s>world</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
@@ -817,7 +817,7 @@
   </ops>
   <after><office:text><text:p>hello<text:s> </text:s></text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
- <test name="SplitParagraph_ExtraneousWhiteSpace_DiscardsUnneededSpace" isFailing="true">
+ <test name="SplitParagraph_ExtraneousWhiteSpace_DiscardsUnneededSpace">
   <before><office:text><text:p>hello world</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
@@ -1621,7 +1621,10 @@
   </ops>
   <after><office:text><text:p><text:span>abc <c:cursor c:memberId="Joe"/></text:span><text:span>ef</text:span></text:p></office:text></after>
  </test>
- <test name="RemoveText_NearWhitespaceOverBoundary_4" isFailing="true">
+ <test name="RemoveText_NearWhitespaceOverBoundary_4">
+  <!-- This test has a problem with trailing whitespace not being correctly downgraded.
+       When the trailing spaces become correctly downgraded, this test can be removed and
+       the following will replace it -->
   <before><office:text><text:p><text:span>abc</text:span><text:span>d <text:s> </text:s>ef</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -1629,5 +1632,14 @@
    <op optype="RemoveText" memberid="Joe" position="3" length="1"/>
   </ops>
   <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span><text:s> </text:s><text:s> </text:s>ef</text:span></text:p></office:text></after>
+ </test>
+ <test name="RemoveText_NearWhitespaceOverBoundary_4_Ideal" isFailing="true">
+  <before><office:text><text:p><text:span>abc</text:span><text:span>d <text:s> </text:s>ef</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="3" length="1"/>
+   <op optype="RemoveText" memberid="Joe" position="3" length="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span> <text:s> </text:s>ef</text:span></text:p></office:text></after>
  </test>
 </tests>
