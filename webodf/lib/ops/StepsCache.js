@@ -587,11 +587,16 @@
         };
 
         /**
-         * Mark all steps beyond inflectionStep as no longer accurate
+         * Mark all steps beyond inflectionStep as no longer accurate. Note, if a negative value
+         * is passed in it is treated as a 0, and the whole cache will be cleared.
          * @param {!number} inflectionStep
          * @return {undefined}
          */
         this.damageCacheAfterStep = function(inflectionStep) {
+            if (inflectionStep < 0) {
+                // Truncate negative steps to be 0. Saves some badness from occurring if a negative is passed in.
+                inflectionStep = 0;
+            }
             if (lastUndamagedCacheStep === undefined) {
                 lastUndamagedCacheStep = inflectionStep;
             } else if (inflectionStep < lastUndamagedCacheStep) {

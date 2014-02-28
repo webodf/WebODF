@@ -259,7 +259,7 @@
             // Paragraph merge behaviours might result in the paragraph exactly at the reported position being
             // replaced by a later paragraph. Conceptually, this means the last unmodified position is
             // actually 1 step prior to the replace paragraph.
-            stepsCache.damageCacheAfterStep(eventArgs.position === 0 ? 0 : eventArgs.position - 1);
+            stepsCache.damageCacheAfterStep(eventArgs.position - 1);
         };
     };
 
