@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global Node, runtime, core, gui, ops, odf, xmldom*/
+/*global Node, NodeFilter, runtime, core, gui, ops, odf, xmldom*/
 
 /**
  * @constructor
@@ -142,6 +142,32 @@ ops.OperationTests = function OperationTests(runner) {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns true if the specified node is an empty text node
+     * @param {!Node} node
+     * @return {!number}
+     */
+    function emptyNodes(node) {
+        if (node.nodeType === Node.TEXT_NODE && node.length === 0) {
+            return NodeFilter.FILTER_ACCEPT;
+        }
+        return NodeFilter.FILTER_REJECT;
+    }
+
+    /**
+     * Check that there are no empty text nodes in the supplied rootElement
+     * @param {!Node} rootElement
+     * @return {undefined}
+     */
+    function checkForEmptyTextNodes(rootElement) {
+        var walker = rootElement.ownerDocument.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT, emptyNodes, false),
+            node;
+        node = walker.nextNode();
+        if (node) {
+            r.testFailed("Empty text nodes were found");
+        }
     }
     function parseTest(name, node) {
         var hasSetup = node.getAttribute("hasSetup") === "true",
@@ -265,6 +291,7 @@ ops.OperationTests = function OperationTests(runner) {
             if (metabefore) {
                 t.odtDocument.emit(ops.OdtDocument.signalOperationEnd, op);
             }
+            checkForEmptyTextNodes(t.odtDocument.getCanvas().getElement());
         }
 
         // check result

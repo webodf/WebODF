@@ -808,7 +808,7 @@
   </ops>
   <after><office:text><text:p>hello</text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
- <test name="SplitParagraph_InSpaceBlock_LeadingSpace">
+ <test name="SplitParagraph_InSpaceBlock_LeadingSpace" isFailing="true">
   <before><office:text><text:p>hello <text:s> </text:s>world</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
@@ -817,7 +817,7 @@
   </ops>
   <after><office:text><text:p>hello<text:s> </text:s></text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
- <test name="SplitParagraph_ExtraneousWhiteSpace_DiscardsUnneededSpace">
+ <test name="SplitParagraph_ExtraneousWhiteSpace_DiscardsUnneededSpace" isFailing="true">
   <before><office:text><text:p>hello world</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
@@ -1593,5 +1593,41 @@
    <op optype="MoveCursor" memberid="Joe" position="0" length="2"/>
   </ops>
   <after><office:text><text:p><c:anchor c:memberId="Joe"/>AB<c:cursor c:memberId="Joe"/>C</text:p></office:text></after>
+ </test>
+ <test name="RemoveText_NearWhitespaceOverBoundary" isFailing="true">
+  <before><office:text><text:p><text:span>abc <text:s> </text:s></text:span><text:span>def</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="4" length="2"/>
+   <op optype="RemoveText" memberid="Joe" position="4" length="2"/>
+  </ops>
+  <after><office:text><text:p><text:span>abc <c:cursor c:memberId="Joe"/></text:span><text:span>ef</text:span></text:p></office:text></after>
+ </test>
+ <test name="RemoveText_NearWhitespaceOverBoundary_2">
+  <before><office:text><text:p><text:span>abc <text:s> </text:s></text:span><text:span>def</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="3" length="3"/>
+   <op optype="RemoveText" memberid="Joe" position="3" length="3"/>
+  </ops>
+  <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span>ef</text:span></text:p></office:text></after>
+ </test>
+ <test name="RemoveText_NearWhitespaceOverBoundary_3" isFailing="true">
+  <before><office:text><text:p><text:span>abc </text:span><text:span>def</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="4" length="1"/>
+   <op optype="RemoveText" memberid="Joe" position="4" length="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>abc <c:cursor c:memberId="Joe"/></text:span><text:span>ef</text:span></text:p></office:text></after>
+ </test>
+ <test name="RemoveText_NearWhitespaceOverBoundary_4" isFailing="true">
+  <before><office:text><text:p><text:span>abc</text:span><text:span>d <text:s> </text:s>ef</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="3" length="1"/>
+   <op optype="RemoveText" memberid="Joe" position="3" length="1"/>
+  </ops>
+  <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span><text:s> </text:s><text:s> </text:s>ef</text:span></text:p></office:text></after>
  </test>
 </tests>
