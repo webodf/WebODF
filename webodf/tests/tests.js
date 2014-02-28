@@ -63,6 +63,13 @@ runtime.loadClass("ops.TransformerTests");
 runtime.loadClass("xmldom.LSSerializerTests");
 runtime.loadClass("xmldom.XPathTests");
 
+
+// The StepsCache verification feature verifies the cache after every modification to ensure it does
+// not contain any bad data. This is quite slow to do in practice, but is very helpful for debugging,
+// and very important for tests.
+runtime.loadClass("ops.StepsCache");
+ops.StepsCache.ENABLE_CACHE_VERIFICATION = true;
+
 /**
  * Holds the unit tests to run.
  * @type {!Array.<Function>}
