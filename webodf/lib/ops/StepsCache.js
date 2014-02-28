@@ -79,6 +79,9 @@
      */
     ops.StepsCache = function StepsCache(rootElement, filter, bucketSize) {
         var coordinatens = "urn:webodf:names:steps",
+            // Note, our coding standards usually require a key of !string for a dictionary.
+            // As I'm often assigning numbers as well (which JS quite happily converts for me)
+            // using both types saves me a lot of extra typing
             /**@type{!Object.<(!string|!number), !ops.StepsCache.Bookmark>}*/
             stepToDomPoint = {},
             /**@type{!Object.<!string, !ops.StepsCache.Bookmark>}*/
@@ -177,7 +180,7 @@
         }
 
         /**
-         * Run a serious of verification checks against the complete cache to ensure it is operating
+         * Run a series of verification checks against the complete cache to ensure it is operating
          * correctly. Note, this is VERY expensive, and should only be done when attempting to diagnose
          * caching problems
          * @return {undefined}
@@ -453,8 +456,8 @@
                     damagedBookmark = nextBookmark;
                 }
 
-                // Have now recovered the cache up to the supplied step. All bookmarks before this are
-                // guaranteed to be up-to-date.
+                // Have now recovered the cache up to the supplied step. All bookmarks up to this
+                // step are guaranteed to be up-to-date.
                 lastUndamagedCacheStep = currentIteratorStep;
             } else {
                 undamagedBookmark = getClosestBookmark(currentIteratorStep);
