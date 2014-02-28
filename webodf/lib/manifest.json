@@ -388,9 +388,13 @@
     "ops.Session": [
         "ops.TrivialOperationRouter"
     ],
-    "ops.StepsTranslator": [
+    "ops.StepsCache": [
+        "core.LoopWatchDog",
         "core.PositionFilter",
         "odf.OdfUtils"
+    ],
+    "ops.StepsTranslator": [
+        "ops.StepsCache"
     ],
     "ops.TextPositionFilter": [
         "core.PositionFilter",

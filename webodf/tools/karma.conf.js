@@ -59,6 +59,7 @@ module.exports = function (config) {
             'lib/ops/Document.js',
             'lib/ops/OdtCursor.js',
             'lib/ops/Operation.js',
+            'lib/ops/StepsCache.js',
             'lib/ops/StepsTranslator.js',
             'lib/ops/TextPositionFilter.js',
             'lib/ops/OdtDocument.js',

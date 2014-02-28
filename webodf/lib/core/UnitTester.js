@@ -620,7 +620,7 @@ core.UnitTester = function UnitTester() {
             try {
                 t();
             } catch(/**@type{!Error}*/e) {
-                runner.testFailed("Unexpected exception encountered: " + e.toString());
+                runner.testFailed("Unexpected exception encountered: " + e.toString() + "\n" + e.stack);
             }
             if (texpectFail) {
                 runner.endExpectFail();

@@ -1642,4 +1642,26 @@
   </ops>
   <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span> <text:s> </text:s>ef</text:span></text:p></office:text></after>
  </test>
+ <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots">
+  <!--- happened when simulating github issue #417 -->
+  <before>
+   <office:text><text:p/><text:p>ABCDEFGH</text:p><text:p>12345678</text:p></office:text>
+  </before>
+  <ops>
+   <op optype="AddAnnotation" memberid="Alice" position="3" length="2" name="a" timestamp="1375706047061"/>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="17" length="0"/>
+   <op optype="MoveCursor" memberid="Joe" position="0" length="0"/>
+   <!-- Insert 500 chars at the begin for another step cache bookmark -->
+   <op optype="InsertText" memberid="Alice" position="0" text="...................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................."/>
+   <!-- remove one char before annotation start, one behind and +2 for positions due to being inline-root -->
+   <op optype="RemoveText" position="502" length="4"/>
+   <!-- Remove the 500 chars again, for simpler debugging-->
+   <op optype="RemoveText" position="0" length="500"/>
+   <op optype="MoveCursor" memberid="Joe" position="15" length="0"/>
+  </ops>
+  <after>
+   <office:text><text:p/><text:p>A<office:annotation office:name="a"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D<office:annotation-end office:name="a"/>EFGH</text:p><text:p>12345<c:cursor c:memberId="Joe"/>678</text:p></office:text>.
+  </after>
+ </test>
 </tests>
