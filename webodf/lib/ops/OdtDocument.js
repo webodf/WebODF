@@ -506,14 +506,26 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function upgradeWhitespaceToElement(textNode, offset) {
         runtime.assert(textNode.data[offset] === ' ', "upgradeWhitespaceToElement: textNode.data[offset] should be a literal space");
 
-        var space = textNode.ownerDocument.createElementNS(odf.Namespaces.textns, 'text:s');
+        var space = textNode.ownerDocument.createElementNS(odf.Namespaces.textns, 'text:s'),
+            container = textNode.parentNode,
+            adjacentNode = textNode;
+
         space.appendChild(textNode.ownerDocument.createTextNode(' '));
 
-        textNode.deleteData(offset, 1);
-        if (offset > 0) { // Don't create an empty text node if the offset is 0...
-            textNode = /**@type {!Text}*/(textNode.splitText(offset));
+        if (textNode.length === 1) {
+            // The space is the only element in this node. Can simply replace it
+            container.replaceChild(space, textNode);
+        } else {
+            textNode.deleteData(offset, 1);
+            if (offset > 0) { // Don't create an empty text node if the offset is 0...
+                if (offset < textNode.length) {
+                    // Don't split if offset === textNode.length as this would add an empty text node after
+                    textNode.splitText(offset);
+                }
+                adjacentNode = textNode.nextSibling;
+            }
+            container.insertBefore(space, adjacentNode);
         }
-        textNode.parentNode.insertBefore(space, textNode);
         return space;
     }
 
