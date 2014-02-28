@@ -1642,7 +1642,7 @@
   </ops>
   <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span> <text:s> </text:s>ef</text:span></text:p></office:text></after>
  </test>
- <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots" isFailing="true">
+ <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots">
   <!--- happened when simulating github issue #417 -->
   <before>
    <office:text><text:p/><text:p>ABCDEFGH</text:p><text:p>12345678</text:p></office:text>

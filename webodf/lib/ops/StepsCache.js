@@ -317,32 +317,22 @@
         }
 
         /**
-         * Returns the closest undamaged bookmark to the supplied bookmark
-         * @param {!ops.StepsCache.Bookmark} bookmark
-         * @returns {!ops.StepsCache.Bookmark}
-         */
-        function getUndamagedBookmark(bookmark) {
-            var undamagedBookmark;
-
-            if (lastUndamagedCacheStep !== undefined) {
-                undamagedBookmark = bookmark;
-                while (undamagedBookmark.steps > lastUndamagedCacheStep) {
-                    undamagedBookmark = undamagedBookmark.previousBookmark;
-                }
-                bookmark = undamagedBookmark || basePoint;
-            }
-            return bookmark;
-        }
-
-        /**
-         * Finds the closest bookmark before or at the specified steps count
+         * Returns the closest undamaged bookmark before or at the specified step
          * @param {!number} steps
          * @return {!ops.StepsCache.Bookmark}
          */
         function getClosestBookmark(steps) {
-            var cacheBucket = getBucket(steps),
+            var cacheBucket,
                 cachePoint,
                 loopGuard = new core.LoopWatchDog(0, 10000);
+
+            // This function promises to return an undamaged bookmark at all times.
+            // Easiest way to ensure this is don't allow requests to damaged sections
+            // of the cache.
+            if (lastUndamagedCacheStep !== undefined && steps > lastUndamagedCacheStep) {
+                steps = lastUndamagedCacheStep;
+            }
+            cacheBucket = getBucket(steps);
 
             while (!cachePoint && cacheBucket !== 0) {
                 cachePoint = stepToDomPoint[cacheBucket];
@@ -355,6 +345,21 @@
                 cachePoint = cachePoint.nextBookmark;
             }
             return cachePoint;
+        }
+
+        /**
+         * Returns the closest undamaged bookmark before (or equal to) the supplied bookmark
+         * @param {!ops.StepsCache.Bookmark} bookmark
+         * @return {!ops.StepsCache.Bookmark}
+         */
+        function getUndamagedBookmark(bookmark) {
+            // Based on logic in the repairCacheUpToStep, a damaged bookmark is guaranteed to have it's
+            // steps moved beyond the damage point. This makes it simple to check if the bookmark is
+            // in the damaged region, and return the last undamaged one if it is.
+            if (lastUndamagedCacheStep !== undefined && bookmark.steps > lastUndamagedCacheStep) {
+                bookmark = getClosestBookmark(lastUndamagedCacheStep);
+            }
+            return bookmark;
         }
 
         /**
@@ -400,48 +405,61 @@
         }
 
         /**
-         * Repair any damaged bookmarks up to (and including) the supplied step. Returns the closest
-         * undamaged bookmark just prior or equal to the supplied step.
-         * @param {!number} step
+         * Signal that all bookmarks up to the specified step have been iterated over and are up-to-date. This allows
+         * removed nodes and invalid bookmarks to be removed from the cache. This function will return the closest
+         * undamaged bookmark just at or prior to the supplied step.
+         * @param {!number} currentIteratorStep
          * @return {!ops.StepsCache.Bookmark}
          */
-        function repairCacheUpToStep(step) {
-            var bookmark,
-                closestBookmark,
+        function repairCacheUpToStep(currentIteratorStep) {
+            var damagedBookmark,
+                undamagedBookmark,
                 nextBookmark,
                 stepsBucket;
 
-            if (lastUndamagedCacheStep !== undefined && lastUndamagedCacheStep < step) {
-                bookmark = getClosestBookmark(lastUndamagedCacheStep); // Get the last undamaged bookmark
-                closestBookmark = bookmark;
-                bookmark = bookmark.nextBookmark; // Don't need to check the undamaged bookmark however
+            if (lastUndamagedCacheStep !== undefined && lastUndamagedCacheStep < currentIteratorStep) {
+                // The step indicates where in the document re-iteration has covered. This function
+                // is called every time a bookmark is updated, and the lastUndamagedCacheStep is updated
+                // after every call. This means that all bookmarks between the undamagedBookmark and the current step
+                // have not been updated, so they are either:
+                // a) no longer in the document and should be removed
+                // or b) are no longer before this step and should be pushed back into the damaged region
 
-                while (bookmark && bookmark.steps <= step) {
-                    nextBookmark = bookmark.nextBookmark;
-                    if (!domUtils.containsNode(rootElement, bookmark.node)) {
-                        // The bookmarked node no longer exists in the document. Remove it from all caches
-                        stepsBucket = getDestinationBucket(bookmark.steps);
-                        if (stepToDomPoint[stepsBucket] === bookmark) {
-                            stepToDomPoint[stepsBucket] = /**@type{!ops.StepsCache.Bookmark}*/(bookmark.previousBookmark);
-                        }
+                undamagedBookmark = getClosestBookmark(lastUndamagedCacheStep); // Get the last undamaged bookmark
+                damagedBookmark = undamagedBookmark.nextBookmark; // Don't need to check the undamaged bookmark however
 
-                        // Don't unlink until after stepsToDomPoint has been relocated otherwise previousBookmark
-                        // will be null
-                        removeBookmark(bookmark);
-                        delete nodeToBookmark[bookmark.nodeId];
-                    } else {
-                        closestBookmark = bookmark;
+                while (damagedBookmark && damagedBookmark.steps <= currentIteratorStep) {
+                    nextBookmark = damagedBookmark.nextBookmark;
+                    stepsBucket = getDestinationBucket(damagedBookmark.steps);
+                    // A damaged bookmark is not valid in the stepToDomPoint. In order to minimise update load though
+                    // we don't remove them all at once. Each bookmark is checked vs. the damage point first before use,
+                    // so in order to guarantee we never return a damaged bookmark, we only need to remove damaged
+                    // bookmarks before the damage point.
+
+                    if (stepToDomPoint[stepsBucket] === damagedBookmark) {
+                        // stepToDomPoint is a sparsely populated cache. For damaged bookmarks, the
+                        // safest thing to do is to remove them entirely from view
+                        delete stepToDomPoint[stepsBucket];
                     }
-                    bookmark = nextBookmark;
+                    if (!domUtils.containsNode(rootElement, damagedBookmark.node)) {
+                        // Node no longer exists in the document. Discard the bookmark as well
+                        removeBookmark(damagedBookmark);
+                        delete nodeToBookmark[damagedBookmark.nodeId];
+                    } else {
+                        // Move the damaged bookmark clearly past the undamaged step
+                        // If this appears later in the sequence, the step number will be corrected then
+                        damagedBookmark.steps = currentIteratorStep + 1;
+                    }
+                    damagedBookmark = nextBookmark;
                 }
 
                 // Have now recovered the cache up to the supplied step. All bookmarks before this are
                 // guaranteed to be up-to-date.
-                lastUndamagedCacheStep = step;
+                lastUndamagedCacheStep = currentIteratorStep;
             } else {
-                closestBookmark = getClosestBookmark(step);
+                undamagedBookmark = getClosestBookmark(currentIteratorStep);
             }
-            return closestBookmark || basePoint;
+            return undamagedBookmark;
         }
 
         /**
@@ -467,6 +485,8 @@
                 }
 
                 closestPriorBookmark = repairCacheUpToStep(steps);
+                // Note, the node bookmark must be updated after the repair as if steps < lastUndamagedCacheStep
+                // the repair will assume any nodes after lastUndamagedCacheStep are damaged.
                 bookmark = getNodeBookmark(/**@type{!Element}*/(node), steps);
                 insertBookmark(closestPriorBookmark, bookmark);
                 // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
@@ -490,7 +510,7 @@
         this.setToClosestStep = function (steps, iterator) {
             var cachePoint;
             verifyCache();
-            cachePoint = getUndamagedBookmark(getClosestBookmark(steps));
+            cachePoint = getClosestBookmark(steps);
             cachePoint.setIteratorPosition(iterator);
             return cachePoint.steps;
         };
