@@ -36,73 +36,76 @@
     /**
      * Implementation of a step to DOM point lookup cache.
      *
-     * A cache point is created for each passed paragraph, saving the number of steps from the root node to the first
-     * walkable position in the paragraph. This cached point is linked to the paragraph node via a unique identifier
-     * per node.
+     * A cache point ("bookmark") is created for each passed paragraph, saving the number of steps from the root node to
+     * the first step in the paragraph. This cached point is linked to the paragraph node via a unique identifier per
+     * node.
      *
-     * This cache depends on StepsTranslator.handleStepsInserted & handleStepsRemoved is called at the step of change,
-     * along with information about how many steps have been changed. The cache is able to cope with paragraph nodes being
-     * cloned, as long as the position of change and reported number of steps changed is correctly reported.
+     * The cache works by tracking "damage" to it's bookmarks (via steps inserted & removal). As re-iteration over the
+     * damaged sections occur, the bookmarks are updated, and the damage repaired.
+     *
+     * A visual example of the cache during various states is as follows:
+     * legend: -=good bookmark, x=damaged bookmark, !=indeterminate bookmark, ?=requested step,
+     *          @=current iterator position
+     * 
+     * [--------------] <-- cache before steps change
+     * [----x!!!!!!!!!] <-- damage occurs (e.g., a step is deleted) which means all bookmarks after the damage point are
+     *                      now indeterminate as their step location is now outdated
+     * [----xxxxxxxxxx] <-- trailing bookmarks now considered "damaged", and will not be used until they can be repaired
+     * [---@xxxx?xxxxx] <-- when a bookmark is requested for step in the damaged region, the last undamaged bookmark will
+     *                      be returned instead. The consumer of this interface already knows additional iteration may
+     *                      be necessary to reach the desired step count, so this case is no different than if the cache
+     *                      was unprimed.
+     * [------@xxxxxxx] <-- as re-iteration over the doc occurs, bookmark positions are updated and the damage start
+     *                      point is moved along to the next damaged node
+     *
+     * This cache depends on StepsTranslator.handleStepsInserted & handleStepsRemoved being called at the step of change,
+     * along with information about the region that has changed. The cache is able to cope with paragraph nodes being
+     * cloned, as long as the position of change is correctly reported.
      *
      * However, this implementation will NOT cope with paragraphs being re-ordered, even if a change event is reported.
      * This is because the cache relies on the paragraph order remaining fixed as long as they are in the DOM.
      * If paragraph reordering is desired, it can be achieved through either:
-     * a) cloning the paragraph into the new position and removing the original paragraph (the clone will be detected and rectified)
-     * b) removing the original paragraph from the DOM, calling updateCache (to purge the original bookmark) then re-adding
-     *      the paragraph into the new position and calling updateCache a second time (add a brand new bookmark for the paragraph)
+     * a) cloning the paragraph into the new position and removing the original paragraph (the clone will be detected
+     *    and rectified)
+     * b) removing the original paragraph from the DOM, calling updateCache (to purge the original bookmark) then
+     *    re-adding the paragraph into the new position and calling updateCache a second time (add a brand new bookmark
+     *    for the paragraph)
      *
-     * When updateCacheAtPoint is called, the cache will refresh all bookmarks trailing the removal/insertion step. Note,
-     * the exact step of change is not affected. For example, inserting 2 steps after position 9 results in the following
-     * changes to existing points:
-     * 9 => 9
-     * 10 => 12
-     * 11 => 13
-     * ...
      *
-     * Removing 2 steps from after position 9 results in the following:
-     * 9 => 9
-     * 10 => x
-     * 11 => x
-     * 12 => 10
-     * 13 => 11
-     * ...
-     *
-     * @param {!Node} rootNode
+     * @constructor
+     * @param {!Element} rootElement
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
-     * @constructor
      */
-    ops.StepsCache = function StepsCache(rootNode, filter, bucketSize) {
+    ops.StepsCache = function StepsCache(rootElement, filter, bucketSize) {
         var coordinatens = "urn:webodf:names:steps",
-            /**@type{!Object.<(!string|!number), !ParagraphBookmark>}*/
+            /**@type{!Object.<(!string|!number), !ops.StepsCache.Bookmark>}*/
             stepToDomPoint = {},
-            /**@type{!Object.<!string, !ParagraphBookmark>}*/
+            /**@type{!Object.<!string, !ops.StepsCache.Bookmark>}*/
             nodeToBookmark = {},
             odfUtils = new odf.OdfUtils(),
             domUtils = new core.DomUtils(),
             /**@type{!RootBookmark}*/
             basePoint,
+            /**@type{!number|undefined}*/
+            lastUndamagedCacheStep,
             /**@const*/
             FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
 
         /**
          * Bookmark indicating the first walkable position in a paragraph
          * @constructor
+         * @param {!string} nodeId
          * @param {!number} steps
          * @param {!Element} paragraphNode
+         *
+         * @implements {ops.StepsCache.Bookmark}
          */
-        function ParagraphBookmark(steps, paragraphNode) {
+        function ParagraphBookmark(nodeId, steps, paragraphNode) {
+            this.nodeId = nodeId;
             this.steps = steps;
             this.node = paragraphNode;
-
-            /**
-             * @type {?ParagraphBookmark}
-             */
             this.nextBookmark = null;
-
-            /**
-             * @type {?ParagraphBookmark|?RootBookmark}
-             */
             this.previousBookmark = null;
 
             /**
@@ -121,22 +124,18 @@
 
         /**
          * Bookmark indicating the first walkable position in the document
+         * @constructor
+         * @param {!string} nodeId
          * @param {!number} steps
          * @param {!Node} rootNode
-         * @constructor
+         *
+         * @implements {ops.StepsCache.Bookmark}
          */
-        function RootBookmark(steps, rootNode) {
+        function RootBookmark(nodeId, steps, rootNode) {
+            this.nodeId = nodeId;
             this.steps = steps;
             this.node = rootNode;
-
-            /**
-             * @type {?ParagraphBookmark}
-             */
             this.nextBookmark = null;
-
-            /**
-             * @type {null}
-             */
             this.previousBookmark = null;
 
             /**
@@ -206,7 +205,7 @@
          * The element might have been cloned from another part of the document and have a stale or duplicate
          * nodeId
          * @param {!Node} node
-         * @param {!ParagraphBookmark|!RootBookmark} bookmark
+         * @param {!ops.StepsCache.Bookmark} bookmark
          * @return {!boolean} True if the bookmark is actually for the supplied node
          */
         function isValidBookmarkForNode(node, bookmark) {
@@ -218,18 +217,18 @@
          * are updated to the specified number of steps
          * @param {!Element} node
          * @param {!number} steps
-         * @return {!ParagraphBookmark}
+         * @return {!ops.StepsCache.Bookmark}
          */
         function getNodeBookmark(node, steps) {
             var nodeId = getNodeId(node) || setNodeId(node),
                 existingBookmark;
             existingBookmark = nodeToBookmark[nodeId];
             if (!existingBookmark) {
-                existingBookmark = nodeToBookmark[nodeId] = new ParagraphBookmark(steps, node);
+                existingBookmark = nodeToBookmark[nodeId] = new ParagraphBookmark(nodeId, steps, node);
             } else if (!isValidBookmarkForNode(node, existingBookmark)) {
                 runtime.log("Cloned node detected. Creating new bookmark");
                 nodeId = setNodeId(node);
-                existingBookmark = nodeToBookmark[nodeId] = new ParagraphBookmark(steps, node);
+                existingBookmark = nodeToBookmark[nodeId] = new ParagraphBookmark(nodeId, steps, node);
             } else {
                 existingBookmark.steps = steps;
             }
@@ -237,9 +236,27 @@
         }
 
         /**
+         * Returns the closest undamaged bookmark to the supplied bookmark
+         * @param {!ops.StepsCache.Bookmark} bookmark
+         * @returns {!ops.StepsCache.Bookmark}
+         */
+        function getUndamagedBookmark(bookmark) {
+            var undamagedBookmark;
+
+            if (lastUndamagedCacheStep !== undefined) {
+                undamagedBookmark = bookmark;
+                while (undamagedBookmark.steps > lastUndamagedCacheStep) {
+                    undamagedBookmark = undamagedBookmark.previousBookmark;
+                }
+                bookmark = undamagedBookmark || basePoint;
+            }
+            return bookmark;
+        }
+
+        /**
          * Finds the closest bookmark before or at the specified steps count
          * @param {!number} steps
-         * @return {!RootBookmark|!ParagraphBookmark}
+         * @return {!ops.StepsCache.Bookmark}
          */
         function getClosestBookmark(steps) {
             var cacheBucket = getBucket(steps),
@@ -261,7 +278,7 @@
 
         /**
          * Remove a bookmark from the cache chain
-         * @param {!ParagraphBookmark} currentBookmark
+         * @param {!ops.StepsCache.Bookmark} currentBookmark
          * @return {undefined}
          */
         function removeBookmark(currentBookmark) {
@@ -276,8 +293,8 @@
 
         /**
          * Insert a bookmark into the cache chain just after the previous bookmark
-         * @param {!RootBookmark|!ParagraphBookmark} previousBookmark
-         * @param {!ParagraphBookmark} newBookmark
+         * @param {!ops.StepsCache.Bookmark} previousBookmark
+         * @param {!ops.StepsCache.Bookmark} newBookmark
          * @return {undefined}
          */
         function insertBookmark(previousBookmark, newBookmark) {
@@ -302,6 +319,51 @@
         }
 
         /**
+         * Repair any damaged bookmarks up to (and including) the supplied step. Returns the closest
+         * undamaged bookmark just prior or equal to the supplied step.
+         * @param {!number} step
+         * @return {!ops.StepsCache.Bookmark}
+         */
+        function repairCacheUpToStep(step) {
+            var bookmark,
+                closestBookmark,
+                nextBookmark,
+                stepsBucket;
+
+            if (lastUndamagedCacheStep !== undefined && lastUndamagedCacheStep < step) {
+                bookmark = getClosestBookmark(lastUndamagedCacheStep); // Get the last undamaged bookmark
+                closestBookmark = bookmark;
+                bookmark = bookmark.nextBookmark; // Don't need to check the undamaged bookmark however
+
+                while (bookmark && bookmark.steps <= step) {
+                    nextBookmark = bookmark.nextBookmark;
+                    if (!domUtils.containsNode(rootElement, bookmark.node)) {
+                        // The bookmarked node no longer exists in the document. Remove it from all caches
+                        stepsBucket = getDestinationBucket(bookmark.steps);
+                        if (stepToDomPoint[stepsBucket] === bookmark) {
+                            stepToDomPoint[stepsBucket] = /**@type{!ops.StepsCache.Bookmark}*/(bookmark.previousBookmark);
+                        }
+
+                        // Don't unlink until after stepsToDomPoint has been relocated otherwise previousBookmark
+                        // will be null
+                        removeBookmark(bookmark);
+                        delete nodeToBookmark[bookmark.nodeId];
+                    } else {
+                        closestBookmark = bookmark;
+                    }
+                    bookmark = nextBookmark;
+                }
+
+                // Have now recovered the cache up to the supplied step. All bookmarks before this are
+                // guaranteed to be up-to-date.
+                lastUndamagedCacheStep = step;
+            } else {
+                closestBookmark = getClosestBookmark(step);
+            }
+            return closestBookmark || basePoint;
+        }
+
+        /**
          * Process known step to DOM position points for possible caching
          * @param {!number} steps Current steps offset from position 0
          * @param {!core.PositionIterator} iterator
@@ -309,30 +371,28 @@
          * @return {undefined}
          */
         this.updateCache = function(steps, iterator, isStep) {
-            var stablePoint,
-                cacheBucket,
+            var cacheBucket,
                 existingCachePoint,
                 bookmark,
+                closestPriorBookmark,
                 node = iterator.getCurrentNode();
 
             if (iterator.isBeforeNode() && odfUtils.isParagraph(node)) {
-                stablePoint = true;
                 if (!isStep) {
                     // Paragraph bookmarks indicate "first position in the paragraph"
                     // If the current stable point is before the first walkable position (as often happens)
                     // simply increase the step number by 1 to move to within the paragraph node
                     steps += 1;
                 }
-            }
 
-            if (stablePoint) {
-                // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
+                closestPriorBookmark = repairCacheUpToStep(steps);
                 bookmark = getNodeBookmark(/**@type{!Element}*/(node), steps);
-                insertBookmark(getClosestBookmark(steps), bookmark);
+                insertBookmark(closestPriorBookmark, bookmark);
+                // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
                 cacheBucket = getDestinationBucket(bookmark.steps);
                 existingCachePoint = stepToDomPoint[cacheBucket];
                 if (!existingCachePoint || bookmark.steps > existingCachePoint.steps) {
-                    // The current node & offset are closer to the cache bucket boundary than the existing entry is
+                    // The current node & offset are closer to the cache bucket boundary than the existing entry was
                     stepToDomPoint[cacheBucket] = bookmark;
                 }
             }
@@ -346,7 +406,7 @@
          * @return {!number} Corresponding step for the current iterator position
          */
         this.setToClosestStep = function (steps, iterator) {
-            var cachePoint = getClosestBookmark(steps);
+            var cachePoint = getUndamagedBookmark(getClosestBookmark(steps));
             cachePoint.setIteratorPosition(iterator);
             return cachePoint.steps;
         };
@@ -354,14 +414,14 @@
         /**
          * Finds the nearest ancestor node that has an associated bookmark
          * @param {!Node} node
-         * @return {?ParagraphBookmark}
+         * @return {?ops.StepsCache.Bookmark}
          */
         function findBookmarkedAncestor(node) {
             var currentNode = node,
                 nodeId,
                 bookmark = null;
 
-            while (!bookmark && currentNode && currentNode !== rootNode) {
+            while (!bookmark && currentNode && currentNode !== rootElement) {
                 nodeId = getNodeId(currentNode);
                 if (nodeId) {
                     // Take care as a nodeId may be bookmarked in another translator, but not this particular instance
@@ -387,15 +447,15 @@
          * @return {!number} Corresponding step for the current iterator position
          */
         this.setToClosestDomPoint = function (node, offset, iterator) {
-            var /**@type{!RootBookmark|?ParagraphBookmark}*/
+            var /**@type{?ops.StepsCache.Bookmark}*/
                 bookmark,
                 b,
                 /**@type{string|number}*/
                 key;
 
-            if (node === rootNode && offset === 0) {
+            if (node === rootElement && offset === 0) {
                 bookmark = basePoint;
-            } else if (node === rootNode && offset === rootNode.childNodes.length) {
+            } else if (node === rootElement && offset === rootElement.childNodes.length) {
                 bookmark = basePoint;
                 for (key in stepToDomPoint) {
                     if (stepToDomPoint.hasOwnProperty(key)) {
@@ -416,80 +476,66 @@
                 }
             }
 
-            bookmark = bookmark || basePoint;
+            bookmark = getUndamagedBookmark(bookmark || basePoint);
             bookmark.setIteratorPosition(iterator);
             return bookmark.steps;
         };
 
         /**
-         * Update all cached bookmarks starting just beyond the specified step
-         * @param {!number} inflectionStep Step beyond which the changes occurs. Bookmarks beyond step+1 will be updated
-         * @param {!function(number):number} getUpdatedSteps Callback to get an updated number of bookmark steps
+         * Mark all steps beyond inflectionStep as no longer accurate
+         * @param {!number} inflectionStep
          * @return {undefined}
          */
-        this.updateCacheAtPoint = function (inflectionStep, getUpdatedSteps) {
-            var /**@type{!Object.<(string|number),!ParagraphBookmark>}*/
-                updatedBuckets = {},
-                inflectionBookmark = getClosestBookmark(inflectionStep),
-                /**@type{?ParagraphBookmark}*/
-                bookmark,
-                nextBookmark;
-
-            if (inflectionBookmark !== basePoint) {
-                bookmark = /**@type{!ParagraphBookmark}*/(inflectionBookmark);
-            } else {
-                // The base bookmark should never be updated
-                bookmark = basePoint.nextBookmark;
+        this.damageCacheAfterStep = function(inflectionStep) {
+            if (lastUndamagedCacheStep === undefined) {
+                lastUndamagedCacheStep = inflectionStep;
+            } else if (inflectionStep < lastUndamagedCacheStep) {
+                lastUndamagedCacheStep = inflectionStep;
             }
-
-            // Key concept: on step removal, the inflectionStep is replaced by the following step.
-            // In the case of paragraph removal, this means the bookmark at exactly the point of inflection might be replaced.
-            /**
-             * @param {!ParagraphBookmark} bookmark
-             * @return {undefined}
-             */
-            function updateBookmark(bookmark) {
-                var originalCacheBucket = getDestinationBucket(bookmark.steps),
-                    newCacheBucket,
-                    existingBookmark;
-
-                if (!domUtils.containsNode(rootNode, bookmark.node)) {
-                    // Node is no longer present in the document
-                    removeBookmark(bookmark);
-                    delete nodeToBookmark[getNodeId(bookmark.node)];
-                } else if (bookmark !== inflectionBookmark) {
-                    // The inflection bookmark does not have steps updated because it is the last unchanged step
-                    bookmark.steps = getUpdatedSteps(bookmark.steps);
-                    // The destination cache bucket might have updated as a result of the bookmark update
-                    newCacheBucket = getDestinationBucket(bookmark.steps);
-                    existingBookmark = updatedBuckets[newCacheBucket];
-                    if (!existingBookmark || bookmark.steps > existingBookmark.steps) {
-                        // Use this bookmark if it is either the only one in the cache bucket, or the closest
-                        updatedBuckets[newCacheBucket] = bookmark;
-                    }
-                }
-
-                if (stepToDomPoint[originalCacheBucket] === bookmark) {
-                    // The new cache entry will be added in the subsequent update
-                    delete stepToDomPoint[originalCacheBucket];
-                }
-            }
-
-            while (bookmark) {
-                // Save a copy now because nextBookmark might be unlinked during the update
-                nextBookmark = bookmark.nextBookmark;
-                updateBookmark(/**@type{!ParagraphBookmark}*/(bookmark));
-                bookmark = nextBookmark;
-            }
-
-            Object.keys(updatedBuckets).forEach(function (cacheBucket) {
-                stepToDomPoint[cacheBucket] = updatedBuckets[cacheBucket];
-            });
         };
 
         function init() {
-            basePoint = new RootBookmark(0, rootNode);
+            var rootElementId = getNodeId(rootElement) || setNodeId(rootElement);
+            basePoint = new RootBookmark(rootElementId, 0, rootElement);
         }
         init();
     };
+
+
+    /*jslint emptyblock: true, unparam: true*/
+    /**
+     * @interface
+     */
+    ops.StepsCache.Bookmark = function Bookmark() { };
+
+    /**
+     * @type {!string}
+     */
+    ops.StepsCache.Bookmark.prototype.nodeId;
+
+    /**
+     * @type {!Node}
+     */
+    ops.StepsCache.Bookmark.prototype.node;
+
+    /**
+     * @type {!number}
+     */
+    ops.StepsCache.Bookmark.prototype.steps;
+
+    /**
+     * @type {?ops.StepsCache.Bookmark}
+     */
+    ops.StepsCache.Bookmark.prototype.previousBookmark;
+
+    /**
+     * @type {?ops.StepsCache.Bookmark}
+     */
+    ops.StepsCache.Bookmark.prototype.nextBookmark;
+
+    /**
+     * @param {!core.PositionIterator} iterator
+     * @return {undefined}
+     */
+    ops.StepsCache.Bookmark.prototype.setIteratorPosition = function(iterator) { };
 }());

@@ -55,7 +55,7 @@
     /**
      *
      * @constructor
-     * @param {!function():!Node} getRootNode
+     * @param {!function():!Element} getRootNode
      * @param {!function(!Node):!core.PositionIterator} newIterator
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
@@ -242,14 +242,7 @@
             // Old position = position
             // New position = position + length
             // E.g., {position: 10, length: 1} indicates 10 => 10, New => 11, 11 => 12, 12 => 13
-            /**
-             * @param {number} steps
-             * @return {number}
-             */
-            function doUpdate(steps) {
-                return steps + eventArgs.length;
-            }
-            stepsCache.updateCacheAtPoint(eventArgs.position, doUpdate);
+            stepsCache.damageCacheAfterStep(eventArgs.position);
         };
 
         /**
@@ -261,19 +254,12 @@
             // Old position = position + length
             // New position = position
             // E.g., {position: 10, length: 1} indicates 10 => 10, 11 => 10, 12 => 11
-            /**
-             * @param {number} steps
-             * @return {number}
-             */
-            function doUpdate(steps) {
-                steps -= eventArgs.length;
-                if (steps < 0) {
-                    // Obviously, there can't be negative steps in a document
-                    steps = 0;
-                }
-                return steps;
-            }
-            stepsCache.updateCacheAtPoint(eventArgs.position, doUpdate);
+
+            // TODO OpRemoveText inaccurately reports the position making it necessary subtract 1
+            // Paragraph merge behaviours might result in the paragraph exactly at the reported position being
+            // replaced by a later paragraph. Conceptually, this means the last unmodified position is
+            // actually 1 step prior to the replace paragraph.
+            stepsCache.damageCacheAfterStep(eventArgs.position === 0 ? 0 : eventArgs.position - 1);
         };
     };
 
