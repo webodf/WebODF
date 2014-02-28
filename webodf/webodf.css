@@ -286,6 +286,7 @@ cursor|cursor > .handle:after {
     opacity: 0;
     color: rgba(255, 255, 255, 0); /* hide the blinking caret by setting the colour to fully transparent */
     overflow: hidden; /* The overflow visibility is used to hide and show characters being entered */
+    pointer-events: none;
 }
 
 /* within a cursor */
