@@ -90,7 +90,8 @@
             /**@type{!number|undefined}*/
             lastUndamagedCacheStep,
             /**@const*/
-            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+            verifyCache;
 
         /**
          * Bookmark indicating the first walkable position in a paragraph
@@ -150,6 +151,86 @@
                     }
                 } while (iterator.nextPosition());
             };
+        }
+
+        /**
+         * Return a summary string of the supplied bookmark node id(s)
+         * @param {!ops.StepsCache.Bookmark} bookmark1
+         * @param {?ops.StepsCache.Bookmark=} bookmark2
+         * @return {!string}
+         */
+        function inspectBookmarks(bookmark1, bookmark2) {
+            var parts = "[" + bookmark1.nodeId;
+            if (bookmark2) {
+                parts += " => " + bookmark2.nodeId;
+            }
+            return parts + "]";
+        }
+
+        /**
+         * Returns true if the specified bookmark is undamaged
+         * @param {!ops.StepsCache.Bookmark} bookmark
+         * @return {!boolean}
+         */
+        function isUndamagedBookmark(bookmark) {
+            return lastUndamagedCacheStep === undefined || bookmark.steps <= lastUndamagedCacheStep;
+        }
+
+        /**
+         * Run a serious of verification checks against the complete cache to ensure it is operating
+         * correctly. Note, this is VERY expensive, and should only be done when attempting to diagnose
+         * caching problems
+         * @return {undefined}
+         */
+        function verifyCacheImpl() {
+            var bookmark = basePoint,
+                previousBookmark,
+                nextBookmark,
+                documentPosition,
+                loopCheck = new core.LoopWatchDog(0, 100000);
+
+            while (bookmark) {
+                loopCheck.check();
+                previousBookmark = bookmark.previousBookmark;
+                if (previousBookmark) {
+                    // Make sure previous => current chain is intact
+                    runtime.assert(previousBookmark.nextBookmark === bookmark,
+                        "Broken bookmark link to previous @" + inspectBookmarks(previousBookmark, bookmark));
+                } else {
+                    // If there is no previous, ensure this is the basePoint bookmark
+                    runtime.assert(bookmark === basePoint, "Broken bookmark link @" + inspectBookmarks(bookmark));
+                    runtime.assert(isUndamagedBookmark(basePoint), "Base point is damaged @" + inspectBookmarks(bookmark));
+                }
+                nextBookmark = bookmark.nextBookmark;
+                if (nextBookmark) {
+                    // Make sure current => next chain is intact
+                    runtime.assert(nextBookmark.previousBookmark === bookmark,
+                        "Broken bookmark link to next @" + inspectBookmarks(bookmark, nextBookmark));
+                }
+
+                if (isUndamagedBookmark(bookmark)) {
+                    runtime.assert(domUtils.containsNode(rootElement, bookmark.node),
+                        "Disconnected node is being reported as undamaged @" + inspectBookmarks(bookmark));
+                    if (previousBookmark) {
+                        documentPosition = bookmark.node.compareDocumentPosition(previousBookmark.node);
+                        /*jslint bitwise:true*/
+                        runtime.assert(documentPosition === 0 || (documentPosition&Node.DOCUMENT_POSITION_PRECEDING) !== 0,
+                            "Bookmark order with previous does not reflect DOM order @" + inspectBookmarks(previousBookmark, bookmark));
+                        /*jslint bitwise:false*/
+                    }
+                    if (nextBookmark) {
+                        if (domUtils.containsNode(rootElement, nextBookmark.node)) {
+                            documentPosition = bookmark.node.compareDocumentPosition(nextBookmark.node);
+                            /*jslint bitwise:true*/
+                            runtime.assert(documentPosition === 0 || (documentPosition&Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+                                "Bookmark order with next does not reflect DOM order @" + inspectBookmarks(bookmark, nextBookmark));
+                            /*jslint bitwise:false*/
+                        }
+                    }
+                }
+
+                bookmark = bookmark.nextBookmark;
+            }
         }
 
         /**
@@ -395,6 +476,7 @@
                     // The current node & offset are closer to the cache bucket boundary than the existing entry was
                     stepToDomPoint[cacheBucket] = bookmark;
                 }
+                verifyCache();
             }
         };
 
@@ -406,7 +488,9 @@
          * @return {!number} Corresponding step for the current iterator position
          */
         this.setToClosestStep = function (steps, iterator) {
-            var cachePoint = getUndamagedBookmark(getClosestBookmark(steps));
+            var cachePoint;
+            verifyCache();
+            cachePoint = getUndamagedBookmark(getClosestBookmark(steps));
             cachePoint.setIteratorPosition(iterator);
             return cachePoint.steps;
         };
@@ -453,6 +537,7 @@
                 /**@type{string|number}*/
                 key;
 
+            verifyCache();
             if (node === rootElement && offset === 0) {
                 bookmark = basePoint;
             } else if (node === rootElement && offset === rootElement.childNodes.length) {
@@ -492,15 +577,25 @@
             } else if (inflectionStep < lastUndamagedCacheStep) {
                 lastUndamagedCacheStep = inflectionStep;
             }
+            verifyCache();
         };
 
         function init() {
             var rootElementId = getNodeId(rootElement) || setNodeId(rootElement);
             basePoint = new RootBookmark(rootElementId, 0, rootElement);
+            /*jslint emptyblock:true*/
+            verifyCache = ops.StepsCache.ENABLE_CACHE_VERIFICATION ? verifyCacheImpl : function() { };
+            /*jslint emptyblock:false*/
         }
         init();
     };
 
+    /**
+     * Enable or disable cache verification operation after every modification. VERY SLOW.
+     * This is primarily used in testing or during interactive diagnostics
+     * @type {!boolean}
+     */
+    ops.StepsCache.ENABLE_CACHE_VERIFICATION = false;
 
     /*jslint emptyblock: true, unparam: true*/
     /**
