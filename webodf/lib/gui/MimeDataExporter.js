@@ -42,12 +42,10 @@ gui.MimeDataExporter = function MimeDataExporter() {
      * Copy the contents of the supplied range into the passed dataTransfer.
      * @param {!DataTransfer} dataTransfer
      * @param {!Range} range Selection range to copy into the clipboard
-     * @return {boolean} Returns true if the data was successfully exported into the dataTransfer
+     * @return {undefined}
      */
     this.exportRangeToDataTransfer = function (dataTransfer, range) {
-        var result = true,
-            setDataResult,
-            document = range.startContainer.ownerDocument,
+        var document = range.startContainer.ownerDocument,
             fragmentContainer;
 
         // the document fragment needs to be wrapped in a span as
@@ -55,10 +53,7 @@ gui.MimeDataExporter = function MimeDataExporter() {
         fragmentContainer = document.createElement('span');
         fragmentContainer.appendChild(range.cloneContents());
 
-        setDataResult = dataTransfer.setData('text/plain', textSerializer.writeToString(fragmentContainer));
-        result = result && setDataResult;
-
-        return result;
+        dataTransfer.setData('text/plain', textSerializer.writeToString(fragmentContainer));
     };
 
     function init() {
