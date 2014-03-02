@@ -46,14 +46,23 @@ gui.MimeDataExporter = function MimeDataExporter() {
      */
     this.exportRangeToDataTransfer = function (dataTransfer, range) {
         var document = range.startContainer.ownerDocument,
+            serializedFragment,
             fragmentContainer;
 
         // the document fragment needs to be wrapped in a span as
         // text nodes cannot be inserted at the top level of the DOM
         fragmentContainer = document.createElement('span');
         fragmentContainer.appendChild(range.cloneContents());
-
-        dataTransfer.setData('text/plain', textSerializer.writeToString(fragmentContainer));
+        serializedFragment = textSerializer.writeToString(fragmentContainer);
+        try {
+            dataTransfer.setData('text/plain', serializedFragment);
+        } catch(e) {
+            // Internet Explorer only supports the 'Text' key being set
+            // See http://msdn.microsoft.com/en-us/library/ie/ms536744%28v=vs.85%29.aspx
+            // Could do some browser sniffing potentially, but this is less error prone as it
+            // doesn't rely on the agent string being correct.
+            dataTransfer.setData('Text', serializedFragment);
+        }
     };
 
     function init() {
