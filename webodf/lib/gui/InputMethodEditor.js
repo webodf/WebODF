@@ -112,8 +112,7 @@
      * @param {!gui.EventManager} eventManager
      */
     gui.InputMethodEditor = function InputMethodEditor(inputMemberId, eventManager) {
-        var window = runtime.getWindow(),
-            cursorns = "urn:webodf:names:cursor",
+        var cursorns = "urn:webodf:names:cursor",
             /**@type{ops.OdtCursor}*/
             localCursor = null,
             eventTrap = eventManager.getEventTrap(),
@@ -185,42 +184,21 @@
         }
 
         function resetWindowSelection() {
-            var selection = window.getSelection(),
-                node,
-                textNode;
-
             flushEvent();
-
-            while (eventTrap.childNodes.length > 1) {
-                // Repeated text entry events can result in lots of empty text nodes
-                eventTrap.removeChild(eventTrap.firstChild);
-            }
-            node = eventTrap.firstChild;
-            if (!node || node.nodeType !== Node.TEXT_NODE) {
-                while (eventTrap.firstChild) {
-                    // Opera puts a random BR tag in as the first node for some reason...
-                    eventTrap.removeChild(eventTrap.firstChild);
-                }
-                // Content is necessary for cut/copy/paste to be enabled
-                node = eventTrap.appendChild(doc.createTextNode(""));
-            }
 
             // If there is a local cursor, and it is collapsed, collapse the window selection as well.
             // Otherwise, ensure some text is selected by default.
             // A browser selection in an editable area is necessary to allow cut/copy events to fire
             // It doesn't have to be an accurate selection however as the SessionController will override
             // the default browser handling.
-            textNode = /**@type{!Text}*/(node);
             if (localCursor && localCursor.getSelectedRange().collapsed) {
-                textNode.deleteData(0, textNode.length);
+                eventTrap.value = "";
             } else {
-                textNode.replaceData(0, textNode.length, FAKE_CONTENT);
+                // Content is necessary for cut/copy/paste to be enabled
+                eventTrap.value = FAKE_CONTENT;
             }
 
-            selection.collapse(eventTrap.firstChild, 0);
-            if (selection.extend) {
-                selection.extend(eventTrap, eventTrap.childNodes.length);
-            }
+            eventTrap.setSelectionRange(0, eventTrap.value.length);
         }
 
         function compositionStart() {
