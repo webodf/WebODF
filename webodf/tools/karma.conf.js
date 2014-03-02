@@ -52,6 +52,7 @@ module.exports = function (config) {
             'lib/odf/FontLoader.js',
             'lib/odf/Formatting.js',
             'lib/odf/StyleTree.js',
+            'lib/odf/ListStylesToCss.js',
             'lib/odf/Style2CSS.js',
             'lib/gui/ZoomHelper.js',
             'lib/ops/Canvas.js',

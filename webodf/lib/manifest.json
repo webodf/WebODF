@@ -196,6 +196,9 @@
         "odf.OdfContainer",
         "odf.OdfUtils"
     ],
+    "odf.ListStylesToCss": [
+        "odf.StyleTree"
+    ],
     "odf.Namespaces": [
     ],
     "odf.ObjectNameGenerator": [
@@ -208,6 +211,7 @@
         "gui.AnnotationViewManager",
         "odf.FontLoader",
         "odf.Formatting",
+        "odf.ListStylesToCss",
         "odf.Style2CSS",
         "ops.Canvas"
     ],
