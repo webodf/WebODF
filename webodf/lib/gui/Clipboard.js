@@ -64,7 +64,8 @@ gui.Clipboard = function Clipboard(mimeDataExporter) {
         }
 
         if (clipboard) {
-            result = mimeDataExporter.exportRangeToDataTransfer(/**@type{!DataTransfer}*/(clipboard), range);
+            result = true;
+            mimeDataExporter.exportRangeToDataTransfer(/**@type{!DataTransfer}*/(clipboard), range);
             // By calling preventDefault on the copy event, no data is actually placed into the clipboard.
             // However, if we don't call it, the data we add is stripped out and thrown away :-/
             e.preventDefault();
