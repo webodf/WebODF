@@ -94,7 +94,16 @@
                 PINCH: 2
             },
             /**@type{!number}*/
-            currentGesture = gestures.NONE;
+            currentGesture = gestures.NONE,
+            /**
+             * On webkit, which has the ability to style scrollbars
+             * with CSS, `window` has the property 'ontouchstart'.
+             * This can be used as a hint of touch event support,
+             * and we can take advantage of that to decide to show
+             * custom scrollbars (because webkit hides them).
+             * @type{!boolean}
+             */
+            requiresCustomScrollBars = runtime.getWindow().hasOwnProperty('ontouchstart');
 
         /**
          * Apply a 3D or 2D CSS transform with the given
@@ -164,6 +173,35 @@
         }
 
         /**
+         * Enable or disable virtual scrollbars on the container.
+         * @param {!boolean} enable
+         * @return {undefined}
+         */
+        function enableScrollBars(enable) {
+            var initialOverflow = offsetParent.style.overflow,
+                enabled = offsetParent.classList.contains('customScrollbars');
+
+            if (!requiresCustomScrollBars || (enable && enabled) || (!enable && !enabled)) {
+                return;
+            }
+
+            if (enable) {
+                offsetParent.classList.add('customScrollbars');
+                // The custom scrollbar does not appear in webkit unless a full redraw
+                // of the scrollable area is forced. Therefore attempt to toggle the
+                // overflow stle of the scrolling container across successive animation
+                // frames.
+                offsetParent.style.overflow = 'hidden';
+                runtime.getWindow().requestAnimationFrame(function () {
+                    offsetParent.style.overflow = initialOverflow;
+                });
+            } else {
+                offsetParent.classList.remove('customScrollbars');
+            }
+        }
+
+
+        /**
          * Sets the scrolling of the container to (0,0)
          * so that transforms and event points can be
          * conveniently computed.
@@ -175,6 +213,7 @@
             applyCSSTransform(-panPoint.x, -panPoint.y, zoom, true);
             offsetParent.scrollLeft = 0;
             offsetParent.scrollTop = 0;
+            enableScrollBars(false);
         }
 
         /**
@@ -188,6 +227,7 @@
             applyCSSTransform(0, 0, zoom, true);
             offsetParent.scrollLeft = panPoint.x;
             offsetParent.scrollTop = panPoint.y;
+            enableScrollBars(true);
         }
 
         /**
@@ -409,18 +449,25 @@
             offsetParent.removeEventListener('touchstart', /**@type{!EventListener}*/(prepareGesture), false);
             offsetParent.removeEventListener('touchmove', /**@type{!EventListener}*/(processGesture), false);
             offsetParent.removeEventListener('touchend', /**@type{!EventListener}*/(sanitizeGesture), false);
+            enableScrollBars(false);
             callback();
         };
 
-        function init() {
+    function init() {
             zoom = 1;
             previousZoom = 1;
             panPoint = new Point(0, 0);
-
             offsetParent = /**@type{!HTMLElement}*/(zoomableElement.offsetParent);
+
+            // There is no reliable way of detecting if the browser
+            // supports these touch events. Therefore the only thing
+            // we can do is simply attach listeners to these events
+            // as this seems harmless if the events are not supported
+            // anyway.
             offsetParent.addEventListener('touchstart', /**@type{!EventListener}*/(prepareGesture), false);
             offsetParent.addEventListener('touchmove', /**@type{!EventListener}*/(processGesture), false);
             offsetParent.addEventListener('touchend', /**@type{!EventListener}*/(sanitizeGesture), false);
+            enableScrollBars(true);
         }
         init();
     };
