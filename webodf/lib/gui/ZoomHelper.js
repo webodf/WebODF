@@ -453,7 +453,18 @@
             callback();
         };
 
-    function init() {
+        /**
+         * FIXME: I don't like that we can switch the zoomable
+         * element at runtime, but I don't see any other way to
+         * keep the zoom helper working after an undo.
+         * @param {!HTMLElement} element
+         * @return {undefined}
+         */
+        this.setZoomableElement = function (element) {
+            zoomableElement = element;
+        };
+
+        function init() {
             zoom = 1;
             previousZoom = 1;
             panPoint = new Point(0, 0);

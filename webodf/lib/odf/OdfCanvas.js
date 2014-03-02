@@ -1225,9 +1225,14 @@
 
             sizer.insertBefore(shadowContent, sizer.firstChild);
 
-            zoomHelper = new gui.ZoomHelper(sizer);
-            zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, fixContainerSize);
-            self.setZoomLevel(1);
+            if (!zoomHelper) {
+                zoomHelper = new gui.ZoomHelper(sizer);
+                zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, fixContainerSize);
+                self.setZoomLevel(1);
+            } else {
+                zoomHelper.setZoomableElement(sizer);
+                zoomHelper.setZoomLevel(zoomHelper.getZoomLevel());
+            }
         }
 
         /**
@@ -1481,6 +1486,13 @@
                 annotationViewManager.forgetAnnotations();
                 fixContainerSize();
             }
+        };
+
+        /**
+         * @return {!gui.ZoomHelper}
+         */
+        this.getZoomHelper = function () {
+            return zoomHelper;
         };
 
         /**
