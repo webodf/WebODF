@@ -10,13 +10,13 @@ The following steps have been tested with the Microsoft C\C++ compilers that are
 
    The express version should work http://www.visualstudio.com/en-us/downloads#d-2010-express
 
-   It can also be obtained from the Windows 7 SDK but I would recommend the above
+   It can also be obtained from the Windows 7 SDK but I would recommend the above.
 
-- **Qt SDK 4.8.1**
+   To avoid issues with CMake, VS2010 SP1 also needs to be downloaded and installed http://www.microsoft.com/en-us/download/details.aspx?id=23691
 
-   I would **strongly** recommend you install this specific version as there are problems running the Qt tests on later versions of 4.8.x
+- **Qt SDK 4.8.5**
 
-   The SDK built with VS 2010 can be downloaded from here http://download.qt-project.org/archive/qt/4.8/4.8.1/qt-win-opensource-4.8.1-vs2010.exe
+   The SDK built with VS 2010 can be downloaded from here http://download.qt-project.org/official_releases/qt/4.8/4.8.5/qt-win-opensource-4.8.5-vs2010.exe
 
 - **CMake**
 
