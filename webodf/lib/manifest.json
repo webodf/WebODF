@@ -178,6 +178,10 @@
     "gui.UndoStateRules": [
         "ops.Operation"
     ],
+    "gui.ZoomHelper": [
+        "core.Destroyable",
+        "core.EventNotifier"
+    ],
     "odf.CommandLineTools": [
         "odf.OdfCanvas"
     ],
@@ -199,6 +203,7 @@
         "core.Async",
         "core.ScheduledTask",
         "gui.AnnotationViewManager",
+        "gui.ZoomHelper",
         "odf.FontLoader",
         "odf.Formatting",
         "odf.Style2CSS",

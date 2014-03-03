@@ -612,3 +612,21 @@ dc|*::-moz-selection {
     left: -4px;
     margin-top: -2.5px; /* half of the height defined in #imageSelector > div */
 }
+
+div.customScrollbars::-webkit-scrollbar
+{
+    width: 8px;
+    height: 8px;
+    background-color: transparent;
+}
+
+div.customScrollbars::-webkit-scrollbar-track
+{
+    background-color: transparent;
+}
+
+div.customScrollbars::-webkit-scrollbar-thumb
+{
+    background-color: #444;
+    border-radius: 4px;
+}

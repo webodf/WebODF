@@ -38,7 +38,9 @@
 
 /*global define,require*/
 
-define("webodf/editor/widgets/zoomSlider", [], function () {
+define("webodf/editor/widgets/zoomSlider", [
+    "webodf/editor/EditorSession"],
+    function (EditorSession) {
     "use strict";
 
     return function ZoomSlider(callback) {
@@ -53,8 +55,8 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
                 slider = new HorizontalSlider({
                     name: 'zoomSlider',
                     value: 100,
-                    minimum: 30,
-                    maximum: 150,
+                    minimum: 25,
+                    maximum: 400,
                     discreteValues: 100,
                     intermediateChanges: true,
                     style: {
@@ -66,7 +68,7 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
 
                 slider.onChange = function (value) {
                     if (editorSession) {
-                        editorSession.getOdfCanvas().setZoomLevel(value / 100.0);
+                        editorSession.getOdfCanvas().getZoomHelper().setZoomLevel(value / 100.0);
                     }
                     self.onToolDone();
                 };
@@ -75,9 +77,23 @@ define("webodf/editor/widgets/zoomSlider", [], function () {
             });
         }
 
+        function updateSlider(zoomLevel) {
+            if (slider) {
+                slider.set('value', zoomLevel * 100);
+            }
+        }
+
         this.setEditorSession = function(session) {
+            var zoomHelper;
+            if (editorSession) {
+                editorSession.getOdfCanvas().getZoomHelper().unsubscribe(gui.ZoomHelper.signalZoomChanged, updateSlider);
+            }
             editorSession = session;
-//             if (slider) { slider.setValue(editorSession.getOdfCanvas().getZoomLevel() ); TODO!
+            if (editorSession) {
+                zoomHelper = editorSession.getOdfCanvas().getZoomHelper();
+                zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, updateSlider);
+                updateSlider(zoomHelper.getZoomLevel());
+            }
         };
 
         this.onToolDone = function () {};
