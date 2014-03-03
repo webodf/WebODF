@@ -70,10 +70,11 @@
      * subscribe to the current zoom level.
      * @constructor
      * @implements {core.Destroyable}
-     * @param {!HTMLElement} zoomableElement
      */
-    gui.ZoomHelper = function (zoomableElement) {
-        var /**@type{!Point}*/
+    gui.ZoomHelper = function () {
+        var /**@type{!HTMLElement}*/
+            zoomableElement,
+            /**@type{!Point}*/
             panPoint,
             /**@type{!Point}*/
             previousPanPoint,
@@ -178,10 +179,14 @@
          * @return {undefined}
          */
         function enableScrollBars(enable) {
+            if (!offsetParent || !requiresCustomScrollBars) {
+                return;
+            }
+
             var initialOverflow = offsetParent.style.overflow,
                 enabled = offsetParent.classList.contains('customScrollbars');
 
-            if (!requiresCustomScrollBars || (enable && enabled) || (!enable && !enabled)) {
+            if ((enable && enabled) || (!enable && !enabled)) {
                 return;
             }
 
@@ -436,19 +441,49 @@
          * @return {undefined}
          */
         this.setZoomLevel = function (zoomLevel) {
-            zoom = zoomLevel;
-            applyDetailedTransform();
-            events.emit(gui.ZoomHelper.signalZoomChanged, zoom);
+            if (zoomableElement) {
+                zoom = zoomLevel;
+                applyDetailedTransform();
+                events.emit(gui.ZoomHelper.signalZoomChanged, zoom);
+            }
         };
+
+        /**
+         * Adds touchstart, touchmove, and touchend
+         * event listeners to the element's scrollable
+         * container.
+         * @return {undefined}
+         */
+        function registerGestureListeners() {
+            if (offsetParent) {
+                // There is no reliable way of detecting if the browser
+                // supports these touch events. Therefore the only thing
+                // we can do is simply attach listeners to these events
+                // as this seems harmless if the events are not supported
+                // anyway.
+                offsetParent.addEventListener('touchstart', /**@type{!EventListener}*/(prepareGesture), false);
+                offsetParent.addEventListener('touchmove', /**@type{!EventListener}*/(processGesture), false);
+                offsetParent.addEventListener('touchend', /**@type{!EventListener}*/(sanitizeGesture), false);
+            }
+        }
+
+        /**
+         * @return {undefined}
+         */
+        function unregisterGestureListeners() {
+            if (offsetParent) {
+                offsetParent.removeEventListener('touchstart', /**@type{!EventListener}*/(prepareGesture), false);
+                offsetParent.removeEventListener('touchmove', /**@type{!EventListener}*/(processGesture), false);
+                offsetParent.removeEventListener('touchend', /**@type{!EventListener}*/(sanitizeGesture), false);
+            }
+        }
 
         /**
          * @param {!function(!Object=)} callback, passing an error object in case of error
          * @return {undefined}
          */
         this.destroy = function (callback) {
-            offsetParent.removeEventListener('touchstart', /**@type{!EventListener}*/(prepareGesture), false);
-            offsetParent.removeEventListener('touchmove', /**@type{!EventListener}*/(processGesture), false);
-            offsetParent.removeEventListener('touchend', /**@type{!EventListener}*/(sanitizeGesture), false);
+            unregisterGestureListeners();
             enableScrollBars(false);
             callback();
         };
@@ -461,24 +496,19 @@
          * @return {undefined}
          */
         this.setZoomableElement = function (element) {
+            unregisterGestureListeners();
             zoomableElement = element;
+            offsetParent = /**@type{!HTMLElement}*/(zoomableElement.offsetParent);
+            // Write out the current transform to the new element.
+            applyDetailedTransform();
+            registerGestureListeners();
+            enableScrollBars(true);
         };
 
         function init() {
             zoom = 1;
             previousZoom = 1;
             panPoint = new Point(0, 0);
-            offsetParent = /**@type{!HTMLElement}*/(zoomableElement.offsetParent);
-
-            // There is no reliable way of detecting if the browser
-            // supports these touch events. Therefore the only thing
-            // we can do is simply attach listeners to these events
-            // as this seems harmless if the events are not supported
-            // anyway.
-            offsetParent.addEventListener('touchstart', /**@type{!EventListener}*/(prepareGesture), false);
-            offsetParent.addEventListener('touchmove', /**@type{!EventListener}*/(processGesture), false);
-            offsetParent.addEventListener('touchend', /**@type{!EventListener}*/(sanitizeGesture), false);
-            enableScrollBars(true);
         }
         init();
     };

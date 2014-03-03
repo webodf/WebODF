@@ -1024,7 +1024,7 @@
             shouldRerenderAnnotations = false,
             loadingQueue = new LoadingQueue(),
             /**@type{!gui.ZoomHelper}*/
-            zoomHelper;
+            zoomHelper = new gui.ZoomHelper();
 
         /**
          * Load all the images that are inside an odf element.
@@ -1225,14 +1225,7 @@
 
             sizer.insertBefore(shadowContent, sizer.firstChild);
 
-            if (!zoomHelper) {
-                zoomHelper = new gui.ZoomHelper(sizer);
-                zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, fixContainerSize);
-                self.setZoomLevel(1);
-            } else {
-                zoomHelper.setZoomableElement(sizer);
-                zoomHelper.setZoomLevel(zoomHelper.getZoomLevel());
-            }
+            zoomHelper.setZoomableElement(sizer);
         }
 
         /**
@@ -1506,7 +1499,7 @@
          * @return {!number}
          */
         this.getZoomLevel = function () {
-            return zoomHelper ? zoomHelper.getZoomLevel() : 1;
+            return zoomHelper.getZoomLevel();
         };
         /**
          * @param {!number} width
@@ -1624,12 +1617,14 @@
             if (annotationsPane && annotationsPane.parentNode) {
                 annotationsPane.parentNode.removeChild(annotationsPane);
             }
-            if (sizer && zoomHelper) {
-                zoomHelper.destroy(function () {
+
+            zoomHelper.destroy(function () {
+                if (sizer) {
                     element.removeChild(sizer);
                     sizer = null;
-                });
-            }
+                }
+            });
+
             // remove all styles
             removeWebODFStyleSheet(webodfcss);
             head.removeChild(fontcss);
@@ -1647,6 +1642,7 @@
             stylesxmlcss = addStyleSheet(doc);
             positioncss = addStyleSheet(doc);
             redrawContainerTask = new core.ScheduledTask(redrawContainer, 0);
+            zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, fixContainerSize);
         }
 
         init();
