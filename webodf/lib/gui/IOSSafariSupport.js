@@ -52,7 +52,7 @@ gui.IOSSafariSupport = function (eventManager) {
         // This keyboard detection trick seems to work on iOS
         if (window.innerHeight !== window.outerHeight) {
             eventTrap.style.display = "none";
-            window.requestAnimationFrame(function () {
+            runtime.requestAnimationFrame(function () {
                 eventTrap.style.display = "block";
             });
         }

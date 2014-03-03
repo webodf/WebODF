@@ -192,7 +192,7 @@
                 // overflow stle of the scrolling container across successive animation
                 // frames.
                 offsetParent.style.overflow = 'hidden';
-                runtime.getWindow().requestAnimationFrame(function () {
+                runtime.requestAnimationFrame(function () {
                     offsetParent.style.overflow = initialOverflow;
                 });
             } else {

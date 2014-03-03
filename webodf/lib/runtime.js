@@ -187,7 +187,16 @@ Runtime.prototype.exit = function (exitCode) {"use strict"; };
  * @return {?Window}
  */
 Runtime.prototype.getWindow = function () {"use strict"; };
-
+/**
+ * @param {!function():undefined} callback
+ * @return {!number}
+ */
+Runtime.prototype.requestAnimationFrame = function (callback) {"use strict"; };
+/**
+ * @param {!number} requestId
+ * @return {undefined}
+ */
+Runtime.prototype.cancelAnimationFrame = function (requestId) {"use strict"; };
 /**
  * @param {!boolean} condition
  * @param {!string} message
@@ -916,6 +925,45 @@ function BrowserRuntime(logoutput) {
     this.getWindow = function () {
         return window;
     };
+    /**
+     * @param {!function():undefined} callback
+     * @return {!number}
+     */
+    this.requestAnimationFrame = function (callback) {
+        var rAF = window.requestAnimationFrame
+            || window.webkitRequestAnimationFrame
+            || window.mozRequestAnimationFrame
+            || window.msRequestAnimationFrame,
+            requestId = 0;
+
+        if (rAF) {
+            // This code is to satisfy Closure, which expects
+            // that the `this` of rAF should be window.
+            rAF.bind(window);
+            requestId = /**@type{function(!function():undefined):!number}*/(rAF)(callback);
+        } else {
+            return setTimeout(callback, 15);
+        }
+
+        return requestId;
+    };
+    /**
+     * @param {!number} requestId
+     * @return {undefined}
+     */
+    this.cancelAnimationFrame = function (requestId) {
+        var cAF = window.cancelAnimationFrame
+            || window.webkitCancelAnimationFrame
+            || window.mozCancelAnimationFrame
+            || window.msCancelAnimationFrame;
+
+        if (cAF) {
+            cAF.bind(window);
+            /**@type{function(!number)}*/(cAF)(requestId);
+        } else {
+            clearTimeout(requestId);
+        }
+    };
 }
 
 /**
@@ -1209,6 +1257,20 @@ function NodeJSRuntime() {
     this.exit = process.exit;
     this.getWindow = function () {
         return null;
+    };
+    /**
+     * @param {!function():undefined} callback
+     * @return {!number}
+     */
+    this.requestAnimationFrame = function (callback) {
+        return setTimeout(callback, 15);
+    };
+    /**
+     * @param {!number} requestId
+     * @return {undefined}
+     */
+    this.cancelAnimationFrame = function (requestId) {
+        clearTimeout(requestId);
     };
     function init() {
         var /**@type{function(new:DOMParser)}*/
@@ -1545,6 +1607,22 @@ function RhinoRuntime() {
     this.getWindow = function () {
         return null;
     };
+    /**
+     * @param {!function():undefined} callback
+     * @return {!number}
+     */
+    this.requestAnimationFrame = function (callback) {
+        callback();
+        return 0;
+    };
+    /*jslint emptyblock: true */
+    /**
+     * @param {!number} requestId
+     * @return {undefined}
+     */
+    this.cancelAnimationFrame = function () {
+    };
+    /*jslint emptyblock: false */
 }
 
 /**
