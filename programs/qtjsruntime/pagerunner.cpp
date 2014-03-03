@@ -127,6 +127,10 @@ PageRunner::PageRunner(const QStringList& args)
         mainFrame()->load(absurl);
     }
 }
+QString PageRunner::userAgentForUrl ( const QUrl & url ) const
+{
+    return "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2";
+}
 PageRunner::~PageRunner() {
     delete view;
 }

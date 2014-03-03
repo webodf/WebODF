@@ -59,9 +59,7 @@ private:
     void renderToFile(const QString& filename);
     void printToFile(const QString& filename);
     // overload because default impl was causing a crash
-    QString userAgentForUrl(const QUrl&) const {
-        return QString();
-    }
+    QString userAgentForUrl(const QUrl&) const;
     QMap<QString, QString> parseArguments(const QStringList& args);
 };
 
