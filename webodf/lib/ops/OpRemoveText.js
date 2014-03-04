@@ -246,7 +246,14 @@ ops.OpRemoveText = function OpRemoveText() {
 
         // Each character element is fully contained within the range, so will be completely removed
         textNodes.forEach(function (element) {
-            collapseRules.mergeChildrenIntoParent(element);
+            if (element.parentNode) {
+                // If this is an empty text node, it might have already been removed from it's container.
+                // Although WebODF specifically avoids empty text nodes at all times, incorrect 3rd party
+                // DOM manipulation (or undiscovered WebODF bugs) may leave these behind.
+                collapseRules.mergeChildrenIntoParent(element);
+            } else {
+                runtime.log("WARN: text element has already been removed from it's container");
+            }
         });
 
         /**
