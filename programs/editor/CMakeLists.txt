@@ -1,15 +1,16 @@
 COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     # general
-    Editor.js
-    editor.css
     Tools.js
     avatar-joe.png
     EditorSession.js
     Translator.js
+    wodotexteditor.css
     # only local editor
+    wodotexteditor.js
+    texteditor.html
     FileSaver.js
-    localeditor.js
+    localfileeditor.js
     localeditor.html
     revieweditor.html
     images/kogmbh.png
@@ -18,10 +19,12 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     SessionListView.js
     MemberListView.js
     collabeditor.html
-    collabeditor.js
     document-save.png
     network-disconnect.png
     vcs-locally-modified.png
+    wodocollabpane.css
+    wodocollabtexteditor.js
+    pullboxeditor.js
     # example data
     welcome.odt
     # demo-only

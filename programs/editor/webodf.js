@@ -41,3 +41,8 @@ runtime.currentDirectory = function () {
 runtime.libraryPaths = function () {
     return [path];
 };
+// load a class to trigger loading the complete lib
+runtime.loadClass('odf.OdfContainer');
+
+// flag for telling the editor component that this is run from source
+WodoFromSource = true;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * This file is part of WebODF.
@@ -22,36 +22,17 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*
- * bootstrap the editor
- * this file is meant to be included from HTML and used
- * by users who do not want to know much about the inner
- * complexity.
- * so we need to make it really easy.
- *
- * including this file will result in the namespace/object
- * "webodfEditor" to be available from the HTML side.
- * calling webodfEditor.boot() will start the editor.
- * the method can also take some parameters to specify
- * behaviour. see documentation of that method.
- */
-
-/*global runtime, require, document, alert, window, FileReader, Uint8Array */
-
-// define the namespace/object we want to provide
-// this is the first line of API, the user gets.
-var webodfEditor = (function () {
+function createEditor() {
     "use strict";
 
-    var editorInstance = null,
-        booting = false,
+    var editor = null,
+        editorOptions,
         loadedFilename;
 
     /**
      * @return {undefined}
      */
      function startEditing() {
-         editorInstance.startEditing();
      }
 
     /**
@@ -79,12 +60,11 @@ var webodfEditor = (function () {
             if (reader.readyState === 2) {
                 runtime.registerFile(file.name, reader.result);
                 loadedFilename = file.name;
-                editorInstance.openDocument(loadedFilename, startEditing);
+                editor.openDocumentFromUrl(loadedFilename, startEditing);
             }
         }
         if (files && files.length === 1) {
-            editorInstance.endEditing();
-            editorInstance.closeDocument(function() {
+            editor.closeDocument(function() {
                 file = files[0];
                 reader = new FileReader();
                 reader.onloadend = onLoadEnd;
@@ -150,77 +130,47 @@ var webodfEditor = (function () {
     }
 
     function save() {
-        editorInstance.saveDocument(loadedFilename);
-    }
-
-    /**
-     * make a guess about the document (# in URL)
-     *
-     * @param {?Object} args
-     *
-     * args:
-     *
-     * docUrl:        if given it is used as the url to the document to load
-     *
-     */
-    function boot(args) {
-        var editorOptions = {
-            loadCallback: load,
-            saveCallback: save,
-            allFeaturesEnabled: true
-        };
-        runtime.assert(!booting, "editor creation already in progress");
-
-        args = args || {};
-
-        if (args.saveCallback) {
-            editorOptions.saveCallback = args.saveCallback;
-        }
-        // TODO:
-//             editorOptions.registerCallbackForShutdown = function (callback) {
-//                 window.onunload = callback;
-//             };
-
-        // start the editor
-        booting = true;
-
-        if (args.docUrl === undefined) {
-            args.docUrl = guessDocUrl();
-        }
-        if (args.reviewModeEnabled === true) {
-            editorOptions.reviewModeEnabled = true;
-            editorOptions.directParagraphStylingEnabled = false;
-            editorOptions.hyperlinkEditingEnabled = false;
-            editorOptions.imageEditingEnabled = false;
-            editorOptions.paragraphStyleSelectingEnabled = false;
-            editorOptions.paragraphStyleEditingEnabled = false;
-        } else {
-            editorOptions.reviewModeEnabled = false;
-        }
-        runtime.assert(args.docUrl, "docUrl needs to be specified");
-        runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
-
-        require({ }, [
-            "webodf/editor/Translator",
-            "webodf/editor/Editor"],
-            function (Translator, Editor) {
-                var locale = navigator.language || "en-US",
-                    editorBase = dojo.config && dojo.config.paths && dojo.config.paths["webodf/editor"],
-                    translationsDir = '/translations',
-                    t;
-
-                    runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
-
-                    t = new Translator(editorBase + translationsDir, locale, function (editorTranslator) {
-                        runtime.setTranslator(editorTranslator.translate);
-                        editorInstance = new Editor("mainContainer", editorOptions);
-                        editorInstance.openDocument(args.docUrl, startEditing);
-                    });
+        function saveByteArrayLocally(err, data) {
+            if (err) {
+                alert(err);
+                return;
             }
-        );
+            // TODO: odfcontainer should have a property mimetype
+            var mimetype = "application/vnd.oasis.opendocument.text",
+                filename = loadedFilename || "doc.odt",
+                blob = new Blob([data.buffer], {type: mimetype});
+            saveAs(blob, filename);
+        }
+
+        editor.getDocumentAsByteArray(saveByteArrayLocally);
     }
 
-    // exposed API
-    return { boot: boot };
-}());
+    editorOptions = {
+        loadCallback: load,
+        saveCallback: save,
+        allFeaturesEnabled: true
+    };
 
+    function onEditorCreated(err, e) {
+        var docUrl = guessDocUrl();
+
+        if (err) {
+            // something failed unexpectedly
+            alert(err);
+            return;
+        }
+
+        editor = e;
+        editor.setUserData({
+            fullName: "WebODF-Curious",
+            color:    "black"
+        });
+
+        if (docUrl) {
+            loadedFilename = docUrl;
+            editor.openDocumentFromUrl(docUrl, startEditing);
+        }
+    }
+
+    Wodo.createTextEditor('editorContainer', editorOptions, onEditorCreated);
+}

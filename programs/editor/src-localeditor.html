@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xml:lang="en" lang="en">
+<html style="width:100%; height:100%; margin:0px; padding:0px" xml:lang="en" lang="en">
   <head>
     <!--
     This HTML page is meant to provide a starting point for testing
@@ -38,15 +38,16 @@
     <!-- dojo setup: end -->
 
     <!-- editor: start -->
-    <link rel="stylesheet" type="text/css" href="editor.css"/>
+    <link rel="stylesheet" type="text/css" href="wodotexteditor.css"/>
     <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="wodotexteditor.js" type="text/javascript" charset="utf-8"></script>
     <script src="FileSaver.js" type="text/javascript" charset="utf-8"></script>
-    <script src="localeditor.js" type="text/javascript" charset="utf-8"></script>
+    <script src="localfileeditor.js" type="text/javascript" charset="utf-8"></script>
     <!-- editor: end -->
   </head>
 
-  <body onload="webodfEditor.boot();" class="claro">
-    <div id="mainContainer">
+  <body style="width:100%; height:100%; margin:0px; padding:0px" onload="createEditor();">
+    <div id="editorContainer" style="width:100%; height:100%; margin:0px; padding:0px">
     </div>
   </body>
 </html>
