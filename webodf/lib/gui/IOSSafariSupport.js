@@ -65,6 +65,7 @@ gui.IOSSafariSupport = function (eventManager) {
     this.destroy = function (callback) {
         eventManager.unsubscribe('focus', suppressFocusScrollIfKeyboardOpen);
         eventTrap.removeAttribute("autocapitalize");
+        eventTrap.style.WebkitTransform = "";
         callback();
     };
 
@@ -74,6 +75,10 @@ gui.IOSSafariSupport = function (eventManager) {
         // Till then, we need to avoid typing all-caps because the keyboard
         // thinks that the eventTrap is empty and therefore a new line has begun.
         eventTrap.setAttribute("autocapitalize", "off");
+        // On iOS the caret is not hideable even if the text color is made transparent
+        // and opacity is set to 0. However, we do not have a positional IME
+        // on that platform, so just CSS-translate it offscreen.
+        eventTrap.style.WebkitTransform = "translateX(-10000px)";
     }
     init();
 };
