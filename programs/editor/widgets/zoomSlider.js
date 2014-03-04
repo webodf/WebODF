@@ -82,7 +82,7 @@ define("webodf/editor/widgets/zoomSlider", [
 
         function updateSlider(zoomLevel) {
             if (slider) {
-                slider.set('value', Math.log(zoomLevel) / Math.log(extremeZoomFactor));
+                slider.set('value', Math.log(zoomLevel) / Math.log(extremeZoomFactor), false);
             }
         }
 
