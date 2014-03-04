@@ -46,18 +46,21 @@ define("webodf/editor/widgets/zoomSlider", [
     return function ZoomSlider(callback) {
         var self = this,
             editorSession,
-            slider;
+            slider,
+            extremeZoomFactor = 4;
 
+        // The slider zooms from -1 to +1, which corresponds
+        // to zoom levels of 1/extremeZoomFactor to extremeZoomFactor.
         function makeWidget(callback) {
             require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
                 var widget = {};
 
                 slider = new HorizontalSlider({
                     name: 'zoomSlider',
-                    value: 100,
-                    minimum: 25,
-                    maximum: 400,
-                    discreteValues: 100,
+                    value: 0,
+                    minimum: -1,
+                    maximum: 1,
+                    discreteValues: 0.01,
                     intermediateChanges: true,
                     style: {
                         width: '150px',
@@ -68,7 +71,7 @@ define("webodf/editor/widgets/zoomSlider", [
 
                 slider.onChange = function (value) {
                     if (editorSession) {
-                        editorSession.getOdfCanvas().getZoomHelper().setZoomLevel(value / 100.0);
+                        editorSession.getOdfCanvas().getZoomHelper().setZoomLevel(Math.pow(extremeZoomFactor, value));
                     }
                     self.onToolDone();
                 };
@@ -79,7 +82,7 @@ define("webodf/editor/widgets/zoomSlider", [
 
         function updateSlider(zoomLevel) {
             if (slider) {
-                slider.set('value', zoomLevel * 100);
+                slider.set('value', Math.log(zoomLevel) / Math.log(extremeZoomFactor));
             }
         }
 
