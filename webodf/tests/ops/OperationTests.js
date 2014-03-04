@@ -457,6 +457,19 @@ ops.OperationTests = function OperationTests(runner) {
                 },
                 tearDown: function () {}
             };
+        },
+        "RemoveText_CopesWithEmptyTextNodes" : function () {
+            return {
+                setUp: function () {
+                    var rootElement = t.odfContainer.rootElement,
+                        doc = rootElement.ownerDocument,
+                        paddedElement = doc.getElementById("paddedByEmptyTextNodes");
+
+                    paddedElement.insertBefore(doc.createTextNode(""), paddedElement.firstChild);
+                    paddedElement.appendChild(doc.createTextNode(""));
+                },
+                tearDown: function () {}
+            };
         }
     };
     /*jslint emptyblock: false*/
