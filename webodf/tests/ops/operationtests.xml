@@ -1675,7 +1675,7 @@
    <office:text><text:p>AH</text:p></office:text>.
   </after>
  </test>
- <test name="ApplyStyle_CopesWithSelectionSpanningDifferentSubtrees" isFailing="true">
+ <test name="ApplyStyle_CopesWithSelectionSpanningDifferentSubtrees">
   <before><office:text><text:p><text:span>AB</text:span>C<text:s> </text:s><text:s> </text:s>D<text:s> </text:s>E<text:s> </text:s></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
