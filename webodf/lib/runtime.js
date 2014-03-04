@@ -1617,7 +1617,6 @@ function RhinoRuntime() {
     };
     /*jslint emptyblock: true */
     /**
-     * @param {!number} requestId
      * @return {undefined}
      */
     this.cancelAnimationFrame = function () {
