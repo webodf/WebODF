@@ -68,7 +68,7 @@ Ext.define('WebODFApp.view.OdfView', (function () {
                     globalreadfunction.apply(runtime,
                         [path, offset, length, callback]);
                 } else {
-                    callback(null, data.slice(offset, offset + length));
+                    callback(null, data.subarray(offset, offset + length));
                 }
             };
             runtime.getFileSize = function (path, callback) {
