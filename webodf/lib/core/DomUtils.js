@@ -649,7 +649,9 @@
                             left: rect.left + body.scrollLeft,
                             right: rect.right + body.scrollLeft,
                             top: rect.top + body.scrollTop,
-                            bottom: rect.bottom + body.scrollTop
+                            bottom: rect.bottom + body.scrollTop,
+                            width: rect.width,
+                            height: rect.height
                         });
                     }
                     return rect;
