@@ -519,6 +519,36 @@
          * @param {!Event} event
          * @return {undefined}
          */
+        function selectWordByLongPress(event) {
+            var /**@type{?{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}}*/
+                selection,
+                position,
+                selectionRange,
+                container, offset;
+
+            position = caretPositionFromPoint(event.clientX, event.clientY);
+            if (position) {
+                container = /**@type{!Node}*/(position.container);
+                offset = position.offset;
+
+                selection = {
+                    anchorNode: container,
+                    anchorOffset: offset,
+                    focusNode: container,
+                    focusOffset: offset
+                };
+
+                selectionRange = selectionController.selectionToRange(selection);
+                selectionController.selectRange(selectionRange.range,
+                selectionRange.hasForwardSelection, 2);
+                eventManager.focus();
+            }
+        }
+
+        /**
+         * @param {!Event} event
+         * @return {undefined}
+         */
         function handleMouseClickEvent(event) {
             var target = getTarget(event),
                 range,
@@ -969,6 +999,7 @@
             odtDocument.unsubscribe(ops.Document.signalCursorAdded, inputMethodEditor.registerCursor);
             odtDocument.unsubscribe(ops.Document.signalCursorRemoved, inputMethodEditor.removeCursor);
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, updateUndoStack);
+            eventManager.unsubscribe("longpress", selectWordByLongPress);
 
             callback();
         }
@@ -1059,6 +1090,7 @@
             eventManager.subscribe("dragstart", handleDragStart);
             eventManager.subscribe("dragend", handleDragEnd);
             eventManager.subscribe("click", hyperlinkClickHandler.handleClick);
+            eventManager.subscribe("longpress", selectWordByLongPress);
 
             odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
             odtDocument.subscribe(ops.Document.signalCursorAdded, inputMethodEditor.registerCursor);

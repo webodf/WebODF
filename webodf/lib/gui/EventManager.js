@@ -55,7 +55,9 @@ gui.EventManager = function EventManager(odtDocument) {
             // results in the beforecut return value being ignored which prevents cut from being called.
             "beforecut": true,
             // Epiphany 3.6.1 requires this to allow the paste event to fire
-            "beforepaste": true
+            "beforepaste": true,
+            // Capture long-press events inside the canvas
+            "longpress": true
         },
         // Events that should be bound to the global window rather than the canvas element
         bindToWindow = {
@@ -66,11 +68,15 @@ gui.EventManager = function EventManager(odtDocument) {
             // Focus is a non-bubbling event, and we'll usually pass focus to the event trap
             "focus": true
         },
-        /**@type{!Object.<string,!EventDelegate>}*/
+       /**@type{!Object.<string,!CompoundEvent>}*/
+        compoundEvents = {},
+       /**@type{!Object.<string,!EventDelegate>}*/
         eventDelegates = {},
         /**@type{!HTMLInputElement}*/
         eventTrap,
-        canvasElement = odtDocument.getCanvas().getElement();
+        canvasElement = odtDocument.getCanvas().getElement(),
+        eventManager = this,
+        /**@const*/LONGPRESS_DURATION = 400; // milliseconds
 
     /**
      * Ensures events that may bubble through multiple sources are only handled once.
@@ -107,6 +113,104 @@ gui.EventManager = function EventManager(odtDocument) {
                 runtime.setTimeout(function () { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
             }
         };
+    }
+
+    /**
+     * A compound event is an event that is not directly supported
+     * by any browser APIs but which can be representation as a
+     * logical consequence of a combination of several preexisting
+     * events. For example: long press, double tap, pinch, etc.
+     * @constructor
+     * @param {!string} eventName
+     * @param {!Array.<!string>} dependencies,
+     * @param {!function(!Event, !Object, !function(!Object)):undefined} eventProxy
+     */
+    function CompoundEvent(eventName, dependencies, eventProxy) {
+        var /**@type{!Object}*/
+            cachedState = {},
+            events = new core.EventNotifier(['eventTriggered']);
+
+        /**
+         * @param {!Event} event
+         * @return {undefined}
+         */
+        function subscribedProxy(event) {
+            eventProxy(event, cachedState, function (compoundEventInstance) {
+                compoundEventInstance.type = eventName;
+                events.emit('eventTriggered', compoundEventInstance);
+            });
+        }
+
+        /**
+         * @param {!Function} cb
+         * @return {undefined}
+         */
+        this.subscribe = function (cb) {
+            events.subscribe('eventTriggered', cb);
+        };
+
+        /**
+         * @param {!Function} cb
+         * @return {undefined}
+         */
+        this.unsubscribe = function (cb) {
+            events.unsubscribe('eventTriggered', cb);
+        };
+
+        /**
+         * @return {undefined}
+         */
+        this.destroy = function () {
+            dependencies.forEach(function (eventName) {
+                eventManager.unsubscribe(eventName, subscribedProxy);
+            });
+        };
+
+        function init() {
+            dependencies.forEach(function (eventName) {
+                eventManager.subscribe(eventName, subscribedProxy);
+            });
+        }
+        init();
+    }
+
+    /**
+     * A long-press occurs when a finger is placed
+     * against the screen and not lifted or moved
+     * before a specific short duration (400ms seems
+     * approximately the time iOS takes).
+     * @param {!Event} event
+     * @param {!Object} cachedState
+     * @param {!function(!Object):undefined} callback
+     * @return {undefined}
+     */
+    function emitLongPressEvent(event, cachedState, callback) {
+        var touchEvent = /**@type{!TouchEvent}*/(event),
+            fingers = /**@type{!number}*/(touchEvent.touches.length),
+            touch = /**@type{!Touch}*/(touchEvent.touches[0]),
+            timer = /**@type{{timer: !number}}*/(cachedState).timer;
+
+        if (event.type === 'touchmove' || event.type === 'touchend') {
+            if (timer) {
+                runtime.clearTimeout(timer);
+            }
+        } else if (event.type === 'touchstart') {
+            if (fingers !== 1) {
+                runtime.clearTimeout(timer);
+            } else {
+                timer = runtime.setTimeout(function () {
+                    callback({
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                        pageX: touch.pageX,
+                        pageY: touch.pageY,
+                        target: event.target,
+                        detail: 1
+                    });
+                }, LONGPRESS_DURATION);
+            }
+        }
+        cachedState.timer = timer;
     }
 
     /**
@@ -153,8 +257,15 @@ gui.EventManager = function EventManager(odtDocument) {
      * @return {undefined}
      */
     function listenEvent(eventTarget, eventType, eventHandler) {
-        var onVariant = "on" + eventType,
+        var onVariant,
             bound = false;
+
+        if (compoundEvents.hasOwnProperty(eventType)) {
+            compoundEvents[eventType].subscribe(eventHandler);
+            return;
+        }
+
+        onVariant = "on" + eventType;
         if (eventTarget.attachEvent) {
             // attachEvent is only supported in Internet Explorer < 11
             eventTarget.attachEvent(onVariant, eventHandler);
@@ -263,7 +374,7 @@ gui.EventManager = function EventManager(odtDocument) {
         return scrollParents;
     }
 
-    /**
+   /**
      * Return event focus back to the event manager
      */
     this.focus = function () {
@@ -302,8 +413,12 @@ gui.EventManager = function EventManager(odtDocument) {
       * @return {undefined}
       */
     this.destroy = function (callback) {
-        eventTrap.parentNode.removeChild(eventTrap);
+        Object.keys(compoundEvents).forEach(function (compoundEventName) {
+            compoundEvents[compoundEventName].destroy();
+        });
+        compoundEvents = {};
 
+        eventTrap.parentNode.removeChild(eventTrap);
         // TODO: drop left eventDelegates, complain about those not unsubscribed
         // Also investigate if delegates need to proper unlisten from events in any case
 
@@ -320,6 +435,8 @@ gui.EventManager = function EventManager(odtDocument) {
         // Negative tab index still allows focus, but removes accessibility by keyboard
         eventTrap.setAttribute("tabindex", -1);
         sizerElement.appendChild(eventTrap);
+
+        compoundEvents.longpress = new CompoundEvent('longpress', ['touchstart', 'touchmove', 'touchend'], emitLongPressEvent);
     }
     init();
 };
