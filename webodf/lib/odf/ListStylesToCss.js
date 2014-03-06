@@ -24,7 +24,7 @@
  */
 
 
-/*global odf, runtime*/
+/*global odf, core, runtime*/
 
 (function () {
     "use strict";
@@ -48,10 +48,23 @@
             'I': 'upper-roman'
         };
 
-    /***
+    /**
      * @constructor
      */
     odf.ListStyleToCss = function ListStyleToCss() {
+
+        var cssUnits = new core.CSSUnits(),
+            odfUtils = new odf.OdfUtils();
+
+        /**
+         * Takes a value with a valid CSS unit and converts it to a CSS pixel value
+         * @param {!string} value
+         * @return {!number}
+         */
+        function convertToPxValue(value) {
+            var parsedLength = odfUtils.parseLength(value);
+            return cssUnits.convert(parsedLength.value, parsedLength.unit, "px");
+        }
 
         /**
          * Appends the rule into the stylesheets and logs any errors that occur
@@ -111,7 +124,28 @@
         }
 
         /**
-         * Creates the final CSS rule with the correct indentation and content
+         * In label-width-and-position mode of specifying list layout the margin and indent specified in
+         * the paragraph style is additive to the layout specified in the list style.
+         *
+         *   fo:margin-left    text:space-before    fo:text-indent  +-----------+
+         * +---------------->+------------------>+----------------->|   label   |     LIST TEXT
+         *                                                          +-----------+
+         * +---------------->+------------------>+-------------------->LIST TEXT LIST TEXT LIST TEXT
+         *                                        text:min-label-width
+         *
+         * To get this additive behaviour we calculate an offset from the left side of the page which is
+         * the space-before +  min-label-width. We then apply this offset to each text:list-item
+         * element and apply the negative value of the offset to each text:list element. This allows the positioning
+         * provided in the list style to apply relative to the paragraph style as we desired. Then on each
+         * ::before pseudo-element which holds the label we apply the negative value of the min-label-width to complete
+         * the alignment from the left side of the page. We then apply the min-label-distance as padding to the right
+         * of the ::before psuedo-element to complete the list label placement.
+         *
+         * For the label-alignment mode the paragraph style overrides the list style but we specify offsets for
+         * the text:list and text:list-item elements to keep the code consistent between the modes
+         *
+         * Diagram and implementation based on: https://wiki.openoffice.org/wiki/Number_layout
+         *
          * @param {!CSSStyleSheet} styleSheet
          * @param {!string} name
          * @param {!Element} node
@@ -121,58 +155,77 @@
         function addListStyleRule(styleSheet, name, node, itemRule) {
             var selector = 'text|list[text|style-name="' + name + '"]',
                 level = node.getAttributeNS(textns, "level"),
-                itemSelector,
                 listItemRule,
                 listLevelProps = /**@type{!Element}*/(node.getElementsByTagNameNS(stylens, "list-level-properties")[0]),
+                listLevelPositionSpaceMode = listLevelProps.getAttributeNS(textns, "list-level-position-and-space-mode"),
                 listLevelLabelAlign = /**@type{!Element}*/(listLevelProps.getElementsByTagNameNS(stylens, "list-level-label-alignment")[0]),
-                bulletIndent,
                 listIndent,
+                textAlign,
                 bulletWidth,
-                rule;
+                labelDistance,
+                bulletIndent,
+                leftOffset;
 
-            if (listLevelLabelAlign) {
-                bulletIndent = listLevelLabelAlign.getAttributeNS(fons,
-                    "text-indent");
-                listIndent = listLevelLabelAlign.getAttributeNS(fons,
-                    "margin-left");
-            }
-
-            // If no values are specified, use default values
-            if (!bulletIndent) {
-                bulletIndent = "-0.6cm";
-            }
-
-            // bulletWidth is the negative of bulletIndent
-            // Obtain this my stripping the fist character
-            if (bulletIndent.charAt(0) === '-') {
-                bulletWidth = bulletIndent.substring(1);
-            } else {
-                bulletWidth = "-" + bulletIndent;
-            }
-
+            // calculate CSS selector based on list level
             level = level && parseInt(level, 10);
             while (level > 1) {
                 selector += ' > text|list-item > text|list';
                 level -= 1;
             }
-            if (listIndent) {
-                itemSelector = selector;
-                itemSelector += ' > text|list-item > *:not(text|list):first-child';
-                listItemRule = itemSelector + "{";
-                listItemRule += 'margin-left:' + listIndent + ';';
-                listItemRule += "}";
-                appendRule(styleSheet, listItemRule);
+
+            textAlign = listLevelProps.getAttributeNS(fons, "text-align");
+            // convert the start and end text alignments to left and right as
+            // IE does not support the start and end values for text alignment
+            switch (textAlign) {
+                case "end":
+                    textAlign = "right";
+                    break;
+                case "start":
+                    textAlign = "left";
+                    break;
             }
-            // insert a block before every immediate child of the list-item, except for lists
-            selector += ' > text|list-item > *:not(text|list):first-child:before';
-            rule = selector + '{' + itemRule + ';';
 
-            rule += 'counter-increment:list;';
-            rule += 'margin-left:' + bulletIndent + ';';
-            rule += 'width:' + bulletWidth + ';';
-            rule += 'display:inline-block}';
+            // get relevant properties from the style based on the list label positioning mode
+            if (listLevelPositionSpaceMode === "label-alignment") {
+                listIndent = listLevelLabelAlign.getAttributeNS(fons, "margin-left");
+                bulletIndent = listLevelLabelAlign.getAttributeNS(fons, "text-indent");
 
-            appendRule(styleSheet, rule);
+            } else {
+                // this block is entered if list-level-position-and-space-mode
+                // has the value label-width-and-position or is not present
+                listIndent = listLevelProps.getAttributeNS(textns, "space-before") || "0px";
+                bulletWidth = listLevelProps.getAttributeNS(textns, "min-label-width") || "0px";
+                labelDistance = listLevelProps.getAttributeNS(textns, "min-label-distance");
+                leftOffset = convertToPxValue(listIndent) + convertToPxValue(bulletWidth);
+            }
+
+            listItemRule = selector + ' > text|list-item';
+            listItemRule += '{';
+            listItemRule += 'margin-left: ' + leftOffset + 'px;';
+            listItemRule += '}';
+            appendRule(styleSheet, listItemRule);
+
+            listItemRule = selector + ' > text|list-item > text|list';
+            listItemRule += '{';
+            listItemRule += 'margin-left: ' + (-leftOffset) + 'px;';
+            listItemRule += '}';
+            appendRule(styleSheet, listItemRule);
+
+            // insert the list label before every immediate child of the list-item, except for lists
+            listItemRule = selector + ' > text|list-item > *:not(text|list):first-child:before';
+            listItemRule += '{';
+            listItemRule += itemRule + ';';
+            listItemRule += 'text-align: ' + textAlign + ';';
+            listItemRule += 'counter-increment:list;';
+            listItemRule += 'display: inline-block;';
+
+            if (listLevelPositionSpaceMode !== "label-alignment") {
+                listItemRule += 'min-width: ' + bulletWidth + ';';
+                listItemRule += 'margin-left: -' + bulletWidth + ';';
+                listItemRule += 'padding-right: ' + labelDistance + ';';
+            }
+            listItemRule += '}';
+            appendRule(styleSheet, listItemRule);
         }
 
         /**

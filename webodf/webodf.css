@@ -181,6 +181,7 @@ text|list:before {
     content:"";
 }
 text|list {
+    display: block;
     counter-reset: list;
 }
 text|list-item {
