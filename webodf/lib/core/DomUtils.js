@@ -143,6 +143,26 @@
     }
 
     /**
+     * Return the first child element with the given namespace and name.
+     * If the parent is null, or if there is no child with the given name and
+     * namespace, null is returned.
+     * @param {?Element} parent
+     * @param {!string} ns
+     * @param {!string} name
+     * @return {?Element}
+     */
+    function getDirectChild(parent, ns, name) {
+        var node = parent ? parent.firstElementChild : null;
+        while (node) {
+            if (node.localName === name && node.namespaceURI === ns) {
+                return /**@type{!Element}*/(node);
+            }
+            node = node.nextElementSibling;
+        }
+        return null;
+    }
+
+    /**
      * A collection of Dom utilities
      * @constructor
      */
@@ -812,6 +832,8 @@
             });
         }
         this.mapObjOntoNode = mapObjOntoNode;
+
+        this.getDirectChild = getDirectChild;
 
         /**
          * @param {!core.DomUtils} self

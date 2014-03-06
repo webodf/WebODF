@@ -71,22 +71,6 @@
         documentContentScope = "document-content";
 
     /**
-     * @param {?Node} node
-     * @param {!string} ns
-     * @param {!string} name
-     * @return {?Element}
-     */
-    function getDirectChild(node, ns, name) {
-        node = node ? node.firstChild : null;
-        while (node) {
-            if (node.localName === name && node.namespaceURI === ns) {
-                return /**@type{!Element}*/(node);
-            }
-            node = node.nextSibling;
-        }
-        return null;
-    }
-    /**
      * Return the position the node should get according to the ODF flat format.
      * @param {!Node} child
      * @return {!number}
@@ -642,7 +626,7 @@
          * Any processing instructions are removed, since importing them
          * gives an exception.
          * @param {Document|undefined} xmldoc
-         * @return {Node|undefined}
+         * @return {!Element|undefined}
          */
         function importRootNode(xmldoc) {
             var doc = self.rootElement.ownerDocument,
@@ -652,7 +636,7 @@
             if (xmldoc) {
                 removeProcessingInstructions(xmldoc.documentElement);
                 try {
-                    node = doc.importNode(xmldoc.documentElement, true);
+                    node = /**@type{!Element}*/(doc.importNode(xmldoc.documentElement, true));
                 } catch (ignore) {
                 }
             }
@@ -678,12 +662,12 @@
         function setRootElement(root) {
             contentElement = null;
             self.rootElement = /**@type{!odf.ODFDocumentElement}*/(root);
-            root.fontFaceDecls = getDirectChild(root, officens, 'font-face-decls');
-            root.styles = getDirectChild(root, officens, 'styles');
-            root.automaticStyles = getDirectChild(root, officens, 'automatic-styles');
-            root.masterStyles = getDirectChild(root, officens, 'master-styles');
-            root.body = getDirectChild(root, officens, 'body');
-            root.meta = getDirectChild(root, officens, 'meta');
+            root.fontFaceDecls = domUtils.getDirectChild(root, officens, 'font-face-decls');
+            root.styles = domUtils.getDirectChild(root, officens, 'styles');
+            root.automaticStyles = domUtils.getDirectChild(root, officens, 'automatic-styles');
+            root.masterStyles = domUtils.getDirectChild(root, officens, 'master-styles');
+            root.body = domUtils.getDirectChild(root, officens, 'body');
+            root.meta = domUtils.getDirectChild(root, officens, 'meta');
             linkAnnotationStartAndEndElements(root);
         }
         /**
@@ -713,16 +697,16 @@
                 setState(OdfContainer.INVALID);
                 return;
             }
-            root.fontFaceDecls = getDirectChild(node, officens, 'font-face-decls');
+            root.fontFaceDecls = domUtils.getDirectChild(node, officens, 'font-face-decls');
             setChild(root, root.fontFaceDecls);
-            n = getDirectChild(node, officens, 'styles');
+            n = domUtils.getDirectChild(node, officens, 'styles');
             root.styles = n || xmldoc.createElementNS(officens, 'styles');
             setChild(root, root.styles);
-            n = getDirectChild(node, officens, 'automatic-styles');
+            n = domUtils.getDirectChild(node, officens, 'automatic-styles');
             root.automaticStyles = n || xmldoc.createElementNS(officens, 'automatic-styles');
             setAutomaticStylesScope(root.automaticStyles, documentStylesScope);
             setChild(root, root.automaticStyles);
-            node = getDirectChild(node, officens, 'master-styles');
+            node = domUtils.getDirectChild(node, officens, 'master-styles');
             root.masterStyles = node || xmldoc.createElementNS(officens,
                     'master-styles');
             setChild(root, root.masterStyles);
@@ -748,14 +732,14 @@
                 return;
             }
             root = self.rootElement;
-            fontFaceDecls = getDirectChild(node, officens, 'font-face-decls');
+            fontFaceDecls = domUtils.getDirectChild(node, officens, 'font-face-decls');
             if (root.fontFaceDecls && fontFaceDecls) {
                 fontFaceNameChangeMap = mergeFontFaceDecls(root.fontFaceDecls, fontFaceDecls);
             } else if (fontFaceDecls) {
                 root.fontFaceDecls = fontFaceDecls;
                 setChild(root, fontFaceDecls);
             }
-            automaticStyles = getDirectChild(node, officens, 'automatic-styles');
+            automaticStyles = domUtils.getDirectChild(node, officens, 'automatic-styles');
             setAutomaticStylesScope(automaticStyles, documentContentScope);
             if (fontFaceNameChangeMap) {
                 styleInfo.changeFontFaceNames(automaticStyles, fontFaceNameChangeMap);
@@ -770,7 +754,7 @@
                 root.automaticStyles = automaticStyles;
                 setChild(root, automaticStyles);
             }
-            node = getDirectChild(node, officens, 'body');
+            node = domUtils.getDirectChild(node, officens, 'body');
             if (node === null) {
                 throw "<office:body/> tag is mising.";
             }
@@ -789,7 +773,7 @@
                 return;
             }
             root = self.rootElement;
-            root.meta = getDirectChild(node, officens, 'meta');
+            root.meta = domUtils.getDirectChild(node, officens, 'meta');
             setChild(root, root.meta);
         }
         /**
@@ -804,7 +788,7 @@
                 return;
             }
             root = self.rootElement;
-            root.settings = getDirectChild(node, officens, 'settings');
+            root.settings = domUtils.getDirectChild(node, officens, 'settings');
             setChild(root, root.settings);
         }
         /**
@@ -914,7 +898,7 @@
             var header = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n',
                 xml = '<manifest:manifest xmlns:manifest="' + manifestns + '" manifest:version="1.2"></manifest:manifest>',
                 manifest = /**@type{!Document}*/(runtime.parseXML(xml)),
-                manifestRoot = getDirectChild(manifest, manifestns, 'manifest'),
+                manifestRoot = manifest.documentElement,
                 serializer = new xmldom.LSSerializer(),
                 /**@type{string}*/
                 fullPath;
@@ -1042,9 +1026,9 @@
                 body;
             if (!contentElement) {
                 body = self.rootElement.body;
-                contentElement = getDirectChild(body, officens, "text")
-                    || getDirectChild(body, officens, "presentation")
-                    || getDirectChild(body, officens, "spreadsheet");
+                contentElement = domUtils.getDirectChild(body, officens, "text")
+                    || domUtils.getDirectChild(body, officens, "presentation")
+                    || domUtils.getDirectChild(body, officens, "spreadsheet");
             }
             if (!contentElement) {
                 throw "Could not find content element in <office:body/>.";
