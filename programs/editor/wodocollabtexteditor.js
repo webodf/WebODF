@@ -32,7 +32,7 @@ var Wodo = Wodo || (function () {
         /** @type{!number} */
         instanceCounter = 0,
         // constructors
-        BorderContainer, ContentPane, EditorSession, Tools, MemberListView,
+        BorderContainer, ContentPane, FullWindowZoomHelper, EditorSession, Tools, MemberListView,
         // const strings
         /** @const
             @type {!string} */
@@ -61,11 +61,12 @@ var Wodo = Wodo || (function () {
         require([
             "dijit/layout/BorderContainer",
             "dijit/layout/ContentPane",
+            "webodf/editor/FullWindowZoomHelper",
             "webodf/editor/EditorSession",
             "webodf/editor/Tools",
             "webodf/editor/MemberListView",
             "webodf/editor/Translator"],
-            function (BC, CP, ES, T, MLV, Translator) {
+            function (BC, CP, FWZH, ES, T, MLV, Translator) {
                 var locale = navigator.language || "en-US",
                     editorBase = dojo.config && dojo.config.paths && dojo.config.paths["webodf/editor"],
                     translationsDir = editorBase + '/translations',
@@ -73,6 +74,7 @@ var Wodo = Wodo || (function () {
 
                 BorderContainer = BC;
                 ContentPane = CP;
+                FullWindowZoomHelper = FWZH,
                 EditorSession = ES;
                 Tools = T;
                 MemberListView = MLV;
@@ -149,6 +151,8 @@ var Wodo = Wodo || (function () {
             /** @const
                 @type{!string} */
             editorElementId = "webodfeditor-editor" + instanceCounter,
+            //
+            fullWindowZoomHelper,
             //
             memberListElement,
             membersElement,
@@ -426,17 +430,6 @@ var Wodo = Wodo || (function () {
             return editorSession.sessionController.getMetadataController().getMetadata(property);
         };
 
-        function translateToolbar() {
-            var y = document.body.scrollTop;
-
-            toolbarContainerElement.style.WebkitTransformOrigin = "center top";
-            toolbarContainerElement.style.WebkitTransform = 'translateY(' + y + 'px)';
-        }
-
-        function repositionContainer() {
-            canvasContainerElement.style.top = toolbarContainerElement.getBoundingClientRect().height + 'px';
-        }
-
         /**
          * @return {undefined}
          */
@@ -462,11 +455,6 @@ var Wodo = Wodo || (function () {
         function destroy(callback) {
             var destroyCallbacks = [];
 
-            window.removeEventListener('scroll', translateToolbar);
-            window.removeEventListener('focusout', translateToolbar);
-            window.removeEventListener('touchmove', translateToolbar);
-            window.removeEventListener('resize', repositionContainer);
-
             // TODO: decide if some forced close should be done here instead of enforcing proper API usage
             runtime.assert(!session, "session should not exist here.");
 
@@ -474,6 +462,7 @@ var Wodo = Wodo || (function () {
             mainContainer.destroyRecursive(true);
 
             destroyCallbacks = destroyCallbacks.concat([
+                fullWindowZoomHelper.destroy,
                 memberListView.destroy,
                 tools.destroy,
                 odfCanvas.destroy,
@@ -586,13 +575,7 @@ var Wodo = Wodo || (function () {
 
             odfCanvas.addListener("statereadychange", createSession);
 
-            // fullscreen pinch-zoom adaption TODO: turn this into a helper class
-            repositionContainer();
-
-            window.addEventListener('scroll', translateToolbar);
-            window.addEventListener('focusout', translateToolbar);
-            window.addEventListener('touchmove', translateToolbar);
-            window.addEventListener('resize', repositionContainer);
+            fullWindowZoomHelper = new FullWindowZoomHelper(toolbarContainerElement, canvasContainerElement);
         }
 
         init();

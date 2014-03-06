@@ -5,6 +5,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     avatar-joe.png
     EditorSession.js
     Translator.js
+    FullWindowZoomHelper.js
     wodotexteditor.css
     # only local editor
     wodotexteditor.js
