@@ -128,7 +128,6 @@
         "gui.ShadowCursor"
     ],
     "gui.SelectionViewManager": [
-        "core.Destroyable",
         "gui.SelectionView"
     ],
     "gui.SessionController": [
@@ -168,7 +167,6 @@
     ],
     "gui.TrivialUndoManager": [
         "core.DomUtils",
-        "core.EventNotifier",
         "gui.UndoManager",
         "gui.UndoStateRules"
     ],
@@ -203,7 +201,6 @@
         "core.Async",
         "core.ScheduledTask",
         "gui.AnnotationViewManager",
-        "gui.ZoomHelper",
         "odf.FontLoader",
         "odf.Formatting",
         "odf.Style2CSS",
@@ -245,6 +242,7 @@
         "ops.OdtDocument"
     ],
     "ops.Canvas": [
+        "gui.ZoomHelper"
     ],
     "ops.Document": [
         "core.PositionFilter",
@@ -256,7 +254,6 @@
     "ops.Member": [
     ],
     "ops.OdtCursor": [
-        "core.EventNotifier",
         "gui.SelectionMover",
         "ops.Document"
     ],

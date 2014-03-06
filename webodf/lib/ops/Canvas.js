@@ -51,3 +51,7 @@ ops.Canvas.prototype.getZoomLevel = function () { "use strict"; };
  * @return {!Element}
  */
 ops.Canvas.prototype.getElement = function () { "use strict"; };
+/**
+ * @return {!gui.ZoomHelper}
+ */
+ops.Canvas.prototype.getZoomHelper = function () { "use strict"; };

@@ -47,7 +47,8 @@
 gui.SvgSelectionView = function SvgSelectionView(cursor) {
     "use strict";
 
-    var document = cursor.getDocument(),
+    var /**@type{!ops.Document}*/
+        document = cursor.getDocument(),
         documentRoot, // initialized by addOverlay
         /**@type{!Element}*/
         root, // initialized by addOverlays
@@ -56,8 +57,12 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         svgns = "http://www.w3.org/2000/svg",
         overlay = doc.createElementNS(svgns, 'svg'),
         polygon = doc.createElementNS(svgns, 'polygon'),
+        handle1 = doc.createElementNS(svgns, 'circle'),
+        handle2 = doc.createElementNS(svgns, 'circle'),
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
+        /**@type{!gui.ZoomHelper}*/
+        zoomHelper = document.getCanvas().getZoomHelper(),
         /**@type{boolean}*/
         isVisible = true,
         positionIterator = gui.SelectionMover.createPositionIterator(document.getRootNode()),
@@ -65,6 +70,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/
         FILTER_REJECT = NodeFilter.FILTER_REJECT,
+        /**@const*/
+        HANDLE_RADIUS = 8,
         /**@type{!core.ScheduledTask}*/
         renderTask;
 
@@ -83,7 +90,15 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             root = /**@type{!Element}*/(documentRoot.parentNode.parentNode.parentNode);
             root.appendChild(overlay);
             overlay.setAttribute('class', 'selectionOverlay');
+            handle1.setAttribute('class', 'draggable');
+            handle2.setAttribute('class', 'draggable');
+            handle1.setAttribute('end', 'left');
+            handle2.setAttribute('end', 'right');
+            handle1.setAttribute('r', HANDLE_RADIUS);
+            handle2.setAttribute('r', HANDLE_RADIUS);
             overlay.appendChild(polygon);
+            overlay.appendChild(handle1);
+            overlay.appendChild(handle2);
         }
     }
 
@@ -96,7 +111,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      */
     function translateRect(rect) {
         var rootRect = domUtils.getBoundingClientRect(root),
-            zoomLevel = document.getCanvas().getZoomLevel(),
+            zoomLevel = zoomHelper.getZoomLevel(),
             resultRect = {};
 
         resultRect.top = domUtils.adaptRangeDifferenceToZoomLevel(rect.top - rootRect.top, zoomLevel);
@@ -570,6 +585,11 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
                 { x: firstRect.left,    y: top + firstRect.height   }
             ]);
 
+            handle1.setAttribute('cx', firstRect.left);
+            handle1.setAttribute('cy', top + firstRect.height / 2);
+            handle2.setAttribute('cx', lastRect.right);
+            handle2.setAttribute('cy', bottom - lastRect.height / 2);
+
             firstRange.detach();
             lastRange.detach();
             fillerRange.detach();
@@ -635,11 +655,25 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     }
 
     /**
+     * Scale handles to 1/zoomLevel,so they are
+     * finger-friendly at every zoom level.
+     * @param {!number} zoomLevel
+     * @return {undefined}
+     */
+    function scaleHandles(zoomLevel) {
+        var radius = HANDLE_RADIUS / zoomLevel;
+
+        handle1.setAttribute('r', radius);
+        handle2.setAttribute('r', radius);
+    }
+
+    /**
      * @param {function(!Object=)} callback
      */
     function destroy(callback) {
         root.removeChild(overlay);
         cursor.getDocument().unsubscribe(ops.Document.signalCursorMoved, handleCursorMove);
+        zoomHelper.unsubscribe(gui.ZoomHelper.signalZoomChanged, scaleHandles);
         callback();
     }
 
@@ -659,6 +693,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         addOverlay();
         overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
         cursor.getDocument().subscribe(ops.Document.signalCursorMoved, handleCursorMove);
+        zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, scaleHandles);
+        scaleHandles(zoomHelper.getZoomLevel());
     }
 
     init();
