@@ -475,6 +475,27 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.selection.range.endOffset", "7");
     }
 
+    function expandToWordBoundaries_RangeInDifferentRootToCursor() {
+        var doc = createOdtDocument("<text:p>one two three<office:annotation><text:p>four five</text:p></office:annotation></text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[1],
+            text = p.childNodes[0];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 0,
+            focusNode: text,
+            focusOffset: 1
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "0");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "4");
+    }
+
     this.setUp = function () {
         testarea = core.UnitTest.provideTestAreaDiv();
         t = { doc: testarea.ownerDocument };
@@ -526,7 +547,8 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             expandToWordBoundaries_CollapsedInWord,
             expandToWordBoundaries_CollasedAtWordStart,
             expandToWordBoundaries_CollasedAtWordEnd,
-            expandToWordBoundaries_AlreadyAtWordBoundaries
+            expandToWordBoundaries_AlreadyAtWordBoundaries,
+            expandToWordBoundaries_RangeInDifferentRootToCursor
         ]);
     };
     this.asyncTests = function () {

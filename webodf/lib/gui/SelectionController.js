@@ -84,9 +84,10 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!core.StepIterator}
      */
     function createWordBoundaryStepIterator(node, offset, includeWhitespace) {
-        var wordBoundaryFilter = new odf.WordBoundaryFilter(odtDocument, includeWhitespace);
-        return odtDocument.createStepIterator(node, offset, [baseFilter, rootFilter, wordBoundaryFilter],
-            odtDocument.getRootElement(node));
+        var wordBoundaryFilter = new odf.WordBoundaryFilter(odtDocument, includeWhitespace),
+            nodeRoot = odtDocument.getRootElement(node),
+            nodeRootFilter = odtDocument.createRootFilter(nodeRoot);
+        return odtDocument.createStepIterator(node, offset, [baseFilter, nodeRootFilter, wordBoundaryFilter], nodeRoot);
     }
 
     /**
