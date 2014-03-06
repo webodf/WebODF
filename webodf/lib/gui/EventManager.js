@@ -35,7 +35,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, core */
+/*global runtime, gui, core, Node */
 
 /**
  * Event wiring and management abstraction layer
@@ -57,7 +57,11 @@ gui.EventManager = function EventManager(odtDocument) {
             // Epiphany 3.6.1 requires this to allow the paste event to fire
             "beforepaste": true,
             // Capture long-press events inside the canvas
-            "longpress": true
+            "longpress": true,
+            // Capture compound drag events inside the canvas
+            "drag": true,
+            // Capture compound dragstop events inside the canvas
+            "dragstop": true
         },
         // Events that should be bound to the global window rather than the canvas element
         bindToWindow = {
@@ -211,6 +215,78 @@ gui.EventManager = function EventManager(odtDocument) {
             }
         }
         cachedState.timer = timer;
+    }
+
+    /**
+     * Drag events are generated whenever an element with class
+     * 'draggable' is touched and subsequent finger movements
+     * lie on the same element. This prevents the default
+     * action of touchmove, i.e. usually scrolling.
+     * @param {!Event} event
+     * @param {!Object} cachedState
+     * @param {!function(!Object):undefined} callback
+     * @return {undefined}
+     */
+    function emitDragEvent(event, cachedState, callback) {
+        var touchEvent = /**@type{!TouchEvent}*/(event),
+            fingers = /**@type{!number}*/(touchEvent.touches.length),
+            touch = /**@type{!Touch}*/(touchEvent.touches[0]),
+            target = /**@type{!Element}*/(event.target),
+            cachedTarget = /**@type{{target: ?Element}}*/(cachedState).target;
+
+        if (fingers !== 1
+                || event.type === 'touchend') {
+            cachedTarget = null;
+        } else if (event.type === 'touchstart' && target.getAttribute('class') === 'draggable') {
+            cachedTarget = target;
+        } else if (event.type === 'touchmove' && cachedTarget) {
+            // Prevent the default action of 'touchmove', i.e. scrolling.
+            event.preventDefault();
+            // Stop propagation, so even if there is no native scroll,
+            // we can block the pan processing in ZoomHelper as well.
+            event.stopPropagation();
+            callback({
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                pageX: touch.pageX,
+                pageY: touch.pageY,
+                target: cachedTarget,
+                detail: 1
+            });
+        }
+        cachedState.target = cachedTarget;
+    }
+
+    /**
+     * Drag-stop events are generated whenever an touchend
+     * is preceded by a drag event.
+     * @param {!Event} event
+     * @param {!Object} cachedState
+     * @param {!function(!Object):undefined} callback
+     * @return {undefined}
+     */
+    function emitDragStopEvent(event, cachedState, callback) {
+        var touchEvent = /**@type{!TouchEvent}*/(event),
+            target = /**@type{!Element}*/(event.target),
+            /**@type{!Touch}*/
+            touch,
+            dragging = /**@type{{dragging: ?boolean}}*/(cachedState).dragging;
+
+        if (event.type === 'drag') {
+            dragging = true;
+        } else if (event.type === 'touchend' && dragging) {
+            dragging = false;
+            touch = /**@type{!Touch}*/(touchEvent.changedTouches[0]);
+            callback({
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                pageX: touch.pageX,
+                pageY: touch.pageY,
+                target: target,
+                detail: 1
+            });
+        }
+        cachedState.dragging = dragging;
     }
 
     /**
@@ -437,6 +513,8 @@ gui.EventManager = function EventManager(odtDocument) {
         sizerElement.appendChild(eventTrap);
 
         compoundEvents.longpress = new CompoundEvent('longpress', ['touchstart', 'touchmove', 'touchend'], emitLongPressEvent);
+        compoundEvents.drag = new CompoundEvent('drag', ['touchstart', 'touchmove', 'touchend'], emitDragEvent);
+        compoundEvents.dragstop = new CompoundEvent('dragstop', ['drag', 'touchend'], emitDragStopEvent);
     }
     init();
 };
