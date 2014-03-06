@@ -88,29 +88,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         return odtDocument.createStepIterator(node, offset, [baseFilter, rootFilter, wordBoundaryFilter],
             odtDocument.getRootElement(node));
     }
-    
-    /**
-     * @param {function(!Node):Node} lookup
-     * @return {function(!Node,number):function(number,!Node,number):boolean}
-     */
-    /*jslint unparam:true*/
-    function constrain(lookup) {
-        /**
-         * @param {!Node} originalNode
-         * @return {function(number,!Node,number):boolean}
-         */
-        return function (originalNode) {
-            var originalContainer = lookup(originalNode);
-            /**
-             * @param {number} step
-             * @param {!Node} node
-             */
-            return function (step, node) {
-                return lookup(node) === originalContainer;
-            };
-        };
-    }
-    /*jslint unparam:false*/
 
     /**
      * Derive a selection-type object from the provided cursor
@@ -256,9 +233,64 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     this.expandToParagraphBoundaries = expandToParagraphBoundaries;
 
     /**
+     * Rounds to the closest available step inside the supplied root, and preferably
+     * inside the original paragraph the node and offset are within. If (node, offset) is
+     * outside the root, the closest root boundary is used instead.
+     * This function will assert if no valid step is found within the supplied root.
+     *
+     * @param {!Node} root Root to contain iteration within
+     * @param {!Array.<!core.PositionFilter>} filters Position filters
+     * @param {!Range} range Range to modify
+     * @param {!boolean} modifyStart Set to true to modify the start container & offset. If false, the end
+     * container and offset will be modified instead.
+     *
+     * @return {undefined}
+     */
+    function roundToClosestStep(root, filters, range, modifyStart) {
+        var stepIterator,
+            node,
+            offset;
+
+        if (modifyStart) {
+            node = /**@type{!Node}*/(range.startContainer);
+            offset = range.startOffset;
+        } else {
+            node = /**@type{!Node}*/(range.endContainer);
+            offset = range.endOffset;
+        }
+
+        if (!domUtils.containsNode(root, node)) {
+            if (domUtils.comparePoints(root, 0, node, offset) < 0) {
+                offset = 0;
+            } else {
+                offset = root.childNodes.length;
+            }
+            node = root;
+        }
+        stepIterator = odtDocument.createStepIterator(node, offset, filters, odfUtils.getParagraphElement(node) || root);
+        if (!stepIterator.roundToClosestStep()) {
+            runtime.assert(false, "No step found in requested range");
+        }
+        if (modifyStart) {
+            range.setStart(stepIterator.container(), stepIterator.offset());
+        } else {
+            range.setEnd(stepIterator.container(), stepIterator.offset());
+        }
+    }
+
+    /**
+     * Set the user's cursor to the specified selection. If the start and end containers are in different roots,
+     * the anchor's root constraint is used (the anchor is the startContainer for a forward selection, or the
+     * endContainer for a reverse selection).
+     *
+     * If both the range start and range end are outside of the canvas element, no operations are generated.
+     *
      * @param {!Range} range
-     * @param {!boolean} hasForwardSelection
-     * @param {number=} clickCount
+     * @param {!boolean} hasForwardSelection Set to true to indicate the range is from anchor (startContainer) to focus
+     * (endContainer)
+     * @param {number=} clickCount A value of 2 denotes expandToWordBoundaries, while a value of 3 and above will expand
+     * to paragraph boundaries.
+     * @return {undefined}
      */
     function selectRange(range, hasForwardSelection, clickCount) {
         var canvasElement = odtDocument.getOdfCanvas().getElement(),
@@ -267,6 +299,8 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             endInsideCanvas,
             existingSelection,
             newSelection,
+            anchorRoot,
+            filters = [baseFilter],
             op;
 
         startInsideCanvas = domUtils.containsNode(canvasElement, range.startContainer);
@@ -284,8 +318,16 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             }
         }
 
+        if (hasForwardSelection) {
+            anchorRoot = odtDocument.getRootElement(/**@type{!Node}*/(range.startContainer));
+        } else {
+            anchorRoot = odtDocument.getRootElement(/**@type{!Node}*/(range.endContainer));
+        }
+        filters.push(odtDocument.createRootFilter(anchorRoot));
+        roundToClosestStep(anchorRoot, filters, range, true);
+        roundToClosestStep(anchorRoot, filters, range, false);
         validSelection = rangeToSelection(range, hasForwardSelection);
-        newSelection = odtDocument.convertDomToCursorRange(validSelection, constrain(odfUtils.getParagraphElement));
+        newSelection = odtDocument.convertDomToCursorRange(validSelection);
         existingSelection = odtDocument.getCursorSelection(inputMemberId);
         if (newSelection.position !== existingSelection.position || newSelection.length !== existingSelection.length) {
             op = createOpMoveCursor(newSelection.position, newSelection.length, ops.OdtCursor.RangeSelection);
