@@ -84,6 +84,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const
            @type{!string}*/
         presentationns = odf.Namespaces.presentationns,
+        domUtils = new core.DomUtils(),
 
         /**@const
            @type{!Object.<string,string>}*/
@@ -452,22 +453,6 @@ odf.Style2CSS = function Style2CSS() {
         return selectors;
     }
     /**
-     * @param {?Element} node
-     * @param {!string} ns
-     * @param {!string} name
-     * @return {?Element}
-     */
-    function getDirectChild(node, ns, name) {
-        var e = node && node.firstElementChild;
-        while (e) {
-            if (e.namespaceURI === ns && e.localName === name) {
-                break;
-            }
-            e = e.nextElementSibling;
-        }
-        return e;
-    }
-    /**
      * Make sure border width is no less than 1px wide; otherwise border is not rendered.
      * Only have problems with point unit at the moment. Please add more rule if needed.
      * @param {!string} value a string contains border attributes eg. 1pt solid black or 1px
@@ -523,7 +508,7 @@ odf.Style2CSS = function Style2CSS() {
      * @return {?{value: !number, unit: !string}}
      */
     function getFontSize(styleNode) {
-        var props = getDirectChild(styleNode, stylens, 'text-properties');
+        var props = domUtils.getDirectChild(styleNode, stylens, 'text-properties');
         if (props) {
             return utils.parseFoFontSize(props.getAttributeNS(fons, 'font-size'));
         }
@@ -628,7 +613,7 @@ odf.Style2CSS = function Style2CSS() {
     function getParagraphProperties(props) {
         var rule = '', bgimage, url, lineHeight;
         rule += applySimpleMapping(props, paragraphPropertySimpleMapping);
-        bgimage = getDirectChild(props, stylens, 'background-image');
+        bgimage = domUtils.getDirectChild(props, stylens, 'background-image');
         if (bgimage) {
             url = bgimage.getAttributeNS(xlinkns, 'href');
             if (url) {
@@ -791,41 +776,41 @@ odf.Style2CSS = function Style2CSS() {
             selector = selectors.join(','),
             rule = '',
             properties;
-        properties = getDirectChild(node.element, stylens, 'text-properties');
+        properties = domUtils.getDirectChild(node.element, stylens, 'text-properties');
         if (properties) {
             rule += getTextProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                 stylens, 'paragraph-properties');
         if (properties) {
             rule += getParagraphProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                  stylens, 'graphic-properties');
         if (properties) {
             rule += getGraphicProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                  stylens, 'drawing-page-properties');
         if (properties) {
             rule += getDrawingPageProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                  stylens, 'table-cell-properties');
         if (properties) {
             rule += getTableCellProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                  stylens, 'table-row-properties');
         if (properties) {
             rule += getTableRowProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                  stylens, 'table-column-properties');
         if (properties) {
             rule += getTableColumnProperties(properties);
         }
-        properties = getDirectChild(node.element,
+        properties = domUtils.getDirectChild(node.element,
                  stylens, 'table-properties');
         if (properties) {
             rule += getTableProperties(properties);
@@ -898,9 +883,9 @@ odf.Style2CSS = function Style2CSS() {
             level = node.getAttributeNS(textns, "level"),
             itemSelector,
             listItemRule,
-            listLevelProps = getDirectChild(node, stylens,
+            listLevelProps = domUtils.getDirectChild(node, stylens,
                     "list-level-properties"),
-            listLevelLabelAlign = getDirectChild(listLevelProps, stylens,
+            listLevelLabelAlign = domUtils.getDirectChild(listLevelProps, stylens,
                     "list-level-label-alignment"),
             bulletIndent,
             listIndent,
@@ -968,7 +953,7 @@ odf.Style2CSS = function Style2CSS() {
         var rule = '', imageProps, url,
             contentLayoutRule = '',
             pageSizeRule = '',
-            props = getDirectChild(node, stylens, 'page-layout-properties'),
+            props = domUtils.getDirectChild(node, stylens, 'page-layout-properties'),
             stylename,
             masterStyles,
             e,
@@ -979,7 +964,7 @@ odf.Style2CSS = function Style2CSS() {
         stylename = node.getAttributeNS(stylens, 'name');
 
         rule += applySimpleMapping(props, pageContentPropertySimpleMapping);
-        imageProps = getDirectChild(props, stylens, 'background-image');
+        imageProps = domUtils.getDirectChild(props, stylens, 'background-image');
         if (imageProps) {
             url = imageProps.getAttributeNS(xlinkns, 'href');
             if (url) {
@@ -990,7 +975,7 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         if (documentType === 'presentation') {
-            masterStyles = getDirectChild(/**@type{!Element}*/(node.parentNode.parentNode), officens, 'master-styles');
+            masterStyles = domUtils.getDirectChild(/**@type{!Element}*/(node.parentNode.parentNode), officens, 'master-styles');
             e = masterStyles && masterStyles.firstElementChild;
             while (e) {
                 // Generate CSS for all the pages that use the master page that use this page-layout

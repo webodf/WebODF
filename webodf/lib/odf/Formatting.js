@@ -109,22 +109,6 @@ odf.Formatting = function Formatting() {
         odfContainer = odfcontainer;
     };
     /**
-     * @param {?Element} node
-     * @param {!string} ns
-     * @param {!string} name
-     * @return {?Element}
-     */
-    function getDirectChild(node, ns, name) {
-        var e = node && node.firstElementChild;
-        while (e) {
-            if (e.namespaceURI === ns && e.localName === name) {
-                break;
-            }
-            e = e.nextElementSibling;
-        }
-        return e;
-    }
-    /**
      * Returns a font face declarations map, where the key is the style:name and
      * the value is the svg:font-family or null, if none set but a svg:font-face-uri
      * @return {!Object.<string,string>}
@@ -676,10 +660,10 @@ odf.Formatting = function Formatting() {
 
         pageLayoutElement = getPageLayoutStyleElement(styleName, styleFamily);
         if (!pageLayoutElement) {
-            pageLayoutElement = getDirectChild(odfContainer.rootElement.styles,
+            pageLayoutElement = domUtils.getDirectChild(odfContainer.rootElement.styles,
                     stylens, "default-page-layout");
         }
-        props = getDirectChild(pageLayoutElement, stylens,
+        props = domUtils.getDirectChild(pageLayoutElement, stylens,
                 "page-layout-properties");
         if (props) {
             printOrientation = props.getAttributeNS(stylens, "print-orientation") || "portrait";
