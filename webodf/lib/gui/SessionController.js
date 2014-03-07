@@ -341,6 +341,44 @@
         // TODO it will soon be time to grow an UndoController
         this.redo = redo;
 
+        /**
+         * This processes our custom drag events and if they are on
+         * a selection handle (with the attribute 'end' denoting the left
+         * or right handle), updates the shadow cursor's selection to
+         * be on those endpoints.
+         * @param {!Event} event
+         * @return {undefined}
+         */
+        function extendSelectionByDrag(event) {
+            var position,
+                cursor = odtDocument.getCursor(inputMemberId),
+                selectedRange = cursor.getSelectedRange(),
+                newSelectionRange,
+                /**@type{!string}*/
+                handleEnd = /**@type{!Element}*/(getTarget(event)).getAttribute('end');
+
+            if (selectedRange && handleEnd) {
+                position = caretPositionFromPoint(event.clientX, event.clientY);
+                if (position) {
+                    shadowCursorIterator.setUnfilteredPosition(position.container, position.offset);
+                    if (mouseDownRootFilter.acceptPosition(shadowCursorIterator) === FILTER_ACCEPT) {
+                        newSelectionRange = /**@type{!Range}*/(selectedRange.cloneRange());
+                        if (handleEnd === 'left') {
+                            newSelectionRange.setStart(shadowCursorIterator.container(), shadowCursorIterator.unfilteredDomOffset());
+                        } else {
+                            newSelectionRange.setEnd(shadowCursorIterator.container(), shadowCursorIterator.unfilteredDomOffset());
+                        }
+                        shadowCursor.setSelectedRange(newSelectionRange, handleEnd === 'right');
+                        odtDocument.emit(ops.Document.signalCursorMoved, shadowCursor);
+                    }
+                }
+            }
+        }
+
+        function updateCursorSelection() {
+            selectionController.selectRange(shadowCursor.getSelectedRange(), shadowCursor.hasForwardSelection(), 1);
+        }
+
         function updateShadowCursor() {
             var selection = window.getSelection(),
                 selectionRange = selection.rangeCount > 0 && selectionController.selectionToRange(selection);
@@ -519,6 +557,36 @@
          * @param {!Event} event
          * @return {undefined}
          */
+        function selectWordByLongPress(event) {
+            var /**@type{?{anchorNode: ?Node, anchorOffset: !number, focusNode: ?Node, focusOffset: !number}}*/
+                selection,
+                position,
+                selectionRange,
+                container, offset;
+
+            position = caretPositionFromPoint(event.clientX, event.clientY);
+            if (position) {
+                container = /**@type{!Node}*/(position.container);
+                offset = position.offset;
+
+                selection = {
+                    anchorNode: container,
+                    anchorOffset: offset,
+                    focusNode: container,
+                    focusOffset: offset
+                };
+
+                selectionRange = selectionController.selectionToRange(selection);
+                selectionController.selectRange(selectionRange.range,
+                selectionRange.hasForwardSelection, 2);
+                eventManager.focus();
+            }
+        }
+
+        /**
+         * @param {!Event} event
+         * @return {undefined}
+         */
         function handleMouseClickEvent(event) {
             var target = getTarget(event),
                 range,
@@ -625,7 +693,9 @@
                 annotationController.removeAnnotation(annotationNode);
                 eventManager.focus();
             } else {
-                handleMouseClickEvent(event);
+                if (target.getAttribute('class') !== 'draggable') {
+                    handleMouseClickEvent(event);
+                }
             }
         }
 
@@ -964,6 +1034,9 @@
             eventManager.unsubscribe("dragstart", handleDragStart);
             eventManager.unsubscribe("dragend", handleDragEnd);
             eventManager.unsubscribe("click", hyperlinkClickHandler.handleClick);
+            eventManager.unsubscribe("longpress", selectWordByLongPress);
+            eventManager.unsubscribe("drag", extendSelectionByDrag);
+            eventManager.unsubscribe("dragstop", updateCursorSelection);
 
             odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
             odtDocument.unsubscribe(ops.Document.signalCursorAdded, inputMethodEditor.registerCursor);
@@ -1059,6 +1132,9 @@
             eventManager.subscribe("dragstart", handleDragStart);
             eventManager.subscribe("dragend", handleDragEnd);
             eventManager.subscribe("click", hyperlinkClickHandler.handleClick);
+            eventManager.subscribe("longpress", selectWordByLongPress);
+            eventManager.subscribe("drag", extendSelectionByDrag);
+            eventManager.subscribe("dragstop", updateCursorSelection);
 
             odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, redrawRegionSelectionTask.trigger);
             odtDocument.subscribe(ops.Document.signalCursorAdded, inputMethodEditor.registerCursor);

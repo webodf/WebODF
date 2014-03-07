@@ -553,6 +553,19 @@ dc|*::-moz-selection {
     fill-rule: evenodd;
 }
 
+.selectionOverlay > .draggable {
+    fill-opacity: 0.8;
+    stroke-opacity: 0;
+    stroke-width: 8;
+    pointer-events: all;
+    display: none;
+
+    -moz-transform-origin: center center;
+    -webkit-transform-origin: center center;
+    -ms-transform-origin: center center;
+    transform-origin: center center;
+}
+
 #imageSelector {
     display: none;
     position: absolute;
