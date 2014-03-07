@@ -398,24 +398,42 @@
                 treeWalker.currentNode = currentNode;
             }
 
-            if (currentNode && nodeFilter(currentNode) === NodeFilter.FILTER_ACCEPT) {
-                // The first call to nextNode will return the next node *after* walker.currentNode
-                // Therefore, need to manually check if currentNode should be included in the elements array
-                // and save it if it passes the filter
-                elements.push(currentNode);
-            }
-
-            currentNode = treeWalker.nextNode();
-            while (currentNode) {
-                comparePositionResult = lastNodeInRange.compareDocumentPosition(currentNode);
-                if (comparePositionResult !== 0 && (comparePositionResult & endNodeCompareFlags) === 0) {
-                    // comparePositionResult === 0 if currentNode === lastNodeInRange. This is considered within the range
-                    // comparePositionResult & endNodeCompareFlags would be non-zero if n precedes lastNodeInRange
-                    // If either of these statements are false, currentNode is past the end of the range
-                    break;
+            if (currentNode) {
+                switch (nodeFilter(/**@type{!Node}*/(currentNode))) {
+                    case NodeFilter.FILTER_REJECT:
+                        // If started on a rejected node, calling nextNode will incorrectly
+                        // dive down into the rejected node's children. Instead, advance to
+                        // the next sibling or parent node's sibling and resume walking from
+                        // there.
+                        currentNode = treeWalker.nextSibling();
+                        while (!currentNode && treeWalker.parentNode()) {
+                            currentNode = treeWalker.nextSibling();
+                        }
+                        break;
+                    case NodeFilter.FILTER_ACCEPT:
+                        // The first call to nextNode will return the next node *after* walker.currentNode
+                        // Therefore, need to manually check if currentNode should be included in the elements array
+                        // and save it if it passes the filter
+                        elements.push(currentNode);
+                        currentNode = treeWalker.nextNode();
+                        break;
+                    default:
+                    // case NodeFilter.FILTER_SKIP:
+                        currentNode = treeWalker.nextNode();
+                        break;
                 }
-                elements.push(currentNode);
-                currentNode = treeWalker.nextNode();
+
+                while (currentNode) {
+                    comparePositionResult = lastNodeInRange.compareDocumentPosition(currentNode);
+                    if (comparePositionResult !== 0 && (comparePositionResult & endNodeCompareFlags) === 0) {
+                        // comparePositionResult === 0 if currentNode === lastNodeInRange. This is considered within the range
+                        // comparePositionResult & endNodeCompareFlags would be non-zero if n precedes lastNodeInRange
+                        // If either of these statements are false, currentNode is past the end of the range
+                        break;
+                    }
+                    elements.push(currentNode);
+                    currentNode = treeWalker.nextNode();
+                }
             }
 
             return elements;

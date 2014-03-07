@@ -163,6 +163,21 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[0]"); // "AB"
         r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]"); // text:s
     }
+    function getTextElements_IgnoresEditInfoWithTextChild() {
+        t.doc = createDocument("<text:p><editinfo>HI</editinfo><text:s/>CD</text:p>");
+        t.range.setStart(t.doc, 0);
+        t.range.setEnd(t.doc, t.doc.childNodes.length);
+
+        t.paragraphs = t.odfUtils.getParagraphElements(t.range);
+        t.textElements = t.odfUtils.getTextElements(t.range, false, false);
+
+        r.shouldBe(t, "t.paragraphs.length", "1");
+        r.shouldBe(t, "t.paragraphs.shift()", "t.doc");
+
+        r.shouldBe(t, "t.textElements.length", "2");
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[1]"); // text:s
+        r.shouldBe(t, "t.textElements.shift()", "t.doc.childNodes[2]"); // "CD"
+    }
     function getTextElements_SpansMultipleParagraphs() {
         t.doc = createDocument("<text:p>AB<text:s/>CD</text:p><text:p>EF<text:s/>GH</text:p>");
         t.range.setStart(t.doc.childNodes[0].childNodes[0], 0);
@@ -378,6 +393,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             getTextElements_EncompassedWithinParagraph,
             getTextElements_EncompassedWithinSpan_And_Paragraph,
             getTextElements_IgnoresEditInfo,
+            getTextElements_IgnoresEditInfoWithTextChild,
             getTextElements_SpansMultipleParagraphs,
             getTextElements_IncludesInsignificantWhitespace,
             getTextElements_ExcludesInsignificantWhitespace,

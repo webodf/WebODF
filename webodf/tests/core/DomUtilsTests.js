@@ -611,6 +611,20 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         range.detach();
     }
 
+    function getNodesInRange_StartsOnRejectedNode_IgnoresChildNodes() {
+        var range = document.createRange();
+        createNodes("<span>ignored</span>after");
+
+        range.setStart(t.doc, 0);
+        range.setEnd(t.doc, t.doc.childNodes.length);
+
+        t.nodes = t.utils.getNodesInRange(range, ignoreSpans, NodeFilter.SHOW_ALL);
+
+        r.shouldBe(t, "t.nodes.shift()", "t.doc.childNodes[1]");
+        r.shouldBe(t, "t.nodes.shift()", "undefined");
+        range.detach();
+    }
+
     function mapObjOntoNode_EmptyObject() {
         t.node = document.createElement("span");
 
@@ -657,6 +671,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             getNodesInRange_NodeStartToNodeEnd_ReturnsNode,
             getNodesInRange_NodeEndToNodeStart_ReturnsTouchedNode,
             getNodesInRange_NodeEndToNodeEnd_ReturnsBracketedNode,
+            getNodesInRange_StartsOnRejectedNode_IgnoresChildNodes,
 
             mapObjOntoNode_EmptyObject
         ]);
