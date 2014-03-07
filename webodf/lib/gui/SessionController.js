@@ -355,7 +355,7 @@
                 selectedRange = cursor.getSelectedRange(),
                 newSelectionRange,
                 /**@type{!string}*/
-                handleEnd = /**@type{!Element}*/(event.target).getAttribute('end');
+                handleEnd = /**@type{!Element}*/(getTarget(event)).getAttribute('end');
 
             if (selectedRange && handleEnd) {
                 position = caretPositionFromPoint(event.clientX, event.clientY);

@@ -204,6 +204,15 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
+     * @param {!Event} e
+     * @return {Node}
+     */
+    function getTarget(e) {
+        // e.srcElement because IE10 likes to be different...
+        return /**@type{Node}*/(e.target) || e.srcElement || null;
+    }
+
+    /**
      * A long-press occurs when a finger is placed
      * against the screen and not lifted or moved
      * before a specific short duration (400ms seems
@@ -233,7 +242,7 @@ gui.EventManager = function EventManager(odtDocument) {
                         clientY: touch.clientY,
                         pageX: touch.pageX,
                         pageY: touch.pageY,
-                        target: event.target,
+                        target: getTarget(event),
                         detail: 1
                     });
                 }, LONGPRESS_DURATION);
@@ -256,7 +265,7 @@ gui.EventManager = function EventManager(odtDocument) {
         var touchEvent = /**@type{!TouchEvent}*/(event),
             fingers = /**@type{!number}*/(touchEvent.touches.length),
             touch = /**@type{!Touch}*/(touchEvent.touches[0]),
-            target = /**@type{!Element}*/(event.target),
+            target = /**@type{!Element}*/(getTarget(event)),
             cachedTarget = /**@type{{target: ?Element}}*/(cachedState).target;
 
         if (fingers !== 1
@@ -292,7 +301,7 @@ gui.EventManager = function EventManager(odtDocument) {
      */
     function emitDragStopEvent(event, cachedState, callback) {
         var touchEvent = /**@type{!TouchEvent}*/(event),
-            target = /**@type{!Element}*/(event.target),
+            target = /**@type{!Element}*/(getTarget(event)),
             /**@type{!Touch}*/
             touch,
             dragging = /**@type{{dragging: ?boolean}}*/(cachedState).dragging;
