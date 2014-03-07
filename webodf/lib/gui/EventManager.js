@@ -80,8 +80,8 @@ gui.EventManager = function EventManager(odtDocument) {
         eventTrap,
         canvasElement = /**@type{!HTMLElement}*/(odtDocument.getCanvas().getElement()),
         eventManager = this,
-        /**@type{!Array.<!number>}*/
-        longPressTimers = [],
+        /**@type{!Object.<!number, !boolean>}*/
+        longPressTimers = {},
         /**@const*/LONGPRESS_DURATION = 400; // milliseconds
 
     /**
@@ -181,6 +181,29 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
+     * @param {!number} timer
+     * @return {undefined}
+     */
+    function clearTimeout(timer) {
+        runtime.clearTimeout(timer);
+        delete longPressTimers[timer];
+    }
+
+    /**
+     * @param {!Function} fn
+     * @param {!number} duration
+     * @return {!number}
+     */
+    function setTimeout(fn, duration) {
+        var timer = runtime.setTimeout(function () {
+            fn();
+            clearTimeout(timer);
+        }, duration);
+        longPressTimers[timer] = true;
+        return timer;
+    }
+
+    /**
      * A long-press occurs when a finger is placed
      * against the screen and not lifted or moved
      * before a specific short duration (400ms seems
@@ -198,13 +221,13 @@ gui.EventManager = function EventManager(odtDocument) {
 
         if (event.type === 'touchmove' || event.type === 'touchend') {
             if (timer) {
-                runtime.clearTimeout(timer);
+                clearTimeout(timer);
             }
         } else if (event.type === 'touchstart') {
             if (fingers !== 1) {
                 runtime.clearTimeout(timer);
             } else {
-                timer = runtime.setTimeout(function () {
+                timer = setTimeout(function () {
                     callback({
                         clientX: touch.clientX,
                         clientY: touch.clientY,
@@ -214,7 +237,6 @@ gui.EventManager = function EventManager(odtDocument) {
                         detail: 1
                     });
                 }, LONGPRESS_DURATION);
-                longPressTimers.push(timer);
             }
         }
         cachedState.timer = timer;
@@ -502,8 +524,8 @@ gui.EventManager = function EventManager(odtDocument) {
       */
     this.destroy = function (callback) {
         // Clear all long press timers, just in case
-        longPressTimers.forEach(function (timer) {
-            runtime.clearTimeout(timer);
+        Object.keys(longPressTimers).forEach(function (timer) {
+            clearTimeout(parseInt(timer, 10));
         });
         longPressTimers.length = 0;
 
