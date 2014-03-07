@@ -164,6 +164,10 @@ gui.SessionViewOptions = function () {
             setStyle('span.editInfoAuthor', '{ content: "' + name + '"; }', ':before');
             setStyle('dc|creator', '{ background-color: ' + color + '; }', '');
             setStyle('.selectionOverlay', '{ fill: ' + color + '; stroke: ' + color + ';}', '');
+            // Hide the handles of non-local users
+            if (memberId === gui.ShadowCursor.ShadowCursorMemberId || memberId === localMemberId) {
+                setStyle('.webodf-touchEnabled .selectionOverlay', '{ display: block; }', ' > .draggable');
+            }
         }
 
         /**
