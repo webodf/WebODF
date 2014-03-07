@@ -52,7 +52,17 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         keyboardMovementsFilter = new core.PositionFilterChain(),
         rootFilter = odtDocument.createRootFilter(inputMemberId),
         TRAILING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
-        LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING;
+        LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING,
+        /**
+         * @const
+         * @type {!number}
+         */
+        PREVIOUS = -1,
+        /**
+         * @const
+         * @type {!number}
+         */
+        NEXT = 1;
 
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
@@ -392,7 +402,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     this.extendSelectionToRight = extendSelectionToRight;
 
     /**
-     * @param {!number} direction -1 for upwards 1 for downwards
+     * @param {!number} direction PREVIOUS for upwards NEXT for downwards
      * @param {!boolean} extend
      * @return {undefined}
      */
@@ -413,7 +423,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorUp() {
-        moveCursorByLine(-1, false);
+        moveCursorByLine(PREVIOUS, false);
         return true;
     }
     this.moveCursorUp = moveCursorUp;
@@ -422,7 +432,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorDown() {
-        moveCursorByLine(1, false);
+        moveCursorByLine(NEXT, false);
         return true;
     }
     this.moveCursorDown = moveCursorDown;
@@ -431,7 +441,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionUp() {
-        moveCursorByLine(-1, true);
+        moveCursorByLine(PREVIOUS, true);
         return true;
     }
     this.extendSelectionUp = extendSelectionUp;
@@ -440,13 +450,13 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionDown() {
-        moveCursorByLine(1, true);
+        moveCursorByLine(NEXT, true);
         return true;
     }
     this.extendSelectionDown = extendSelectionDown;
 
     /**
-     * @param {!number} direction -1 for beginning 1 for end
+     * @param {!number} direction PREVIOUS (-1) or NEXT (1)
      * @param {!boolean} extend
      * @return {undefined}
      */
@@ -463,7 +473,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
-     * @param {!number} direction -1 for left 1 for right
+     * @param {!number} direction PREVIOUS (-1) or NEXT (1)
      * @param {!boolean} extend whether extend the selection instead of moving the cursor
      * @return {undefined}
      */
@@ -474,10 +484,10 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             selectionUpdated,
             stepIterator = createWordBoundaryStepIterator(newSelection.focusNode, newSelection.focusOffset, TRAILING_SPACE);
 
-        if (direction >= 0) {
-            selectionUpdated = stepIterator.nextStep();
-        } else {
+        if (direction === PREVIOUS) {
             selectionUpdated = stepIterator.previousStep();
+        } else {
+            selectionUpdated = stepIterator.nextStep();
         }
 
         if (selectionUpdated) {
@@ -497,7 +507,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorBeforeWord() {
-        moveCursorByWord(-1, false);
+        moveCursorByWord(PREVIOUS, false);
         return true;
     }
     this.moveCursorBeforeWord = moveCursorBeforeWord;
@@ -506,7 +516,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorPastWord() {
-        moveCursorByWord(1, false);
+        moveCursorByWord(NEXT, false);
         return true;
     }
     this.moveCursorPastWord = moveCursorPastWord;
@@ -515,7 +525,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionBeforeWord() {
-        moveCursorByWord(-1, true);
+        moveCursorByWord(PREVIOUS, true);
         return true;
     }
     this.extendSelectionBeforeWord = extendSelectionBeforeWord;
@@ -524,7 +534,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionPastWord() {
-        moveCursorByWord(1, true);
+        moveCursorByWord(NEXT, true);
         return true;
     }
     this.extendSelectionPastWord = extendSelectionPastWord;
@@ -533,7 +543,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToLineStart() {
-        moveCursorToLineBoundary(-1, false);
+        moveCursorToLineBoundary(PREVIOUS, false);
         return true;
     }
     this.moveCursorToLineStart = moveCursorToLineStart;
@@ -542,7 +552,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToLineEnd() {
-        moveCursorToLineBoundary(1, false);
+        moveCursorToLineBoundary(NEXT, false);
         return true;
     }
     this.moveCursorToLineEnd = moveCursorToLineEnd;
@@ -551,7 +561,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToLineStart() {
-        moveCursorToLineBoundary(-1, true);
+        moveCursorToLineBoundary(PREVIOUS, true);
         return true;
     }
     this.extendSelectionToLineStart = extendSelectionToLineStart;
@@ -560,13 +570,13 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToLineEnd() {
-        moveCursorToLineBoundary(1, true);
+        moveCursorToLineBoundary(NEXT, true);
         return true;
     }
     this.extendSelectionToLineEnd = extendSelectionToLineEnd;
 
     /**
-     * @param {!number} direction -1 for beginning, 1 for end
+     * @param {!number} direction PREVIOUS (-1) or NEXT (1)
      * @param {!boolean} extend True to extend the selection
      * @param {!function(!Node):Node} getContainmentNode Returns a node container for the supplied node.
      *  Usually this will be something like the parent paragraph or root the supplied node is within
@@ -584,7 +594,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         runtime.assert(Boolean(rootElement), "SelectionController: Cursor outside root");
         stepIterator = odtDocument.createStepIterator(selection.focusNode, selection.focusOffset, [baseFilter, rootFilter], rootElement);
         stepIterator.roundToClosestStep();
-        if (direction < 0) {
+        if (direction === PREVIOUS) {
             if (stepIterator.previousStep()) {
                 containmentNode = getContainmentNode(stepIterator.container());
                 if (containmentNode) {
@@ -619,7 +629,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.extendSelectionToParagraphStart = function() {
-        adjustSelectionByNode(-1, true, odtDocument.getParagraphElement);
+        adjustSelectionByNode(PREVIOUS, true, odtDocument.getParagraphElement);
         return true;
     };
 
@@ -627,7 +637,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.extendSelectionToParagraphEnd = function () {
-        adjustSelectionByNode(1, true, odtDocument.getParagraphElement);
+        adjustSelectionByNode(NEXT, true, odtDocument.getParagraphElement);
         return true;
     };
 
@@ -635,7 +645,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.moveCursorToParagraphStart = function () {
-        adjustSelectionByNode(-1, false, odtDocument.getParagraphElement);
+        adjustSelectionByNode(PREVIOUS, false, odtDocument.getParagraphElement);
         return true;
     };
 
@@ -643,7 +653,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.moveCursorToParagraphEnd = function () {
-        adjustSelectionByNode(1, false, odtDocument.getParagraphElement);
+        adjustSelectionByNode(NEXT, false, odtDocument.getParagraphElement);
         return true;
     };
 
@@ -651,7 +661,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.moveCursorToDocumentStart = function () {
-        adjustSelectionByNode(-1, false, odtDocument.getRootElement);
+        adjustSelectionByNode(PREVIOUS, false, odtDocument.getRootElement);
         return true;
     };
 
@@ -659,7 +669,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.moveCursorToDocumentEnd = function () {
-        adjustSelectionByNode(1, false, odtDocument.getRootElement);
+        adjustSelectionByNode(NEXT, false, odtDocument.getRootElement);
         return true;
     };
 
@@ -667,7 +677,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.extendSelectionToDocumentStart = function () {
-        adjustSelectionByNode(-1, true, odtDocument.getRootElement);
+        adjustSelectionByNode(PREVIOUS, true, odtDocument.getRootElement);
         return true;
     };
 
@@ -675,7 +685,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.extendSelectionToDocumentEnd = function () {
-        adjustSelectionByNode(1, true, odtDocument.getRootElement);
+        adjustSelectionByNode(NEXT, true, odtDocument.getRootElement);
         return true;
     };
 
