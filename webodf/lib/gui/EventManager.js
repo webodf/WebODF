@@ -80,6 +80,8 @@ gui.EventManager = function EventManager(odtDocument) {
         eventTrap,
         canvasElement = /**@type{!HTMLElement}*/(odtDocument.getCanvas().getElement()),
         eventManager = this,
+        /**@type{!Array.<!number>}*/
+        longPressTimers = [],
         /**@const*/LONGPRESS_DURATION = 400; // milliseconds
 
     /**
@@ -212,6 +214,7 @@ gui.EventManager = function EventManager(odtDocument) {
                         detail: 1
                     });
                 }, LONGPRESS_DURATION);
+                longPressTimers.push(timer);
             }
         }
         cachedState.timer = timer;
@@ -498,6 +501,12 @@ gui.EventManager = function EventManager(odtDocument) {
       * @return {undefined}
       */
     this.destroy = function (callback) {
+        // Clear all long press timers, just in case
+        longPressTimers.forEach(function (timer) {
+            runtime.clearTimeout(timer);
+        });
+        longPressTimers.length = 0;
+
         Object.keys(compoundEvents).forEach(function (compoundEventName) {
             compoundEvents[compoundEventName].destroy();
         });
