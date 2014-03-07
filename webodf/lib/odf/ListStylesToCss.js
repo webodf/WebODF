@@ -110,7 +110,7 @@
          * @return {!string}
          */
         function getImageRule() {
-            return "content: none;";
+            return "content: none";
         }
 
         /**
@@ -120,7 +120,7 @@
          */
         function getBulletRule(node) {
             var bulletChar = node.getAttributeNS(textns, "bullet-char");
-            return "content: '" + bulletChar + "';";
+            return "content: '" + bulletChar + "'";
         }
 
         /**
@@ -164,6 +164,7 @@
                 bulletWidth,
                 labelDistance,
                 bulletIndent,
+                followedBy,
                 leftOffset;
 
             // calculate CSS selector based on list level
@@ -187,8 +188,12 @@
 
             // get relevant properties from the style based on the list label positioning mode
             if (listLevelPositionSpaceMode === "label-alignment") {
+                // TODO: fetch the margin and indent from the paragraph style if it is defined there
+                // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-style_list-level-label-alignment
                 listIndent = listLevelLabelAlign.getAttributeNS(fons, "margin-left");
                 bulletIndent = listLevelLabelAlign.getAttributeNS(fons, "text-indent");
+                followedBy = listLevelLabelAlign.getAttributeNS(textns, "label-followed-by");
+                leftOffset = convertToPxValue(listIndent);
 
             } else {
                 // this block is entered if list-level-position-and-space-mode
@@ -214,16 +219,25 @@
             // insert the list label before every immediate child of the list-item, except for lists
             listItemRule = selector + ' > text|list-item > *:not(text|list):first-child:before';
             listItemRule += '{';
-            listItemRule += itemRule + ';';
             listItemRule += 'text-align: ' + textAlign + ';';
             listItemRule += 'counter-increment:list;';
             listItemRule += 'display: inline-block;';
 
-            if (listLevelPositionSpaceMode !== "label-alignment") {
+            if (listLevelPositionSpaceMode === "label-alignment") {
+                listItemRule += 'margin-left: ' + bulletIndent + ';';
+                if (followedBy === "space") {
+                    itemRule += ' \'\\a0\'';
+                } else if (followedBy === "listtab") {
+                    // TODO: remove this padding once text:label-followed-by="listtab" is implemented
+                    // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#attribute-text_label-followed-by
+                    listItemRule += 'padding-right: 0.2cm;';
+                }
+            } else {
                 listItemRule += 'min-width: ' + bulletWidth + ';';
                 listItemRule += 'margin-left: -' + bulletWidth + ';';
                 listItemRule += 'padding-right: ' + labelDistance + ';';
             }
+            listItemRule += itemRule + ';';
             listItemRule += '}';
             appendRule(styleSheet, listItemRule);
         }
