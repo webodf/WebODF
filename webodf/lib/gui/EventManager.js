@@ -78,7 +78,7 @@ gui.EventManager = function EventManager(odtDocument) {
         eventDelegates = {},
         /**@type{!HTMLInputElement}*/
         eventTrap,
-        canvasElement = odtDocument.getCanvas().getElement(),
+        canvasElement = /**@type{!HTMLElement}*/(odtDocument.getCanvas().getElement()),
         eventManager = this,
         /**@const*/LONGPRESS_DURATION = 400; // milliseconds
 
@@ -290,6 +290,15 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
+     * Adds a class 'webodf-touchEnabled' to the canvas
+     * @return {undefined}
+     */
+    function declareTouchEnabled() {
+        canvasElement.classList.add('webodf-touchEnabled');
+        eventManager.unsubscribe('touchstart', declareTouchEnabled);
+    }
+
+    /**
      * @param {!Window} window
      * @constructor
      */
@@ -494,6 +503,7 @@ gui.EventManager = function EventManager(odtDocument) {
         });
         compoundEvents = {};
 
+        eventManager.unsubscribe('touchstart', declareTouchEnabled);
         eventTrap.parentNode.removeChild(eventTrap);
         // TODO: drop left eventDelegates, complain about those not unsubscribed
         // Also investigate if delegates need to proper unlisten from events in any case
@@ -515,6 +525,8 @@ gui.EventManager = function EventManager(odtDocument) {
         compoundEvents.longpress = new CompoundEvent('longpress', ['touchstart', 'touchmove', 'touchend'], emitLongPressEvent);
         compoundEvents.drag = new CompoundEvent('drag', ['touchstart', 'touchmove', 'touchend'], emitDragEvent);
         compoundEvents.dragstop = new CompoundEvent('dragstop', ['drag', 'touchend'], emitDragStopEvent);
+
+        eventManager.subscribe('touchstart', declareTouchEnabled);
     }
     init();
 };

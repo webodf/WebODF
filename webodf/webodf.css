@@ -558,6 +558,7 @@ dc|*::-moz-selection {
     stroke-opacity: 0;
     stroke-width: 8;
     pointer-events: all;
+    display: none;
 
     -moz-transform-origin: center center;
     -webkit-transform-origin: center center;
