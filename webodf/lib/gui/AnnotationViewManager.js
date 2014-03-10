@@ -148,7 +148,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
             textNodes.forEach(function (n) {
                 var container = doc.createElement('span');
-                container.className = 'annotationHighlight';
+                container.className = 'webodf-annotationHighlight';
                 container.setAttribute('annotation', annotationName);
 
                 n.parentNode.insertBefore(container, n);
@@ -166,7 +166,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
      */
     function unhighlightAnnotation(annotation) {
         var annotationName = annotation.getAttributeNS(odf.Namespaces.officens, 'name'),
-            highlightSpans = doc.querySelectorAll('span.annotationHighlight[annotation="' + annotationName + '"]'),
+            highlightSpans = doc.querySelectorAll('span.webodf-annotationHighlight[annotation="' + annotationName + '"]'),
             i,
             container;
 

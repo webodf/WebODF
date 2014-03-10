@@ -184,14 +184,14 @@
             }
 
             var initialOverflow = offsetParent.style.overflow,
-                enabled = offsetParent.classList.contains('customScrollbars');
+                enabled = offsetParent.classList.contains('webodf-customScrollbars');
 
             if ((enable && enabled) || (!enable && !enabled)) {
                 return;
             }
 
             if (enable) {
-                offsetParent.classList.add('customScrollbars');
+                offsetParent.classList.add('webodf-customScrollbars');
                 // The custom scrollbar does not appear in webkit unless a full redraw
                 // of the scrollable area is forced. Therefore attempt to toggle the
                 // overflow stle of the scrolling container across successive animation
@@ -201,7 +201,7 @@
                     offsetParent.style.overflow = initialOverflow;
                 });
             } else {
-                offsetParent.classList.remove('customScrollbars');
+                offsetParent.classList.remove('webodf-customScrollbars');
             }
         }
 
