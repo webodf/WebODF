@@ -89,6 +89,7 @@ runtime.log("Sending message to server: "+messageString);
             if (token) {
                 xhr.setRequestHeader("requesttoken", token);
             }
+            xhr.setRequestHeader("content-type", "application/json");
             xhr.onreadystatechange = handleResult;
             xhr.timeout = serverCallTimeout;
             // TODO: seems handleResult is called on timeout as well, with xhr.status === 0
