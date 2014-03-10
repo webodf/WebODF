@@ -90,8 +90,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             root = /**@type{!Element}*/(documentRoot.parentNode.parentNode.parentNode);
             root.appendChild(overlay);
             overlay.setAttribute('class', 'webodf-selectionOverlay');
-            handle1.setAttribute('class', 'draggable');
-            handle2.setAttribute('class', 'draggable');
+            handle1.setAttribute('class', 'webodf-draggable');
+            handle2.setAttribute('class', 'webodf-draggable');
             handle1.setAttribute('end', 'left');
             handle2.setAttribute('end', 'right');
             handle1.setAttribute('r', HANDLE_RADIUS);

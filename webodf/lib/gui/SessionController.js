@@ -693,7 +693,7 @@
                 annotationController.removeAnnotation(annotationNode);
                 eventManager.focus();
             } else {
-                if (target.getAttribute('class') !== 'draggable') {
+                if (target.getAttribute('class') !== 'webodf-draggable') {
                     handleMouseClickEvent(event);
                 }
             }

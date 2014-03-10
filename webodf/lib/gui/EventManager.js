@@ -253,7 +253,7 @@ gui.EventManager = function EventManager(odtDocument) {
 
     /**
      * Drag events are generated whenever an element with class
-     * 'draggable' is touched and subsequent finger movements
+     * 'webodf-draggable' is touched and subsequent finger movements
      * lie on the same element. This prevents the default
      * action of touchmove, i.e. usually scrolling.
      * @param {!Event} event
@@ -271,7 +271,7 @@ gui.EventManager = function EventManager(odtDocument) {
         if (fingers !== 1
                 || event.type === 'touchend') {
             cachedTarget = null;
-        } else if (event.type === 'touchstart' && target.getAttribute('class') === 'draggable') {
+        } else if (event.type === 'touchstart' && target.getAttribute('class') === 'webodf-draggable') {
             cachedTarget = target;
         } else if (event.type === 'touchmove' && cachedTarget) {
             // Prevent the default action of 'touchmove', i.e. scrolling.

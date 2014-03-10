@@ -166,7 +166,7 @@ gui.SessionViewOptions = function () {
             setStyle('.webodf-selectionOverlay', '{ fill: ' + color + '; stroke: ' + color + ';}', '');
             // Hide the handles of non-local users
             if (memberId === gui.ShadowCursor.ShadowCursorMemberId || memberId === localMemberId) {
-                setStyle('.webodf-touchEnabled .webodf-selectionOverlay', '{ display: block; }', ' > .draggable');
+                setStyle('.webodf-touchEnabled .webodf-selectionOverlay', '{ display: block; }', ' > .webodf-draggable');
             }
         }
 

@@ -553,7 +553,7 @@ dc|*::-moz-selection {
     fill-rule: evenodd;
 }
 
-.webodf-selectionOverlay > .draggable {
+.webodf-selectionOverlay > .webodf-draggable {
     fill-opacity: 0.8;
     stroke-opacity: 0;
     stroke-width: 8;
