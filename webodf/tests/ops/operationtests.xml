@@ -1206,7 +1206,7 @@
  <test name="ApplyDirectStyling_WithinNonSpanContainer">
   <before>
    <office:automatic-styles/>
-   <office:text><text:p><html:span class="annotationHighlight">ABCD</html:span></text:p></office:text>
+   <office:text><text:p><html:span class="webodf-annotationHighlight">ABCD</html:span></text:p></office:text>
   </before>
   <ops>
    <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
@@ -1215,7 +1215,7 @@
   </ops>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" wo:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
-   <office:text><text:p><html:span class="annotationHighlight">A<text:span text:style-name="auto63350368_0">BC</text:span>D</html:span></text:p></office:text>
+   <office:text><text:p><html:span class="webodf-annotationHighlight">A<text:span text:style-name="auto63350368_0">BC</text:span>D</html:span></text:p></office:text>
   </after>
  </test>
  <test name="SelectionWithDirectsStyling">

@@ -231,7 +231,7 @@ odf.OdfUtils = function OdfUtils() {
         return (/^(span|p|h|a|meta)$/.test(localName)
                 && e.namespaceURI === textns)
                || (localName === "span"
-                   && e.className === "annotationHighlight");
+                   && e.className === "webodf-annotationHighlight");
     }
     this.isGroupingElement = isGroupingElement;
     /**

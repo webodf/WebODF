@@ -530,7 +530,7 @@ dc|*::-moz-selection {
     outline: 1px solid #ccc;
 }
 
-.annotationHighlight {
+.webodf-annotationHighlight {
     background-color: yellow;
     position: relative;
 }
