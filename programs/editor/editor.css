@@ -163,9 +163,6 @@ div.memberListLabel[fullname]:before {
 
 .dijitDialogPaneContent {
     border: none !important;
-    overflow: hidden !important;
-    height: 510px !important;
-    width: 450px !important;
 }
 
 .dijitDialogPaneContent h3 {

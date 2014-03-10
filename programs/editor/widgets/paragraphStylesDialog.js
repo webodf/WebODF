@@ -51,21 +51,16 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 "dijit/Dialog",
                 "dijit/TooltipDialog",
                 "dijit/popup",
+                "dijit/layout/LayoutContainer",
                 "dijit/layout/TabContainer",
                 "dijit/layout/ContentPane",
                 "dijit/form/Button",
-                "dijit/form/DropDownButton",
-                "dijit/form/RadioButton"], function (Dialog, TooltipDialog, popup, TabContainer, ContentPane, Button, DropDownButton, RadioButton) {
+                "dijit/form/DropDownButton"], function (Dialog, TooltipDialog, popup, LayoutContainer, TabContainer, ContentPane, Button, DropDownButton) {
                 var i,
                     tr = runtime.tr,
+                    mainLayoutContainer,
                     tabContainer,
-                    flowPane,
-                    numberingPane,
-                    tabsPane,
-                    capsPane,
-                    bordersPane,
-                    backgroundPane,
-                    indentsPane,
+                    topBar,
                     actionBar,
                     okButton,
                     cancelButton,
@@ -185,6 +180,16 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     title: tr("Paragraph Styles")
                 });
 
+                mainLayoutContainer = new LayoutContainer({
+                    style: "height: 520px; width: 450px;"
+                });
+
+                topBar = new ContentPane({
+                    region: "top",
+                    style: "margin: 0; padding: 0"
+                });
+                mainLayoutContainer.addChild(topBar);
+
                 cloneTooltip = new TooltipDialog({
                     content:
                         '<h2 style="margin: 0;">'+tr("Clone this Style")+'</h2><br/>' +
@@ -207,7 +212,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     dropDown: cloneTooltip,
                     style: "float: right; margin-bottom: 5px;"
                 });
-                dialog.addChild(cloneDropDown, 1);
+                topBar.addChild(cloneDropDown, 1);
 
                 deleteButton = new Button({
                     label: tr("Delete"),
@@ -218,13 +223,13 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                         deleteStyle(stylePicker.value());
                     }
                 });
-                dialog.addChild(deleteButton, 2);
+                topBar.addChild(deleteButton, 2);
 
                 // Tab Container
                 tabContainer = new TabContainer({
-                    style: "height: 100%; width: 100%;"
+                    region: "center"
                 });
-                dialog.addChild(tabContainer, 3);
+                mainLayoutContainer.addChild(tabContainer);
 
                 actionBar = dojo.create("div", {
                     "class": "dijitDialogPaneActionBar"
@@ -264,7 +269,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                         stylePicker.widget().domNode.style.float = "left";
                         stylePicker.widget().domNode.style.width = "350px";
                         stylePicker.widget().domNode.style.marginTop = "5px";
-                        dialog.addChild(stylePicker.widget(), 0);
+                        topBar.addChild(stylePicker.widget(), 0);
 
                         stylePicker.onAdd = function (name) {
                             if (newStyleName === name) {
@@ -309,7 +314,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     dialog.onHide = self.onToolDone;
                 });
 
-                tabContainer.startup();
+                dialog.addChild(mainLayoutContainer);
+                mainLayoutContainer.startup();
 
                 return callback(dialog);
             });
