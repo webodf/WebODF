@@ -446,7 +446,6 @@ define("webodf/editor/Editor", [
             // init
             function init() {
                 var editorPane, memberListPane,
-                    inviteButton,
                     canvasElement = document.getElementById("canvas"),
                     container = document.getElementById('container'),
                     memberListElement = document.getElementById('memberList'),
@@ -504,14 +503,6 @@ define("webodf/editor/Editor", [
                 }
 
                 mainContainer.startup();
-
-                if (window.inviteButtonProxy) {
-                    inviteButton = document.getElementById('inviteButton');
-                    runtime.assert(inviteButton, 'missing "inviteButton" div in HTML');
-                    inviteButton.innerText = runtime.tr("Invite Members");
-                    inviteButton.style.display = "block";
-                    inviteButton.onclick = window.inviteButtonProxy.clicked;
-                }
 
                 tools = new Tools({
                     onToolDone: setFocusToOdfCanvas,
