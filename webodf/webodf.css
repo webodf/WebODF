@@ -535,7 +535,7 @@ dc|*::-moz-selection {
     position: relative;
 }
 
-.selectionOverlay {
+.webodf-selectionOverlay {
     position: absolute;
     pointer-events: none;
     top: 0;
@@ -546,14 +546,14 @@ dc|*::-moz-selection {
     height: 100%;
     z-index: 15;
 }
-.selectionOverlay > polygon {
+.webodf-selectionOverlay > polygon {
     fill-opacity: 0.3;
     stroke-opacity: 0.8;
     stroke-width: 1;
     fill-rule: evenodd;
 }
 
-.selectionOverlay > .draggable {
+.webodf-selectionOverlay > .draggable {
     fill-opacity: 0.8;
     stroke-opacity: 0;
     stroke-width: 8;
