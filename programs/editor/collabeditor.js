@@ -69,19 +69,18 @@ var webodfEditor = (function () {
         booting = false;
 
     // TODO: just some quick hack done for testing, make nice (e.g. the position calculation is fragile)
-    function addStatusOverlay(parentElementId, symbolFileName, position) {
+    function addStatusOverlay(parentElement, symbolFileName, position) {
         var htmlns = document.documentElement.namespaceURI,
-            parentElement = document.getElementById(parentElementId),
             imageElement, overlay;
 
-        runtime.assert(parentElement, "heya, no such element with id "+parentElementId);
+        runtime.assert(parentElement, "heya, no such parentelement");
 
         overlay = document.createElementNS(htmlns, "div");
         imageElement = document.createElementNS(htmlns, "img");
         imageElement.src = symbolFileName;
         overlay.appendChild(imageElement);
-        overlay.style.position = "relative";
-        overlay.style.top = 24*position + "px";
+        overlay.style.position = "absolute";
+        overlay.style.top =  24*position + "px";
         overlay.style.opacity = "0.8";
         overlay.style.display = "none";
         parentElement.appendChild(overlay);
@@ -183,16 +182,20 @@ var webodfEditor = (function () {
                     function (Translator, Editor) {
                         var locale = navigator.language || "en-US",
                             t = new Translator(locale, function (editorTranslator) {
+                                var canvasContainerElement;
+
                                 runtime.setTranslator(editorTranslator.translate);
-                                savingOverlay = addStatusOverlay("editor", "document-save.png", 0);
-                                hasLocalUnsyncedOpsOverlay = addStatusOverlay("editor", "vcs-locally-modified.png", 0);
-                                disconnectedOverlay = addStatusOverlay("editor", "network-disconnect.png", 1);
 
                                 editorOptions = editorOptions || {}; // TODO: cleanup
                                 editorOptions.networkSecurityToken = token;
                                 editorOptions.closeCallback = closeEditing;
 
-                                editorInstance = new Editor(editorOptions, server, serverFactory);
+                                editorInstance = new Editor("mainContainer", editorOptions, server, serverFactory);
+                                canvasContainerElement = editorInstance.getCanvasContainerElement();
+                                savingOverlay = addStatusOverlay(canvasContainerElement, "document-save.png", 0);
+                                hasLocalUnsyncedOpsOverlay = addStatusOverlay(canvasContainerElement, "vcs-locally-modified.png", 0);
+                                disconnectedOverlay = addStatusOverlay(canvasContainerElement, "network-disconnect.png", 1);
+
                                 editorInstance.addEventListener(Editor.EVENT_BEFORESAVETOFILE, function() {
                                     savingOverlay.style.display = "";
                                 });

@@ -210,7 +210,7 @@ var webodfEditor = (function () {
                 var locale = navigator.language || "en-US",
                     t = new Translator(locale, function (editorTranslator) {
                         runtime.setTranslator(editorTranslator.translate);
-                        editorInstance = new Editor(editorOptions);
+                        editorInstance = new Editor("mainContainer", editorOptions);
                         editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
                     });
             }

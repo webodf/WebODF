@@ -7,15 +7,11 @@ html, body, #mainContainer {
     padding: 0px;
 }
 
-#mainContainer {
-    background-color: gray;
-}
-
-#editor *:focus {
+.webodfeditor-editor *:focus {
     outline: none;
 }
 
-#editor {
+.webodfeditor-editor {
     border: none;
     box-shadow: 0px 0px 14px #555;
     overflow: hidden;
@@ -23,7 +19,7 @@ html, body, #mainContainer {
     z-index: 4;
 }
 
-#toolbar {
+.webodfeditor-toolbarcontainer {
     top: 0;
     left: 0;
     right: 0;
@@ -32,7 +28,7 @@ html, body, #mainContainer {
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
 }
 
-#container {
+.webodfeditor-canvascontainer {
     text-align: center;
     background-color: #ddd;
     overflow: auto;
@@ -43,7 +39,7 @@ html, body, #mainContainer {
     right: 0;
 }
 
-#canvas {
+.webodfeditor-canvas {
     margin-top: 30px;
     margin-left: 10px;
     margin-right: 10px;
@@ -61,52 +57,20 @@ html, body, #mainContainer {
  * of the slider and not have to be updated
  * every time a gesture ends
  */
-#canvas > div {
+.webodfeditor-canvas > div {
     box-shadow: 0px 0px 20px #aaa;
     border: 1px solid #ccc;
 }
 
-#collaboration {
-    width: 20%;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-
-    box-shadow: 0 0 3px #888;
-
-    border: none;
+.webodfeditor-members {
+    width: 70px !important;
+    padding: 2px !important;
+    text-align: center !important;
+    background-color: gray !important;
+    border: none !important;
 }
 
-#collaboration > .dojoxExpandoTitle {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    border: none;
-    background-color: rgb(243, 243, 243);
-}
-
-#collaboration > .dojoxExpandoWrapper {
-    width: 100%;
-    background-color: rgb(243, 243, 243);
-    border: 1px solid #769DC0;
-    border: none;
-
-}
-
-#members {
-    width: 70px;  
-    padding: 2px;
-    text-align: center;
-    background-color: gray;
-    border: none;
-}
-
-#members > #nameInfo {
-    padding-top: 3px;
-    padding-bottom: 3px;
-    width: 100%;
-    background-color: #eef;
-}
-
-#memberList .memberListButton {
+.webodfeditor-memberList .webodfeditor-memberListButton {
     margin-top: 5px;
     padding-top: 3px;
     margin-left: auto;
@@ -120,7 +84,7 @@ html, body, #mainContainer {
     cursor: pointer;
 }
 
-#memberList .memberListLabel {
+.webodfeditor-memberList .webodfeditor-memberListLabel {
     color: white;
     border-radius: 5px;
     padding: 2px;
@@ -128,11 +92,11 @@ html, body, #mainContainer {
     word-wrap: break-word;
     text-align: center justify;
 }
-div.memberListLabel[fullname]:before {
+div.webodfeditor-memberListLabel[fullname]:before {
     content: attr(fullname) "";
 }
 
-#memberList img {
+.webodfeditor-memberList img {
     box-shadow: 0px 0px 5px rgb(90, 90, 90) inset;
     background-color: rgb(200, 200, 200);
     border-radius: 5px;
@@ -143,7 +107,7 @@ div.memberListLabel[fullname]:before {
     margin: auto;
 }
 
-#memberList img:hover {
+.webodfeditor-memberList img:hover {
     opacity: 0.9;
 }
 

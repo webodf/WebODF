@@ -57,7 +57,7 @@ define("webodf/editor/Tools", [
     function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, EditHyperlinks, ImageInserter, ParagraphStylesDialog, ZoomSlider, EditorSession) {
         "use strict";
 
-        return function Tools(args) {
+        return function Tools(toolbarElementId, args) {
             var tr = runtime.tr,
                 onToolDone = args.onToolDone,
                 loadOdtFile = args.loadOdtFile,
@@ -121,7 +121,7 @@ define("webodf/editor/Tools", [
 
             // init
             ready(function () {
-                toolbar = new Toolbar({}, "toolbar");
+                toolbar = new Toolbar({}, toolbarElementId);
 
                 // Undo/Redo
                 if (args.undoRedoEnabled) {
