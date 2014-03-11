@@ -82,6 +82,7 @@ gui.KeyboardHandler = function KeyboardHandler() {
         // Easiest way to cope with this is to manually normalize these events.
         switch (keyCode) {
             case gui.KeyboardHandler.KeyCode.LeftMeta:
+            case gui.KeyboardHandler.KeyCode.RightMeta:
             case gui.KeyboardHandler.KeyCode.MetaInMozilla:
                 modifiers |= modifier.Meta;
                 break;
@@ -222,6 +223,7 @@ gui.KeyboardHandler.KeyCode = {
     Y: 89,
     Z: 90,
     LeftMeta: 91,
+    RightMeta: 93,
     MetaInMozilla: 224
 };
 

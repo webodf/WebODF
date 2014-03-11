@@ -85,6 +85,8 @@
         "ops.OdtDocument"
     ],
     "gui.HyperlinkClickHandler": [
+        "core.Destroyable",
+        "gui.KeyboardHandler",
         "odf.OdfUtils",
         "xmldom.XPath"
     ],
@@ -140,7 +142,6 @@
         "gui.ImageController",
         "gui.ImageSelector",
         "gui.InputMethodEditor",
-        "gui.KeyboardHandler",
         "gui.PlainTextPasteboard",
         "gui.SelectionController",
         "gui.TextController",
