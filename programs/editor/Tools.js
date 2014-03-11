@@ -53,8 +53,9 @@ define("webodf/editor/Tools", [
     "webodf/editor/widgets/imageInserter",
     "webodf/editor/widgets/paragraphStylesDialog",
     "webodf/editor/widgets/zoomSlider",
+    "webodf/editor/widgets/aboutDialog",
     "webodf/editor/EditorSession"],
-    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, EditHyperlinks, ImageInserter, ParagraphStylesDialog, ZoomSlider, EditorSession) {
+    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, EditHyperlinks, ImageInserter, ParagraphStylesDialog, ZoomSlider, AboutDialog, EditorSession) {
         "use strict";
 
         return function Tools(toolbarElementId, args) {
@@ -64,7 +65,7 @@ define("webodf/editor/Tools", [
                 saveOdtFile = args.saveOdtFile,
                 close = args.close,
                 toolbar,
-                loadButton, saveButton, closeButton,
+                loadButton, saveButton, closeButton, aboutButton,
                 formatDropDownMenu, formatMenuButton,
                 paragraphStylesMenuItem, paragraphStylesDialog, simpleStyles, currentStyle,
                 zoomSlider,
@@ -74,6 +75,7 @@ define("webodf/editor/Tools", [
                 imageInserter,
                 annotationControl,
                 editHyperlinks,
+                aboutDialog,
                 sessionSubscribers = [];
 
             function handleCursorMoved(cursor) {
@@ -122,6 +124,25 @@ define("webodf/editor/Tools", [
             // init
             ready(function () {
                 toolbar = new Toolbar({}, toolbarElementId);
+
+                if (args.aboutEnabled) {
+                    aboutButton = new Button({
+                        label: tr('About WebODF Text Editor'),
+                        showLabel: false,
+                        iconClass: 'webodfeditor-dijitWebODFIcon',
+                        style: {
+                            float: 'left'
+                        }
+                    });
+                    aboutDialog = new AboutDialog(function (dialog) {
+                        aboutButton.onClick = function () {
+                            dialog.startup();
+                            dialog.show();
+                        };
+                    });
+                    aboutDialog.onToolDone = onToolDone;
+                    aboutButton.placeAt(toolbar);
+                }
 
                 // Undo/Redo
                 if (args.undoRedoEnabled) {
