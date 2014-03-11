@@ -80,6 +80,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer) {
 
     /**
      * @param {!Event} e
+     * @return {undefined}
      */
     this.handleClick = function (e) {
         var target = e.target || e.srcElement,
@@ -140,6 +141,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer) {
 
     /**
      * Show pointer cursor when hover over hyperlink
+     * @return {undefined}
      */
     function showPointerCursor() {
         var container = getContainer();
@@ -150,6 +152,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer) {
 
     /**
      * Show text cursor when hover over hyperlink
+     * @return {undefined}
      */
     function showTextCursor() {
         var container = getContainer();
@@ -161,6 +164,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer) {
     /**
      * Sets the modifier key for activating the hyperlink.
      * @param {!number} value
+     * @return {undefined}
      */
     this.setModifier = function (value) {
         modifier = value;
