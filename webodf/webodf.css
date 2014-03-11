@@ -195,7 +195,7 @@ text|a {
     text-decoration: underline;
     cursor: pointer;
 }
-office|text[webodfhelper|links="inactive"] text|a {
+.webodf-inactiveLinks text|a {
     cursor: text;
 }
 text|note-citation {

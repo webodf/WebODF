@@ -40,19 +40,13 @@
 
 /**
  * @constructor
- * @param {!function():!Element} getRootNode
+ * @param {!function():!HTMLElement} getContainer Fetch the surrounding HTML container
  */
-gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
+gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer) {
     "use strict";
     var /**@const
          @type{!string}*/
-        webodfns = "urn:webodf:names:helper",
-        /**@const
-         @type{!string}*/
-        links = "links",
-        /**@const
-         @type{!string}*/
-        inactive = "inactive",
+        inactiveLinksCssClass = "webodf-inactiveLinks",
         /**@const
          @type{!number}*/
         None = gui.HyperlinkClickHandler.Modifier.None,
@@ -86,6 +80,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
 
     /**
      * @param {!Event} e
+     * @return {undefined}
      */
     this.handleClick = function (e) {
         var target = e.target || e.srcElement,
@@ -118,7 +113,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
 
         if (url[0] === '#') { // bookmark
             url = url.substring(1);
-            rootNode = /** @type {!Element} */(getRootNode());
+            rootNode = getContainer();
             bookmarks = xpath.getODFElementsWithXPath(rootNode,
                 "//text:bookmark-start[@text:name='" + url + "']",
                 odf.Namespaces.lookupNamespaceURI);
@@ -146,23 +141,30 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
 
     /**
      * Show pointer cursor when hover over hyperlink
+     * @return {undefined}
      */
     function showPointerCursor() {
-        getRootNode().removeAttributeNS(webodfns, links);
+        var container = getContainer();
+        runtime.assert(Boolean(container.classList), "Document container has no classList element");
+        container.classList.remove(inactiveLinksCssClass);
     }
     this.showPointerCursor = showPointerCursor;
 
     /**
      * Show text cursor when hover over hyperlink
+     * @return {undefined}
      */
     function showTextCursor() {
-        getRootNode().setAttributeNS(webodfns, links, inactive);
+        var container = getContainer();
+        runtime.assert(Boolean(container.classList), "Document container has no classList element");
+        container.classList.add(inactiveLinksCssClass);
     }
     this.showTextCursor = showTextCursor;
 
     /**
      * Sets the modifier key for activating the hyperlink.
      * @param {!number} value
+     * @return {undefined}
      */
     this.setModifier = function (value) {
         modifier = value;
