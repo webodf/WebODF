@@ -48,13 +48,26 @@
  */
 ops.OperationFactory = function OperationFactory() {
     "use strict";
-    var /**@type{!Object.<string,function(new:ops.Operation)>}*/
+    var /**@type{!Object.<!string, !ops.OperationFactory.SpecConstructor>}*/
         specs;
+
+    /**
+     * @param {!function(new:ops.Operation)} Constructor
+     * @return {!ops.OperationFactory.SpecConstructor}
+     */
+    /*jslint unparam:true*/
+    function construct(Constructor) {
+        return function(spec) {
+            return new Constructor();
+        };
+    }
+    /*jslint unparam:false*/
 
     /**
      * Registers an operation constructor with this operation factory
      * @param {!string} specName
-     * @param {!function(new:ops.Operation)} specConstructor
+     * @param {!ops.OperationFactory.SpecConstructor} specConstructor
+     * @return {undefined}
      */
     this.register = function (specName, specConstructor) {
         specs[specName] = specConstructor;
@@ -68,9 +81,9 @@ ops.OperationFactory = function OperationFactory() {
     this.create = function (spec) {
         var /**@type{ops.Operation}*/
             op = null,
-            Constructor = specs[spec.optype];
-        if (Constructor) {
-            op = new Constructor();
+            constructor = specs[spec.optype];
+        if (constructor) {
+            op = constructor(spec);
             op.init(spec);
         }
         return op;
@@ -78,31 +91,37 @@ ops.OperationFactory = function OperationFactory() {
 
     function init() {
         specs = {
-            AddMember: ops.OpAddMember,
-            UpdateMember: ops.OpUpdateMember,
-            RemoveMember: ops.OpRemoveMember,
-            AddCursor: ops.OpAddCursor,
-            ApplyDirectStyling: ops.OpApplyDirectStyling,
-            SetBlob: ops.OpSetBlob,
-            RemoveBlob: ops.OpRemoveBlob,
-            InsertImage: ops.OpInsertImage,
-            InsertTable: ops.OpInsertTable,
-            InsertText: ops.OpInsertText,
-            RemoveText: ops.OpRemoveText,
-            SplitParagraph: ops.OpSplitParagraph,
-            SetParagraphStyle: ops.OpSetParagraphStyle,
-            UpdateParagraphStyle: ops.OpUpdateParagraphStyle,
-            AddStyle: ops.OpAddStyle,
-            RemoveStyle: ops.OpRemoveStyle,
-            MoveCursor: ops.OpMoveCursor,
-            RemoveCursor: ops.OpRemoveCursor,
-            AddAnnotation: ops.OpAddAnnotation,
-            RemoveAnnotation: ops.OpRemoveAnnotation,
-            UpdateMetadata: ops.OpUpdateMetadata,
-            ApplyHyperlink: ops.OpApplyHyperlink,
-            RemoveHyperlink: ops.OpRemoveHyperlink
+            AddMember: construct(ops.OpAddMember),
+            UpdateMember: construct(ops.OpUpdateMember),
+            RemoveMember: construct(ops.OpRemoveMember),
+            AddCursor: construct(ops.OpAddCursor),
+            ApplyDirectStyling: construct(ops.OpApplyDirectStyling),
+            SetBlob: construct(ops.OpSetBlob),
+            RemoveBlob: construct(ops.OpRemoveBlob),
+            InsertImage: construct(ops.OpInsertImage),
+            InsertTable: construct(ops.OpInsertTable),
+            InsertText: construct(ops.OpInsertText),
+            RemoveText: construct(ops.OpRemoveText),
+            SplitParagraph: construct(ops.OpSplitParagraph),
+            SetParagraphStyle: construct(ops.OpSetParagraphStyle),
+            UpdateParagraphStyle: construct(ops.OpUpdateParagraphStyle),
+            AddStyle: construct(ops.OpAddStyle),
+            RemoveStyle: construct(ops.OpRemoveStyle),
+            MoveCursor: construct(ops.OpMoveCursor),
+            RemoveCursor: construct(ops.OpRemoveCursor),
+            AddAnnotation: construct(ops.OpAddAnnotation),
+            RemoveAnnotation: construct(ops.OpRemoveAnnotation),
+            UpdateMetadata: construct(ops.OpUpdateMetadata),
+            ApplyHyperlink: construct(ops.OpApplyHyperlink),
+            RemoveHyperlink: construct(ops.OpRemoveHyperlink)
         };
     }
 
     init();
 };
+
+
+/**
+ * @typedef {!function(!{optype:!string}):!ops.Operation}
+ */
+ops.OperationFactory.SpecConstructor;
