@@ -87,7 +87,7 @@
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, eventManager),
             /**@type{number}*/
             clickCount = 0,
-            hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getRootNode),
+            hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getOdfCanvas().getElement),
             hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
             selectionController = new gui.SelectionController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,

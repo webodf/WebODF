@@ -40,19 +40,13 @@
 
 /**
  * @constructor
- * @param {!function():!Element} getRootNode
+ * @param {!function():!HTMLElement} getContainer Fetch the surrounding HTML container
  */
-gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
+gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer) {
     "use strict";
     var /**@const
          @type{!string}*/
-        webodfns = "urn:webodf:names:helper",
-        /**@const
-         @type{!string}*/
-        links = "links",
-        /**@const
-         @type{!string}*/
-        inactive = "inactive",
+        inactiveLinksCssClass = "webodf-inactiveLinks",
         /**@const
          @type{!number}*/
         None = gui.HyperlinkClickHandler.Modifier.None,
@@ -118,7 +112,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
 
         if (url[0] === '#') { // bookmark
             url = url.substring(1);
-            rootNode = /** @type {!Element} */(getRootNode());
+            rootNode = getContainer();
             bookmarks = xpath.getODFElementsWithXPath(rootNode,
                 "//text:bookmark-start[@text:name='" + url + "']",
                 odf.Namespaces.lookupNamespaceURI);
@@ -148,7 +142,9 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
      * Show pointer cursor when hover over hyperlink
      */
     function showPointerCursor() {
-        getRootNode().removeAttributeNS(webodfns, links);
+        var container = getContainer();
+        runtime.assert(Boolean(container.classList), "Document container has no classList element");
+        container.classList.remove(inactiveLinksCssClass);
     }
     this.showPointerCursor = showPointerCursor;
 
@@ -156,7 +152,9 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getRootNode) {
      * Show text cursor when hover over hyperlink
      */
     function showTextCursor() {
-        getRootNode().setAttributeNS(webodfns, links, inactive);
+        var container = getContainer();
+        runtime.assert(Boolean(container.classList), "Document container has no classList element");
+        container.classList.add(inactiveLinksCssClass);
     }
     this.showTextCursor = showTextCursor;
 
