@@ -820,11 +820,8 @@
                 keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
-                keyDownHandler.bind(keyCode.LeftMeta, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
-                keyDownHandler.bind(keyCode.MetaInMozilla, modifier.Meta, hyperlinkClickHandler.showPointerCursor);
-
-                // event.ctrlKey and event.metaKey are always equal false in keyup event. Cannot really refer a source,
-                // but seem this is how all browsers behave. Probably because there is no such need in this event.
+                keyDownHandler.bind(keyCode.LeftMeta, modifier.None, hyperlinkClickHandler.showPointerCursor);
+                keyDownHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showPointerCursor);
                 keyUpHandler.bind(keyCode.LeftMeta, modifier.None, hyperlinkClickHandler.showTextCursor);
                 keyUpHandler.bind(keyCode.MetaInMozilla, modifier.None, hyperlinkClickHandler.showTextCursor);
             } else {
@@ -838,10 +835,7 @@
                 keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
-                keyDownHandler.bind(keyCode.Ctrl, modifier.Ctrl, hyperlinkClickHandler.showPointerCursor);
-
-                // event.ctrlKey and event.metaKey are always equal false in keyup event. Cannot really refer a source,
-                // but seem this is how all browsers behave. Probably because there is no such need in this event.
+                keyDownHandler.bind(keyCode.Ctrl, modifier.None, hyperlinkClickHandler.showPointerCursor);
                 keyUpHandler.bind(keyCode.Ctrl, modifier.None, hyperlinkClickHandler.showTextCursor);
             }
 
