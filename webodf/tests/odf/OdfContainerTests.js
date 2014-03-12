@@ -109,6 +109,25 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
+    function createNewSaveAsAndLoad_OptionalElement_SettingsXml(callback) {
+        t.odf = new odf.OdfContainer("", null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        t.odf.rootElement.settings = null;
+        t.odf.saveAs("test.odt", function (err) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            r.shouldBeNull(t, "t.odf.rootElement.settings");
+            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+                t.odf = odf;
+                r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+                // The value would only become null if it was a node. By default, random unspecified
+                // attributes on anything are undefined.
+                r.shouldBe(t, "t.odf.rootElement.settings", "undefined");
+                callback();
+            });
+        });
+    }
+
     function createNewSaveAsAndLoad_OptionalElement_MetaXml(callback) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
@@ -297,6 +316,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     this.asyncTests = function () {
         return r.name([
             createNewSaveAsAndLoad,
+            createNewSaveAsAndLoad_OptionalElement_SettingsXml,
             createNewSaveAsAndLoad_OptionalElement_MetaXml,
             testDefaultStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
