@@ -98,8 +98,8 @@ define("webodf/editor/MemberListView",
                 imageElement = doc.createElement("img"),
                 fullnameNode = doc.createElement("div");
 
-            avatarDiv.className = "memberListButton";
-            fullnameNode.className = "memberListLabel";
+            avatarDiv.className = "webodfeditor-memberListButton";
+            fullnameNode.className = "webodfeditor-memberListLabel";
             avatarDiv.appendChild(imageElement);
             avatarDiv.appendChild(fullnameNode);
             avatarDiv.memberId = memberId; // TODO: namespace?

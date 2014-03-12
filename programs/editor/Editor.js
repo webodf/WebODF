@@ -54,6 +54,28 @@ define("webodf/editor/Editor", [
 
         runtime.loadClass('odf.OdfCanvas');
 
+        var editorInstanceCounter = 0;
+
+        // Extend runtime with a convenient translation function
+        runtime.translateContent = function (node) {
+            var i,
+                element,
+                tag,
+                placeholder,
+                translatable = node.querySelectorAll("*[text-i18n]");
+
+            for (i = 0; i < translatable.length; i += 1) {
+                element = translatable[i];
+                tag = element.localName;
+                placeholder = element.getAttribute('text-i18n');
+                if (tag === "label"
+                        || tag === "span"
+                        || /h\d/i.test(tag)) {
+                    element.textContent = runtime.tr(placeholder);
+                }
+            }
+        };
+
         /**
          * @constructor
          * @param {{unstableFeaturesEnabled:boolean,
@@ -63,12 +85,20 @@ define("webodf/editor/Editor", [
          * param {!ops.Server=} server
          * @param {!ServerFactory=} serverFactory
          */
-        function Editor(args, server, serverFactory) {
+        function Editor(mainContainerElementId, args, server, serverFactory) {
 
             var self = this,
                 // Private
                 session,
                 editorSession,
+                //
+                mainContainerElement,
+                editorElement,
+                toolbarContainerElement, // container needed because dijit toolbar overwrites direct classList
+                canvasContainerElement,
+                //
+                membersElement,
+                //
                 mainContainer,
                 memberListView,
                 tools,
@@ -367,6 +397,14 @@ define("webodf/editor/Editor", [
             };
 
             /**
+             * Temporary util method, to be removed after refactoring
+             * @return {!Element}
+             */
+            this.getCanvasContainerElement = function() {
+                return canvasContainerElement;
+            };
+
+            /**
              * Applies a CSS transformation to the toolbar
              * to ensure that if there is a body-scroll,
              * the toolbar remains visible at the top of
@@ -379,7 +417,7 @@ define("webodf/editor/Editor", [
              * @return {undefined}
              */
             function translateToolbar() {
-                var bar = document.getElementById('toolbar'),
+                var bar = toolbarContainerElement,
                     y = document.body.scrollTop;
 
                 bar.style.WebkitTransformOrigin = "center top";
@@ -397,7 +435,20 @@ define("webodf/editor/Editor", [
              * @return {undefined}
              */
             function repositionContainer() {
-                document.getElementById('container').style.top = document.getElementById('toolbar').getBoundingClientRect().height + 'px';
+                canvasContainerElement.style.top = toolbarContainerElement.getBoundingClientRect().height + 'px';
+            }
+
+            /**
+             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @return {undefined}
+             */
+            function destroyInternal(callback) {
+                mainContainerElement.removeChild(editorElement);
+                if (membersElement) {
+                    mainContainerElement.removeChild(membersElement);
+                }
+
+                callback();
             }
 
             /**
@@ -430,7 +481,7 @@ define("webodf/editor/Editor", [
                                     if (err) {
                                         callback(err);
                                     } else {
-                                        callback();
+                                        destroyInternal(callback);
                                     }
                                 });
                             }
@@ -446,9 +497,17 @@ define("webodf/editor/Editor", [
             // init
             function init() {
                 var editorPane, memberListPane,
-                    canvasElement = document.getElementById("canvas"),
-                    container = document.getElementById('container'),
-                    memberListElement = document.getElementById('memberList'),
+                    //
+                    editorElementId = "webodfeditor-editor" + editorInstanceCounter,
+                    canvasElementId = "webodfeditor-canvas" + editorInstanceCounter,
+                    canvasElement,
+                    canvasContainerElementId = "webodfeditor-canvascontainer" + editorInstanceCounter,
+                    toolbarElement,
+                    toolbarElementId = "webodfeditor-toolbar" + editorInstanceCounter,
+                    memberListElement,
+                    membersElementId = "webodfeditor-members" + editorInstanceCounter,
+                    documentns = document.documentElement.namespaceURI,
+                    //
                     collabEditing = Boolean(server),
                     directParagraphStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                     imageInsertingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
@@ -459,52 +518,65 @@ define("webodf/editor/Editor", [
                     undoRedoEnabled = (! collabEditing),
                     closeCallback;
 
-                // Extend runtime with a convenient translation function
-                runtime.translateContent = function (node) {
-                    var i,
-                        element,
-                        tag,
-                        placeholder,
-                        translatable = node.querySelectorAll("*[text-i18n]");
+                editorInstanceCounter += 1;
 
-                    for (i = 0; i < translatable.length; i += 1) {
-                        element = translatable[i];
-                        tag = element.localName;
-                        placeholder = element.getAttribute('text-i18n');
-                        if (tag === "label"
-                                || tag === "span"
-                                || /h\d/i.test(tag)) {
-                            element.textContent = runtime.tr(placeholder);
-                        }
+                function createElement(tagLocalName, id, className) {
+                    var element;
+                    element = document.createElementNS(documentns, tagLocalName);
+                    if (id) {
+                        element.id = id;
                     }
-                };
-
-                if (collabEditing) {
-                    runtime.assert(memberListElement, 'missing "memberList" div in HTML');
+                    element.classList.add(className);
+                    return element;
                 }
 
-                runtime.assert(canvasElement, 'missing "canvas" div in HTML');
+                mainContainerElement = document.getElementById(mainContainerElementId);
+                runtime.assert(Boolean(mainContainerElement), "No id of an existing element passed to WebODFEditor.createInstance(): "+mainContainerElementId);
+
+               // create needed tree structure
+                canvasElement = createElement('div', canvasElementId, "webodfeditor-canvas");
+                canvasContainerElement = createElement('div', canvasContainerElementId, "webodfeditor-canvascontainer");
+                toolbarElement = createElement('span', toolbarElementId, "webodfeditor-toolbar");
+                toolbarContainerElement = createElement('span', undefined, "webodfeditor-toolbarcontainer");
+                editorElement = createElement('div', editorElementId, "webodfeditor-editor");
+
+                // put into tree
+                canvasContainerElement.appendChild(canvasElement);
+                toolbarContainerElement.appendChild(toolbarElement);
+                editorElement.appendChild(toolbarContainerElement);
+                editorElement.appendChild(canvasContainerElement);
+                mainContainerElement.appendChild(editorElement);
+
+                if (collabEditing) {
+                    // memberlist plugin
+                    memberListElement = createElement('div', undefined, "webodfeditor-memberList");
+                    membersElement = createElement('div', membersElementId, "webodfeditor-members");
+
+                    // put into tree
+                    membersElement.appendChild(memberListElement);
+                    mainContainerElement.appendChild(membersElement);
+                }
 
                 // App Widgets
-                mainContainer = new BorderContainer({}, 'mainContainer');
+                mainContainer = new BorderContainer({}, mainContainerElementId);
 
                 editorPane = new ContentPane({
                     region: 'center'
-                }, 'editor');
+                }, editorElementId);
                 mainContainer.addChild(editorPane);
 
                 if (collabEditing) {
                     memberListPane = new ContentPane({
                         region: 'right',
                         title: runtime.tr("Members")
-                    }, 'members');
+                    }, membersElementId);
                     mainContainer.addChild(memberListPane);
                     memberListView = new MemberListView(memberListElement);
                 }
 
                 mainContainer.startup();
 
-                tools = new Tools({
+                tools = new Tools(toolbarElementId, {
                     onToolDone: setFocusToOdfCanvas,
                     loadOdtFile: loadOdtFile,
                     saveOdtFile: saveOdtFile,
