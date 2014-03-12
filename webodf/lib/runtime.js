@@ -37,7 +37,7 @@
 /*global window, XMLHttpRequest, require, console, DOMParser, document,
   process, __dirname, setTimeout, Packages, print,
   readFile, quit, Buffer, ArrayBuffer, Uint8Array,
-  navigator, VBArray, alert, now, clearTimeout */
+  navigator, VBArray, alert, now, clearTimeout, webodf_version */
 /**
  * Three implementations of a runtime for browser, node.js and rhino.
  */
@@ -1667,6 +1667,30 @@ var odf = {};
  * @namespace The editing operations
  */
 var ops = {};
+
+/**
+ * @namespace The webodf namespace
+ */
+var webodf = {};
+
+(function () {
+    "use strict";
+    /**
+     * @return {string}
+     */
+    function getWebODFVersion() {
+        var version = (String(typeof webodf_version) !== "undefined"
+            ? webodf_version
+            : "From Source"
+        );
+        return version;
+    }
+    /**
+     * @const
+     * @type {!string}
+     */
+    webodf.Version = getWebODFVersion();
+}());
 
 /*jslint sloppy: true*/
 (function () {

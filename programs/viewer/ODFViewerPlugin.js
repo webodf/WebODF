@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, document, odf, gui, console*/
+/*global runtime, document, odf, gui, console, webodf*/
 
 function ODFViewerPlugin() {
     "use strict";
@@ -216,11 +216,7 @@ function ODFViewerPlugin() {
     };
 
     this.getPluginVersion = function () {
-        var version = (String(typeof webodf_version) !== "undefined"
-            ? webodf_version
-            : "From Source"
-        );
-        return version;
+        return webodf.Version;
     };
 
     this.getPluginURL = function () {

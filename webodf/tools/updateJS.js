@@ -237,6 +237,7 @@ function Main(cmakeListPath) {
     function createCMakeLists(typed) {
         var path = cmakeListPath, content;
         content = "set(LIBJSFILES\n" +
+                // include webodfversion.js before runtime.js, latter uses var from the first
                 "    ${CMAKE_BINARY_DIR}/webodf/webodfversion.js\n" +
                 "    lib/runtime.js\n    lib/" +
                 typed.join("\n    lib/") + "\n)\n";
