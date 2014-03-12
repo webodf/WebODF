@@ -50,7 +50,16 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+        /**
+         * @const
+         * @type {!boolean}
+         */
+        BACKWARD = false,
+        /**
+         * @const
+         * @type {!boolean}
+         */
+        FORWARD = true;
 
     /**
      * Creates an operation to remove the provided selection
@@ -133,27 +142,55 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * The iterator is constrained within the root element for the current cursor position so
      * iteration will stop once the root is entirely walked in the requested direction
      * @param {!Element} cursorNode
-     * @param {boolean} forward
-     * @return {boolean}
+     * @return {!core.StepIterator}
      */
-    function hasPositionInDirection(cursorNode, forward) {
-        var rootConstrainedFilter = new core.PositionFilterChain(),
-            iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootElement(cursorNode)),
-            nextPosition = /**@type {!function():!boolean}*/(forward ? iterator.nextPosition : iterator.previousPosition);
+    function createStepIterator(cursorNode) {
+        var cursorRoot = odtDocument.getRootElement(cursorNode),
+            filters = [odtDocument.getPositionFilter(), odtDocument.createRootFilter(cursorRoot)];
 
-        // TODO Performance could be improved by allowing iteration to skip child roots
-        // Even though the iterator is bounded to the root, iteration will still go over
-        // child elements that are part of a different root. Therefore, a combined filter
-        // is still necessary
-        rootConstrainedFilter.addFilter(odtDocument.getPositionFilter());
-        rootConstrainedFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
-        iterator.setUnfilteredPosition(cursorNode, 0);
-        while (nextPosition()) {
-            if (rootConstrainedFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                return true;
+        return odtDocument.createStepIterator(cursorNode, 0, filters, cursorRoot);
+    }
+
+    /**
+     * Remove the current selection, or if the cursor is collapsed, remove the next step
+     * in the specified direction.
+     *
+     * @param {!boolean} isForward True indicates delete the next step. False indicates delete the previous step
+     * @return {!boolean}
+     */
+    function removeTextInDirection(isForward) {
+        var cursorNode,
+            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+            stepIterator,
+            op = null;
+
+        if (selection.length === 0) {
+            cursorNode = odtDocument.getCursor(inputMemberId).getNode();
+            stepIterator = createStepIterator(cursorNode);
+            // There must be at least one more step in the root same root as the cursor node
+            // in order to do something if there is no selected text
+            // TODO Superstition alert - Step rounding is probably not necessary as cursor should always be at a step
+            if (stepIterator.roundToClosestStep()
+                    && (isForward ? stepIterator.nextStep() : stepIterator.previousStep())) {
+                selection = toForwardSelection(odtDocument.convertDomToCursorRange({
+                    anchorNode: cursorNode,
+                    anchorOffset: 0,
+                    focusNode: stepIterator.container(),
+                    focusOffset: stepIterator.offset()
+                }));
+                op = new ops.OpRemoveText();
+                op.init({
+                    memberid: inputMemberId,
+                    position: selection.position,
+                    length: selection.length
+                });
+                session.enqueue([op]);
             }
+        } else {
+            op = createOpRemoveSelection(selection);
+            session.enqueue([op]);
         }
-        return false;
+        return op !== null;
     }
 
     /**
@@ -162,29 +199,8 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     this.removeTextByBackspaceKey = function () {
-        var cursor = odtDocument.getCursor(inputMemberId),
-            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
-            op = null;
-
-        if (selection.length === 0) {
-            // position-1 must exist for backspace to be valid
-            if (hasPositionInDirection(cursor.getNode(), false)) {
-                op = new ops.OpRemoveText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: selection.position - 1,
-                    length: 1
-                });
-                session.enqueue([op]);
-            }
-        } else {
-            op = createOpRemoveSelection(selection);
-            session.enqueue([op]);
-        }
-        return op !== null;
+        return removeTextInDirection(BACKWARD);
     };
-
-
 
     /**
      * Removes the currently selected content. If no content is selected and there is at least
@@ -192,26 +208,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     this.removeTextByDeleteKey = function () {
-        var cursor = odtDocument.getCursor(inputMemberId),
-            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
-            op = null;
-
-        if (selection.length === 0) {
-            // position+1 must exist for delete to be valid
-            if (hasPositionInDirection(cursor.getNode(), true)) {
-                op = new ops.OpRemoveText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: selection.position,
-                    length: 1
-                });
-                session.enqueue([op]);
-            }
-        } else {
-            op = createOpRemoveSelection(selection);
-            session.enqueue([op]);
-        }
-        return op !== null;
+        return removeTextInDirection(FORWARD);
     };
 
     /**
