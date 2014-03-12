@@ -668,6 +668,8 @@
             root.masterStyles = domUtils.getDirectChild(root, officens, 'master-styles');
             root.body = domUtils.getDirectChild(root, officens, 'body');
             root.meta = domUtils.getDirectChild(root, officens, 'meta');
+            root.settings = domUtils.getDirectChild(root, officens, 'settings');
+            root.scripts = domUtils.getDirectChild(root, officens, 'scripts');
             linkAnnotationStartAndEndElements(root);
         }
         /**
