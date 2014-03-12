@@ -825,8 +825,16 @@
             if (component) {
                 zip.loadAsDOM(component.path, function (err, xmldoc) {
                     component.handler(xmldoc);
-                    if (err || self.state === OdfContainer.INVALID) {
+                    if (self.state === OdfContainer.INVALID) {
+                        if (err) {
+                            runtime.log("ERROR: Unable to load " + component.path + " - " + err);
+                        } else {
+                            runtime.log("ERROR: Unable to load " + component.path);
+                        }
                         return;
+                    }
+                    if (err) {
+                        runtime.log("DEBUG: Unable to load " + component.path + " - " + err);
                     }
                     loadNextComponent(remainingComponents);
                 });
