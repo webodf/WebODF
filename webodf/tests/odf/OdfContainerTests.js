@@ -109,6 +109,24 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
+    function createNewSaveAsAndLoad_OptionalElement_MetaXml(callback) {
+        t.odf = new odf.OdfContainer("", null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        t.odf.rootElement.meta = null;
+        t.odf.saveAs("test.odt", function (err) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            // Metadata is always created when the generator string is updated to webodf
+            r.shouldBeNonNull(t, "t.odf.rootElement.meta");
+            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+                t.odf = odf;
+                r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+                r.shouldBeNonNull(t, "t.odf.rootElement.meta");
+                callback();
+            });
+        });
+    }
+
     function doFontFaceDeclsSaveAsAndLoadRoundTrip(args, callback) {
         t.odf = new odf.OdfContainer("", null);
         appendXmlsToNode(t.odf.rootElement.fontFaceDecls,   args.keptFontFaceDecls);
@@ -279,6 +297,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     this.asyncTests = function () {
         return r.name([
             createNewSaveAsAndLoad,
+            createNewSaveAsAndLoad_OptionalElement_MetaXml,
             testDefaultStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testAutomaticStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,

@@ -1182,10 +1182,10 @@
             var data,
                 date = new Date();
 
-            updateMetadataForSaving();
-
             data = runtime.byteArrayFromString(serializeSettingsXml(), "utf8");
             zip.save("settings.xml", data, true, date);
+            updateMetadataForSaving();
+            // Even thought meta-data is optional, it is always created by the previous statement
             data = runtime.byteArrayFromString(serializeMetaXml(), "utf8");
             zip.save("meta.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeStylesXml(), "utf8");
