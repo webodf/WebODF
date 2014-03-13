@@ -53,7 +53,6 @@
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
-            async = new core.Async(),
             /**@type{!core.DomUtils}*/
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
@@ -1061,7 +1060,7 @@
             ]);
 
             runtime.clearTimeout(handleMouseClickTimeoutId);
-            async.destroyAll(destroyCallbacks, callback);
+            core.Async.destroyAll(destroyCallbacks, callback);
         };
 
         function init() {

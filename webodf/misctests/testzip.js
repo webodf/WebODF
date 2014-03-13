@@ -37,7 +37,6 @@
 runtime.loadClass("core.Zip");
 runtime.loadClass("core.Async");
 
-var async = new core.Async();
 
 /**
  * @param {!core.Zip.ZipEntry} entry
@@ -96,7 +95,7 @@ function compareZips(zipa, zipb, callback) {
         }
     }
     // compare the data in the entries
-    async.forEach(entriesa, function (entry, callback) {
+    core.Async.forEach(entriesa, function (entry, callback) {
         entry.load(function (err, dataa) {
             if (err) {
                 callback(err);
@@ -138,7 +137,7 @@ function testZip(filepatha, callback) {
             entries = zipa.getEntries(),
             i,
             entriesDone = 0;
-        async.forEach(entries, function (entry, callback) {
+        core.Async.forEach(entries, function (entry, callback) {
             copyEntry(entry, zipb, callback);
         }, function (err) {
             if (err) {

@@ -53,7 +53,6 @@ gui.CaretManager = function CaretManager(sessionController) {
     "use strict";
     var /**@type{!Object.<string,!gui.Caret>}*/
         carets = {},
-        async = new core.Async(),
         window = runtime.getWindow(),
         ensureCaretVisibleTimeoutId,
         scrollIntoViewScheduled = false;
@@ -237,7 +236,7 @@ gui.CaretManager = function CaretManager(sessionController) {
         window.removeEventListener("blur", hideLocalCaret, false);
 
         carets = {};
-        async.destroyAll(caretCleanup, callback);
+        core.Async.destroyAll(caretCleanup, callback);
     };
 
     function init() {

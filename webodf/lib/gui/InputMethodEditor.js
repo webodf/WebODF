@@ -120,7 +120,6 @@
             doc = /**@type{!Document}*/(eventTrap.ownerDocument),
             /**@type{!Element}*/
             compositionElement,
-            async = new core.Async(),
             FAKE_CONTENT = "b",
             /**@type{!core.ScheduledTask}*/
             processUpdates,
@@ -327,7 +326,7 @@
             eventManager.unsubscribe('mouseup', synchronizeEventStatus);
             eventManager.unsubscribe('focus', resetWindowSelection);
 
-            async.destroyAll(cleanup, callback);
+            core.Async.destroyAll(cleanup, callback);
         };
 
         function init() {

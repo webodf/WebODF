@@ -992,7 +992,6 @@
             "odf.OdfCanvas constructor needs DOM");
         var self = this,
             doc = /**@type{!Document}*/(element.ownerDocument),
-            async = new core.Async(),
             /**@type{!odf.OdfContainer}*/
             odfcontainer,
             /**@type{!odf.Formatting}*/
@@ -1632,7 +1631,7 @@
             head.removeChild(positioncss);
 
             // TODO: loadingQueue, make sure it is empty
-            async.destroyAll(cleanup, callback);
+            core.Async.destroyAll(cleanup, callback);
         };
 
         function init() {
