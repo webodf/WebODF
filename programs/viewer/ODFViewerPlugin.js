@@ -96,8 +96,7 @@ function ODFViewerPlugin() {
     this.initialize = function (viewerElement, documentUrl) {
         // If the URL has a fragment (#...), try to load the file it represents
         init(function () {
-            var hyperlinkClickHandler,
-                session,
+            var session,
                 sessionController,
                 sessionView,
                 odtDocument,
@@ -142,11 +141,6 @@ function ODFViewerPlugin() {
 
                 self.onLoad();
             });
-
-            hyperlinkClickHandler = new gui.HyperlinkClickHandler(function () {
-                return odfCanvas.odfContainer().getContentElement();
-            });
-            odfCanvas.addListener("click", hyperlinkClickHandler.handleEvent);
         });
     };
 
