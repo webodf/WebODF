@@ -48,6 +48,7 @@ function Viewer(viewerPlugin) {
         kDefaultScaleDelta = 1.1,
         kDefaultScale = 'auto',
         presentationMode = false,
+        isFullScreen = false,
         initialized = false,
         isSlideshow = false,
         url,
@@ -127,12 +128,6 @@ function Viewer(viewerPlugin) {
     function hideAboutDialog() {
         aboutDialog.style.display = "none";
         overlay.style.visibility = "hidden";
-    }
-
-    function isFullScreen() {
-    // Note that the browser fullscreen (triggered by short keys) might
-    // be considered different from content fullscreen when expecting a boolean
-        return document.isFullScreen || document.mozFullScreen || document.webkitIsFullScreen;
     }
 
     function selectScaleOption(value) {
@@ -341,13 +336,15 @@ function Viewer(viewerPlugin) {
      */
     this.toggleFullScreen = function () {
         var elem = viewerElement;
-        if (!isFullScreen()) {
+        if (!isFullScreen) {
             if (elem.requestFullScreen) {
                 elem.requestFullScreen();
             } else if (elem.mozRequestFullScreen) {
                 elem.mozRequestFullScreen();
             } else if (elem.webkitRequestFullScreen) {
                 elem.webkitRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
             }
         } else {
             if (document.cancelFullScreen) {
@@ -356,6 +353,8 @@ function Viewer(viewerPlugin) {
                 document.mozCancelFullScreen();
             } else if (document.webkitCancelFullScreen) {
                 document.webkitCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
             }
         }
     };
@@ -443,9 +442,14 @@ function Viewer(viewerPlugin) {
     };
 
     function cancelPresentationMode() {
-        if (presentationMode && !isFullScreen()) {
+        if (presentationMode && !isFullScreen) {
             self.togglePresentationMode();
         }
+    }
+
+    function handleFullScreenChange() {
+        isFullScreen = !isFullScreen;
+        cancelPresentationMode();
     }
 
     function showOverlayNavigator() {
@@ -465,22 +469,24 @@ function Viewer(viewerPlugin) {
         if (viewerPlugin) {
             self.initialize();
 
-            if (!(document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen)) {
+            if (!(document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen || document.msExitFullscreen)) {
                 document.getElementById('fullscreen').style.visibility = 'hidden';
+                document.getElementById('presentation').style.visibility = 'hidden';
             }
 
             document.getElementById('overlayCloseButton').addEventListener('click', self.toggleFullScreen);
             document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
             document.getElementById('presentation').addEventListener('click', function () {
-                if (!isFullScreen()) {
+                if (!isFullScreen) {
                     self.toggleFullScreen();
                 }
                 self.togglePresentationMode();
             });
 
-            document.addEventListener('fullscreenchange', cancelPresentationMode);
-            document.addEventListener('webkitfullscreenchange', cancelPresentationMode);
-            document.addEventListener('mozfullscreenchange', cancelPresentationMode);
+            document.addEventListener('fullscreenchange', handleFullScreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullScreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullScreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullScreenChange);
 
             document.getElementById('download').addEventListener('click', function () {
                 self.download();
