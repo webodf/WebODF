@@ -456,7 +456,7 @@ define("webodf/editor/Editor", [
              * @return {undefined}
              */
             this.destroy = function (callback) {
-                var destroyMemberListView = memberListView ? memberListView.destroy : function(cb) { cb(); };
+                var destroyCallbacks = [];
 
                 window.removeEventListener('scroll', translateToolbar);
                 window.removeEventListener('focusout', translateToolbar);
@@ -469,25 +469,16 @@ define("webodf/editor/Editor", [
                 // TODO: investigate what else needs to be done
                 mainContainer.destroyRecursive(true);
 
-                destroyMemberListView(function(err) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        tools.destroy(function(err) {
-                            if (err) {
-                                callback(err);
-                            } else {
-                                odfCanvas.destroy(function(err) {
-                                    if (err) {
-                                        callback(err);
-                                    } else {
-                                        destroyInternal(callback);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                if (memberListView) {
+                    destroyCallbacks.push(memberListView.destroy);
+                }
+                destroyCallbacks = destroyCallbacks.concat([
+                    tools.destroy,
+                    odfCanvas.destroy,
+                    destroyInternal
+                ]);
+
+                core.Async.destroyAll(destroyCallbacks, callback);
             };
 
             function setFocusToOdfCanvas() {

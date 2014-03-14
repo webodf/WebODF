@@ -53,7 +53,6 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         /**@type{!Element}*/
         root, // initialized by addOverlays
         doc = document.getDOMDocument(),
-        async = new core.Async(),
         svgns = "http://www.w3.org/2000/svg",
         overlay = doc.createElementNS(svgns, 'svg'),
         polygon = doc.createElementNS(svgns, 'polygon'),
@@ -682,7 +681,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * @param {function(!Object=)} callback
      */
     this.destroy = function (callback) {
-        async.destroyAll([renderTask.destroy, destroy], callback);
+        core.Async.destroyAll([renderTask.destroy, destroy], callback);
     };
 
     function init() {

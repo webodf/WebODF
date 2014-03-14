@@ -67,7 +67,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         /**@type{?Element}*/
         overlayElement,
         domUtils = new core.DomUtils(),
-        async = new core.Async(),
         /**@type{!core.ScheduledTask}*/
         redrawTask,
         /**@type{!core.ScheduledTask}*/
@@ -538,7 +537,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     this.destroy = function (callback) {
         var cleanup = [redrawTask.destroy, blinkTask.destroy, avatar.destroy, destroy];
-        async.destroyAll(cleanup, callback);
+        core.Async.destroyAll(cleanup, callback);
     };
 
     function init() {

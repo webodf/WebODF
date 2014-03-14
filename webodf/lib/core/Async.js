@@ -33,67 +33,83 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
+
 /*global core*/
 
-/**
- * @constructor
- */
-core.Async = function Async() {
+(function() {
     "use strict";
+
     /**
-     * @param {!Array.<*>} items
-     * @param {function(*, !function(!string):undefined):undefined} f
-     * @param {function(?string)} callback
-     * @return {undefined}
+     * @return {!{forEach:!function(!Array.<*>,!function(*, !function(!string):undefined):undefined,!function(?string)):undefined, destroyAll:function(!Array.<!function(!function(!Object=))>,!function(!Object=)):undefined}}
      */
-    this.forEach = function (items, f, callback) {
-        var i, l = items.length,
-            /**@type{!number}*/
-            itemsDone = 0;
+    function createASyncSingleton() {
         /**
-         * @param {?string} err
+         * @param {!Array.<*>} items
+         * @param {!function(*, !function(!string):undefined):undefined} f
+         * @param {!function(?string)} callback
          * @return {undefined}
          */
-        function end(err) {
-            if (itemsDone !== l) {
-                if (err) {
-                    itemsDone = l;
-                    callback(err);
-                } else {
-                    itemsDone += 1;
-                    if (itemsDone === l) {
-                        callback(null);
+        function forEach(items, f, callback) {
+            var i, l = items.length,
+                /**@type{!number}*/
+                itemsDone = 0;
+            /**
+             * @param {?string} err
+             * @return {undefined}
+             */
+            function end(err) {
+                if (itemsDone !== l) {
+                    if (err) {
+                        itemsDone = l;
+                        callback(err);
+                    } else {
+                        itemsDone += 1;
+                        if (itemsDone === l) {
+                            callback(null);
+                        }
                     }
                 }
             }
-        }
-        for (i = 0; i < l; i += 1) {
-            f(items[i], end);
-        }
-    };
-
-    /**
-     * @param {!Array.<!function(!function(!Object=))>} items
-     * @param {!function(!Object=)} callback
-     * @return {undefined}
-     */
-    this.destroyAll = function (items, callback) {
-        /**
-         * @param {!number} itemIndex
-         * @param {!Object|undefined} err
-         * @return {undefined}
-         */
-        function destroy(itemIndex, err) {
-            if (err) {
-                callback(err);
-            } else {
-                if (itemIndex < items.length) {
-                    items[itemIndex](function (err) { destroy(itemIndex + 1, err); });
-                } else {
-                    callback();
-                }
+            for (i = 0; i < l; i += 1) {
+                f(items[i], end);
             }
         }
-        destroy(0, undefined);
-    };
-};
+
+        /**
+         * @param {!Array.<!function(!function(!Object=))>} items
+         * @param {!function(!Object=)} callback
+         * @return {undefined}
+         */
+        function destroyAll(items, callback) {
+            /**
+             * @param {!number} itemIndex
+             * @param {!Object|undefined} err
+             * @return {undefined}
+             */
+            function destroy(itemIndex, err) {
+                if (err) {
+                    callback(err);
+                } else {
+                    if (itemIndex < items.length) {
+                        items[itemIndex](function (err) { destroy(itemIndex + 1, err); });
+                    } else {
+                        callback();
+                    }
+                }
+            }
+            destroy(0, undefined);
+        }
+
+        return {
+            forEach: forEach,
+            destroyAll: destroyAll
+        };
+    }
+
+    /**
+     * Wrapper for Async functions
+     * @const
+     * @type {!{forEach:!function(!Array.<*>,!function(*, !function(!string):undefined):undefined,!function(?string)):undefined, destroyAll:function(!Array.<!function(!function(!Object=))>,!function(!Object=)):undefined}}
+     */
+    core.Async = createASyncSingleton();
+}());
