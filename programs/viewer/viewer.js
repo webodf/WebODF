@@ -471,6 +471,7 @@ function Viewer(viewerPlugin) {
 
             if (!(document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen || document.msExitFullscreen)) {
                 document.getElementById('fullscreen').style.visibility = 'hidden';
+                document.getElementById('presentation').style.visibility = 'hidden';
             }
 
             document.getElementById('overlayCloseButton').addEventListener('click', self.toggleFullScreen);
