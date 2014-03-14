@@ -560,6 +560,7 @@ gui.EventManager = function EventManager(odtDocument) {
         eventTrap.id = "eventTrap";
         // Negative tab index still allows focus, but removes accessibility by keyboard
         eventTrap.setAttribute("tabindex", -1);
+        eventTrap.setAttribute("readOnly", true);
         sizerElement.appendChild(eventTrap);
 
         compoundEvents.longpress = new CompoundEvent('longpress', ['touchstart', 'touchmove', 'touchend'], emitLongPressEvent);
