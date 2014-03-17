@@ -24,6 +24,7 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/gui/StyleSummaryTests.js
     tests/gui/TrivialUndoManagerTests.js
     tests/gui/UndoStateRulesTests.js
+    tests/odf/StyleCacheTests.js
     tests/odf/FormattingTests.js
     tests/odf/LayoutTests.js
     tests/odf/ListStyleToCssTests.js

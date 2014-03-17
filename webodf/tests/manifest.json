@@ -99,6 +99,11 @@
         "core.UnitTester",
         "odf.OdfUtils"
     ],
+    "odf.StyleCacheTests": [
+        "core.UnitTester",
+        "odf.OdfContainer",
+        "odf.StyleCache"
+    ],
     "odf.StyleInfoTests": [
         "core.UnitTester",
         "odf.StyleInfo"
