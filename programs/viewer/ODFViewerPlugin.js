@@ -53,6 +53,7 @@ function ODFViewerPlugin() {
             runtime.loadClass('odf.OdfCanvas');
             runtime.loadClass('ops.Session');
             runtime.loadClass('gui.CaretManager');
+            runtime.loadClass("gui.HyperlinkTooltipView");
             runtime.loadClass('gui.SessionController');
             runtime.loadClass('gui.SvgSelectionView');
             runtime.loadClass('gui.SelectionViewManager');
@@ -96,15 +97,16 @@ function ODFViewerPlugin() {
     this.initialize = function (viewerElement, documentUrl) {
         // If the URL has a fragment (#...), try to load the file it represents
         init(function () {
-            var hyperlinkClickHandler,
-                session,
+            var session,
                 sessionController,
                 sessionView,
                 odtDocument,
                 shadowCursor,
                 selectionViewManager,
                 caretManager,
-                localMemberId = 'localuser';
+                localMemberId = 'localuser',
+                hyperlinkTooltipView,
+                eventManager;
 
             odfElement = document.getElementById('canvas');
             odfCanvas = new odf.OdfCanvas(odfElement);
@@ -121,12 +123,17 @@ function ODFViewerPlugin() {
                     odtDocument = session.getOdtDocument();
                     shadowCursor = new gui.ShadowCursor(odtDocument);
                     sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {});
+                    eventManager = sessionController.getEventManager();
                     caretManager = new gui.CaretManager(sessionController);
                     selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
                     sessionView = new gui.SessionView({
                         caretAvatarsInitiallyVisible: false
                     }, localMemberId, session, caretManager, selectionViewManager);
                     selectionViewManager.registerCursor(shadowCursor);
+                    hyperlinkTooltipView = new gui.HyperlinkTooltipView(odfCanvas,
+                        sessionController.getHyperlinkClickHandler().getModifier);
+                    eventManager.subscribe("mousemove", hyperlinkTooltipView.showTooltip);
+                    eventManager.subscribe("mouseout", hyperlinkTooltipView.hideTooltip);
 
                     var op = new ops.OpAddMember();
                     op.init({
@@ -142,11 +149,6 @@ function ODFViewerPlugin() {
 
                 self.onLoad();
             });
-
-            hyperlinkClickHandler = new gui.HyperlinkClickHandler(function () {
-                return odfCanvas.odfContainer().getContentElement();
-            });
-            odfCanvas.addListener("click", hyperlinkClickHandler.handleEvent);
         });
     };
 

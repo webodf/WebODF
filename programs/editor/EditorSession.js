@@ -43,6 +43,7 @@ define("webodf/editor/EditorSession", [
 ], function (fontsCSS) { // fontsCSS is retrieved as a string, using dojo's text retrieval AMD plugin
     "use strict";
 
+    runtime.loadClass("core.Async");
     runtime.loadClass("core.DomUtils");
     runtime.loadClass("odf.OdfUtils");
     runtime.loadClass("ops.OdtDocument");
@@ -55,6 +56,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.Caret");
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
+    runtime.loadClass("gui.HyperlinkTooltipView");
     runtime.loadClass("gui.TrivialUndoManager");
     runtime.loadClass("gui.SvgSelectionView");
     runtime.loadClass("gui.SelectionViewManager");
@@ -75,6 +77,7 @@ define("webodf/editor/EditorSession", [
             currentStyleName = null,
             caretManager,
             selectionViewManager,
+            hyperlinkTooltipView,
             odtDocument = session.getOdtDocument(),
             textns = odf.Namespaces.textns,
             fontStyles = document.createElement('style'),
@@ -567,11 +570,12 @@ define("webodf/editor/EditorSession", [
         };
 
         /**
-         * @param {!function(!Object=)} callback, passing an error object in case of error
+         * @param {!function(!Object=)} callback passing an error object in case of error
          * @return {undefined}
          */
-        this.destroy = function(callback) {
-            var head = document.getElementsByTagName('head')[0];
+        function destroy(callback) {
+            var head = document.getElementsByTagName('head')[0],
+                eventManager = self.sessionController.getEventManager();
 
             head.removeChild(fontStyles);
 
@@ -587,37 +591,33 @@ define("webodf/editor/EditorSession", [
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, trackCurrentParagraph);
             odtDocument.unsubscribe(ops.OdtDocument.signalUndoStackChanged, undoStackModified);
 
-            self.sessionView.destroy(function(err) {
-                if (err) {
-                    callback(err);
-                } else {
-                    delete self.sessionView;
-                    caretManager.destroy(function(err) {
-                        if (err) {
-                            callback(err);
-                        } else {
-                            selectionViewManager.destroy(function(err) {
-                                if (err) {
-                                    callback(err);
-                                } else {
-                                    self.sessionController.destroy(function(err) {
-                                        if (err) {
-                                            callback(err);
-                                        } else {
-                                            delete self.sessionController;
-                                            callback();
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            eventManager.unsubscribe("mousemove", hyperlinkTooltipView.showTooltip);
+            eventManager.unsubscribe("mouseout", hyperlinkTooltipView.hideTooltip);
+            delete self.sessionView;
+            delete self.sessionController;
+            callback();
+        }
+
+        /**
+         * @param {!function(!Object=)} callback passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function(callback) {
+                var cleanup = [
+                    self.sessionView.destroy,
+                    caretManager.destroy,
+                    selectionViewManager.destroy,
+                    self.sessionController.destroy,
+                    hyperlinkTooltipView.destroy,
+                    destroy
+                ];
+
+            core.Async.destroyAll(cleanup, callback);
         };
 
         function init() {
-            var head = document.getElementsByTagName('head')[0];
+            var head = document.getElementsByTagName('head')[0],
+                eventManager;
 
             // TODO: fonts.css should be rather done by odfCanvas, or?
             fontStyles.type = 'text/css';
@@ -628,6 +628,12 @@ define("webodf/editor/EditorSession", [
             self.sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {
                 directParagraphStylingEnabled: config.directParagraphStylingEnabled
             });
+            eventManager = self.sessionController.getEventManager();
+            hyperlinkTooltipView = new gui.HyperlinkTooltipView(session.getOdtDocument().getOdfCanvas(),
+                                                    self.sessionController.getHyperlinkClickHandler().getModifier);
+            eventManager.subscribe("mousemove", hyperlinkTooltipView.showTooltip);
+            eventManager.subscribe("mouseout", hyperlinkTooltipView.hideTooltip);
+
             caretManager = new gui.CaretManager(self.sessionController);
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
             self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, caretManager, selectionViewManager);
