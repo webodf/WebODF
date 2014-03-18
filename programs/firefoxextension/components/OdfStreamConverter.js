@@ -286,7 +286,13 @@ function makeODFStreamConverters() {
         // properties required for XPCOM registration:
         classID: Components.ID('{7457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
         classDescription: 'OpenDocument Text converter',
-        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text&to=*/*'
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
     };
 
     function OdsStreamConverter() {
@@ -295,7 +301,13 @@ function makeODFStreamConverters() {
         // properties required for XPCOM registration:
         classID: Components.ID('{8457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
         classDescription: 'OpenDocument Spreadsheet converter',
-        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet&to=*/*'
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
     };
 
     function OdpStreamConverter() {
