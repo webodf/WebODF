@@ -42,7 +42,7 @@ function makeODFStreamConverters() {
         Ci = Components.interfaces,
         Cr = Components.results,
         Cu = Components.utils,
-        WEBODFJS_EVENT_ID = 'webodf.js.message';
+        WEBODF_MESSAGE_EVENT_ID = 'webodf.message';
 
     Cu["import"]('resource://gre/modules/XPCOMUtils.jsm');
     Cu["import"]('resource://gre/modules/Services.jsm');
@@ -138,35 +138,14 @@ function makeODFStreamConverters() {
     }
     // Receive an event and synchronously or asynchronously responds.
     RequestListener.prototype.receive = function (event) {
-        var message = event.target,
-            doc = message.ownerDocument,
-            action = message.getUserData('action'),
-            data = message.getUserData('data'),
-            sync = message.getUserData('sync'),
-            actions = this.actions,
-            response,
-            listener;
+        var action = event.detail.action,
+            data = event.detail.data,
+            actions = this.actions;
         if (!(action in actions)) {
             log('Unknown action: ' + action);
             return;
         }
-        if (sync) {
-            response = actions[action].call(this.actions, data);
-            message.setUserData('response', response, null);
-        } else {
-            if (!message.getUserData('callback')) {
-                doc.documentElement.removeChild(message);
-                response = null;
-            } else {
-                response = function sendResponse(response) {
-                    message.setUserData('response', response, null);
-                    listener = doc.createEvent('HTMLEvents');
-                    listener.initEvent('webodf.js.response', true, false);
-                    return message.dispatchEvent(listener);
-                };
-            }
-            actions[action].call(this.actions, data, response);
-        }
+        actions[action].call(this.actions, data);
     };
 
     /* common base for ODT, ODS and ODP stream converters */
@@ -260,10 +239,10 @@ function makeODFStreamConverters() {
                             requestListener = new RequestListener(
                                 new ChromeActions(domWindow)
                             );
-                            domWindow.addEventListener(WEBODFJS_EVENT_ID,
+                            domWindow.addEventListener(WEBODF_MESSAGE_EVENT_ID,
                                 function (event) {
                                     requestListener.receive(event);
-                                }, false, true);
+                                }, false, true, true);
                         }
                         listener.onStopRequest.apply(listener, arguments);
                     }
