@@ -5,10 +5,14 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>uriloader@webodf.js</em:id>
-    <em:name>OpenDocument Format Viewer</em:name>
     <em:type>2</em:type>
+    <em:bootstrap>true</em:bootstrap>
+
+    <em:name>ODF Viewer</em:name>
     <em:version>@WEBODF_VERSION@</em:version>
-    <em:iconURL>chrome://webodf.js/skin/icon.png</em:iconURL>
+    <em:description>Viewer for files in OpenDocument Format (ODF), powered by WebODF, using only web standard technologies.</em:description>
+    <em:creator>KO GmbH</em:creator>
+    <em:homepageURL>http://webodf.org/</em:homepageURL>
 
     <!-- Firefox -->
     <em:targetApplication>
@@ -36,10 +40,5 @@
        <em:maxVersion>16.0a1</em:maxVersion>
      </Description>
     </em:targetApplication>
-
-    <em:bootstrap>true</em:bootstrap>
-    <em:creator>Jos van den Oever</em:creator>
-    <em:description>Uses HTML5 to display ODF files directly in Firefox.</em:description>
-    <em:homepageURL>http://webodf.org/</em:homepageURL>
   </Description>
 </RDF>
