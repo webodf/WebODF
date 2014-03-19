@@ -317,8 +317,6 @@ macro(COPY_FILES _varname _srcdir _tgtdir)
 endmacro(COPY_FILES _directory _files)
 
 set (VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
-set (WORDPRESSZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-wordpress-${WEBODF_VERSION})
-set (WORDPRESSZIP ${WORDPRESSZIPDIR}.zip)
 set(WEBODFXPIDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
 set(WEBODFXPI ${WEBODFXPIDIR}.xpi)
 
@@ -341,9 +339,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}/editor/dojo-deps
     # benchmark
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/benchmark ${WEBODFZIPDIR}/benchmark
-    # wordpressplugin
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/wordpressplugin/readme.txt ${WEBODFZIPDIR}/wordpressplugin-readme.txt
-    COMMAND ${CMAKE_COMMAND} -E copy ${WORDPRESSZIP} ${WEBODFZIPDIR}
 
     # firefox
     COMMAND ${CMAKE_COMMAND} -E copy ${WEBODFXPI} ${WEBODFZIPDIR}
@@ -353,7 +348,6 @@ add_custom_command(
         ${WEBODFZIPDIR}
         ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
     DEPENDS
-        wordpress-target
         webodf-debug.js-target
         webodf.js-target
         editor-compiled.js-target
