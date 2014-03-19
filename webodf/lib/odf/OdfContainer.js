@@ -668,6 +668,8 @@
             root.masterStyles = domUtils.getDirectChild(root, officens, 'master-styles');
             root.body = domUtils.getDirectChild(root, officens, 'body');
             root.meta = domUtils.getDirectChild(root, officens, 'meta');
+            root.settings = domUtils.getDirectChild(root, officens, 'settings');
+            root.scripts = domUtils.getDirectChild(root, officens, 'scripts');
             linkAnnotationStartAndEndElements(root);
         }
         /**
@@ -825,8 +827,16 @@
             if (component) {
                 zip.loadAsDOM(component.path, function (err, xmldoc) {
                     component.handler(xmldoc);
-                    if (err || self.state === OdfContainer.INVALID) {
+                    if (self.state === OdfContainer.INVALID) {
+                        if (err) {
+                            runtime.log("ERROR: Unable to load " + component.path + " - " + err);
+                        } else {
+                            runtime.log("ERROR: Unable to load " + component.path);
+                        }
                         return;
+                    }
+                    if (err) {
+                        runtime.log("DEBUG: Unable to load " + component.path + " - " + err);
                     }
                     loadNextComponent(remainingComponents);
                 });
@@ -915,16 +925,17 @@
          * @return {!string}
          */
         function serializeSettingsXml() {
-            var serializer = new xmldom.LSSerializer(),
-                /**@type{string}*/
+            var serializer,
+                /**@type{!string}*/
+                s = "";
+            // <office:settings/> is optional, but if present must have at least one child element
+            if (self.rootElement.settings && self.rootElement.settings.firstElementChild) {
+                serializer = new xmldom.LSSerializer();
                 s = createDocumentElement("document-settings");
-            serializer.filter = new odf.OdfNodeFilter();
-            // <office:settings/> should have at least one child element
-            if (self.rootElement.settings.firstElementChild) {
-                s += serializer.writeToString(self.rootElement.settings,
-                    odf.Namespaces.namespaceMap);
+                serializer.filter = new odf.OdfNodeFilter();
+                s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
+                s += "</office:document-settings>";
             }
-            s += "</office:document-settings>";
             return s;
         }
         /**
@@ -1180,12 +1191,20 @@
             // refreshed
             // update the zip entries with the data from the live ODF DOM
             var data,
-                date = new Date();
+                date = new Date(),
+                settings;
 
-            updateMetadataForSaving();
-
-            data = runtime.byteArrayFromString(serializeSettingsXml(), "utf8");
+            settings = serializeSettingsXml();
+            if (settings) {
+                // Optional according to package spec
+                // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__440346_826425813
+                data = runtime.byteArrayFromString(settings, "utf8");
             zip.save("settings.xml", data, true, date);
+            } else {
+                zip.remove("settings.xml");
+            }
+            updateMetadataForSaving();
+            // Even thought meta-data is optional, it is always created by the previous statement
             data = runtime.byteArrayFromString(serializeMetaXml(), "utf8");
             zip.save("meta.xml", data, true, date);
             data = runtime.byteArrayFromString(serializeStylesXml(), "utf8");

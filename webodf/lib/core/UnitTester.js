@@ -634,15 +634,26 @@ core.UnitTester = function UnitTester() {
          * @return {undefined}
          */
         function runAsyncTests(todo) {
+            var fname,
+                expectFail;
             if (todo.length === 0) {
                 results[testName] = testResults;
                 failedTests += runner.countFailedTests();
                 callback();
                 return;
             }
+            function tearDownAndRunNext() {
+                if (expectFail) {
+                    runner.endExpectFail();
+                }
+                report(logger.endTest());
+                test.tearDown();
+                testResults[fname] = lastFailCount === runner.countFailedTests();
+                runAsyncTests(todo.slice(1));
+            }
             t = todo[0].f;
-            var fname = todo[0].name,
-                expectFail = (todo[0].expectFail === true);
+            fname = todo[0].name;
+            expectFail = (todo[0].expectFail === true);
             lastFailCount = runner.countFailedTests();
             if (testNames.length && testNames.indexOf(fname) === -1) {
                 runAsyncTests(todo.slice(1));
@@ -652,16 +663,12 @@ core.UnitTester = function UnitTester() {
                 if (expectFail) {
                     runner.beginExpectFail();
                 }
-                t(function () {
-                    if (expectFail) {
-                        runner.endExpectFail();
-                    }
-                    report(logger.endTest());
-                    test.tearDown();
-                    testResults[fname] = lastFailCount ===
-                        runner.countFailedTests();
-                    runAsyncTests(todo.slice(1));
-                });
+                try {
+                    t(tearDownAndRunNext);
+                } catch(/**@type{!Error}*/e) {
+                    runner.testFailed("Unexpected exception encountered: " + e.toString() + "\n" + e.stack);
+                    tearDownAndRunNext();
+                }
             }
         }
         runAsyncTests(test.asyncTests());

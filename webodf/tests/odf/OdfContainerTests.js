@@ -95,6 +95,33 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         r.shouldBeNonNull(t, "t.odf.rootElement.body");
     }
 
+    function setRootElement_OverwritesAllDocumentElements() {
+        var originalProperties = {};
+        t.odf = new odf.OdfContainer("", null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        t.originalRoot = t.odf.rootElement;
+        // The properties values for the original root will change when it is disconnected from the document
+        // so need to snapshot these beforehand
+        Object.keys(t.originalRoot).forEach(function(k) {
+            // This isn't 100% accurate of course, but at least helps find un-assigned values!
+            originalProperties[k] = String(t.originalRoot[k]);
+        });
+        t.cloneRoot = /**@type{!Element}*/(t.odf.rootElement.cloneNode(true));
+
+        t.odf.setRootElement(t.cloneRoot);
+
+        r.shouldBe(t, "t.odf.rootElement", "t.cloneRoot");
+        t.expected = {};
+        t.actual = {};
+        Object.keys(originalProperties).forEach(function(propertyName) {
+            // Make test output nice and readable by using properties on objects. This will show
+            // nice error messages if an unexpected value is encountered
+            t.expected[propertyName] = originalProperties[propertyName];
+            t.actual[propertyName] = String(t.odf.rootElement[propertyName]);
+            r.shouldBe(t, "t.actual." + propertyName, "t.expected." + propertyName);
+        });
+    }
+
     function createNewSaveAsAndLoad(callback) {
         t.odf = new odf.OdfContainer("", null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
@@ -104,6 +131,43 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             t.odf = new odf.OdfContainer("test.odt", function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+                callback();
+            });
+        });
+    }
+
+    function createNewSaveAsAndLoad_OptionalElement_SettingsXml(callback) {
+        t.odf = new odf.OdfContainer("", null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        t.odf.rootElement.settings = null;
+        t.odf.saveAs("test.odt", function (err) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            r.shouldBeNull(t, "t.odf.rootElement.settings");
+            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+                t.odf = odf;
+                r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+                // The value would only become null if it was a node. By default, random unspecified
+                // attributes on anything are undefined.
+                r.shouldBe(t, "t.odf.rootElement.settings", "undefined");
+                callback();
+            });
+        });
+    }
+
+    function createNewSaveAsAndLoad_OptionalElement_MetaXml(callback) {
+        t.odf = new odf.OdfContainer("", null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        t.odf.rootElement.meta = null;
+        t.odf.saveAs("test.odt", function (err) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            // Metadata is always created when the generator string is updated to webodf
+            r.shouldBeNonNull(t, "t.odf.rootElement.meta");
+            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+                t.odf = odf;
+                r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+                r.shouldBeNonNull(t, "t.odf.rootElement.meta");
                 callback();
             });
         });
@@ -273,12 +337,15 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
 */
     this.tests = function () {
         return r.name([
-            createNew
+            createNew,
+            setRootElement_OverwritesAllDocumentElements
         ]);
     };
     this.asyncTests = function () {
         return r.name([
             createNewSaveAsAndLoad,
+            createNewSaveAsAndLoad_OptionalElement_SettingsXml,
+            createNewSaveAsAndLoad_OptionalElement_MetaXml,
             testDefaultStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testAutomaticStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
