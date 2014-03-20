@@ -330,6 +330,7 @@
             eventManager.unsubscribe('keypress', flushEvent);
             eventManager.unsubscribe('mousedown', disableTrapSelection);
             eventManager.unsubscribe('mouseup', enableTrapSelection);
+            eventManager.unsubscribe('contextmenu', enableTrapSelection);
             eventManager.unsubscribe('focus', resetWindowSelection);
 
             core.Async.destroyAll(cleanup, callback);
@@ -342,6 +343,7 @@
             eventManager.subscribe('keypress', flushEvent);
             eventManager.subscribe('mousedown', disableTrapSelection);
             eventManager.subscribe('mouseup', enableTrapSelection);
+            eventManager.subscribe('contextmenu', enableTrapSelection);
             eventManager.subscribe('focus', resetWindowSelection);
 
             filters.push(new DetectSafariCompositionError(eventManager));
