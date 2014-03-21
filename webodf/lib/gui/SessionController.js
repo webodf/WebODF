@@ -624,15 +624,22 @@ gui.SessionControllerOptions = function () {
                 wasCollapsed,
                 frameNode,
                 pos;
+
             drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
-            // We don't want to just select the image if it is a range selection hence ensure the selection is collapsed.
-            if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode) && window.getSelection().isCollapsed) {
-                selectionController.selectImage(/**@type{!Node}*/(target.parentNode));
-                eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (imageSelector.isSelectorElement(target)) {
-                eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (clickStartedWithinCanvas) {
-                if (isMouseMoved) {
+
+            if (clickStartedWithinCanvas) {
+                // Each mouse down event should only ever result in a single mouse click being processed.
+                // This is to cope with there being no hard rules about whether a contextmenu
+                // should be followed by a mouseup as well according to the HTML5 specs.
+                // See http://www.whatwg.org/specs/web-apps/current-work/multipage/interactive-elements.html#context-menus
+
+                // We don't want to just select the image if it is a range selection hence ensure the selection is collapsed.
+                if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode) && window.getSelection().isCollapsed) {
+                    selectionController.selectImage(/**@type{!Node}*/(target.parentNode));
+                    eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
+                } else if (imageSelector.isSelectorElement(target)) {
+                    eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
+                } else if (isMouseMoved) {
                     range = shadowCursor.getSelectedRange();
                     wasCollapsed = range.collapsed;
                     // Resets the endContainer and endOffset when a forward selection end up on an image;
@@ -667,11 +674,11 @@ gui.SessionControllerOptions = function () {
                         }, 0);
                     }
                 }
+                // TODO assumes the mouseup/contextmenu is the same button as the mousedown that initialized the clickCount
+                clickCount = 0;
+                clickStartedWithinCanvas = false;
+                isMouseMoved = false;
             }
-            // TODO assumes the mouseup/contextmenu is the same button as the mousedown that initialized the clickCount
-            clickCount = 0;
-            clickStartedWithinCanvas = false;
-            isMouseMoved = false;
         }
 
         /**
