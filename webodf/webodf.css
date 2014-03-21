@@ -228,6 +228,10 @@ video {
 }
 
 /* below set up the cursor */
+cursor|anchor {
+    display: none;
+}
+
 cursor|cursor {
     display: inline;
     width: 0;
