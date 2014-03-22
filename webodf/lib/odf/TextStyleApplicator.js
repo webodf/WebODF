@@ -153,10 +153,10 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
     /**
      * Moves the specified node and all further siblings within the outer range into a new standalone container
      * @param {!CharacterData} startNode Node to start movement to new container
-     * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
+     * @param {!Range} range style application bounds
      * @return {!Element}  Returns the container node that is to be restyled
      */
-    function moveToNewSpan(startNode, limits) {
+    function moveToNewSpan(startNode, range) {
         var document = startNode.ownerDocument,
             originalContainer = /**@type{!Element}*/(startNode.parentNode),
             styledContainer,
@@ -168,6 +168,17 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             /**@type{!Array.<!Node>}*/
             styledNodes = [];
 
+        // Starting at the startNode, iterate forward until leaving the affected range
+        styledNodes.push(startNode);
+        node = startNode.nextSibling;
+        // Need to fetch all nodes to move before starting to move any, in case
+        // the range actually reference one of the nodes this loop is about to relocate
+        while (node && domUtils.rangeContainsNode(range, node)) {
+            loopGuard.check();
+            styledNodes.push(node);
+            node = node.nextSibling;
+        }
+
         // Do we need a new style container?
         if (!isTextSpan(originalContainer)) {
             // Yes, text node has no wrapping span
@@ -175,7 +186,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             originalContainer.insertBefore(styledContainer, startNode);
             moveTrailing = false;
         } else if (startNode.previousSibling
-                && !domUtils.rangeContainsNode(limits, /**@type{!Element}*/(originalContainer.firstChild))) {
+                && !domUtils.rangeContainsNode(range, /**@type{!Element}*/(originalContainer.firstChild))) {
             // Yes, text node has prior siblings that are not styled
             // TODO what elements should be stripped when the clone occurs?
             styledContainer = originalContainer.cloneNode(false);
@@ -187,16 +198,6 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
             moveTrailing = true;
         }
 
-        // Starting at the startNode, iterate forward until leaving the affected range
-        styledNodes.push(startNode);
-        node = startNode.nextSibling;
-        // Need to fetch all nodes to move before starting to move any, in case
-        // the limits actually reference one of the nodes this loop is about to relocate
-        while (node && domUtils.rangeContainsNode(limits, node)) {
-            loopGuard.check();
-            styledNodes.push(node);
-            node = node.nextSibling;
-        }
         styledNodes.forEach(function (n) {
             if (n.parentNode !== styledContainer) {
                 styledContainer.appendChild(n);
@@ -225,11 +226,11 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
     /**
      * Apply the specified text style to the given text nodes
      * @param {!Array.<!CharacterData>} textNodes
-     * @param {!{startContainer: Node, startOffset: !number, endContainer: Node, endOffset: !number}} limits style application bounds
+     * @param {!Range} range style application bounds
      * @param {!Object} info Style information. Only data within "style:text-properties" will be considered and applied
      * @return {undefined}
      */
-    this.applyStyle = function (textNodes, limits, info) {
+    this.applyStyle = function (textNodes, range, info) {
         var textPropsOnly = {},
             isStyled,
             container,
@@ -248,7 +249,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
         function apply(n) {
             isStyled = styleLookup.isStyleApplied(n);
             if (isStyled === false) {
-                container = moveToNewSpan(n, limits);
+                container = moveToNewSpan(n, range);
                 styleCache.applyStyleToContainer(container);
             }
         }

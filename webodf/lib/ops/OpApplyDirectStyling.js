@@ -81,23 +81,14 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
             odfContainer = odfCanvas.odfContainer(),
             nextTextNodes = domUtils.splitBoundaries(range),
             textNodes = odfUtils.getTextNodes(range, false),
-            limits,
             textStyles;
-
-        // Avoid using the passed in range as boundaries move in strange ways as the DOM is modified
-        limits = {
-            startContainer: range.startContainer,
-            startOffset: range.startOffset,
-            endContainer: range.endContainer,
-            endOffset: range.endOffset
-        };
 
         textStyles = new odf.TextStyleApplicator(
             new odf.ObjectNameGenerator(/**@type{!odf.OdfContainer}*/(odfContainer), memberid), // TODO: use the instance in SessionController
             odtDocument.getFormatting(),
             odfContainer.rootElement.automaticStyles
         );
-        textStyles.applyStyle(textNodes, limits, info);
+        textStyles.applyStyle(textNodes, range, info);
         nextTextNodes.forEach(domUtils.normalizeTextNodes);
     }
 

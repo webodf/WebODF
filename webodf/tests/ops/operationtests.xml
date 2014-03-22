@@ -1675,4 +1675,17 @@
    <office:text><text:p>AH</text:p></office:text>.
   </after>
  </test>
+ <test name="ApplyStyle_CopesWithSelectionSpanningDifferentSubtrees">
+  <before><office:text><text:p><text:span>AB</text:span>C<text:s> </text:s><text:s> </text:s>D<text:s> </text:s>E<text:s> </text:s></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <op optype="MoveCursor" memberid="Joe" position="1" length="7"/>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="7">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </ops>
+  <after>
+    <office:text><text:p><text:span>A<c:anchor c:memberId="Joe"/></text:span><text:span text:style-name="auto63350368_0">B</text:span><text:span text:style-name="auto63350368_0">C<text:s> </text:s><text:s> </text:s>D<text:s> </text:s>E<c:cursor c:memberId="Joe"/></text:span><text:s> </text:s></text:p></office:text>
+  </after>
+ </test>
 </tests>
