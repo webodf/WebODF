@@ -568,6 +568,11 @@ gui.SessionControllerOptions = function () {
                 // When click on the right side of an image that has no text elements, non-FireFox browsers
                 // will return focusNode: frame, focusOffset: 1 as the selection. Since this is not a valid cursor
                 // position, move the cursor to the next walkable position after the frame node.
+
+                // To activate this branch (only applicable on OSX + Linux WebKit-derived browsers AFAIK):
+                // 1. With a paragraph containing some text followed by an inline image and no trailing text,
+                //    select from the start of paragraph to the end.
+                // 2. Now click once to the right hand side of the image. The cursor *should* jump to the right side
                 position = getNextWalkablePosition(selection.focusNode);
                 if (position) {
                     selection.anchorNode = selection.focusNode = position.container;
