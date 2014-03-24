@@ -54,6 +54,19 @@
     odf.ListStyleToCss = function ListStyleToCss() {
 
         /**
+         * Appends the rule into the stylesheets and logs any errors that occur
+         * @param {!CSSStyleSheet} styleSheet
+         * @param {!string} rule
+         */
+        function appendRule(styleSheet, rule) {
+            try {
+                styleSheet.insertRule(rule, styleSheet.cssRules.length);
+            } catch (/**@type{!DOMException}*/e) {
+                runtime.log("cannot load rule: " + rule);
+            }
+        }
+
+        /**
          * Gets the CSS content for a numbered list
          * @param {!Element} node
          * @return {!string}
@@ -148,11 +161,7 @@
                 listItemRule = itemSelector + "{";
                 listItemRule += 'margin-left:' + listIndent + ';';
                 listItemRule += "}";
-                try {
-                    styleSheet.insertRule(listItemRule, styleSheet.cssRules.length);
-                } catch (/**@type{!DOMException}*/e1) {
-                    runtime.log("cannot load rule: " + listItemRule);
-                }
+                appendRule(styleSheet, listItemRule);
             }
             // insert a block before every immediate child of the list-item, except for lists
             selector += ' > text|list-item > *:not(text|list):first-child:before';
@@ -163,11 +172,7 @@
             rule += 'width:' + bulletWidth + ';';
             rule += 'display:inline-block}';
 
-            try {
-                styleSheet.insertRule(rule, styleSheet.cssRules.length);
-            } catch (/**@type{!DOMException}*/e2) {
-                runtime.log("cannot load rule: " + rule);
-            }
+            appendRule(styleSheet, rule);
         }
 
         /**
