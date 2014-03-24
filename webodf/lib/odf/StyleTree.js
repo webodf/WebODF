@@ -147,15 +147,14 @@
             if (stylesTree.hasOwnProperty(name)) {
                 return stylesTree[name];
             }
-            var /**@type{string}*/
-                n,
-                style = null;
-            for (n in stylesTree) {
-                if (stylesTree.hasOwnProperty(n)) {
-                    style = findStyleTreeNode(stylesTree[n].derivedStyles, name);
-                    if (style) {
-                        break;
-                    }
+            var style = null,
+                styleNames = Object.keys(stylesTree),
+                i;
+
+            for (i = 0; i < styleNames.length; i += 1) {
+                style = findStyleTreeNode(stylesTree[styleNames[i]].derivedStyles, name);
+                if (style) {
+                    break;
                 }
             }
             return style;
@@ -197,12 +196,10 @@
          * @return {undefined}
          */
         function addStyleMapToStyleTree(stylesMap, stylesTree) {
-            var /**@type{string}*/
-                name;
-            for (name in stylesMap) {
-                if (stylesMap.hasOwnProperty(name)) {
-                    createStyleTreeNode(name, stylesMap, stylesTree);
-                }
+            if (stylesMap) {
+                Object.keys(stylesMap).forEach(function (styleName) {
+                    createStyleTreeNode(styleName, stylesMap, stylesTree);
+                });
             }
         }
 
@@ -214,22 +211,18 @@
         };
 
         function init() {
-            var /**@type{string}*/
-                family,
-                subTree,
+            var subTree,
                 styleNodes,
                 autoStyleNodes;
 
             styleNodes = getStyleMap(styles);
             autoStyleNodes = getStyleMap(autoStyles);
 
-            for (family in familyNamespacePrefixes) {
-                if (familyNamespacePrefixes.hasOwnProperty(family)) {
-                    subTree = tree[family] = {};
-                    addStyleMapToStyleTree(styleNodes[family], subTree);
-                    addStyleMapToStyleTree(autoStyleNodes[family], subTree);
-                }
-            }
+            Object.keys(familyNamespacePrefixes).forEach(function (family) {
+                subTree = tree[family] = {};
+                addStyleMapToStyleTree(styleNodes[family], subTree);
+                addStyleMapToStyleTree(autoStyleNodes[family], subTree);
+            });
         }
 
         init();
