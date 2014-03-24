@@ -533,6 +533,7 @@ gui.SessionControllerOptions = function () {
          */
         function moveByMouseClickEvent(event) {
             var selection = mutableSelection(window.getSelection()),
+                isCollapsed = window.getSelection().isCollapsed,
                 position,
                 selectionRange,
                 rect,
@@ -556,11 +557,19 @@ gui.SessionControllerOptions = function () {
                 // Move the cursor to the next walkable position when clicking on the right side of an image
                 frameNode = /**@type{!Element}*/(selection.focusNode.parentNode);
                 rect = frameNode.getBoundingClientRect();
-                if (event.clientX > rect.right) {
+                if (event.clientX > rect.left) {
+                    // On OSX, right-clicking on an image at the end of a range selection will hit
+                    // this particular branch. The image should remain selected if the right-click occurs on top
+                    // of it as technically it's the same behaviour as right clicking on an existing text selection.
                     position = getNextWalkablePosition(frameNode);
                     if (position) {
-                        selection.anchorNode = selection.focusNode = position.container;
-                        selection.anchorOffset = selection.focusOffset = position.offset;
+                        selection.focusNode = position.container;
+                        selection.focusOffset = position.offset;
+                        if (isCollapsed) {
+                            // See above comment for the circumstances when the range might not be collapsed
+                            selection.anchorNode = selection.focusNode;
+                            selection.anchorOffset = selection.focusOffset;
+                        }
                     }
                 }
             } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1
@@ -575,6 +584,7 @@ gui.SessionControllerOptions = function () {
                 // 2. Now click once to the right hand side of the image. The cursor *should* jump to the right side
                 position = getNextWalkablePosition(selection.focusNode);
                 if (position) {
+                    // This should only ever be hit when the selection is intended to become collapsed
                     selection.anchorNode = selection.focusNode = position.container;
                     selection.anchorOffset = selection.focusOffset = position.offset;
                 }
