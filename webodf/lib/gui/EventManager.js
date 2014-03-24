@@ -447,23 +447,27 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
+     * @return {undefined}
      */
-    this.subscribe = function (eventName, handler) {
+    function subscribe(eventName, handler) {
         var delegate = getDelegateForEvent(eventName, true);
         delegate.handlers.push(handler);
-    };
+    }
+    this.subscribe = subscribe;
 
     /**
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
+     * @return {undefined}
      */
-    this.unsubscribe = function (eventName, handler) {
+    function unsubscribe(eventName, handler) {
         var delegate = getDelegateForEvent(eventName, false),
             handlerIndex = delegate && delegate.handlers.indexOf(handler);
         if (delegate && handlerIndex !== -1) {
             delegate.handlers.splice(handlerIndex, 1);
         }
-    };
+    }
+    this.unsubscribe = unsubscribe;
 
     /**
      * Returns true if the event manager is currently receiving events
@@ -473,6 +477,43 @@ gui.EventManager = function EventManager(odtDocument) {
         return odtDocument.getDOMDocument().activeElement === eventTrap;
     }
     this.hasFocus = hasFocus;
+
+    /**
+     * Blur focus from the event manager
+     */
+    function blur() {
+        if (hasFocus()) {
+            eventTrap.blur();
+        }
+    }
+    this.blur = blur;
+
+    /**
+     * Prevent the event trap from receiving focus
+     * @return {undefined}
+     */
+    function disableTrapSelection() {
+        // Workaround for a FF bug
+        // If the window selection is in the even trap when it is set non-editable,
+        // further attempts to modify the window selection will crash
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
+        blur();
+        eventTrap.setAttribute("disabled", "true");
+    }
+
+    /**
+     * Allow the event trap to receive focus
+     * @return {undefined}
+     */
+    function enableTrapSelection() {
+        // A disabled element can't have received focus, so don't need to blur before updating this flag
+        eventTrap.removeAttribute("disabled");
+        // Recovering focus here might cause it to be incorrectly stolen from other elements.
+        // At the time that this patch was written, the primary external controllers of focus are
+        // the SessionController (for mouse related events) and the WebODF editor. Let these restore
+        // focus on their own if desired.
+    }
 
     /**
      * Find the all scrollable ancestor for the specified element
@@ -493,22 +534,24 @@ gui.EventManager = function EventManager(odtDocument) {
         return scrollParents;
     }
 
-   /**
+    /**
      * Return event focus back to the event manager
      */
-    this.focus = function () {
+    function focus() {
         var scrollParents;
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
             // Passing focus back to an element that did not previously have it will also
             // cause the element to attempt to recentre back into scroll view
             scrollParents = findScrollableParents(eventTrap);
+            enableTrapSelection();
             eventTrap.focus();
             scrollParents.forEach(function (scrollParent) {
                 scrollParent.restore();
             });
         }
-    };
+    }
+    this.focus = focus;
 
     /**
      * Returns the event trap div
@@ -519,11 +562,26 @@ gui.EventManager = function EventManager(odtDocument) {
     };
 
     /**
-     * Blur focus from the event manager
+     * Sets to true when in edit mode; otherwise false
+     * @param {!boolean} editable
+     * @return {undefined}
      */
-    this.blur = function () {
-        if (hasFocus()) {
-            eventTrap.blur();
+    this.setEditing = function (editable) {
+        var hadFocus = hasFocus();
+        if (hadFocus) {
+            // Toggling flags while the element is in focus
+            // will sometimes stop the browser from allowing the IME to be activated.
+            // Blurring the focus and then restoring ensures the browser re-evaluates
+            // the IME state after the content editable flag has been updated.
+            blur();
+        }
+        if (editable) {
+            eventTrap.removeAttribute("readOnly");
+        } else {
+            eventTrap.setAttribute("readOnly", "true");
+        }
+        if (hadFocus) {
+            focus();
         }
     };
 
@@ -532,6 +590,7 @@ gui.EventManager = function EventManager(odtDocument) {
       * @return {undefined}
       */
     this.destroy = function (callback) {
+        unsubscribe("touchstart", declareTouchEnabled);
         // Clear all long press timers, just in case
         Object.keys(longPressTimers).forEach(function (timer) {
             clearTimeout(parseInt(timer, 10));
@@ -543,10 +602,12 @@ gui.EventManager = function EventManager(odtDocument) {
         });
         compoundEvents = {};
 
-        eventManager.unsubscribe('touchstart', declareTouchEnabled);
         eventTrap.parentNode.removeChild(eventTrap);
         // TODO: drop left eventDelegates, complain about those not unsubscribed
         // Also investigate if delegates need to proper unlisten from events in any case
+        unsubscribe("mousedown", disableTrapSelection);
+        unsubscribe("mouseup", enableTrapSelection);
+        unsubscribe("contextmenu", enableTrapSelection);
 
         callback();
     };
@@ -559,15 +620,19 @@ gui.EventManager = function EventManager(odtDocument) {
         eventTrap = /**@type{!HTMLInputElement}*/(doc.createElement("input"));
         eventTrap.id = "eventTrap";
         // Negative tab index still allows focus, but removes accessibility by keyboard
-        eventTrap.setAttribute("tabindex", -1);
-        eventTrap.setAttribute("readOnly", true);
+        eventTrap.setAttribute("tabindex", "-1");
+        eventTrap.setAttribute("readOnly", "true");
         sizerElement.appendChild(eventTrap);
+
+        subscribe("mousedown", disableTrapSelection);
+        subscribe("mouseup", enableTrapSelection);
+        subscribe("contextmenu", enableTrapSelection);
 
         compoundEvents.longpress = new CompoundEvent('longpress', ['touchstart', 'touchmove', 'touchend'], emitLongPressEvent);
         compoundEvents.drag = new CompoundEvent('drag', ['touchstart', 'touchmove', 'touchend'], emitDragEvent);
         compoundEvents.dragstop = new CompoundEvent('dragstop', ['drag', 'touchend'], emitDragStopEvent);
 
-        eventManager.subscribe('touchstart', declareTouchEnabled);
+        subscribe("touchstart", declareTouchEnabled);
     }
     init();
 };
