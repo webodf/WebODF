@@ -348,6 +348,37 @@
         }
 
         /**
+         * Checks all nodes between the tree walker's current node and the defined
+         * root. If any nodes are rejected, the tree walker is moved to the
+         * highest rejected node below the root. Note, the root is excluded from
+         * this check.
+         *
+         * This logic is similar to PositionIterator.moveToAcceptedNode
+         * @param {!TreeWalker} walker
+         * @param {!Node} root
+         * @param {!function(!Node) : number} nodeFilter
+         *
+         * @return {!Node} Returns the current node the walker is on
+         */
+        function moveToNonRejectedNode(walker, root, nodeFilter) {
+            var node = walker.currentNode;
+
+            // Ensure currentNode is not within a rejected subtree by crawling each parent node
+            // up to the root and verifying it is either accepted or skipped by the nodeFilter.
+            // NOTE: The root is deliberately not checked as it is the container iteration happens within.
+            if (node !== root) {
+                node = node.parentNode;
+                while (node && node !== root) {
+                    if (nodeFilter(node) === NodeFilter.FILTER_REJECT) {
+                        walker.currentNode = node;
+                    }
+                    node = node.parentNode;
+                }
+            }
+            return walker.currentNode;
+        }
+
+        /**
          * Fetches all nodes within a supplied range that pass the required filter
          * @param {!Range} range
          * @param {!function(!Node) : number} nodeFilter
@@ -398,24 +429,45 @@
                 treeWalker.currentNode = currentNode;
             }
 
-            if (currentNode && nodeFilter(currentNode) === NodeFilter.FILTER_ACCEPT) {
-                // The first call to nextNode will return the next node *after* walker.currentNode
-                // Therefore, need to manually check if currentNode should be included in the elements array
-                // and save it if it passes the filter
-                elements.push(currentNode);
-            }
-
-            currentNode = treeWalker.nextNode();
-            while (currentNode) {
-                comparePositionResult = lastNodeInRange.compareDocumentPosition(currentNode);
-                if (comparePositionResult !== 0 && (comparePositionResult & endNodeCompareFlags) === 0) {
-                    // comparePositionResult === 0 if currentNode === lastNodeInRange. This is considered within the range
-                    // comparePositionResult & endNodeCompareFlags would be non-zero if n precedes lastNodeInRange
-                    // If either of these statements are false, currentNode is past the end of the range
-                    break;
+            if (currentNode) {
+                // If the treeWalker hit the end of the sequence in the treeWalker.nextNode line just above,
+                // currentNode will be null.
+                currentNode = moveToNonRejectedNode(treeWalker, root, nodeFilter);
+                switch (nodeFilter(/**@type{!Node}*/(currentNode))) {
+                    case NodeFilter.FILTER_REJECT:
+                        // If started on a rejected node, calling nextNode will incorrectly
+                        // dive down into the rejected node's children. Instead, advance to
+                        // the next sibling or parent node's sibling and resume walking from
+                        // there.
+                        currentNode = treeWalker.nextSibling();
+                        while (!currentNode && treeWalker.parentNode()) {
+                            currentNode = treeWalker.nextSibling();
+                        }
+                        break;
+                    case NodeFilter.FILTER_ACCEPT:
+                        // The first call to nextNode will return the next node *after* walker.currentNode
+                        // Therefore, need to manually check if currentNode should be included in the elements array
+                        // and save it if it passes the filter
+                        elements.push(currentNode);
+                        currentNode = treeWalker.nextNode();
+                        break;
+                    default:
+                    // case NodeFilter.FILTER_SKIP:
+                        currentNode = treeWalker.nextNode();
+                        break;
                 }
-                elements.push(currentNode);
-                currentNode = treeWalker.nextNode();
+
+                while (currentNode) {
+                    comparePositionResult = lastNodeInRange.compareDocumentPosition(currentNode);
+                    if (comparePositionResult !== 0 && (comparePositionResult & endNodeCompareFlags) === 0) {
+                        // comparePositionResult === 0 if currentNode === lastNodeInRange. This is considered within the range
+                        // comparePositionResult & endNodeCompareFlags would be non-zero if n precedes lastNodeInRange
+                        // If either of these statements are false, currentNode is past the end of the range
+                        break;
+                    }
+                    elements.push(currentNode);
+                    currentNode = treeWalker.nextNode();
+                }
             }
 
             return elements;
