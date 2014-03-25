@@ -653,3 +653,12 @@ Document.prototype.activeElement;
  * @return {Range}
  */
 Document.prototype.caretRangeFromPoint = function (x, y) {"use strict"; };
+
+/**
+ * Legacy event handler for older versions of IE.
+ * See http://msdn.microsoft.com/en-us/library/ie/ms536411%28v=vs.85%29.aspx
+ * @param {!string} event
+ * @param {!Function} func
+ * @return {undefined}
+ */
+Element.prototype.detachEvent = function(event, func) { "use strict"; };

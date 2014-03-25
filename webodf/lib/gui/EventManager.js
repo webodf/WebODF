@@ -87,10 +87,75 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * Ensures events that may bubble through multiple sources are only handled once.
      * @constructor
+     * @param {!string} eventName Event this delegate is to listen for
      */
-    function EventDelegate() {
+    function EventDelegate(eventName) {
         var self = this,
-            recentEvents = [];
+            recentEvents = [],
+            subscribers = new core.EventNotifier([eventName]);
+
+        /**
+         * @param {!Element|!Window} eventTarget
+         * @param {!string} eventType
+         * @param {function(!Event)|function()} eventHandler
+         * @return {undefined}
+         */
+        function listenEvent(eventTarget, eventType, eventHandler) {
+            var onVariant,
+                bound = false;
+
+            onVariant = "on" + eventType;
+            if (eventTarget.attachEvent) {
+                // attachEvent is only supported in Internet Explorer < 11
+                eventTarget.attachEvent(onVariant, eventHandler);
+                bound = true; // assume it was bound, missing @return in externs.js
+            }
+            if (!bound && eventTarget.addEventListener) {
+                eventTarget.addEventListener(eventType, eventHandler, false);
+                bound = true;
+            }
+
+            if ((!bound || bindToDirectHandler[eventType]) && eventTarget.hasOwnProperty(onVariant)) {
+                eventTarget[onVariant] = eventHandler;
+            }
+        }
+
+        /**
+         * @param {!Element|!Window} eventTarget
+         * @param {!string} eventType
+         * @param {function(!Event)|function()} eventHandler
+         * @return {undefined}
+         */
+        function removeEvent(eventTarget, eventType, eventHandler) {
+            var onVariant = "on" + eventType;
+            if (/**@type{!Element}*/(eventTarget).detachEvent) {
+                // detachEvent is only supported in Internet Explorer < 11
+                /**@type{!Element}*/(eventTarget).detachEvent(onVariant, eventHandler);
+            }
+            if (eventTarget.removeEventListener) {
+                eventTarget.removeEventListener(eventType, eventHandler, false);
+            }
+            if (eventTarget[onVariant] === eventHandler) {
+                eventTarget[onVariant] = null;
+            }
+        }
+
+        /**
+         * @param {!Event} e
+         * @return {undefined}
+         */
+        function handleEvent(e) {
+            if (recentEvents.indexOf(e) === -1) {
+                recentEvents.push(e); // Track this event as already processed by these handlers
+                if (self.filters.every(function (filter) { return filter(e); })) {
+                    // Yes yes... this is not a spec-compliant event processor... sorry!
+                    subscribers.emit(eventName, e);
+                }
+                // Reset the processed events list after this tick is complete. The event won't be
+                // processed by any other sources after this
+                runtime.setTimeout(function () { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
+            }
+        }
 
         /**
          * @type {!Array.<!function(!Event):!boolean>}
@@ -98,27 +163,40 @@ gui.EventManager = function EventManager(odtDocument) {
         this.filters = [];
 
         /**
-         * @type {!Array.<!function(!Event)>}
+         * @param {!Function} cb
+         * @return {undefined}
          */
-        this.handlers = [];
+        this.subscribe = function (cb) {
+            subscribers.subscribe(eventName, cb);
+        };
 
         /**
-         * @param {!Event} e
+         * @param {!Function} cb
+         * @return {undefined}
          */
-        this.handleEvent = function (e) {
-            if (recentEvents.indexOf(e) === -1) {
-                recentEvents.push(e); // Track this event as already processed by these handlers
-                if (self.filters.every(function (filter) { return filter(e); })) {
-                    self.handlers.forEach(function (handler) {
-                        // Yes yes... this is not a spec-compliant event processor... sorry!
-                        handler(e);
-                    });
-                }
-                // Reset the processed events list after this tick is complete. The event won't be
-                // processed by any other sources after this
-                runtime.setTimeout(function () { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
-            }
+        this.unsubscribe = function (cb) {
+            subscribers.unsubscribe(eventName, cb);
         };
+
+        /**
+         * @return {undefined}
+         */
+        this.destroy = function() {
+            removeEvent(window, eventName, handleEvent);
+            removeEvent(eventTrap, eventName, handleEvent);
+            removeEvent(canvasElement, eventName, handleEvent);
+        };
+
+        function init() {
+            if (bindToWindow[eventName]) {
+                // Internet explorer will only supply mouse up & down on the window object
+                // For other browser though, listening to both will cause two events to be processed
+                listenEvent(window, eventName, handleEvent);
+            }
+            listenEvent(eventTrap, eventName, handleEvent);
+            listenEvent(canvasElement, eventName, handleEvent);
+        }
+        init();
     }
 
     /**
@@ -134,7 +212,7 @@ gui.EventManager = function EventManager(odtDocument) {
     function CompoundEvent(eventName, dependencies, eventProxy) {
         var /**@type{!Object}*/
             cachedState = {},
-            events = new core.EventNotifier([eventName]);
+            subscribers = new core.EventNotifier([eventName]);
 
         /**
          * @param {!Event} event
@@ -143,7 +221,7 @@ gui.EventManager = function EventManager(odtDocument) {
         function subscribedProxy(event) {
             eventProxy(event, cachedState, function (compoundEventInstance) {
                 compoundEventInstance.type = eventName;
-                events.emit(eventName, compoundEventInstance);
+                subscribers.emit(eventName, compoundEventInstance);
             });
         }
 
@@ -152,7 +230,7 @@ gui.EventManager = function EventManager(odtDocument) {
          * @return {undefined}
          */
         this.subscribe = function (cb) {
-            events.subscribe(eventName, cb);
+            subscribers.subscribe(eventName, cb);
         };
 
         /**
@@ -160,7 +238,7 @@ gui.EventManager = function EventManager(odtDocument) {
          * @return {undefined}
          */
         this.unsubscribe = function (cb) {
-            events.unsubscribe(eventName, cb);
+            subscribers.unsubscribe(eventName, cb);
         };
 
         /**
@@ -370,53 +448,15 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
-     * @param {!Element|!Window} eventTarget
-     * @param {!string} eventType
-     * @param {function(!Event)|function()} eventHandler
-     * @return {undefined}
-     */
-    function listenEvent(eventTarget, eventType, eventHandler) {
-        var onVariant,
-            bound = false;
-
-        if (compoundEvents.hasOwnProperty(eventType)) {
-            compoundEvents[eventType].subscribe(eventHandler);
-            return;
-        }
-
-        onVariant = "on" + eventType;
-        if (eventTarget.attachEvent) {
-            // attachEvent is only supported in Internet Explorer < 11
-            eventTarget.attachEvent(onVariant, eventHandler);
-            bound = true; // assume it was bound, missing @return in externs.js
-        }
-        if (!bound && eventTarget.addEventListener) {
-            eventTarget.addEventListener(eventType, eventHandler, false);
-            bound = true;
-        }
-
-        if ((!bound || bindToDirectHandler[eventType]) && eventTarget.hasOwnProperty(onVariant)) {
-            eventTarget[onVariant] = eventHandler;
-        }
-    }
-
-    /**
      * Get an event delegate for the requested event name
      * @param {!string} eventName
      * @param {!boolean} shouldCreate Create a delegate for the requested event if it doesn't exist
-     * @return {EventDelegate}
+     * @return {EventDelegate|CompoundEvent}
      */
     function getDelegateForEvent(eventName, shouldCreate) {
-        var delegate = eventDelegates[eventName] || null;
+        var delegate = eventDelegates[eventName] || compoundEvents[eventName] || null;
         if (!delegate && shouldCreate) {
-            delegate = eventDelegates[eventName] = new EventDelegate();
-            if (bindToWindow[eventName]) {
-                // Internet explorer will only supply mouse up & down on the window object
-                // For other browser though, listening to both will cause two events to be processed
-                listenEvent(window, eventName, delegate.handleEvent);
-            }
-            listenEvent(eventTrap, eventName, delegate.handleEvent);
-            listenEvent(canvasElement, eventName, delegate.handleEvent);
+            delegate = eventDelegates[eventName] = new EventDelegate(eventName);
         }
         return delegate;
     }
@@ -451,7 +491,7 @@ gui.EventManager = function EventManager(odtDocument) {
      */
     function subscribe(eventName, handler) {
         var delegate = getDelegateForEvent(eventName, true);
-        delegate.handlers.push(handler);
+        delegate.subscribe(handler);
     }
     this.subscribe = subscribe;
 
@@ -461,10 +501,9 @@ gui.EventManager = function EventManager(odtDocument) {
      * @return {undefined}
      */
     function unsubscribe(eventName, handler) {
-        var delegate = getDelegateForEvent(eventName, false),
-            handlerIndex = delegate && delegate.handlers.indexOf(handler);
-        if (delegate && handlerIndex !== -1) {
-            delegate.handlers.splice(handlerIndex, 1);
+        var delegate = getDelegateForEvent(eventName, false);
+        if (delegate) {
+            delegate.unsubscribe(handler);
         }
     }
     this.unsubscribe = unsubscribe;
@@ -594,13 +633,16 @@ gui.EventManager = function EventManager(odtDocument) {
         });
         compoundEvents = {};
 
-        eventTrap.parentNode.removeChild(eventTrap);
-        // TODO: drop left eventDelegates, complain about those not unsubscribed
-        // Also investigate if delegates need to proper unlisten from events in any case
         unsubscribe("mousedown", disableTrapSelection);
         unsubscribe("mouseup", enableTrapSelection);
         unsubscribe("contextmenu", enableTrapSelection);
+        Object.keys(eventDelegates).forEach(function (eventName) {
+            eventDelegates[eventName].destroy();
+        });
+        eventDelegates = {};
+        // TODO Create warnings for delegates with existing subscriptions. This may indicate leaked event subscribers.
 
+        eventTrap.parentNode.removeChild(eventTrap);
         callback();
     };
 
