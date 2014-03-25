@@ -134,7 +134,7 @@ gui.EventManager = function EventManager(odtDocument) {
     function CompoundEvent(eventName, dependencies, eventProxy) {
         var /**@type{!Object}*/
             cachedState = {},
-            events = new core.EventNotifier(['eventTriggered']);
+            events = new core.EventNotifier([eventName]);
 
         /**
          * @param {!Event} event
@@ -143,7 +143,7 @@ gui.EventManager = function EventManager(odtDocument) {
         function subscribedProxy(event) {
             eventProxy(event, cachedState, function (compoundEventInstance) {
                 compoundEventInstance.type = eventName;
-                events.emit('eventTriggered', compoundEventInstance);
+                events.emit(eventName, compoundEventInstance);
             });
         }
 
@@ -152,7 +152,7 @@ gui.EventManager = function EventManager(odtDocument) {
          * @return {undefined}
          */
         this.subscribe = function (cb) {
-            events.subscribe('eventTriggered', cb);
+            events.subscribe(eventName, cb);
         };
 
         /**
@@ -160,7 +160,7 @@ gui.EventManager = function EventManager(odtDocument) {
          * @return {undefined}
          */
         this.unsubscribe = function (cb) {
-            events.unsubscribe('eventTriggered', cb);
+            events.unsubscribe(eventName, cb);
         };
 
         /**
