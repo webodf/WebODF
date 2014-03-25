@@ -45,6 +45,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         t,
         testarea,
         textns = odf.Namespaces.textns,
+        officens = odf.Namespaces.officens,
         inputMemberId = "Joe";
 
     /**
@@ -313,6 +314,83 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.position", "17");
     }
 
+    function moveCursorToDocumentEnd_EndsBeforeAnnotation() {
+        t.position = undefined;
+        createOdtDocument("<text:p>the quick red fox<office:annotation><text:p>an</text:p></office:annotation></text:p>");
+
+        t.selectionController.moveCursorToDocumentEnd();
+
+        if(t.session.operations.length > 0) {
+            t.position = t.session.operations[0].spec().position;
+        }
+        r.shouldBe(t, "t.position", "21");
+    }
+
+    function moveSelectionToParagraphEnd_OverAnnotation() {
+        var lastPosition,
+            loopGuard = new core.LoopWatchDog(100000, 100); // Don't care really how long this takes
+        t.movementPositions = [];
+        createOdtDocument("<text:p>ab<office:annotation><text:p>an</text:p></office:annotation></text:p>"
+                            + "<text:p>cde</text:p>"
+                            + "<text:p><text:span>fgh</text:span></text:p>");
+
+        do {
+            loopGuard.check();
+            lastPosition = getCursorPosition().position;
+            t.movementPositions.push(lastPosition);
+            t.selectionController.moveCursorToParagraphEnd();
+        } while (lastPosition !== getCursorPosition().position);
+
+        r.shouldBe(t, "t.movementPositions", "[0, 6, 10, 14]");
+    }
+
+    function moveSelectionToParagraphStart_OverAnnotation() {
+        var lastPosition,
+            loopGuard = new core.LoopWatchDog(100000, 100); // Don't care really how long this takes
+        t.movementPositions = [];
+        createOdtDocument("<text:p><office:annotation><text:p>an</text:p></office:annotation>ab</text:p>"
+            + "<text:p>cde</text:p>"
+            + "<text:p><text:span>fgh</text:span></text:p>");
+        t.selectionController.moveCursorToDocumentEnd();
+
+        do {
+            loopGuard.check();
+            lastPosition = getCursorPosition().position;
+            t.movementPositions.push(lastPosition);
+            t.selectionController.moveCursorToParagraphStart();
+        } while (lastPosition !== getCursorPosition().position);
+
+        r.shouldBe(t, "t.movementPositions", "[14, 11, 7, 0]");
+    }
+
+    function selectRange_BridgesMultipleRoots_IsConstrainedWithinAnchorRoot() {
+        var doc = createOdtDocument("<text:p><office:annotation><text:p>an</text:p></office:annotation>ab</text:p>"),
+            range = testarea.ownerDocument.createRange();
+
+        range.setStart(doc.getElementsByTagNameNS(officens, "annotation")[0], 0);
+        range.setEnd(doc, doc.childNodes.length);
+
+        t.selectionController.selectRange(range, true);
+
+        t.position = getCursorPosition();
+        r.shouldBe(t, "t.position.position", "1");
+        r.shouldBe(t, "t.position.length", "2");
+    }
+
+    function selectRange_BridgesMultipleRoots_IsConstrainedWithinAnchorRoot_Reverse() {
+        var doc = createOdtDocument("<text:p>ab<office:annotation><text:p>an</text:p></office:annotation></text:p>"),
+            range = testarea.ownerDocument.createRange();
+
+        range.setStart(doc, 0);
+        range.setEnd(doc.getElementsByTagNameNS(officens, "annotation")[0], 1);
+
+        t.selectionController.selectRange(range, false);
+
+        t.position = getCursorPosition();
+        r.shouldBe(t, "t.position.position", "5");
+        r.shouldBe(t, "t.position.length", "-2");
+    }
+
     function expandToWordBoundaries_CollapsedInWord() {
         var doc = createOdtDocument("<text:p>one two three</text:p>"),
             p = doc.getElementsByTagNameNS(textns, "p")[0],
@@ -397,6 +475,27 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.selection.range.endOffset", "7");
     }
 
+    function expandToWordBoundaries_RangeInDifferentRootToCursor() {
+        var doc = createOdtDocument("<text:p>one two three<office:annotation><text:p>four five</text:p></office:annotation></text:p>"),
+            p = doc.getElementsByTagNameNS(textns, "p")[1],
+            text = p.childNodes[0];
+
+        t.selection = t.selectionToRange({
+            anchorNode: text,
+            anchorOffset: 0,
+            focusNode: text,
+            focusOffset: 1
+        });
+
+        t.selectionController.expandToWordBoundaries(t.selection.range);
+
+        t.text = text;
+        r.shouldBe(t, "t.selection.range.startContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.startOffset", "0");
+        r.shouldBe(t, "t.selection.range.endContainer", "t.text");
+        r.shouldBe(t, "t.selection.range.endOffset", "4");
+    }
+
     this.setUp = function () {
         testarea = core.UnitTest.provideTestAreaDiv();
         t = { doc: testarea.ownerDocument };
@@ -437,11 +536,19 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             extendCursorPastWord_IsWithinWord,
 
             moveCursorToDocumentEnd_Simple,
+            moveCursorToDocumentEnd_EndsBeforeAnnotation,
+
+            moveSelectionToParagraphEnd_OverAnnotation,
+            moveSelectionToParagraphStart_OverAnnotation,
+
+            selectRange_BridgesMultipleRoots_IsConstrainedWithinAnchorRoot,
+            selectRange_BridgesMultipleRoots_IsConstrainedWithinAnchorRoot_Reverse,
 
             expandToWordBoundaries_CollapsedInWord,
             expandToWordBoundaries_CollasedAtWordStart,
             expandToWordBoundaries_CollasedAtWordEnd,
-            expandToWordBoundaries_AlreadyAtWordBoundaries
+            expandToWordBoundaries_AlreadyAtWordBoundaries,
+            expandToWordBoundaries_RangeInDifferentRootToCursor
         ]);
     };
     this.asyncTests = function () {
