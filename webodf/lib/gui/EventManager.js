@@ -87,10 +87,75 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * Ensures events that may bubble through multiple sources are only handled once.
      * @constructor
+     * @param {!string} eventName Event this delegate is to listen for
      */
-    function EventDelegate() {
+    function EventDelegate(eventName) {
         var self = this,
-            recentEvents = [];
+            recentEvents = [],
+            subscribers = new core.EventNotifier([eventName]);
+
+        /**
+         * @param {!Element|!Window} eventTarget
+         * @param {!string} eventType
+         * @param {function(!Event)|function()} eventHandler
+         * @return {undefined}
+         */
+        function listenEvent(eventTarget, eventType, eventHandler) {
+            var onVariant,
+                bound = false;
+
+            onVariant = "on" + eventType;
+            if (eventTarget.attachEvent) {
+                // attachEvent is only supported in Internet Explorer < 11
+                eventTarget.attachEvent(onVariant, eventHandler);
+                bound = true; // assume it was bound, missing @return in externs.js
+            }
+            if (!bound && eventTarget.addEventListener) {
+                eventTarget.addEventListener(eventType, eventHandler, false);
+                bound = true;
+            }
+
+            if ((!bound || bindToDirectHandler[eventType]) && eventTarget.hasOwnProperty(onVariant)) {
+                eventTarget[onVariant] = eventHandler;
+            }
+        }
+
+        /**
+         * @param {!Element|!Window} eventTarget
+         * @param {!string} eventType
+         * @param {function(!Event)|function()} eventHandler
+         * @return {undefined}
+         */
+        function removeEvent(eventTarget, eventType, eventHandler) {
+            var onVariant = "on" + eventType;
+            if (/**@type{!Element}*/(eventTarget).detachEvent) {
+                // detachEvent is only supported in Internet Explorer < 11
+                /**@type{!Element}*/(eventTarget).detachEvent(onVariant, eventHandler);
+            }
+            if (eventTarget.removeEventListener) {
+                eventTarget.removeEventListener(eventType, eventHandler, false);
+            }
+            if (eventTarget[onVariant] === eventHandler) {
+                eventTarget[onVariant] = null;
+            }
+        }
+
+        /**
+         * @param {!Event} e
+         * @return {undefined}
+         */
+        function handleEvent(e) {
+            if (recentEvents.indexOf(e) === -1) {
+                recentEvents.push(e); // Track this event as already processed by these handlers
+                if (self.filters.every(function (filter) { return filter(e); })) {
+                    // Yes yes... this is not a spec-compliant event processor... sorry!
+                    subscribers.emit(eventName, e);
+                }
+                // Reset the processed events list after this tick is complete. The event won't be
+                // processed by any other sources after this
+                runtime.setTimeout(function () { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
+            }
+        }
 
         /**
          * @type {!Array.<!function(!Event):!boolean>}
@@ -98,27 +163,40 @@ gui.EventManager = function EventManager(odtDocument) {
         this.filters = [];
 
         /**
-         * @type {!Array.<!function(!Event)>}
+         * @param {!Function} cb
+         * @return {undefined}
          */
-        this.handlers = [];
+        this.subscribe = function (cb) {
+            subscribers.subscribe(eventName, cb);
+        };
 
         /**
-         * @param {!Event} e
+         * @param {!Function} cb
+         * @return {undefined}
          */
-        this.handleEvent = function (e) {
-            if (recentEvents.indexOf(e) === -1) {
-                recentEvents.push(e); // Track this event as already processed by these handlers
-                if (self.filters.every(function (filter) { return filter(e); })) {
-                    self.handlers.forEach(function (handler) {
-                        // Yes yes... this is not a spec-compliant event processor... sorry!
-                        handler(e);
-                    });
-                }
-                // Reset the processed events list after this tick is complete. The event won't be
-                // processed by any other sources after this
-                runtime.setTimeout(function () { recentEvents.splice(recentEvents.indexOf(e), 1); }, 0);
-            }
+        this.unsubscribe = function (cb) {
+            subscribers.unsubscribe(eventName, cb);
         };
+
+        /**
+         * @return {undefined}
+         */
+        this.destroy = function() {
+            removeEvent(window, eventName, handleEvent);
+            removeEvent(eventTrap, eventName, handleEvent);
+            removeEvent(canvasElement, eventName, handleEvent);
+        };
+
+        function init() {
+            if (bindToWindow[eventName]) {
+                // Internet explorer will only supply mouse up & down on the window object
+                // For other browser though, listening to both will cause two events to be processed
+                listenEvent(window, eventName, handleEvent);
+            }
+            listenEvent(eventTrap, eventName, handleEvent);
+            listenEvent(canvasElement, eventName, handleEvent);
+        }
+        init();
     }
 
     /**
@@ -134,7 +212,7 @@ gui.EventManager = function EventManager(odtDocument) {
     function CompoundEvent(eventName, dependencies, eventProxy) {
         var /**@type{!Object}*/
             cachedState = {},
-            events = new core.EventNotifier(['eventTriggered']);
+            subscribers = new core.EventNotifier([eventName]);
 
         /**
          * @param {!Event} event
@@ -143,7 +221,7 @@ gui.EventManager = function EventManager(odtDocument) {
         function subscribedProxy(event) {
             eventProxy(event, cachedState, function (compoundEventInstance) {
                 compoundEventInstance.type = eventName;
-                events.emit('eventTriggered', compoundEventInstance);
+                subscribers.emit(eventName, compoundEventInstance);
             });
         }
 
@@ -152,7 +230,7 @@ gui.EventManager = function EventManager(odtDocument) {
          * @return {undefined}
          */
         this.subscribe = function (cb) {
-            events.subscribe('eventTriggered', cb);
+            subscribers.subscribe(eventName, cb);
         };
 
         /**
@@ -160,7 +238,7 @@ gui.EventManager = function EventManager(odtDocument) {
          * @return {undefined}
          */
         this.unsubscribe = function (cb) {
-            events.unsubscribe('eventTriggered', cb);
+            subscribers.unsubscribe(eventName, cb);
         };
 
         /**
@@ -370,53 +448,15 @@ gui.EventManager = function EventManager(odtDocument) {
     }
 
     /**
-     * @param {!Element|!Window} eventTarget
-     * @param {!string} eventType
-     * @param {function(!Event)|function()} eventHandler
-     * @return {undefined}
-     */
-    function listenEvent(eventTarget, eventType, eventHandler) {
-        var onVariant,
-            bound = false;
-
-        if (compoundEvents.hasOwnProperty(eventType)) {
-            compoundEvents[eventType].subscribe(eventHandler);
-            return;
-        }
-
-        onVariant = "on" + eventType;
-        if (eventTarget.attachEvent) {
-            // attachEvent is only supported in Internet Explorer < 11
-            eventTarget.attachEvent(onVariant, eventHandler);
-            bound = true; // assume it was bound, missing @return in externs.js
-        }
-        if (!bound && eventTarget.addEventListener) {
-            eventTarget.addEventListener(eventType, eventHandler, false);
-            bound = true;
-        }
-
-        if ((!bound || bindToDirectHandler[eventType]) && eventTarget.hasOwnProperty(onVariant)) {
-            eventTarget[onVariant] = eventHandler;
-        }
-    }
-
-    /**
      * Get an event delegate for the requested event name
      * @param {!string} eventName
      * @param {!boolean} shouldCreate Create a delegate for the requested event if it doesn't exist
-     * @return {EventDelegate}
+     * @return {EventDelegate|CompoundEvent}
      */
     function getDelegateForEvent(eventName, shouldCreate) {
-        var delegate = eventDelegates[eventName] || null;
+        var delegate = eventDelegates[eventName] || compoundEvents[eventName] || null;
         if (!delegate && shouldCreate) {
-            delegate = eventDelegates[eventName] = new EventDelegate();
-            if (bindToWindow[eventName]) {
-                // Internet explorer will only supply mouse up & down on the window object
-                // For other browser though, listening to both will cause two events to be processed
-                listenEvent(window, eventName, delegate.handleEvent);
-            }
-            listenEvent(eventTrap, eventName, delegate.handleEvent);
-            listenEvent(canvasElement, eventName, delegate.handleEvent);
+            delegate = eventDelegates[eventName] = new EventDelegate(eventName);
         }
         return delegate;
     }
@@ -447,23 +487,26 @@ gui.EventManager = function EventManager(odtDocument) {
     /**
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
+     * @return {undefined}
      */
-    this.subscribe = function (eventName, handler) {
+    function subscribe(eventName, handler) {
         var delegate = getDelegateForEvent(eventName, true);
-        delegate.handlers.push(handler);
-    };
+        delegate.subscribe(handler);
+    }
+    this.subscribe = subscribe;
 
     /**
      * @param {!string} eventName
      * @param {function(!Event)|function()} handler
+     * @return {undefined}
      */
-    this.unsubscribe = function (eventName, handler) {
-        var delegate = getDelegateForEvent(eventName, false),
-            handlerIndex = delegate && delegate.handlers.indexOf(handler);
-        if (delegate && handlerIndex !== -1) {
-            delegate.handlers.splice(handlerIndex, 1);
+    function unsubscribe(eventName, handler) {
+        var delegate = getDelegateForEvent(eventName, false);
+        if (delegate) {
+            delegate.unsubscribe(handler);
         }
-    };
+    }
+    this.unsubscribe = unsubscribe;
 
     /**
      * Returns true if the event manager is currently receiving events
@@ -473,6 +516,35 @@ gui.EventManager = function EventManager(odtDocument) {
         return odtDocument.getDOMDocument().activeElement === eventTrap;
     }
     this.hasFocus = hasFocus;
+
+    /**
+     * Prevent the event trap from receiving focus
+     * @return {undefined}
+     */
+    function disableTrapSelection() {
+        if (hasFocus()) {
+            // Workaround for a FF bug
+            // If the window selection is in the even trap when it is set non-editable,
+            // further attempts to modify the window selection will crash
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
+            eventTrap.blur();
+        }
+        eventTrap.setAttribute("disabled", "true");
+    }
+
+    /**
+     * Allow the event trap to receive focus
+     * @return {undefined}
+     */
+    function enableTrapSelection() {
+        // A disabled element can't have received focus, so don't need to blur before updating this flag
+        eventTrap.removeAttribute("disabled");
+        // Recovering focus here might cause it to be incorrectly stolen from other elements.
+        // At the time that this patch was written, the primary external controllers of focus are
+        // the SessionController (for mouse related events) and the WebODF editor. Let these restore
+        // focus on their own if desired.
+    }
 
     /**
      * Find the all scrollable ancestor for the specified element
@@ -493,22 +565,24 @@ gui.EventManager = function EventManager(odtDocument) {
         return scrollParents;
     }
 
-   /**
+    /**
      * Return event focus back to the event manager
      */
-    this.focus = function () {
+    function focus() {
         var scrollParents;
         if (!hasFocus()) {
             // http://www.whatwg.org/specs/web-apps/current-work/#focus-management
             // Passing focus back to an element that did not previously have it will also
             // cause the element to attempt to recentre back into scroll view
             scrollParents = findScrollableParents(eventTrap);
+            enableTrapSelection();
             eventTrap.focus();
             scrollParents.forEach(function (scrollParent) {
                 scrollParent.restore();
             });
         }
-    };
+    }
+    this.focus = focus;
 
     /**
      * Returns the event trap div
@@ -519,11 +593,26 @@ gui.EventManager = function EventManager(odtDocument) {
     };
 
     /**
-     * Blur focus from the event manager
+     * Sets to true when in edit mode; otherwise false
+     * @param {!boolean} editable
+     * @return {undefined}
      */
-    this.blur = function () {
-        if (hasFocus()) {
+    this.setEditing = function (editable) {
+        var hadFocus = hasFocus();
+        if (hadFocus) {
+            // Toggling flags while the element is in focus
+            // will sometimes stop the browser from allowing the IME to be activated.
+            // Blurring the focus and then restoring ensures the browser re-evaluates
+            // the IME state after the content editable flag has been updated.
             eventTrap.blur();
+        }
+        if (editable) {
+            eventTrap.removeAttribute("readOnly");
+        } else {
+            eventTrap.setAttribute("readOnly", "true");
+        }
+        if (hadFocus) {
+            focus();
         }
     };
 
@@ -532,6 +621,7 @@ gui.EventManager = function EventManager(odtDocument) {
       * @return {undefined}
       */
     this.destroy = function (callback) {
+        unsubscribe("touchstart", declareTouchEnabled);
         // Clear all long press timers, just in case
         Object.keys(longPressTimers).forEach(function (timer) {
             clearTimeout(parseInt(timer, 10));
@@ -543,11 +633,16 @@ gui.EventManager = function EventManager(odtDocument) {
         });
         compoundEvents = {};
 
-        eventManager.unsubscribe('touchstart', declareTouchEnabled);
-        eventTrap.parentNode.removeChild(eventTrap);
-        // TODO: drop left eventDelegates, complain about those not unsubscribed
-        // Also investigate if delegates need to proper unlisten from events in any case
+        unsubscribe("mousedown", disableTrapSelection);
+        unsubscribe("mouseup", enableTrapSelection);
+        unsubscribe("contextmenu", enableTrapSelection);
+        Object.keys(eventDelegates).forEach(function (eventName) {
+            eventDelegates[eventName].destroy();
+        });
+        eventDelegates = {};
+        // TODO Create warnings for delegates with existing subscriptions. This may indicate leaked event subscribers.
 
+        eventTrap.parentNode.removeChild(eventTrap);
         callback();
     };
 
@@ -559,14 +654,19 @@ gui.EventManager = function EventManager(odtDocument) {
         eventTrap = /**@type{!HTMLInputElement}*/(doc.createElement("input"));
         eventTrap.id = "eventTrap";
         // Negative tab index still allows focus, but removes accessibility by keyboard
-        eventTrap.setAttribute("tabindex", -1);
+        eventTrap.setAttribute("tabindex", "-1");
+        eventTrap.setAttribute("readOnly", "true");
         sizerElement.appendChild(eventTrap);
+
+        subscribe("mousedown", disableTrapSelection);
+        subscribe("mouseup", enableTrapSelection);
+        subscribe("contextmenu", enableTrapSelection);
 
         compoundEvents.longpress = new CompoundEvent('longpress', ['touchstart', 'touchmove', 'touchend'], emitLongPressEvent);
         compoundEvents.drag = new CompoundEvent('drag', ['touchstart', 'touchmove', 'touchend'], emitDragEvent);
         compoundEvents.dragstop = new CompoundEvent('dragstop', ['drag', 'touchend'], emitDragStopEvent);
 
-        eventManager.subscribe('touchstart', declareTouchEnabled);
+        subscribe("touchstart", declareTouchEnabled);
     }
     init();
 };

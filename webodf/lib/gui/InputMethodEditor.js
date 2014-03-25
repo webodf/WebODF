@@ -130,8 +130,7 @@
                                                 gui.InputMethodEditor.signalCompositionEnd]),
             lastCompositionData,
             filters = [],
-            cleanup,
-            isEditable = false;
+            cleanup;
 
         /**
          * Subscribe to IME events
@@ -271,50 +270,6 @@
         };
 
         /**
-         * Prevent the event trap from receiving focus
-         */
-        function suppressFocus() {
-            // Workaround for a FF bug
-            // If the window selection is in the even trap when it is set non-editable,
-            // further attempts to modify the window selection will crash
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
-            eventManager.blur();
-            eventTrap.setAttribute('disabled', true);
-        }
-
-        /**
-         * Allow the event trap to receive focus
-         */
-        function synchronizeEventStatus() {
-            var hasFocus = eventManager.hasFocus();
-            if (hasFocus) {
-                // Toggling the content editable flag while the element is in focus
-                // will sometimes stop the browser from allowing the IME to be activated.
-                // Blurring the focus and then restoring ensures the browser re-evaluates
-                // the IME state after the content editable flag has been updated.
-                eventManager.blur();
-            }
-            if (isEditable) {
-                eventTrap.removeAttribute('disabled');
-            } else {
-                eventTrap.setAttribute('disabled', true);
-            }
-            if (hasFocus) {
-                eventManager.focus();
-            }
-        }
-
-        /**
-         * Sets to true when in edit mode; otherwise false
-         * @param {!boolean} editable
-         */
-        this.setEditing = function (editable) {
-            isEditable = editable;
-            synchronizeEventStatus();
-        };
-
-        /**
          * @param {function()} callback
          */
         this.destroy = function (callback) {
@@ -322,8 +277,6 @@
             eventManager.unsubscribe('compositionend', compositionEnd);
             eventManager.unsubscribe('textInput', textInput);
             eventManager.unsubscribe('keypress', flushEvent);
-            eventManager.unsubscribe('mousedown', suppressFocus);
-            eventManager.unsubscribe('mouseup', synchronizeEventStatus);
             eventManager.unsubscribe('focus', resetWindowSelection);
 
             core.Async.destroyAll(cleanup, callback);
@@ -334,8 +287,6 @@
             eventManager.subscribe('compositionend', compositionEnd);
             eventManager.subscribe('textInput', textInput);
             eventManager.subscribe('keypress', flushEvent);
-            eventManager.subscribe('mousedown', suppressFocus);
-            eventManager.subscribe('mouseup', synchronizeEventStatus);
             eventManager.subscribe('focus', resetWindowSelection);
 
             filters.push(new DetectSafariCompositionError(eventManager));

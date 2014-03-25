@@ -791,7 +791,7 @@
                 undoManager.initialize();
             }
 
-            inputMethodEditor.setEditing(true);
+            eventManager.setEditing(true);
             hyperlinkClickHandler.setModifier(isMacOS ? modifier.Meta : modifier.Ctrl);
             // Most browsers will go back one page when given an unhandled backspace press
             // To prevent this, the event handler for this key should always return true
@@ -859,7 +859,7 @@
             eventManager.unsubscribe("paste", handlePaste);
             eventManager.unsubscribe("beforepaste", handleBeforePaste);
 
-            inputMethodEditor.setEditing(false);
+            eventManager.setEditing(false);
             hyperlinkClickHandler.setModifier(modifier.None);
             keyDownHandler.bind(keyCode.Backspace, modifier.None, function () { return true; }, true);
             keyDownHandler.unbind(keyCode.Delete, modifier.None);
