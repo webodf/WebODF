@@ -479,26 +479,18 @@ gui.EventManager = function EventManager(odtDocument) {
     this.hasFocus = hasFocus;
 
     /**
-     * Blur focus from the event manager
-     */
-    function blur() {
-        if (hasFocus()) {
-            eventTrap.blur();
-        }
-    }
-    this.blur = blur;
-
-    /**
      * Prevent the event trap from receiving focus
      * @return {undefined}
      */
     function disableTrapSelection() {
-        // Workaround for a FF bug
-        // If the window selection is in the even trap when it is set non-editable,
-        // further attempts to modify the window selection will crash
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
-        blur();
+        if (hasFocus()) {
+            // Workaround for a FF bug
+            // If the window selection is in the even trap when it is set non-editable,
+            // further attempts to modify the window selection will crash
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=773137
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=787305
+            eventTrap.blur();
+        }
         eventTrap.setAttribute("disabled", "true");
     }
 
@@ -573,7 +565,7 @@ gui.EventManager = function EventManager(odtDocument) {
             // will sometimes stop the browser from allowing the IME to be activated.
             // Blurring the focus and then restoring ensures the browser re-evaluates
             // the IME state after the content editable flag has been updated.
-            blur();
+            eventTrap.blur();
         }
         if (editable) {
             eventTrap.removeAttribute("readOnly");
