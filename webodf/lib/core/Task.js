@@ -27,11 +27,78 @@
 
 (function() {
     "use strict";
+    /** @type {!RedrawTasks} */
+    var redrawTasks;
+
+    /**
+     * FF doesn't execute requestAnimationFrame requests before it's next repaint,
+     * causing flickering when performing some types of updates (e.g., recomputing Style2CSS).
+     * To workaround this, sometimes we force animation callbacks to redraw ourselves
+     * at certain points.
+     *
+     * This object collects animation frame requests and provides
+     * a safe way of executing any outstanding requests
+     *
+     * @constructor
+     */
+    function RedrawTasks() {
+        var callbacks = {};
+
+        /**
+         * Schedule a callback to be invoked on the next animation frame, or
+         * when performRedraw is called.
+         *
+         * @param {!function():undefined} callback
+         * @return {!number}
+         */
+        this.requestRedrawTask = function(callback) {
+            var id = runtime.requestAnimationFrame(function() {
+                callback();
+                delete callbacks[id];
+            });
+            callbacks[id] = callback;
+            return id;
+        };
+
+        /**
+         * Execute any pending animation frame callbacks and cancel their
+         * browser animation frame request.
+         *
+         * @return {undefined}
+         */
+        this.performRedraw = function() {
+            Object.keys(callbacks).forEach(function(id) {
+                callbacks[id]();
+                runtime.cancelAnimationFrame(parseInt(id, 10));
+            });
+            callbacks = {};
+        };
+
+        /**
+         * Cancel a pending animation frame callback
+         * @param {!number} id
+         * @return {undefined}
+         */
+        this.cancelRedrawTask = function(id) {
+            runtime.cancelAnimationFrame(id);
+            delete callbacks[id];
+        };
+    }
 
     /**
      * @type {!Object}
      */
     core.Task =  {};
+
+    /**
+     * Process any outstanding redraw tasks that may be queued up
+     * waiting for an animation frame
+     * 
+     * @return {undefined}
+     */
+    core.Task.processTasks = function() {
+        redrawTasks.performRedraw();
+    };
 
     /**
      * Creates a new task that will execute the specified callback once
@@ -44,8 +111,8 @@
      */
     core.Task.createRedrawTask = function (callback) {
         return new core.ScheduledTask(callback,
-            runtime.requestAnimationFrame,
-            runtime.cancelAnimationFrame
+            redrawTasks.requestRedrawTask,
+            redrawTasks.cancelRedrawTask
         );
     };
 
@@ -67,4 +134,9 @@
             runtime.clearTimeout
         );
     };
+
+    function init() {
+        redrawTasks = new RedrawTasks();
+    }
+    init();
 }());
