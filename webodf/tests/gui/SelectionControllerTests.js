@@ -391,6 +391,20 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.position.length", "-2");
     }
 
+    function selectRange_SelectionOutsideRoot_ContainsToDocumentRoot() {
+        var doc = createOdtDocument("<text:p>ab</text:p>"),
+            range = testarea.ownerDocument.createRange();
+
+        range.setStart(doc, 0);
+        range.setEnd(doc, doc.childNodes.length);
+
+        t.selectionController.selectRange(range, true);
+
+        t.position = getCursorPosition();
+        r.shouldBe(t, "t.position.position", "0");
+        r.shouldBe(t, "t.position.length", "2");
+    }
+
     function expandToWordBoundaries_CollapsedInWord() {
         var doc = createOdtDocument("<text:p>one two three</text:p>"),
             p = doc.getElementsByTagNameNS(textns, "p")[0],
@@ -543,6 +557,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
 
             selectRange_BridgesMultipleRoots_IsConstrainedWithinAnchorRoot,
             selectRange_BridgesMultipleRoots_IsConstrainedWithinAnchorRoot_Reverse,
+            selectRange_SelectionOutsideRoot_ContainsToDocumentRoot,
 
             expandToWordBoundaries_CollapsedInWord,
             expandToWordBoundaries_CollasedAtWordStart,

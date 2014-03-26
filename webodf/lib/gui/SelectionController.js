@@ -324,6 +324,10 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         } else {
             anchorRoot = odtDocument.getRootElement(/**@type{!Node}*/(range.endContainer));
         }
+        if (!anchorRoot) {
+            // If the range end is not within a root element, use the document root instead
+            anchorRoot = odtDocument.getRootNode();
+        }
         filters.push(odtDocument.createRootFilter(anchorRoot));
         roundToClosestStep(anchorRoot, filters, range, true);
         roundToClosestStep(anchorRoot, filters, range, false);
