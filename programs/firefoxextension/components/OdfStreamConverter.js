@@ -263,7 +263,7 @@ function makeODFStreamConverters() {
     }
     OdtStreamConverter.prototype = {
         // properties required for XPCOM registration:
-        classID: Components.ID('{7457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
+        classID: Components.ID('{43d50559-3e72-435e-9526-482b93f05bf1}'),
         classDescription: 'OpenDocument Text converter',
         contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text&to=*/*',
         QueryInterface: OdfStreamConverter.QueryInterface,
@@ -278,7 +278,7 @@ function makeODFStreamConverters() {
     }
     OdsStreamConverter.prototype = {
         // properties required for XPCOM registration:
-        classID: Components.ID('{8457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
+        classID: Components.ID('{5f0cd28d-cd7a-4c38-8dd9-72135474b9bc}'),
         classDescription: 'OpenDocument Spreadsheet converter',
         contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet&to=*/*',
         QueryInterface: OdfStreamConverter.QueryInterface,
@@ -293,7 +293,7 @@ function makeODFStreamConverters() {
     }
     OdpStreamConverter.prototype = {
       // properties required for XPCOM registration:
-        classID: Components.ID('{9457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
+        classID: Components.ID('{84492c35-9c3a-41cc-a512-eb8eb06744a0}'),
         classDescription: 'OpenDocument Presentation converter',
         contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.presentation&to=*/*',
         QueryInterface: OdfStreamConverter.QueryInterface,
