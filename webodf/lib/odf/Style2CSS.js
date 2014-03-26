@@ -38,19 +38,6 @@
 
 /*global odf, runtime, xmldom, core, document*/
 
-
-
-/**
- * @constructor
- * @param {!Element} element
- */
-odf.StyleTreeNode = function StyleTreeNode(element) {
-    "use strict";
-    /**@type{!Object.<string,!odf.StyleTreeNode>}*/
-    this.derivedStyles = {};
-    this.element = element;
-};
-
 /**
  * @constructor
  */
@@ -75,9 +62,6 @@ odf.Style2CSS = function Style2CSS() {
         /**@const
            @type{!string}*/
         tablens = odf.Namespaces.tablens,
-        /**@const
-           @type{!string}*/
-        textns = odf.Namespaces.textns,
         /**@const
            @type{!string}*/
         xlinkns = odf.Namespaces.xlinkns,
@@ -280,123 +264,6 @@ odf.Style2CSS = function Style2CSS() {
         xpath = xmldom.XPath,
         cssUnits = new core.CSSUnits();
 
-    // helper functions
-    /**
-     * @param {!Element} stylesnode
-     * @return {!Object.<string,!Object.<string,?Element>>}}
-     */
-    function getStyleMap(stylesnode) {
-        // put all style elements in a hash map by family and name
-        var node, name, family, style,
-            /**@type{!Object.<string,!Object.<string,?Element>>}}*/
-            stylemap = {};
-        if (!stylesnode) {
-            return stylemap;
-        }
-        node = stylesnode.firstElementChild;
-        while (node) {
-            if (node.namespaceURI === stylens &&
-                    ((node.localName === 'style') ||
-                     (node.localName === 'default-style'))) {
-                family = node.getAttributeNS(stylens, 'family');
-            } else if (node.namespaceURI === textns &&
-                    node.localName === 'list-style') {
-                family = "list";
-            } else if (node.namespaceURI === stylens &&
-                    (node.localName === 'page-layout' || node.localName === 'default-page-layout')) {
-                family = "page";
-            } else {
-                // Skip insignificant white-space only nodes in the style tree
-                family = undefined;
-            }
-
-            if (family) {
-                // get style name
-                name = node.getAttributeNS(stylens, 'name');
-                if (!name) {
-                    // For a default style, there is no name
-                    name = '';
-                }
-
-                // get style (and create, if not yet existing)
-                if (stylemap.hasOwnProperty(family)) {
-                    style = stylemap[family];
-                } else {
-                    stylemap[family] = style = {};
-                }
-
-                // then store style node in map
-                style[name] = node;
-            }
-
-            node = node.nextElementSibling;
-        }
-
-        return stylemap;
-    }
-    /**
-     * @param {!Object.<string,!odf.StyleTreeNode>} stylestree
-     * @param {string} name
-     * @return {odf.StyleTreeNode}
-     */
-    function findStyle(stylestree, name) {
-        if (stylestree.hasOwnProperty(name)) {
-            return stylestree[name];
-        }
-        var /**@type{string}*/
-            n,
-            style = null;
-        for (n in stylestree) {
-            if (stylestree.hasOwnProperty(n)) {
-                style = findStyle(stylestree[n].derivedStyles, name);
-                if (style) {
-                    break;
-                }
-            }
-        }
-        return style;
-    }
-    /**
-     * @param {string} stylename
-     * @param {!Object.<string,!Element>} stylesmap
-     * @param {!Object.<string,!odf.StyleTreeNode>} stylestree
-     * @return {?odf.StyleTreeNode}
-     */
-    function addStyleToStyleTree(stylename, stylesmap, stylestree) {
-        var style, parentname, parentstyle;
-        if (!stylesmap.hasOwnProperty(stylename)) {
-            return null;
-        }
-        style = new odf.StyleTreeNode(stylesmap[stylename]);
-        parentname = style.element.getAttributeNS(stylens, 'parent-style-name');
-        parentstyle = null;
-        if (parentname) {
-            parentstyle = findStyle(stylestree, parentname)
-                || addStyleToStyleTree(parentname, stylesmap, stylestree);
-        }
-        if (parentstyle) {
-            parentstyle.derivedStyles[stylename] = style;
-        } else {
-            // no parent so add the root
-            stylestree[stylename] = style;
-        }
-        delete stylesmap[stylename];
-        return style;
-    }
-    /**
-     * @param {!Object.<string,!Element>} stylesmap
-     * @param {!Object.<string,!odf.StyleTreeNode>} stylestree
-     * @return {undefined}
-     */
-    function addStyleMapToStyleTree(stylesmap, stylestree) {
-        var /**@type{string}*/
-            name;
-        for (name in stylesmap) {
-            if (stylesmap.hasOwnProperty(name)) {
-                addStyleToStyleTree(name, stylesmap, stylestree);
-            }
-        }
-    }
     /**
      * @param {!string} family
      * @param {!string} name
@@ -825,125 +692,7 @@ odf.Style2CSS = function Style2CSS() {
             throw e;
         }
     }
-    /**
-     * @param {!Element} node
-     * @return {string}
-     */
-    function getNumberRule(node) {
-        var style = node.getAttributeNS(stylens, "num-format"),
-            /**@type{string}*/
-            suffix = node.getAttributeNS(stylens, "num-suffix") || "",
-            /**@type{string}*/
-            prefix = node.getAttributeNS(stylens, "num-prefix") || "",
-            /**@type{!Object.<string,string>}*/
-            stylemap = {
-                '1': 'decimal',
-                'a': 'lower-latin',
-                'A': 'upper-latin',
-                'i': 'lower-roman',
-                'I': 'upper-roman'
-            },
-            /**@type{string}*/
-            content = "";
-        if (prefix) {
-            content += ' "' + prefix + '"';
-        }
-        if (stylemap.hasOwnProperty(style)) {
-            content += " counter(list, " + stylemap[style] + ")";
-        } else if (style) {
-            content += ' "' + style + '"';
-        } else {
-            content += " ''";
-        }
-        return 'content:' + content + ' "' + suffix + '"';
-    }
-    /**
-     * @return {string}
-     */
-    function getImageRule() {
-        return "content: none;";
-    }
-    /**
-     * @param {!Element} node
-     * @return {string}
-     */
-    function getBulletRule(node) {
-        var bulletChar = node.getAttributeNS(textns, "bullet-char");
-        return "content: '" + bulletChar + "';";
-    }
-    /**
-     * @param {!CSSStyleSheet} sheet
-     * @param {!string} name
-     * @param {!Element} node
-     * @param {string} itemrule
-     * @return {undefined}
-     */
-    function addListStyleRule(sheet, name, node, itemrule) {
-        var selector = 'text|list[text|style-name="' + name + '"]',
-            level = node.getAttributeNS(textns, "level"),
-            itemSelector,
-            listItemRule,
-            listLevelProps = domUtils.getDirectChild(node, stylens,
-                    "list-level-properties"),
-            listLevelLabelAlign = domUtils.getDirectChild(listLevelProps, stylens,
-                    "list-level-label-alignment"),
-            bulletIndent,
-            listIndent,
-            bulletWidth,
-            rule;
 
-        if (listLevelLabelAlign) {
-            bulletIndent = listLevelLabelAlign.getAttributeNS(fons,
-                   "text-indent");
-            listIndent = listLevelLabelAlign.getAttributeNS(fons,
-                   "margin-left");
-        }
-
-        // If no values are specified, use default values
-        if (!bulletIndent) {
-            bulletIndent = "-0.6cm";
-        }
-
-        // bulletWidth is the negative of bulletIndent
-        // Obtain this my stripping the fist character
-        if (bulletIndent.charAt(0) === '-') {
-            bulletWidth = bulletIndent.substring(1);
-        } else {
-            bulletWidth = "-" + bulletIndent;
-        }
-
-        level = level && parseInt(level, 10);
-        while (level > 1) {
-            selector += ' > text|list-item > text|list';
-            level -= 1;
-        }
-        if (listIndent) {
-            itemSelector = selector;
-            itemSelector += ' > text|list-item > *:not(text|list):first-child';
-            listItemRule = itemSelector + "{";
-            listItemRule += 'margin-left:' + listIndent + ';';
-            listItemRule += "}";
-            try {
-                sheet.insertRule(listItemRule, sheet.cssRules.length);
-            } catch (/**@type{!DOMException}*/e1) {
-                runtime.log("cannot load rule: " + listItemRule);
-            }
-        }
-        // insert a block before every immediate child of the list-item, except for lists
-        selector += ' > text|list-item > *:not(text|list):first-child:before';
-        rule = selector + '{' + itemrule + ';';
-
-        rule += 'counter-increment:list;';
-        rule += 'margin-left:' + bulletIndent + ';';
-        rule += 'width:' + bulletWidth + ';';
-        rule += 'display:inline-block}';
-
-        try {
-            sheet.insertRule(rule, sheet.cssRules.length);
-        } catch (/**@type{!DOMException}*/e2) {
-            runtime.log("cannot load rule: " + rule);
-        }
-    }
     /**
      * @param {!CSSStyleSheet} sheet
      * @param {!Element} node <style:page-layout/>/<style:default-page-layout/>
@@ -1022,40 +771,13 @@ odf.Style2CSS = function Style2CSS() {
 
     /**
      * @param {!CSSStyleSheet} sheet
-     * @param {string} name
-     * @param {!Element} node
-     * @return {undefined}
-     */
-    function addListStyleRules(sheet, name, node) {
-        var n = node.firstChild, e, itemrule;
-        while (n) {
-            if (n.namespaceURI === textns) {
-                e = /**@type{!Element}*/(n);
-                if (n.localName === "list-level-style-number") {
-                    itemrule = getNumberRule(e);
-                    addListStyleRule(sheet, name, e, itemrule);
-                } else if (n.localName === "list-level-style-image") {
-                    itemrule = getImageRule();
-                    addListStyleRule(sheet, name, e, itemrule);
-                } else if (n.localName === "list-level-style-bullet") {
-                    itemrule = getBulletRule(e);
-                    addListStyleRule(sheet, name, e, itemrule);
-                }
-            }
-            n = n.nextSibling;
-        }
-    }
-    /**
-     * @param {!CSSStyleSheet} sheet
      * @param {string} family
      * @param {string} name
      * @param {!odf.StyleTreeNode} node
      * @return {undefined}
      */
     function addRule(sheet, family, name, node) {
-        if (family === "list") {
-            addListStyleRules(sheet, name, node.element);
-        } else if (family === "page") {
+        if (family === "page") {
             addPageStyleRules(sheet, node.element);
         } else {
             addStyleRule(sheet, family, name, node);
@@ -1086,38 +808,27 @@ odf.Style2CSS = function Style2CSS() {
 
     /**
      * @param {!string} doctype
+     * @param {!Element} rootNode
      * @param {!CSSStyleSheet} stylesheet
      * @param {!Object.<string,string>} fontFaceMap
-     * @param {!Element} styles
-     * @param {!Element} autostyles
+     * @param {!Object.<string,!Object.<string,!odf.StyleTreeNode>>} styleTree
      * @return {undefined}
      */
-    this.style2css = function (doctype, stylesheet, fontFaceMap, styles, autostyles) {
-        var doc, styletree, tree, rule,
+    this.style2css = function (doctype, rootNode, stylesheet, fontFaceMap, styleTree) {
+        var tree, rule,
             /**@type{string}*/
             name,
             /**@type{string}*/
-            family,
-            stylenodes, styleautonodes;
+            family;
+
+        odfRoot = rootNode;
 
         // make stylesheet empty
         while (stylesheet.cssRules.length) {
             stylesheet.deleteRule(stylesheet.cssRules.length - 1);
         }
-        doc = null;
-        if (styles) {
-            doc = styles.ownerDocument;
-            odfRoot = styles.parentNode;
-        }
-        if (autostyles) {
-            doc = autostyles.ownerDocument;
-            odfRoot = autostyles.parentNode;
-        }
-        if (!doc) {
-            return;
-        }
 
-        // add @namodfRoot espace rules
+        // add @odfRoot namespace rules
         odf.Namespaces.forEachPrefix(function (prefix, ns) {
             rule = '@namespace ' + prefix + ' url(' + ns + ');';
             try {
@@ -1133,15 +844,9 @@ odf.Style2CSS = function Style2CSS() {
         defaultFontSize = runtime.getWindow().getComputedStyle(document.body, null).getPropertyValue('font-size') || '12pt';
 
         // add the various styles
-        stylenodes = getStyleMap(styles);
-        styleautonodes = getStyleMap(autostyles);
-        styletree = {};
         for (family in familynamespaceprefixes) {
             if (familynamespaceprefixes.hasOwnProperty(family)) {
-                tree = styletree[family] = {};
-                addStyleMapToStyleTree(stylenodes[family], tree);
-                addStyleMapToStyleTree(styleautonodes[family], tree);
-
+                tree = styleTree[family];
                 for (name in tree) {
                     if (tree.hasOwnProperty(name)) {
                         addRules(stylesheet, family, name, tree[name]);

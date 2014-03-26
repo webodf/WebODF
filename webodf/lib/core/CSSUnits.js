@@ -49,7 +49,8 @@ core.CSSUnits = function CSSUnits() {
             "cm": 2.54,
             "mm": 25.4,
             "pt": 72,
-            "pc": 12
+            "pc": 12,
+            "px": 96
         };
 
     /**

@@ -196,6 +196,11 @@
         "odf.OdfContainer",
         "odf.OdfUtils"
     ],
+    "odf.ListStylesToCss": [
+        "core.CSSUnits",
+        "odf.OdfUtils",
+        "odf.StyleTree"
+    ],
     "odf.Namespaces": [
     ],
     "odf.ObjectNameGenerator": [
@@ -208,6 +213,7 @@
         "gui.AnnotationViewManager",
         "odf.FontLoader",
         "odf.Formatting",
+        "odf.ListStylesToCss",
         "odf.Style2CSS",
         "ops.Canvas"
     ],
@@ -228,11 +234,15 @@
     "odf.Style2CSS": [
         "core.CSSUnits",
         "odf.OdfUtils",
+        "odf.StyleTree",
         "xmldom.XPath"
     ],
     "odf.StyleInfo": [
         "odf.Namespaces",
         "xmldom.XPath"
+    ],
+    "odf.StyleTree": [
+        "odf.Namespaces"
     ],
     "odf.TextSerializer": [
         "odf.OdfUtils",
