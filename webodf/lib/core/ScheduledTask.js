@@ -44,9 +44,10 @@
  * @constructor
  * @implements {core.Destroyable}
  * @param {!Function} fn The function to execute for this task
- * @param {!number} delay The number of ms to wait after the first call to trigger
+ * @param {!function(!function():undefined):!number} scheduleTask Schedule the task to execute
+ * @param {!function(!number):undefined} cancelTask Cancel a scheduled task
  */
-core.ScheduledTask = function ScheduledTask(fn, delay) {
+core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
     "use strict";
     var timeoutId,
         scheduled = false,
@@ -54,7 +55,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
 
     function cancel() {
         if (scheduled) {
-            runtime.clearTimeout(timeoutId);
+            cancelTask(timeoutId);
             scheduled = false;
         }
     }
@@ -73,7 +74,7 @@ core.ScheduledTask = function ScheduledTask(fn, delay) {
         args = Array.prototype.slice.call(arguments);
         if (!scheduled) {
             scheduled = true;
-            timeoutId = runtime.setTimeout(execute, delay);
+            timeoutId = scheduleTask(execute);
         }
     };
 

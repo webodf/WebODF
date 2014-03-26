@@ -303,7 +303,7 @@
             compositionElement = doc.createElement('span');
             compositionElement.setAttribute('id', 'composer');
 
-            processUpdates = new core.ScheduledTask(resetWindowSelection, 1);
+            processUpdates = core.Task.createTimeoutTask(resetWindowSelection, 1);
             cleanup.push(processUpdates.destroy);
         }
 

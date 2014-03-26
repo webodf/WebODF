@@ -688,7 +688,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         var editinfons = 'urn:webodf:names:editinfo',
             memberid = cursor.getMemberId();
 
-        renderTask = new core.ScheduledTask(rerender, 0);
+        renderTask = core.Task.createRedrawTask(rerender);
         addOverlay();
         overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
         cursor.getDocument().subscribe(ops.Document.signalCursorMoved, handleCursorMove);

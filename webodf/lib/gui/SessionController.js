@@ -1053,8 +1053,8 @@
         };
 
         function init() {
-            drawShadowCursorTask = new core.ScheduledTask(updateShadowCursor, 0);
-            redrawRegionSelectionTask = new core.ScheduledTask(redrawRegionSelection, 0);
+            drawShadowCursorTask = core.Task.createRedrawTask(updateShadowCursor);
+            redrawRegionSelectionTask = core.Task.createRedrawTask(redrawRegionSelection);
 
             keyDownHandler.bind(keyCode.Left, modifier.None, rangeSelectionOnly(selectionController.moveCursorToLeft));
             keyDownHandler.bind(keyCode.Right, modifier.None, rangeSelectionOnly(selectionController.moveCursorToRight));
