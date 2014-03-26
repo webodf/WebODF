@@ -66,7 +66,8 @@ function run(input_file, output_file, keywords) {
 					runtime.log(err);
 					return;
 				}
-				inp_data = inp_data.replace(new RegExp(trans.from, "g"), repl_data);
+				// "function() { return repl_data; }" is used to avoid possible replacement patterns in repl_data, e.g. $&
+				inp_data = inp_data.replace(new RegExp(trans.from, "g"), function() { return repl_data; });
 
 				repl_done.push(trans);
 				if (repl_done.length === keywords.length) {
