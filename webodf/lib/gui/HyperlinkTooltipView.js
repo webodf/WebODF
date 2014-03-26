@@ -66,7 +66,7 @@ gui.HyperlinkTooltipView = function HyperlinkTooltipView(odfCanvas, getActiveMod
             if (odfUtils.isHyperlink(node)) {
                 return /**@type{!Element}*/(node);
             }
-            if (odfUtils.isParagraph(node)) {
+            if (odfUtils.isParagraph(node) || odfUtils.isInlineRoot(node)) {
                 break;
             }
             node = node.parentNode;
