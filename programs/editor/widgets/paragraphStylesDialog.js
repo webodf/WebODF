@@ -68,7 +68,6 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     deleteButton,
                     cloneTooltip,
                     cloneDropDown,
-                    newStyleName = null,
                     /**
                     * Mapping of the properties from edit pane properties to the attributes of style:text-properties
                     * @const@type{Array.<!{propertyName:string,attributeName:string,unit:string}>}
@@ -161,6 +160,20 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     dialog.hide();
                 }
 
+                function setStyle(value) {
+                    if (value !== stylePicker.value()) {
+                        stylePicker.setValue(value);
+                    }
+                    alignmentPane.setStyle(value);
+                    fontEffectsPane.setStyle(value);
+                    // If it is a default (nameless) style or is used, make it undeletable.
+                    if (value === "" || editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
+                        deleteButton.domNode.style.display = 'none';
+                    } else {
+                        deleteButton.domNode.style.display = 'block';
+                    }
+                }
+
                 /**
                 * Creates and enqueues a paragraph-style cloning operation.
                 * Remembers the id of the created style in newStyleName, so the
@@ -169,7 +182,8 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 * @param {!string} newStyleDisplayName display name of the new style
                 */
                 function cloneStyle(styleName, newStyleDisplayName) {
-                    newStyleName = editorSession.cloneParagraphStyle(styleName, newStyleDisplayName);
+                    var newStyleName = editorSession.cloneParagraphStyle(styleName, newStyleDisplayName);
+                    setStyle(newStyleName);
                 }
 
                 function deleteStyle(styleName) {
@@ -252,17 +266,6 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 ], function (ParagraphStyles, AlignmentPane, FontEffectsPane) {
                     var p, a, f;
 
-                    function openStyle(value) {
-                        alignmentPane.setStyle(value);
-                        fontEffectsPane.setStyle(value);
-                        // If it is a default (nameless) style or is used, make it undeletable.
-                        if (value === "" || editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
-                            deleteButton.domNode.style.display = 'none';
-                        } else {
-                            deleteButton.domNode.style.display = 'block';
-                        }
-                    }
-
                     p = new ParagraphStyles(function (paragraphStyles) {
                         stylePicker = paragraphStyles;
                         stylePicker.widget().startup();
@@ -271,19 +274,15 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                         stylePicker.widget().domNode.style.marginTop = "5px";
                         topBar.addChild(stylePicker.widget(), 0);
 
-                        stylePicker.onAdd = function (name) {
-                            if (newStyleName === name) {
-                                stylePicker.setValue(name);
-                                newStyleName = null; // reset 'flag' name
-                            }
-                        };
-
                         stylePicker.onRemove = function (name) {
-                            // Set the first style name as current
-                            stylePicker.setValue(stylePicker.widget().getOptions(0));
+                            // The style picker automatically falls back
+                            // to the first entry if the currently selected
+                            // entry is deleted. So it is safe to simply
+                            // open the new auto-selected entry after removal.
+                            setStyle(stylePicker.value());
                         };
 
-                        stylePicker.onChange = openStyle;
+                        stylePicker.onChange = setStyle;
                         stylePicker.setEditorSession(editorSession);
                     });
                     a = new AlignmentPane(function (pane) {
@@ -301,14 +300,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
 
                     dialog.onShow = function () {
                         var currentStyle = editorSession.getCurrentParagraphStyle();
-                        // setting the stylepicker value if the style name is the same
-                        // will not trigger onChange, so specifically open the style in
-                        // the panes.
-                        if (stylePicker.value() === currentStyle) {
-                            openStyle(currentStyle);
-                        } else {
-                            stylePicker.setValue(currentStyle);
-                        }
+                        setStyle(currentStyle);
                     };
 
                     dialog.onHide = self.onToolDone;
