@@ -549,8 +549,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         cursorNode = cursor.getNode();
         cursorNode.appendChild(span);
         avatar = new gui.Avatar(cursorNode, avatarInitiallyVisible);
-        redrawTask = new core.ScheduledTask(updateCaret, 0);
-        blinkTask = new core.ScheduledTask(blinkCaret, BLINK_PERIOD_MS);
+        redrawTask = core.Task.createRedrawTask(updateCaret);
+        blinkTask = core.Task.createTimeoutTask(blinkCaret, BLINK_PERIOD_MS);
         redrawTask.triggerImmediate();
     }
     init();

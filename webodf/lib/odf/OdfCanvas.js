@@ -1624,7 +1624,7 @@
             fontcss = addStyleSheet(doc);
             stylesxmlcss = addStyleSheet(doc);
             positioncss = addStyleSheet(doc);
-            redrawContainerTask = new core.ScheduledTask(redrawContainer, 0);
+            redrawContainerTask = core.Task.createRedrawTask(redrawContainer);
             zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, fixContainerSize);
         }
 
