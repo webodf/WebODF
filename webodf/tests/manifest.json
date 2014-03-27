@@ -64,6 +64,7 @@
         "ops.Operation"
     ],
     "odf.FormattingTests": [
+        "core.CSSUnits",
         "core.UnitTester",
         "odf.Formatting",
         "odf.Namespaces"

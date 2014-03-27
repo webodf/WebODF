@@ -60,6 +60,7 @@ odf.Formatting = function Formatting() {
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         utils = new core.Utils(),
+        cssUnits = new core.CSSUnits(),
         // TODO: needs to be extended. Possibly created together with CSS from sone default description?
         /**@const*/
         builtInDefaultStyleAttributesByFamily = {
@@ -71,11 +72,11 @@ odf.Formatting = function Formatting() {
         },
         /**@const*/
         defaultPageFormatSettings = {
-            width: 21.001, // showing as 21.00 in page format dialog but the value is actually 21.001 in the xml
-            height: 29.7,
-            margin: 2,
-            padding: 0
-        }; // LO 4.1.1.2's default page format settings. All numbers are in cm.
+            width: "21.001cm", // showing as 21.00 in page format dialog but the value is actually 21.001 in the xml
+            height: "29.7cm",
+            margin: "2cm",
+            padding: "0cm"
+        }; // LO 4.1.1.2's default page format settings.
 
     /**
      * Returns a JSON representation of the built-in default style attributes
@@ -576,34 +577,76 @@ odf.Formatting = function Formatting() {
     };
 
     /**
+     * Find a master page definition with the specified name
+     * @param {!string} pageName
+     * @return {?Element}
+     */
+    function getMasterPageElement(pageName) {
+        var node = odfContainer.rootElement.masterStyles.firstElementChild;
+        while (node) {
+            if (node.namespaceURI === stylens
+                && node.localName === "master-page"
+                && node.getAttributeNS(stylens, "name") === pageName) {
+                break;
+            }
+            node = node.nextElementSibling;
+        }
+        return node;
+    }
+    this.getMasterPageElement = getMasterPageElement;
+
+    /**
      * Gets the associated page layout style node for the given style and family.
      * @param {!string} styleName
      * @param {!string} styleFamily either 'paragraph' or 'table'
      * @return {?Element}
      */
     function getPageLayoutStyleElement(styleName, styleFamily) {
-        var masterPageName, layoutName, pageLayoutElements, node, i,
+        var masterPageName,
+            layoutName,
+            pageLayoutElements,
+            /**@type{?Element}*/
+            node,
+            i,
             styleElement = getStyleElement(styleName, styleFamily);
 
         runtime.assert(styleFamily === "paragraph" || styleFamily === "table",
-            "styleFamily has to be either paragraph or table");
+            "styleFamily must be either paragraph or table");
 
         if (styleElement) {
-            masterPageName = styleElement.getAttributeNS(stylens, "master-page-name") || "Standard";
-            node = odfContainer.rootElement.masterStyles.lastElementChild;
-            while (node) {
-                if (node.getAttributeNS(stylens, "name") === masterPageName) {
-                    break;
+            masterPageName = styleElement.getAttributeNS(stylens, "master-page-name");
+            if (masterPageName) {
+                node = getMasterPageElement(masterPageName);
+                if (!node) {
+                    runtime.log("WARN: No master page definition found for " + masterPageName);
                 }
-                node = node.previousElementSibling;
+            }
+            // TODO If element has no master-page-name defined find the master-page-name from closest previous sibling
+            // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1417948_253892949
+            if (!node) {
+                // Fallback 1: LibreOffice usually puts a page layout in called "Standard"
+                node = getMasterPageElement("Standard");
+            }
+            if (!node) {
+                // Fallback 2: Find any page style
+                node = /**@type{?Element}*/(odfContainer.rootElement.masterStyles.getElementsByTagNameNS(stylens, "master-page")[0]);
+                if (!node) {
+                    // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-style_master-page
+                    // "All documents shall contain at least one master page element."
+                    runtime.log("WARN: Document has no master pages defined");
+                }
             }
 
-            layoutName = node.getAttributeNS(stylens, "page-layout-name");
-            pageLayoutElements = domUtils.getElementsByTagNameNS(odfContainer.rootElement.automaticStyles, stylens, "page-layout");
-            for (i = 0; i < pageLayoutElements.length; i += 1) {
-                node = pageLayoutElements[i];
-                if (node.getAttributeNS(stylens, "name") === layoutName) {
-                    return /** @type {!Element} */(node);
+            if (node) {
+                // It would be surprising if we still haven't found a page by now. Still, better safe than sorry!
+                // Note, all warnings are already logged in the above conditions
+                layoutName = node.getAttributeNS(stylens, "page-layout-name");
+                pageLayoutElements = domUtils.getElementsByTagNameNS(odfContainer.rootElement.automaticStyles, stylens, "page-layout");
+                for (i = 0; i < pageLayoutElements.length; i += 1) {
+                    node = pageLayoutElements[i];
+                    if (node.getAttributeNS(stylens, "name") === layoutName) {
+                        return /** @type {!Element} */(node);
+                    }
                 }
             }
         }
@@ -612,93 +655,89 @@ odf.Formatting = function Formatting() {
 
     /**
      * @param {!string} length
-     * @param {?number} defaultValue
-     * @return {?number}
+     * @param {string=} defaultValue
+     * @return {!number|undefined}
      */
-    function lengthInCm(length, defaultValue) {
-        var result = odfUtils.parseLength(length),
-            value = defaultValue;
-        if (result) {
-            switch (result.unit) {
-                case "cm":
-                    value = result.value;
-                    break;
-                case "mm":
-                    value = result.value * 0.1;
-                    break;
-                case "in":
-                    value = result.value * 2.54;
-                    break;
-                case "pt":
-                    value = result.value * 0.035277778;
-                    break;
-                case "pc":
-                case "px":
-                case "em":
-                    // length in pc, px and em is ignored, a default value will be used in this case.
-                    // Seems this is how LO handles it
-                    break;
-                default:
-                    runtime.log("Unit identifier: " + result.unit + " is not supported.");
-                    break;
-            }
+    function lengthInPx(length, defaultValue) {
+        var measure;
+        if (length) {
+            measure = cssUnits.convertMeasure(length, "px");
         }
-        return value;
+        if (measure === undefined && defaultValue) {
+            measure = cssUnits.convertMeasure(defaultValue, "px");
+        }
+        return measure;
     }
 
     /**
-     * Gets the width and height of content area in centimeters.
+     * Gets the width and height of content area in pixels.
      * @param {string} styleName
      * @param {string} styleFamily
-     * @return {!{width: number, height: number}}
+     * @return {!{width: number, height: number}} Available content size in pixels
      */
     this.getContentSize = function(styleName, styleFamily) {
-        var pageLayoutElement, props, printOrientation,
-            defaultOrientedPageWidth, defaultOrientedPageHeight, pageWidth, pageHeight,
-            margin, marginLeft, marginRight, marginTop, marginBottom,
-            padding, paddingLeft, paddingRight, paddingTop, paddingBottom;
+        var pageLayoutElement,
+            props,
+            defaultOrientedPageWidth,
+            defaultOrientedPageHeight,
+            pageWidth,
+            pageHeight,
+            margin,
+            marginLeft,
+            marginRight,
+            marginTop,
+            marginBottom,
+            padding,
+            paddingLeft,
+            paddingRight,
+            paddingTop,
+            paddingBottom;
 
         pageLayoutElement = getPageLayoutStyleElement(styleName, styleFamily);
         if (!pageLayoutElement) {
-            pageLayoutElement = domUtils.getDirectChild(odfContainer.rootElement.styles,
-                    stylens, "default-page-layout");
+            pageLayoutElement = domUtils.getDirectChild(odfContainer.rootElement.styles, stylens, "default-page-layout");
         }
-        props = domUtils.getDirectChild(pageLayoutElement, stylens,
-                "page-layout-properties");
+        props = domUtils.getDirectChild(pageLayoutElement, stylens, "page-layout-properties");
         if (props) {
-            printOrientation = props.getAttributeNS(stylens, "print-orientation") || "portrait";
             // set page's default width and height based on print orientation
-            if (printOrientation === "portrait") {
-                defaultOrientedPageWidth  = defaultPageFormatSettings.width;
-                defaultOrientedPageHeight = defaultPageFormatSettings.height;
-            } else  {
+            if (props.getAttributeNS(stylens, "print-orientation") === "landscape") {
                 // swap the default width and height around in landscape
                 defaultOrientedPageWidth = defaultPageFormatSettings.height;
                 defaultOrientedPageHeight = defaultPageFormatSettings.width;
+            } else {
+                defaultOrientedPageWidth = defaultPageFormatSettings.width;
+                defaultOrientedPageHeight = defaultPageFormatSettings.height;
             }
 
-            pageWidth = lengthInCm(props.getAttributeNS(fons, "page-width"), defaultOrientedPageWidth);
-            pageHeight = lengthInCm(props.getAttributeNS(fons, "page-height"), defaultOrientedPageHeight);
+            pageWidth = lengthInPx(props.getAttributeNS(fons, "page-width"), defaultOrientedPageWidth);
+            pageHeight = lengthInPx(props.getAttributeNS(fons, "page-height"), defaultOrientedPageHeight);
 
-            margin = lengthInCm(props.getAttributeNS(fons, "margin"), null);
-            if (margin === null) {
-                marginLeft = lengthInCm(props.getAttributeNS(fons, "margin-left"), defaultPageFormatSettings.margin);
-                marginRight = lengthInCm(props.getAttributeNS(fons, "margin-right"), defaultPageFormatSettings.margin);
-                marginTop = lengthInCm(props.getAttributeNS(fons, "margin-top"), defaultPageFormatSettings.margin);
-                marginBottom = lengthInCm(props.getAttributeNS(fons, "margin-bottom"), defaultPageFormatSettings.margin);
+            margin = lengthInPx(props.getAttributeNS(fons, "margin"));
+            if (margin === undefined) {
+                marginLeft = lengthInPx(props.getAttributeNS(fons, "margin-left"), defaultPageFormatSettings.margin);
+                marginRight = lengthInPx(props.getAttributeNS(fons, "margin-right"), defaultPageFormatSettings.margin);
+                marginTop = lengthInPx(props.getAttributeNS(fons, "margin-top"), defaultPageFormatSettings.margin);
+                marginBottom = lengthInPx(props.getAttributeNS(fons, "margin-bottom"), defaultPageFormatSettings.margin);
             } else {
                 marginLeft = marginRight = marginTop = marginBottom = margin;
             }
 
-            padding = lengthInCm(props.getAttributeNS(fons, "padding"), null);
-            if (padding === null) {
-                paddingLeft = lengthInCm(props.getAttributeNS(fons, "padding-left"), defaultPageFormatSettings.padding);
-                paddingRight = lengthInCm(props.getAttributeNS(fons, "padding-right"), defaultPageFormatSettings.padding);
-                paddingTop = lengthInCm(props.getAttributeNS(fons, "padding-top"), defaultPageFormatSettings.padding);
-                paddingBottom = lengthInCm(props.getAttributeNS(fons, "padding-bottom"), defaultPageFormatSettings.padding);
+            padding = lengthInPx(props.getAttributeNS(fons, "padding"));
+            if (padding === undefined) {
+                paddingLeft = lengthInPx(props.getAttributeNS(fons, "padding-left"), defaultPageFormatSettings.padding);
+                paddingRight = lengthInPx(props.getAttributeNS(fons, "padding-right"), defaultPageFormatSettings.padding);
+                paddingTop = lengthInPx(props.getAttributeNS(fons, "padding-top"), defaultPageFormatSettings.padding);
+                paddingBottom = lengthInPx(props.getAttributeNS(fons, "padding-bottom"), defaultPageFormatSettings.padding);
             } else {
                 paddingLeft = paddingRight = paddingTop = paddingBottom = padding;
             }
+        } else {
+            pageWidth = lengthInPx(defaultPageFormatSettings.width);
+            pageHeight = lengthInPx(defaultPageFormatSettings.height);
+            margin = lengthInPx(defaultPageFormatSettings.margin);
+            marginLeft = marginRight = marginTop = marginBottom = margin;
+            padding = lengthInPx(defaultPageFormatSettings.padding);
+            paddingLeft = paddingRight = paddingTop = paddingBottom = padding;
         }
         return {
             width: pageWidth - marginLeft - marginRight - paddingLeft - paddingRight,

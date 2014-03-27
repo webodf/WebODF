@@ -255,31 +255,6 @@
     }
 
     /**
-     * @param {!odf.OdfContainer} odfContainer
-     * @param {string} masterPageName
-     * @return {?Element}
-     */
-    function getMasterPageElement(odfContainer, masterPageName) {
-        if (!masterPageName) {
-            return null;
-        }
-
-        var masterStyles = odfContainer.rootElement.masterStyles,
-            masterStylesChild = masterStyles.firstElementChild;
-
-        while (masterStylesChild) {
-            if (masterStylesChild.getAttributeNS(stylens, 'name')
-                    === masterPageName
-                    && masterStylesChild.localName === "master-page"
-                    && masterStylesChild.namespaceURI === stylens) {
-                break;
-            }
-            masterStylesChild = masterStylesChild.nextElementSibling;
-        }
-        return masterStylesChild;
-    }
-
-    /**
      * @param {!Element} clonedNode <draw:page/>
      * @return {undefined}
      */
@@ -606,13 +581,14 @@
     }
 
     /**
+     * @param {!odf.Formatting} formatting
      * @param {!odf.OdfContainer} odfContainer
      * @param {!Element} shadowContent
      * @param {!Element} odfbody
      * @param {!CSSStyleSheet} stylesheet
      * @return {undefined}
      **/
-    function cloneMasterPages(odfContainer, shadowContent, odfbody, stylesheet) {
+    function cloneMasterPages(formatting, odfContainer, shadowContent, odfbody, stylesheet) {
         var masterPageName,
             masterPageElement,
             styleId,
@@ -636,7 +612,7 @@
             // If there was a master-page-name attribute, then we are dealing with a draw:page.
             // Get the referenced master page element from the master styles
             masterPageName = element.getAttributeNS(drawns, 'master-page-name');
-            masterPageElement = getMasterPageElement(odfContainer, masterPageName);
+            masterPageElement = formatting.getMasterPageElement(masterPageName);
 
             // If the referenced master page exists, create a new page and copy over it's contents into the new page,
             // except for the ones that are placeholders. Also, call setDrawElementPosition on each of those child frames.
@@ -1221,7 +1197,7 @@
             container.getContentElement().appendChild(shadowContent);
 
             modifyDrawElements(odfnode.body, css);
-            cloneMasterPages(container, shadowContent, odfnode.body, css);
+            cloneMasterPages(formatting, container, shadowContent, odfnode.body, css);
             modifyTables(odfnode.body, element.namespaceURI);
             modifyLineBreakElements(odfnode.body);
             expandSpaceElements(odfnode.body);

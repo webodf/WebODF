@@ -35,7 +35,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, odf, ops */
+/*global runtime, core, gui, odf, ops */
 
 /**
  * @constructor
@@ -46,8 +46,7 @@
 gui.ImageController = function ImageController(session, inputMemberId, objectNameGenerator) {
     "use strict";
 
-    var /**@const@type{!number}*/cmPerPixel = 0.0264583333333334, // since 1px always equals 0.75pt in css2.1
-        /**@const
+    var /**@const
            @type{!Object.<!string, !string>}*/
         fileExtensionByMimetype = {
             "image/gif": ".gif",
@@ -58,9 +57,7 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
            @type{!string}*/
         textns = odf.Namespaces.textns,
         odtDocument = session.getOdtDocument(),
-        formatting = odtDocument.getFormatting(),
-        /**@type{Object.<string,!{width: number, height: number}>}*/
-        paragraphStyleToPageContentSizeMap = {};
+        formatting = odtDocument.getFormatting();
 
     /**
      * @param {!string} name
@@ -144,11 +141,11 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
     /**
      * @param {!string} mimetype
      * @param {!string} content base64 encoded string
-     * @param {!number} widthInCm
-     * @param {!number} heightInCm
+     * @param {!string} widthMeasure Width + units of the image
+     * @param {!string} heightMeasure Height + units of the image
      * @return {undefined}
      */
-    function insertImageInternal(mimetype, content, widthInCm, heightInCm) {
+    function insertImageInternal(mimetype, content, widthMeasure, heightMeasure) {
         var /**@const@type{!string}*/graphicsStyleName = "Graphics",
             stylesElement = odtDocument.getOdfCanvas().odfContainer().rootElement.styles,
             fileExtension = getFileExtension(mimetype),
@@ -189,8 +186,8 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
             memberid: inputMemberId,
             position: odtDocument.getCursorPosition(inputMemberId),
             filename: fileName,
-            frameWidth: widthInCm + "cm",
-            frameHeight: heightInCm + "cm",
+            frameWidth: widthMeasure,
+            frameHeight: heightMeasure,
             frameStyleName: frameStyleName,
             frameName: objectNameGenerator.generateFrameName()
         });
@@ -200,11 +197,14 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
     }
 
     /**
+     * Scales the supplied image rect to fit within the page content horizontal
+     * and vertical limits, whilst preserving the aspect ratio.
+     *
      * @param {!{width: number, height: number}} originalSize
      * @param {!{width: number, height: number}} pageContentSize
      * @return {!{width: number, height: number}}
      */
-    function trimmedSize(originalSize, pageContentSize) {
+    function scaleToAvailableContentSize(originalSize, pageContentSize) {
         var widthRatio = 1,
             heightRatio = 1,
             ratio;
@@ -232,24 +232,22 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
         var paragraphElement,
             styleName,
             pageContentSize,
-            originalSize,
-            newSize;
+            imageSize;
 
         runtime.assert(widthInPx > 0 && heightInPx > 0, "Both width and height of the image should be greater than 0px.");
-
+        imageSize = {
+            width: widthInPx,
+            height: heightInPx
+        };
         // TODO: resize the image to fit in a cell if paragraphElement is in a table-cell
         paragraphElement = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
         styleName = paragraphElement.getAttributeNS(textns, 'style-name');
-        if (!paragraphStyleToPageContentSizeMap.hasOwnProperty(styleName)) {
-            paragraphStyleToPageContentSizeMap[styleName] = formatting.getContentSize(styleName, 'paragraph');
+        if (styleName) {
+            // TODO cope with no paragraph style name being specified (i.e., use the default paragraph style)
+            pageContentSize = formatting.getContentSize(styleName, 'paragraph');
+            imageSize = scaleToAvailableContentSize(imageSize, pageContentSize);
         }
 
-        pageContentSize = paragraphStyleToPageContentSizeMap[styleName];
-        originalSize = {
-            width: widthInPx * cmPerPixel,
-            height: heightInPx * cmPerPixel
-        };
-        newSize = trimmedSize(originalSize, pageContentSize);
-        insertImageInternal(mimetype, content, newSize.width, newSize.height);
+        insertImageInternal(mimetype, content, imageSize.width + "px", imageSize.height + "px");
     };
 };

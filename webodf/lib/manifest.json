@@ -192,6 +192,7 @@
         "odf.OdfContainer"
     ],
     "odf.Formatting": [
+        "core.CSSUnits",
         "core.Utils",
         "odf.OdfContainer",
         "odf.OdfUtils"

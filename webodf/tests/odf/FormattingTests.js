@@ -44,7 +44,8 @@ odf.FormattingTests = function FormattingTests(runner) {
     var self = this,
         t,
         r = runner,
-        namespace = odf.Namespaces.namespaceMap;
+        namespace = odf.Namespaces.namespaceMap,
+        cssUnits = new core.CSSUnits();
 
     this.setUp = function () {
         t = {
@@ -70,6 +71,9 @@ odf.FormattingTests = function FormattingTests(runner) {
         xml += "        <style:text-properties fo:font-name='P1 Font' />";
         xml += "    </style:style>";
         xml += "    <style:style style:name='PEmpty' style:display-name='PEmpty Display' style:family='paragraph' style:master-page-name='Index'>";
+        xml += "    </style:style>";
+        xml += "    <style:style style:name='PMissingDefinition' style:display-name='Missing Def' style:family='paragraph' style:master-page-name='Missing'>";
+        xml += "        <style:text-properties fo:font-name='PMissingDefinition Font' />";
         xml += "    </style:style>";
         xml += "    <style:style style:name='P2' style:display-name='P1 Display' style:family='paragraph'>";
         xml += "        <style:text-properties fo:font-name='P2 Font' />";
@@ -278,14 +282,53 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.styleAttributes['style:text-properties']", "({'fo:font-name':'P1 Font'})");
     }
     function getContentSize_PageSizePaddingAndMarginSpecified() {
-        createDocument("<text:p style:name='P1'/>", "<style:page-layout style:name='pm2' scope='document-styles'><style:page-layout-properties fo:page-width='10cm' fo:page-height='20cm' fo:margin-top='1cm' fo:margin-bottom='0cm' fo:margin-left='1.5cm' fo:margin-right='1.5cm' fo:padding='3cm' /></style:page-layout>");
+        createDocument("<text:p style:name='P1'/>", "<style:page-layout style:name='pm2' scope='document-styles'><style:page-layout-properties fo:page-width='10px' fo:page-height='20px' fo:margin-top='1px' fo:margin-bottom='0px' fo:margin-left='1.5px' fo:margin-right='1.5px' fo:padding='3px' /></style:page-layout>");
         t.contentSize = t.formatting.getContentSize("P1", "paragraph");
         r.shouldBe(t, "t.contentSize", "({'width':1,'height':13})");
     }
     function getContentSize_PageSizePaddingAndMarginNotSpecified() {
+        var heightPx = cssUnits.convertMeasure("21.001cm", "px"),
+            widthPx = cssUnits.convertMeasure("29.7cm", "px"),
+            marginPx = cssUnits.convertMeasure("2cm", "px");
+
         createDocument("<text:p style:name='P2'/>", "<style:page-layout style:name='pm1' scope='document-styles'><style:page-layout-properties style:print-orientation='landscape' /></style:page-layout>");
         t.contentSize = t.formatting.getContentSize("P2", "paragraph");
-        r.shouldBe(t, "t.contentSize", "({'width':25.7,'height':17.001})");
+        t.expectedSize = {
+            height: heightPx - marginPx - marginPx,
+            width: widthPx - marginPx - marginPx
+        };
+        r.shouldBe(t, "t.contentSize", "t.expectedSize");
+    }
+    function getContentSize_MissingPageDefinition_DocumentHasStandard() {
+        var heightPx = cssUnits.convertMeasure("21.001cm", "px"),
+            widthPx = cssUnits.convertMeasure("29.7cm", "px"),
+            marginPx = cssUnits.convertMeasure("2cm", "px");
+
+        createDocument("<text:p style:name='PMissingDefinition'/>", "<style:page-layout style:name='pm1' scope='document-styles'><style:page-layout-properties style:print-orientation='landscape' /></style:page-layout>");
+        t.contentSize = t.formatting.getContentSize("PMissingDefinition", "paragraph");
+        t.expectedSize = {
+            height: heightPx - marginPx - marginPx,
+            width: widthPx - marginPx - marginPx
+        };
+        r.shouldBe(t, "t.contentSize", "t.expectedSize");
+    }
+    function getContentSize_NoMasterPageDefined() {
+        var doc = createDocument("<text:p style:name='P2'/>"),
+            pageDefinitions = doc.getElementsByTagNameNS(namespace.style, "master-page"),
+            heightPx = cssUnits.convertMeasure("29.7cm", "px"),
+            widthPx = cssUnits.convertMeasure("21.001cm", "px"),
+            marginPx = cssUnits.convertMeasure("2cm", "px");
+
+        while (pageDefinitions[0]) {
+            pageDefinitions[0].parentNode.removeChild(pageDefinitions[0]);
+        }
+        t.contentSize = t.formatting.getContentSize("P2", "paragraph");
+
+        t.expectedSize = {
+            height: heightPx - marginPx - marginPx,
+            width: widthPx - marginPx - marginPx
+        };
+        r.shouldBe(t, "t.contentSize", "t.expectedSize");
     }
 
     function getAppliedStyles_SimpleHierarchy() {
@@ -450,6 +493,8 @@ odf.FormattingTests = function FormattingTests(runner) {
 
             getContentSize_PageSizePaddingAndMarginSpecified,
             getContentSize_PageSizePaddingAndMarginNotSpecified,
+            getContentSize_MissingPageDefinition_DocumentHasStandard,
+            getContentSize_NoMasterPageDefined,
 
             getAppliedStyles_SimpleHierarchy,
             getAppliedStyles_NestedHierarchy,
