@@ -592,6 +592,7 @@ odf.Formatting = function Formatting() {
         }
         return node;
     }
+    this.getMasterPageElement = getMasterPageElement;
 
     /**
      * Gets the associated page layout style node for the given style and family.
