@@ -198,11 +198,14 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
     }
 
     /**
+     * Scales the supplied image rect to fit within the page content horizontal
+     * and vertical limits, whilst preserving the aspect ratio.
+     *
      * @param {!{width: number, height: number}} originalSize
      * @param {!{width: number, height: number}} pageContentSize
      * @return {!{width: number, height: number}}
      */
-    function trimmedSize(originalSize, pageContentSize) {
+    function scaleToAvailableContentSize(originalSize, pageContentSize) {
         var widthRatio = 1,
             heightRatio = 1,
             ratio;
@@ -245,7 +248,7 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
             // TODO cope with no paragraph style name being specified (i.e., use the default paragraph style)
             pageContentSize = formatting.getContentSize(styleName, 'paragraph');
             if (pageContentSize) {
-                imageSize = trimmedSize(imageSize, pageContentSize);
+                imageSize = scaleToAvailableContentSize(imageSize, pageContentSize);
             }
         }
 
