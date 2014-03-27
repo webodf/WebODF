@@ -673,7 +673,7 @@ odf.Formatting = function Formatting() {
      * Gets the width and height of content area in pixels.
      * @param {string} styleName
      * @param {string} styleFamily
-     * @return {!{width: number, height: number}|undefined} Available content size in pixels
+     * @return {!{width: number, height: number}} Available content size in pixels
      */
     this.getContentSize = function(styleName, styleFamily) {
         var pageLayoutElement,
@@ -731,11 +731,17 @@ odf.Formatting = function Formatting() {
             } else {
                 paddingLeft = paddingRight = paddingTop = paddingBottom = padding;
             }
-            return {
-                width: pageWidth - marginLeft - marginRight - paddingLeft - paddingRight,
-                height: pageHeight - marginTop - marginBottom - paddingTop - paddingBottom
-            };
-        } // TODO hardcode a page layout in WebODF to fall back if no master pages are found
-        return undefined;
+        } else {
+            pageWidth = lengthInPx(defaultPageFormatSettings.width);
+            pageHeight = lengthInPx(defaultPageFormatSettings.height);
+            margin = lengthInPx(defaultPageFormatSettings.margin);
+            marginLeft = marginRight = marginTop = marginBottom = margin;
+            padding = lengthInPx(defaultPageFormatSettings.padding);
+            paddingLeft = paddingRight = paddingTop = paddingBottom = padding;
+        }
+        return {
+            width: pageWidth - marginLeft - marginRight - paddingLeft - paddingRight,
+            height: pageHeight - marginTop - marginBottom - paddingTop - paddingBottom
+        };
     };
 };

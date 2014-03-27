@@ -314,13 +314,21 @@ odf.FormattingTests = function FormattingTests(runner) {
     }
     function getContentSize_NoMasterPageDefined() {
         var doc = createDocument("<text:p style:name='P2'/>"),
-            pageDefinitions = doc.getElementsByTagNameNS(namespace.style, "master-page");
+            pageDefinitions = doc.getElementsByTagNameNS(namespace.style, "master-page"),
+            heightPx = cssUnits.convertMeasure("29.7cm", "px"),
+            widthPx = cssUnits.convertMeasure("21.001cm", "px"),
+            marginPx = cssUnits.convertMeasure("2cm", "px");
 
         while (pageDefinitions[0]) {
             pageDefinitions[0].parentNode.removeChild(pageDefinitions[0]);
         }
         t.contentSize = t.formatting.getContentSize("P2", "paragraph");
-        r.shouldBe(t, "t.contentSize", "undefined");
+
+        t.expectedSize = {
+            height: heightPx - marginPx - marginPx,
+            width: widthPx - marginPx - marginPx
+        };
+        r.shouldBe(t, "t.contentSize", "t.expectedSize");
     }
 
     function getAppliedStyles_SimpleHierarchy() {

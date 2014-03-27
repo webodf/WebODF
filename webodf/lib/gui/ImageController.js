@@ -245,9 +245,7 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
         if (styleName) {
             // TODO cope with no paragraph style name being specified (i.e., use the default paragraph style)
             pageContentSize = formatting.getContentSize(styleName, 'paragraph');
-            if (pageContentSize) {
-                imageSize = scaleToAvailableContentSize(imageSize, pageContentSize);
-            }
+            imageSize = scaleToAvailableContentSize(imageSize, pageContentSize);
         }
 
         insertImageInternal(mimetype, content, imageSize.width + "px", imageSize.height + "px");
