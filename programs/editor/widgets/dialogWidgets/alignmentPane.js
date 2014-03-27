@@ -67,10 +67,10 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                 s_textAlign;
 
             if (style !== undefined) {
-                s_topMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-top'], 'mm'));
-                s_leftMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-left'], 'mm'));
-                s_rightMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-right'], 'mm'));
-                s_bottomMargin = parseFloat(cssUnits.convertMeasure(style['fo:margin-bottom'], 'mm'));
+                s_topMargin = cssUnits.convertMeasure(style['fo:margin-top'], 'mm');
+                s_leftMargin = cssUnits.convertMeasure(style['fo:margin-left'], 'mm');
+                s_rightMargin = cssUnits.convertMeasure(style['fo:margin-right'], 'mm');
+                s_bottomMargin = cssUnits.convertMeasure(style['fo:margin-bottom'], 'mm');
                 s_textAlign = style['fo:text-align'];
 
                 form.attr('value', {

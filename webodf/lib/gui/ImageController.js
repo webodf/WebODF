@@ -35,7 +35,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, odf, ops */
+/*global runtime, core, gui, odf, ops */
 
 /**
  * @constructor
@@ -46,8 +46,7 @@
 gui.ImageController = function ImageController(session, inputMemberId, objectNameGenerator) {
     "use strict";
 
-    var /**@const@type{!number}*/cmPerPixel = 0.0264583333333334, // since 1px always equals 0.75pt in css2.1
-        /**@const
+    var /**@const
            @type{!Object.<!string, !string>}*/
         fileExtensionByMimetype = {
             "image/gif": ".gif",
@@ -142,11 +141,11 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
     /**
      * @param {!string} mimetype
      * @param {!string} content base64 encoded string
-     * @param {!number} widthInCm
-     * @param {!number} heightInCm
+     * @param {!string} widthMeasure Width + units of the image
+     * @param {!string} heightMeasure Height + units of the image
      * @return {undefined}
      */
-    function insertImageInternal(mimetype, content, widthInCm, heightInCm) {
+    function insertImageInternal(mimetype, content, widthMeasure, heightMeasure) {
         var /**@const@type{!string}*/graphicsStyleName = "Graphics",
             stylesElement = odtDocument.getOdfCanvas().odfContainer().rootElement.styles,
             fileExtension = getFileExtension(mimetype),
@@ -187,8 +186,8 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
             memberid: inputMemberId,
             position: odtDocument.getCursorPosition(inputMemberId),
             filename: fileName,
-            frameWidth: widthInCm + "cm",
-            frameHeight: heightInCm + "cm",
+            frameWidth: widthMeasure,
+            frameHeight: heightMeasure,
             frameStyleName: frameStyleName,
             frameName: objectNameGenerator.generateFrameName()
         });
@@ -236,10 +235,9 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
             imageSize;
 
         runtime.assert(widthInPx > 0 && heightInPx > 0, "Both width and height of the image should be greater than 0px.");
-        // TODO unit conversion assumes page dimensions are in cm which is not a requirement of the spec
         imageSize = {
-            width: widthInPx * cmPerPixel,
-            height: heightInPx * cmPerPixel
+            width: widthInPx,
+            height: heightInPx
         };
         // TODO: resize the image to fit in a cell if paragraphElement is in a table-cell
         paragraphElement = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
@@ -252,6 +250,6 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
             }
         }
 
-        insertImageInternal(mimetype, content, imageSize.width, imageSize.height);
+        insertImageInternal(mimetype, content, imageSize.width + "px", imageSize.height + "px");
     };
 };

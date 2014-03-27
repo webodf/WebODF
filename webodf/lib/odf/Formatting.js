@@ -60,6 +60,7 @@ odf.Formatting = function Formatting() {
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         utils = new core.Utils(),
+        cssUnits = new core.CSSUnits(),
         // TODO: needs to be extended. Possibly created together with CSS from sone default description?
         /**@const*/
         builtInDefaultStyleAttributesByFamily = {
@@ -71,11 +72,11 @@ odf.Formatting = function Formatting() {
         },
         /**@const*/
         defaultPageFormatSettings = {
-            width: 21.001, // showing as 21.00 in page format dialog but the value is actually 21.001 in the xml
-            height: 29.7,
-            margin: 2,
-            padding: 0
-        }; // LO 4.1.1.2's default page format settings. All numbers are in cm.
+            width: "21.001cm", // showing as 21.00 in page format dialog but the value is actually 21.001 in the xml
+            height: "29.7cm",
+            margin: "2cm",
+            padding: "0cm"
+        }; // LO 4.1.1.2's default page format settings.
 
     /**
      * Returns a JSON representation of the built-in default style attributes
@@ -654,45 +655,25 @@ odf.Formatting = function Formatting() {
 
     /**
      * @param {!string} length
-     * @param {?number} defaultValue
-     * @return {?number}
+     * @param {string=} defaultValue
+     * @return {!number|undefined}
      */
-    function lengthInCm(length, defaultValue) {
-        var result = odfUtils.parseLength(length),
-            value = defaultValue;
-        if (result) {
-            switch (result.unit) {
-                case "cm":
-                    value = result.value;
-                    break;
-                case "mm":
-                    value = result.value * 0.1;
-                    break;
-                case "in":
-                    value = result.value * 2.54;
-                    break;
-                case "pt":
-                    value = result.value * 0.035277778;
-                    break;
-                case "pc":
-                case "px":
-                case "em":
-                    // length in pc, px and em is ignored, a default value will be used in this case.
-                    // Seems this is how LO handles it
-                    break;
-                default:
-                    runtime.log("Unit identifier: " + result.unit + " is not supported.");
-                    break;
-            }
+    function lengthInPx(length, defaultValue) {
+        var measure;
+        if (length) {
+            measure = cssUnits.convertMeasure(length, "px");
         }
-        return value;
+        if (measure === undefined && defaultValue) {
+            measure = cssUnits.convertMeasure(defaultValue, "px");
+        }
+        return measure;
     }
 
     /**
-     * Gets the width and height of content area in centimeters.
+     * Gets the width and height of content area in pixels.
      * @param {string} styleName
      * @param {string} styleFamily
-     * @return {!{width: number, height: number}|undefined}
+     * @return {!{width: number, height: number}|undefined} Available content size in pixels
      */
     this.getContentSize = function(styleName, styleFamily) {
         var pageLayoutElement,
@@ -728,25 +709,25 @@ odf.Formatting = function Formatting() {
                 defaultOrientedPageHeight = defaultPageFormatSettings.height;
             }
 
-            pageWidth = lengthInCm(props.getAttributeNS(fons, "page-width"), defaultOrientedPageWidth);
-            pageHeight = lengthInCm(props.getAttributeNS(fons, "page-height"), defaultOrientedPageHeight);
+            pageWidth = lengthInPx(props.getAttributeNS(fons, "page-width"), defaultOrientedPageWidth);
+            pageHeight = lengthInPx(props.getAttributeNS(fons, "page-height"), defaultOrientedPageHeight);
 
-            margin = lengthInCm(props.getAttributeNS(fons, "margin"), null);
-            if (margin === null) {
-                marginLeft = lengthInCm(props.getAttributeNS(fons, "margin-left"), defaultPageFormatSettings.margin);
-                marginRight = lengthInCm(props.getAttributeNS(fons, "margin-right"), defaultPageFormatSettings.margin);
-                marginTop = lengthInCm(props.getAttributeNS(fons, "margin-top"), defaultPageFormatSettings.margin);
-                marginBottom = lengthInCm(props.getAttributeNS(fons, "margin-bottom"), defaultPageFormatSettings.margin);
+            margin = lengthInPx(props.getAttributeNS(fons, "margin"));
+            if (margin === undefined) {
+                marginLeft = lengthInPx(props.getAttributeNS(fons, "margin-left"), defaultPageFormatSettings.margin);
+                marginRight = lengthInPx(props.getAttributeNS(fons, "margin-right"), defaultPageFormatSettings.margin);
+                marginTop = lengthInPx(props.getAttributeNS(fons, "margin-top"), defaultPageFormatSettings.margin);
+                marginBottom = lengthInPx(props.getAttributeNS(fons, "margin-bottom"), defaultPageFormatSettings.margin);
             } else {
                 marginLeft = marginRight = marginTop = marginBottom = margin;
             }
 
-            padding = lengthInCm(props.getAttributeNS(fons, "padding"), null);
-            if (padding === null) {
-                paddingLeft = lengthInCm(props.getAttributeNS(fons, "padding-left"), defaultPageFormatSettings.padding);
-                paddingRight = lengthInCm(props.getAttributeNS(fons, "padding-right"), defaultPageFormatSettings.padding);
-                paddingTop = lengthInCm(props.getAttributeNS(fons, "padding-top"), defaultPageFormatSettings.padding);
-                paddingBottom = lengthInCm(props.getAttributeNS(fons, "padding-bottom"), defaultPageFormatSettings.padding);
+            padding = lengthInPx(props.getAttributeNS(fons, "padding"));
+            if (padding === undefined) {
+                paddingLeft = lengthInPx(props.getAttributeNS(fons, "padding-left"), defaultPageFormatSettings.padding);
+                paddingRight = lengthInPx(props.getAttributeNS(fons, "padding-right"), defaultPageFormatSettings.padding);
+                paddingTop = lengthInPx(props.getAttributeNS(fons, "padding-top"), defaultPageFormatSettings.padding);
+                paddingBottom = lengthInPx(props.getAttributeNS(fons, "padding-bottom"), defaultPageFormatSettings.padding);
             } else {
                 paddingLeft = paddingRight = paddingTop = paddingBottom = padding;
             }
