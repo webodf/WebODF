@@ -216,6 +216,9 @@ text|note:hover text|note-body {
     position: absolute;
     background: #ffffaa;
 }
+text|bibliography-source {
+  display: none;
+}
 svg|title, svg|desc {
     display: none;
 }
