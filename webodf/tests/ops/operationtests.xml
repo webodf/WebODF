@@ -524,6 +524,15 @@
   </ops>
   <after><office:text><text:p text:style-name="B"><text:span><c:cursor c:memberId="Bob"/>cde</text:span></text:p></office:text></after>
  </test>
+ <test name="Remove_MergeEmptyParagraph" isFailing="true">
+  <before><office:text><text:p text:style-name="A"><draw:frame text:anchor-type="as-char"/></text:p><text:p text:style-name="B"/><text:p text:style-name="C"></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="RemoveText" position="0" length="2"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+  </ops>
+  <after><office:text><text:p text:style-name="B"/><text:p text:style-name="C"><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
  <test name="Remove_DeleteLastCharacterNearTabs">
   <before><office:text><text:p><text:span><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab>a</text:span></text:p></office:text></before>
   <ops>
