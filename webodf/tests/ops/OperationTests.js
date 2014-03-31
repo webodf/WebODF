@@ -169,6 +169,17 @@ ops.OperationTests = function OperationTests(runner) {
             r.testFailed("Empty text nodes were found");
         }
     }
+
+    /**
+     * Verify the StepCache to ensure it is consistent
+     * @return {undefined}
+     */
+    function verifyStepsCache() {
+        var rootNode = t.odtDocument.getRootNode();
+        // Asking for the maximum available step will cause the cache to reverify itself completely
+        t.odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length);
+    }
+
     function parseTest(name, node) {
         var hasSetup = node.getAttribute("hasSetup") === "true",
             isFailing = node.getAttribute("isFailing") === "true",
@@ -294,6 +305,7 @@ ops.OperationTests = function OperationTests(runner) {
             checkForEmptyTextNodes(t.odtDocument.getCanvas().getElement());
         }
 
+        verifyStepsCache();
         // check result
         if (stylesbefore) {
             stylesafter.normalize();
