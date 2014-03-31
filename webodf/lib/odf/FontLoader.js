@@ -40,7 +40,9 @@
 (function () {
     "use strict";
     var xpath = xmldom.XPath,
+        odfUtils = new odf.OdfUtils(),
         base64 = new core.Base64();
+
     /**
      * @param {!Element} fontFaceDecls
      * @return {!Object.<string,{href:string,family:string}>}
@@ -56,7 +58,7 @@
         for (i = 0; i < fonts.length; i += 1) {
             font = fonts[i];
             name = font.getAttributeNS(odf.Namespaces.stylens, "name");
-            family = font.getAttributeNS(odf.Namespaces.svgns, "font-family");
+            family = odfUtils.getNormalizedFontFamilyName(font.getAttributeNS(odf.Namespaces.svgns, "font-family"));
             uris = xpath.getODFElementsWithXPath(font,
                 "svg:font-face-src/svg:font-face-uri",
                 odf.Namespaces.lookupNamespaceURI);
@@ -76,7 +78,12 @@
      */
     function addFontToCSS(name, font, fontdata, stylesheet) {
         var cssFamily = font.family || name,
-            rule = "@font-face { font-family: '" + cssFamily + "'; src: " +
+            // font-family already has a quotation in the name if needed, as required by
+            // ODF 1.2 §19.528 svg:font-family, which points to SVG 1.1 §20.8.3, which points to
+            // @font-face facility in CSS2
+            // wrapping again with ' and ' only result in problems with font-family names
+            // that are quoted with ' and ' itself
+            rule = "@font-face { font-family: " + cssFamily + "; src: " +
                 "url(data:application/x-font-ttf;charset=binary;base64," +
                 base64.convertUTF8ArrayToBase64(fontdata) +
                 ") format(\"truetype\"); }";

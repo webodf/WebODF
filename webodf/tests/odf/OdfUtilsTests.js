@@ -63,10 +63,19 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         t.odfUtils = new odf.OdfUtils();
     };
     this.tearDown = function () {
-        t.range.detach();
         t = {};
         core.UnitTest.cleanupTestAreaDiv();
     };
+    /**
+     * @param {!string} fontFamilyName
+     * @param {!string} expectedNormalizedFontFamilyName
+     * @return {undefined}
+     */
+    function testFontFamilyNameNormalizing(fontFamilyName, expectedNormalizedFontFamilyName) {
+        t.expectedNormalizedFontFamilyName = expectedNormalizedFontFamilyName;
+        t.normalizedFontFamilyName = t.odfUtils.getNormalizedFontFamilyName(fontFamilyName);
+        r.shouldBe(t, "t.normalizedFontFamilyName", "t.expectedNormalizedFontFamilyName");
+    }
     function createDocument(dom) {
         var fragment;
 
@@ -380,6 +389,20 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
         r.shouldBe(t, "t.hyperlinks.shift()", "t.doc.childNodes[0]");
         r.shouldBe(t, "t.hyperlinks.shift()", "t.doc.childNodes[1]");
     }
+    function getNormalizedFontFamilyName_normalizeUnquoted() {
+        testFontFamilyNameNormalizing("Heisi Mincho W3",          "'Heisi Mincho W3'");
+        testFontFamilyNameNormalizing(" \t\n\f\rHeisi Mincho W3", "'Heisi Mincho W3'");
+        testFontFamilyNameNormalizing("Heisi Mincho \t\n\f\r W3", "'Heisi Mincho W3'");
+        testFontFamilyNameNormalizing("Heisi Mincho W3 \t\n\f\r", "'Heisi Mincho W3'");
+        testFontFamilyNameNormalizing("\t\n\f\r Heisi Mincho \t\n\f\r W3\t\n\f\r ", "'Heisi Mincho W3'");
+        testFontFamilyNameNormalizing("serif", "serif");
+    }
+    function getNormalizedFontFamilyName_doNotChangeQuoted() {
+        testFontFamilyNameNormalizing("\"\t\n\f\r Heisi Mincho \t\n\f\r W3\t\n\f\r \"", "\"\t\n\f\r Heisi Mincho \t\n\f\r W3\t\n\f\r \"");
+        testFontFamilyNameNormalizing("'\t\n\f\r Heisi Mincho \t\n\f\r W3\t\n\f\r '", "'\t\n\f\r Heisi Mincho \t\n\f\r W3\t\n\f\r '");
+        testFontFamilyNameNormalizing("'serif'", "'serif'");
+        testFontFamilyNameNormalizing("\"serif\"", "\"serif\"");
+    }
     this.tests = function () {
         return r.name([
             isAnchoredAsCharacterElement_ReturnTrueForTab,
@@ -415,7 +438,10 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
 
             getHyperlinkElements_ReturnNoLinkOutsideSelection,
             getHyperlinkElements_ReturnLinkWithinSelection,
-            getHyperlinkElements_ReturnLinksForPartialSelection
+            getHyperlinkElements_ReturnLinksForPartialSelection,
+
+            getNormalizedFontFamilyName_normalizeUnquoted,
+            getNormalizedFontFamilyName_doNotChangeQuoted
         ]);
     };
     this.asyncTests = function () {

@@ -192,7 +192,8 @@
         "odf.OdfCanvas"
     ],
     "odf.FontLoader": [
-        "odf.OdfContainer"
+        "odf.OdfContainer",
+        "odf.OdfUtils"
     ],
     "odf.Formatting": [
         "core.CSSUnits",
