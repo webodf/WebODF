@@ -671,6 +671,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      */
     function destroy(callback) {
         sizer.removeChild(overlay);
+        sizer.classList.remove('webodf-virtualSelections');
         cursor.getDocument().unsubscribe(ops.Document.signalCursorMoved, handleCursorMove);
         zoomHelper.unsubscribe(gui.ZoomHelper.signalZoomChanged, scaleHandles);
         callback();
@@ -691,6 +692,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         renderTask = core.Task.createRedrawTask(rerender);
         addOverlay();
         overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
+        sizer.classList.add('webodf-virtualSelections');
         cursor.getDocument().subscribe(ops.Document.signalCursorMoved, handleCursorMove);
         zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, scaleHandles);
         scaleHandles(zoomHelper.getZoomLevel());
