@@ -116,6 +116,15 @@
         "xmldom.LSSerializer",
         "xmldom.LSSerializerFilter"
     ],
+    "ops.OdtStepsTranslatorTests": [
+        "core.DomUtils",
+        "core.PositionFilter",
+        "core.UnitTester",
+        "gui.SelectionMover",
+        "odf.Namespaces",
+        "ops.OdtStepsTranslator",
+        "ops.TextPositionFilter"
+    ],
     "ops.OperationTests": [
         "core.UnitTester",
         "odf.Namespaces",
@@ -132,15 +141,6 @@
         "odf.OdfCanvas",
         "odf.OdfContainer",
         "ops.Session"
-    ],
-    "ops.StepsTranslatorTests": [
-        "core.DomUtils",
-        "core.PositionFilter",
-        "core.UnitTester",
-        "gui.SelectionMover",
-        "odf.Namespaces",
-        "ops.StepsTranslator",
-        "ops.TextPositionFilter"
     ],
     "ops.TransformationTests": [
         "core.UnitTester",

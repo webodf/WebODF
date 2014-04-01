@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, core, ops*/
+/*global runtime, core, ops, odf*/
 
 (function () {
     "use strict";
@@ -60,15 +60,56 @@
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
      */
-    ops.StepsTranslator = function StepsTranslator(getRootNode, newIterator, filter, bucketSize) {
-        var rootNode = getRootNode(),
+    ops.OdtStepsTranslator = function OdtStepsTranslator(getRootNode, newIterator, filter, bucketSize) {
+        var rootNode,
             /**@type{!ops.StepsCache}*/
-            stepsCache = new ops.StepsCache(rootNode, filter, bucketSize),
+            stepsCache,
+            odfUtils = new odf.OdfUtils(),
             domUtils = new core.DomUtils(),
             /**@type{!core.PositionIterator}*/
-            iterator = newIterator(getRootNode()),
+            iterator,
             /**@const*/
             FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+
+        /**
+         * Update the steps cache based on the current iterator position. This can either add new
+         * bookmarks or update existing references and repair damaged regions of the cache.
+         *
+         * @param {!number} steps
+         * @param {!core.PositionIterator} iterator
+         * @param {!boolean} isStep
+         * @return {undefined}
+         */
+        function updateCache(steps, iterator, isStep) {
+            var node = iterator.getCurrentNode();
+
+            if (iterator.isBeforeNode() && odfUtils.isParagraph(node)) {
+                if (!isStep) {
+                    // Paragraph bookmarks indicate "first position in the paragraph"
+                    // If the current stable point is before the first walkable position (as often happens)
+                    // simply increase the step number by 1 to move to within the paragraph node
+                    steps += 1;
+                }
+                stepsCache.updateBookmark(steps, node);
+            }
+        }
+
+        /**
+         * Saved bookmarks always represent the first step inside the corresponding paragraph or node. Based on the
+         * current TextPositionFilter impl, this means rounding up if the current iterator position is not on a step.
+         * @param {!number} steps
+         * @param {!core.PositionIterator} iterator
+         * @return {undefined}
+         */
+        /*jslint unparam:true*/
+        function roundUpToStep(steps, iterator) {
+            do {
+                if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                    break;
+                }
+            } while (iterator.nextPosition());
+        }
+        /*jslint unparam:false*/
 
         /**
          * This evil little check is necessary because someone, not mentioning any names *cough*
@@ -83,9 +124,12 @@
             // TODO Remove when a proper undo manager arrives
             var currentRootNode = getRootNode();
             if (currentRootNode !== rootNode) {
-                runtime.log("Undo detected. Resetting steps cache");
+                if (rootNode) {
+                    // verifyRootNode is called during init. Don't log misleading messages in this case
+                    runtime.log("Undo detected. Resetting steps cache");
+                }
                 rootNode = currentRootNode;
-                stepsCache = new ops.StepsCache(rootNode, filter, bucketSize);
+                stepsCache = new ops.StepsCache(rootNode, bucketSize, roundUpToStep);
                 iterator = newIterator(rootNode);
             }
         }
@@ -109,13 +153,13 @@
             }
             verifyRootNode();
             stepsFromRoot = stepsCache.setToClosestStep(steps, iterator);
-            
+
             while (stepsFromRoot < steps && iterator.nextPosition()) {
                 isStep = filter.acceptPosition(iterator) === FILTER_ACCEPT;
                 if (isStep) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator, isStep);
+                updateCache(stepsFromRoot, iterator, isStep);
             }
             if (stepsFromRoot !== steps) {
                 throw new RangeError("Requested steps (" + steps + ") exceeds available steps (" + stepsFromRoot + ")");
@@ -209,7 +253,7 @@
                 if (isStep) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator, isStep);
+                updateCache(stepsFromRoot, iterator, isStep);
             }
             return stepsFromRoot + rounding;
         };
@@ -229,7 +273,7 @@
                 if (isStep) {
                     stepsFromRoot += 1;
                 }
-                stepsCache.updateCache(stepsFromRoot, iterator, isStep);
+                updateCache(stepsFromRoot, iterator, isStep);
             }
         };
 
@@ -261,19 +305,24 @@
             // actually 1 step prior to the replace paragraph.
             stepsCache.damageCacheAfterStep(eventArgs.position - 1);
         };
+
+        function init() {
+            verifyRootNode();
+        }
+        init();
     };
 
     /**
      * @const
      * @type {!number}
      */
-    ops.StepsTranslator.PREVIOUS_STEP = PREVIOUS_STEP;
+    ops.OdtStepsTranslator.PREVIOUS_STEP = PREVIOUS_STEP;
 
     /**
      * @const
      * @type {!number}
      */
-    ops.StepsTranslator.NEXT_STEP = NEXT_STEP;
+    ops.OdtStepsTranslator.NEXT_STEP = NEXT_STEP;
 
-    return ops.StepsTranslator;
+    return ops.OdtStepsTranslator;
 }());

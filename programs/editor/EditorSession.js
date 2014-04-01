@@ -47,7 +47,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("core.DomUtils");
     runtime.loadClass("odf.OdfUtils");
     runtime.loadClass("ops.OdtDocument");
-    runtime.loadClass("ops.StepsTranslator");
+    runtime.loadClass("ops.OdtStepsTranslator");
     runtime.loadClass("ops.Session");
     runtime.loadClass("odf.Namespaces");
     runtime.loadClass("odf.OdfCanvas");
@@ -316,7 +316,7 @@ define("webodf/editor/EditorSession", [
          * @return {!boolean}
          */
         function roundUp(step) {
-            return step === ops.StepsTranslator.NEXT_STEP;
+            return step === ops.OdtStepsTranslator.NEXT_STEP;
         }
 
         /**

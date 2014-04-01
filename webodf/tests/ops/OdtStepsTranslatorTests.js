@@ -39,7 +39,7 @@
  * @param {core.UnitTestRunner} runner
  * @implements {core.UnitTest}
  */
-ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
+ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
     "use strict";
     var t,
         domUtils = new core.DomUtils(),
@@ -49,11 +49,11 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         CACHE_STEP_SIZE = 5;
 
     function roundDown(step) {
-        return step === ops.StepsTranslator.PREVIOUS_STEP;
+        return step === ops.OdtStepsTranslator.PREVIOUS_STEP;
     }
 
     function roundUp(step) {
-        return step === ops.StepsTranslator.NEXT_STEP;
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
     }
 
     /**
@@ -140,7 +140,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         t = {
             filter: new CallCountedPositionFilter(new ops.TextPositionFilter(function() { return testarea; }))
         };
-        t.translator = new ops.StepsTranslator(function() { return testarea; },
+        t.translator = new ops.OdtStepsTranslator(function() { return testarea; },
             gui.SelectionMover.createPositionIterator,
             t.filter, CACHE_STEP_SIZE);
     };
@@ -671,11 +671,11 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         ];
     };
 };
-ops.StepsTranslatorTests.prototype.description = function () {
+ops.OdtStepsTranslatorTests.prototype.description = function () {
     "use strict";
-    return "Test the StepsTranslator class.";
+    return "Test the OdtStepsTranslator class.";
 };
 (function () {
     "use strict";
-    return ops.StepsTranslatorTests;
+    return ops.OdtStepsTranslatorTests;
 }());

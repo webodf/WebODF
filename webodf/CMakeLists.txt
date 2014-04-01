@@ -27,7 +27,7 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/ops/OdtDocumentTests.js
     tests/ops/OperationTests.js
     tests/ops/SessionTests.js
-    tests/ops/StepsTranslatorTests.js
+    tests/ops/OdtStepsTranslatorTests.js
     tests/ops/TransformationTests.js
     tests/ops/TransformerTests.js
     tests/xmldom/LSSerializerTests.js

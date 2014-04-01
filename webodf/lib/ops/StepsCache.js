@@ -24,7 +24,7 @@
  */
 
 
-/*global runtime, core, ops, odf, Node*/
+/*global runtime, core, ops, Node*/
 
 (function() {
     "use strict";
@@ -36,9 +36,8 @@
     /**
      * Implementation of a step to DOM point lookup cache.
      *
-     * A cache point ("bookmark") is created for each passed paragraph, saving the number of steps from the root node to
-     * the first step in the paragraph. This cached point is linked to the paragraph node via a unique identifier per
-     * node.
+     * A cache point ("bookmark") is created each time updateBookmark is called, saving the number of steps from the root
+     * node to the bookmarked node. This cached point is linked to the node via a unique identifier.
      *
      * The cache works by tracking "damage" to it's bookmarks (via steps inserted & removal). As re-iteration over the
      * damaged sections occur, the bookmarks are updated, and the damage repaired.
@@ -58,26 +57,22 @@
      * [------@xxxxxxx] <-- as re-iteration over the doc occurs, bookmark positions are updated and the damage start
      *                      point is moved along to the next damaged node
      *
-     * This cache depends on StepsTranslator.handleStepsInserted & handleStepsRemoved being called at the step of change,
-     * along with information about the region that has changed. The cache is able to cope with paragraph nodes being
-     * cloned, as long as the position of change is correctly reported.
+     * This cache depends on OdtStepsTranslator.handleStepsInserted & handleStepsRemoved being called at the step of change,
+     * along with information about the region that has changed. The cache is able to cope with nodes being cloned, as
+     * long as the position of change is correctly reported.
      *
-     * However, this implementation will NOT cope with paragraphs being re-ordered, even if a change event is reported.
-     * This is because the cache relies on the paragraph order remaining fixed as long as they are in the DOM.
-     * If paragraph reordering is desired, it can be achieved through either:
-     * a) cloning the paragraph into the new position and removing the original paragraph (the clone will be detected
-     *    and rectified)
-     * b) removing the original paragraph from the DOM, calling updateCache (to purge the original bookmark) then
-     *    re-adding the paragraph into the new position and calling updateCache a second time (add a brand new bookmark
-     *    for the paragraph)
-     *
+     * However, this implementation will NOT cope with nodes being re-ordered, even if a change event is reported.
+     * This is because the cache relies on the nodes order remaining fixed as long as they are in the DOM.
+     * If node reordering is desired, it can be achieved through cloning the node into the new position and removing
+     * the original node (the clone will be detected and rectified).
      *
      * @constructor
      * @param {!Element} rootElement
-     * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
+     * @param {!function(!number, !core.PositionIterator):undefined} restoreBookmarkPosition Fine-tune the iterator position after
+     *      it is set to a specific bookmark location.
      */
-    ops.StepsCache = function StepsCache(rootElement, filter, bucketSize) {
+    ops.StepsCache = function StepsCache(rootElement, bucketSize, restoreBookmarkPosition) {
         var coordinatens = "urn:webodf:names:steps",
             // Note, our coding standards usually require a key of !string for a dictionary.
             // As I'm often assigning numbers as well (which JS quite happily converts for me)
@@ -86,29 +81,27 @@
             stepToDomPoint = {},
             /**@type{!Object.<!string, !ops.StepsCache.Bookmark>}*/
             nodeToBookmark = {},
-            odfUtils = new odf.OdfUtils(),
             domUtils = new core.DomUtils(),
             /**@type{!RootBookmark}*/
             basePoint,
             /**@type{!number|undefined}*/
             lastUndamagedCacheStep,
-            /**@const*/
-            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
             verifyCache;
 
         /**
-         * Bookmark indicating the first walkable position in a paragraph
+         * Bookmark tied to a specific node
          * @constructor
          * @param {!string} nodeId
          * @param {!number} steps
-         * @param {!Element} paragraphNode
+         * @param {!Element} bookmarkNode
          *
          * @implements {ops.StepsCache.Bookmark}
          */
-        function ParagraphBookmark(nodeId, steps, paragraphNode) {
+        function NodeBookmark(nodeId, steps, bookmarkNode) {
+            var self = this;
             this.nodeId = nodeId;
             this.steps = steps;
-            this.node = paragraphNode;
+            this.node = bookmarkNode;
             this.nextBookmark = null;
             this.previousBookmark = null;
 
@@ -117,12 +110,8 @@
              * @return {undefined}
              */
             this.setIteratorPosition = function(iterator) {
-                iterator.setPositionBeforeElement(paragraphNode);
-                do {
-                    if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                        break;
-                    }
-                } while (iterator.nextPosition());
+                iterator.setPositionBeforeElement(bookmarkNode);
+                restoreBookmarkPosition(self.steps, iterator);
             };
         }
 
@@ -136,6 +125,7 @@
          * @implements {ops.StepsCache.Bookmark}
          */
         function RootBookmark(nodeId, steps, rootNode) {
+            var self = this;
             this.nodeId = nodeId;
             this.steps = steps;
             this.node = rootNode;
@@ -148,11 +138,7 @@
              */
             this.setIteratorPosition = function (iterator) {
                 iterator.setUnfilteredPosition(rootNode, 0);
-                do {
-                    if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                        break;
-                    }
-                } while (iterator.nextPosition());
+                restoreBookmarkPosition(self.steps, iterator);
             };
         }
 
@@ -308,11 +294,11 @@
                 existingBookmark;
             existingBookmark = nodeToBookmark[nodeId];
             if (!existingBookmark) {
-                existingBookmark = nodeToBookmark[nodeId] = new ParagraphBookmark(nodeId, steps, node);
+                existingBookmark = nodeToBookmark[nodeId] = new NodeBookmark(nodeId, steps, node);
             } else if (!isValidBookmarkForNode(node, existingBookmark)) {
                 runtime.log("Cloned node detected. Creating new bookmark");
                 nodeId = setNodeId(node);
-                existingBookmark = nodeToBookmark[nodeId] = new ParagraphBookmark(nodeId, steps, node);
+                existingBookmark = nodeToBookmark[nodeId] = new NodeBookmark(nodeId, steps, node);
             } else {
                 existingBookmark.steps = steps;
             }
@@ -466,26 +452,16 @@
         }
 
         /**
-         * Process known step to DOM position points for possible caching
+         * Cache the current step, using the supplied node as the anchor
          * @param {!number} steps Current steps offset from position 0
-         * @param {!core.PositionIterator} iterator
-         * @param {!boolean} isStep True if the current node and offset is accepted by the position filter
+         * @param {!Node} node
          * @return {undefined}
          */
-        this.updateCache = function(steps, iterator, isStep) {
+        this.updateBookmark = function(steps, node) {
             var cacheBucket,
                 existingCachePoint,
                 bookmark,
-                closestPriorBookmark,
-                node = iterator.getCurrentNode();
-
-            if (iterator.isBeforeNode() && odfUtils.isParagraph(node)) {
-                if (!isStep) {
-                    // Paragraph bookmarks indicate "first position in the paragraph"
-                    // If the current stable point is before the first walkable position (as often happens)
-                    // simply increase the step number by 1 to move to within the paragraph node
-                    steps += 1;
-                }
+                closestPriorBookmark;
 
                 closestPriorBookmark = repairCacheUpToStep(steps);
                 // Note, the node bookmark must be updated after the repair as if steps < lastUndamagedCacheStep
@@ -500,7 +476,6 @@
                     stepToDomPoint[cacheBucket] = bookmark;
                 }
                 verifyCache();
-            }
         };
 
         /**

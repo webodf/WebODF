@@ -83,7 +83,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@const*/
         FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         filter,
-        /**@type{!ops.StepsTranslator}*/
+        /**@type{!ops.OdtStepsTranslator}*/
         stepsTranslator,
         lastEditingOp,
         unsupportedMetadataRemoved = false;
@@ -131,7 +131,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.setDocumentElement = function (documentElement) {
         var odfContainer = odfCanvas.odfContainer();
         // TODO Replace with a neater hack for reloading the Odt tree
-        // Once this is fixed, SelectionView.addOverlays & StepsTranslator.verifyRootNode can be largely removed
+        // Once this is fixed, SelectionView.addOverlays & OdtStepsTranslator.verifyRootNode can be largely removed
         odfContainer.setRootElement(documentElement);
         odfCanvas.setOdfContainer(odfContainer, true);
         odfCanvas.refreshCSS();
@@ -927,7 +927,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         filter = new ops.TextPositionFilter(getRootNode);
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
-        stepsTranslator = new ops.StepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
+        stepsTranslator = new ops.OdtStepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
         eventNotifier.subscribe(ops.OdtDocument.signalOperationEnd, handleOperationExecuted);

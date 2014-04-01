@@ -455,7 +455,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {!boolean}
      */
     function roundUp(step) {
-        return step === ops.StepsTranslator.NEXT_STEP;
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
     }
 
     /**
