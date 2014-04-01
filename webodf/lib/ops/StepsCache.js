@@ -162,7 +162,9 @@
          * @return {!boolean}
          */
         function isUndamagedBookmark(bookmark) {
-            return lastUndamagedCacheStep === undefined || bookmark.steps <= lastUndamagedCacheStep;
+            return lastUndamagedCacheStep === undefined
+                || bookmark === basePoint
+                || bookmark.steps <= lastUndamagedCacheStep;
         }
 
         /**
@@ -323,7 +325,7 @@
             }
             cacheBucket = getBucket(steps);
 
-            while (!cachePoint && cacheBucket !== 0) {
+            while (!cachePoint && cacheBucket >= 0) {
                 cachePoint = stepToDomPoint[cacheBucket];
                 cacheBucket -= bucketSize;
             }
@@ -463,19 +465,19 @@
                 bookmark,
                 closestPriorBookmark;
 
-                closestPriorBookmark = repairCacheUpToStep(steps);
-                // Note, the node bookmark must be updated after the repair as if steps < lastUndamagedCacheStep
-                // the repair will assume any nodes after lastUndamagedCacheStep are damaged.
-                bookmark = getNodeBookmark(/**@type{!Element}*/(node), steps);
-                insertBookmark(closestPriorBookmark, bookmark);
-                // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
-                cacheBucket = getDestinationBucket(bookmark.steps);
-                existingCachePoint = stepToDomPoint[cacheBucket];
-                if (!existingCachePoint || bookmark.steps > existingCachePoint.steps) {
-                    // The current node & offset are closer to the cache bucket boundary than the existing entry was
-                    stepToDomPoint[cacheBucket] = bookmark;
-                }
-                verifyCache();
+            closestPriorBookmark = repairCacheUpToStep(steps);
+            // Note, the node bookmark must be updated after the repair as if steps < lastUndamagedCacheStep
+            // the repair will assume any nodes after lastUndamagedCacheStep are damaged.
+            bookmark = getNodeBookmark(/**@type{!Element}*/(node), steps);
+            insertBookmark(closestPriorBookmark, bookmark);
+            // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
+            cacheBucket = getDestinationBucket(bookmark.steps);
+            existingCachePoint = stepToDomPoint[cacheBucket];
+            if (!existingCachePoint || bookmark.steps > existingCachePoint.steps) {
+                // The current node & offset are closer to the cache bucket boundary than the existing entry was
+                stepToDomPoint[cacheBucket] = bookmark;
+            }
+            verifyCache();
         };
 
         /**
@@ -566,14 +568,14 @@
 
         /**
          * Mark all steps beyond inflectionStep as no longer accurate. Note, if a negative value
-         * is passed in it is treated as a 0, and the whole cache will be cleared.
+         * is passed in it is treated as a -1, and the whole cache will be cleared.
          * @param {!number} inflectionStep
          * @return {undefined}
          */
         this.damageCacheAfterStep = function(inflectionStep) {
             if (inflectionStep < 0) {
                 // Truncate negative steps to be 0. Saves some badness from occurring if a negative is passed in.
-                inflectionStep = 0;
+                inflectionStep = -1;
             }
             if (lastUndamagedCacheStep === undefined) {
                 lastUndamagedCacheStep = inflectionStep;

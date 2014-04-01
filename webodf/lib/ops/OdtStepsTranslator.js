@@ -101,15 +101,19 @@
          * @param {!core.PositionIterator} iterator
          * @return {undefined}
          */
-        /*jslint unparam:true*/
         function roundUpToStep(steps, iterator) {
             do {
                 if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
+                    // Have reached the step represented by the paragraph bookmark
+                    updateCache(steps, iterator, true);
                     break;
                 }
+                // This logic inverts the +1 logic in updateCache. Conceptually speaking, the stored
+                // bookmark represents the first step in the paragraph. Until the first step is found,
+                // the iterator is still technically on steps-1.
+                updateCache(steps - 1, iterator, false);
             } while (iterator.nextPosition());
         }
-        /*jslint unparam:false*/
 
         /**
          * This evil little check is necessary because someone, not mentioning any names *cough*

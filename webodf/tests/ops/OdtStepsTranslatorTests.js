@@ -583,19 +583,20 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
     }
 
     function handleStepsRemoved_AtDocumentStart() {
-        var doc = createDoc("<text:p>ABCD</text:p><text:p>EFG</text:p>"),
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>F</text:p>"),
             removedParagraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0],
-            paragraphs = [];
+            paragraphs = extractParagraphBoundaries(doc);
 
-        paragraphs.push(createParagraphBoundary(doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1]));
         t.translator.prime();
         t.filter.popCallCount();
 
         removedParagraph.parentNode.removeChild(removedParagraph);
-        paragraphs[0].node.firstChild.deleteData(0, 2);
-        t.translator.handleStepsRemoved({position: 0, length: 7});
+        paragraphs.shift(); // remove the first boundary to match the removed paragraph
+        t.translator.handleStepsRemoved({position: 0, length: 5});
+        // manually update the remaining paragraph boundaries to reflect what they should now be
         paragraphs[0].start = 0;
         paragraphs[0].length = 1;
+        paragraphs[1].start = 2;
 
         verifyParagraphBoundaries(paragraphs);
     }

@@ -340,7 +340,7 @@
   </ops>
   <after><office:text><text:p>a bc</text:p></office:text></after>
  </test>
- <test name="InsertText_AfterSpaceAndTab_InNewParagraph" isFailing="true">
+ <test name="InsertText_AfterSpaceAndTab_InNewParagraph">
   <before><office:text><text:p/></office:text></before>
   <ops>
    <op optype="SplitParagraph" position="0" moveCursor="true"/>
@@ -524,7 +524,7 @@
   </ops>
   <after><office:text><text:p text:style-name="B"><text:span><c:cursor c:memberId="Bob"/>cde</text:span></text:p></office:text></after>
  </test>
- <test name="Remove_MergeEmptyParagraph" isFailing="true">
+ <test name="Remove_MergeEmptyParagraph">
   <before><office:text><text:p text:style-name="A"><draw:frame text:anchor-type="as-char"/></text:p><text:p text:style-name="B"/><text:p text:style-name="C"></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
