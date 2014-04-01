@@ -301,7 +301,7 @@
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Joe"/><text:s> </text:s></text:p></office:text></after>
  </test>
- <test name="MoveCursor_DeletedParagraph" isFailing="true">
+ <test name="MoveCursor_DeletedParagraph">
   <before><office:text><text:tracked-changes><text:changed-region><text:deletion><text:p>123</text:p></text:deletion></text:changed-region></text:tracked-changes><text:p>ab</text:p><text:p/></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>

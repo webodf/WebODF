@@ -86,6 +86,16 @@
             basePoint,
             /**@type{!number|undefined}*/
             lastUndamagedCacheStep,
+            /**
+             * @const
+             * @type {!number}
+             */
+            DOCUMENT_POSITION_FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING,
+            /**
+             * @const
+             * @type {!number}
+             */
+            DOCUMENT_POSITION_PRECEDING = Node.DOCUMENT_POSITION_PRECEDING,
             verifyCache;
 
         /**
@@ -205,7 +215,7 @@
                     if (previousBookmark) {
                         documentPosition = bookmark.node.compareDocumentPosition(previousBookmark.node);
                         /*jslint bitwise:true*/
-                        runtime.assert(documentPosition === 0 || (documentPosition&Node.DOCUMENT_POSITION_PRECEDING) !== 0,
+                        runtime.assert(documentPosition === 0 || (documentPosition & DOCUMENT_POSITION_PRECEDING) !== 0,
                             "Bookmark order with previous does not reflect DOM order @" + inspectBookmarks(previousBookmark, bookmark));
                         /*jslint bitwise:false*/
                     }
@@ -213,7 +223,7 @@
                         if (domUtils.containsNode(rootElement, nextBookmark.node)) {
                             documentPosition = bookmark.node.compareDocumentPosition(nextBookmark.node);
                             /*jslint bitwise:true*/
-                            runtime.assert(documentPosition === 0 || (documentPosition&Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+                            runtime.assert(documentPosition === 0 || (documentPosition & DOCUMENT_POSITION_FOLLOWING) !== 0,
                                 "Bookmark order with next does not reflect DOM order @" + inspectBookmarks(bookmark, nextBookmark));
                             /*jslint bitwise:false*/
                         }
@@ -369,6 +379,16 @@
         }
 
         /**
+         * Returns true if the newBookmark is already directly on or after the previous bookmark
+         * @param {!ops.StepsCache.Bookmark} previousBookmark
+         * @param {!ops.StepsCache.Bookmark} newBookmark
+         * @return {!boolean}
+         */
+        function isAlreadyInOrder(previousBookmark, newBookmark) {
+            return previousBookmark === newBookmark || previousBookmark.nextBookmark === newBookmark;
+        }
+
+        /**
          * Insert a bookmark into the cache chain just after the previous bookmark
          * @param {!ops.StepsCache.Bookmark} previousBookmark
          * @param {!ops.StepsCache.Bookmark} newBookmark
@@ -378,19 +398,33 @@
             var nextBookmark;
             // Check if the newBookmark is already in the chain at the correct location. Don't bother updating
             // if it is in place.
-            if (previousBookmark !== newBookmark && previousBookmark.nextBookmark !== newBookmark) {
-                // Removing the existing item first helps prevent infinite-loops from being created in the cache if
-                // multiple bookmarks somehow end up sharing the same step. This is NOT expected to happen in practice,
-                // but could be caused by an undiscovered bug.
-                removeBookmark(newBookmark);
-                // Assign this value before we override it just below
-                nextBookmark = previousBookmark.nextBookmark;
+            if (!isAlreadyInOrder(previousBookmark, newBookmark)) {
+                if (previousBookmark.steps === newBookmark.steps) {
+                    // It is valid for multiple bookmarks to share the same step.
+                    // In this case, step order becomes ambiguous so DOM order is now required to determine the
+                    // correct insertion point
+                    /*jslint bitwise:true*/
+                    while ((newBookmark.node.compareDocumentPosition(previousBookmark.node) & DOCUMENT_POSITION_FOLLOWING) !== 0
+                            && previousBookmark !== basePoint) {
+                        // if the previous bookmark FOLLOWS the new bookmark, navigate back one
+                        previousBookmark = /**@type{!ops.StepsCache.Bookmark}*/(previousBookmark.previousBookmark);
+                    }
+                    /*jslint bitwise:false*/
+                }
 
-                newBookmark.nextBookmark = previousBookmark.nextBookmark;
-                newBookmark.previousBookmark = previousBookmark;
-                previousBookmark.nextBookmark = newBookmark;
-                if (nextBookmark) {
-                    nextBookmark.previousBookmark = newBookmark;
+                if (!isAlreadyInOrder(previousBookmark, newBookmark)) {
+                    // Removing the existing item first helps prevent infinite-loops from being created in the event of
+                    // some type of undiscovered cache bug.
+                    removeBookmark(newBookmark);
+                    // Assign this value before we override it just below
+                    nextBookmark = previousBookmark.nextBookmark;
+
+                    newBookmark.nextBookmark = previousBookmark.nextBookmark;
+                    newBookmark.previousBookmark = previousBookmark;
+                    previousBookmark.nextBookmark = newBookmark;
+                    if (nextBookmark) {
+                        nextBookmark.previousBookmark = newBookmark;
+                    }
                 }
             }
         }

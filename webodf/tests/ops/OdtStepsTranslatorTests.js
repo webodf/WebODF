@@ -306,6 +306,22 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         r.shouldBe(t, "t.actualOriginalDomPoint.offset", "0");
     }
 
+    function convertStepsToDomPoint_Cached_MultipleBookmarksOnSameStep() {
+        var doc = createDoc("<text:tracked-changes><text:p>1</text:p></text:tracked-changes><text:p>A</text:p><text:p>B</text:p>"),
+            paragraphs = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p"),
+            step;
+
+        t.expected0 = {node: paragraphs[1].firstChild, offset: 0};
+        t.expected1 = {node: paragraphs[1], offset: 1};
+        t.expected2 = {node: paragraphs[2].firstChild, offset: 0};
+        t.expected3 = {node: paragraphs[2], offset: 1};
+
+        for (step = 0; step <= 3; step += 1) {
+            t["position" + step] = t.translator.convertStepsToDomPoint(step);
+            r.shouldBe(t, "t.position" + step, "t.expected" + step);
+        }
+    }
+
     function convertDomPointsToSteps_At0() {
         var doc = createDoc("<text:p>AB</text:p>"),
             p = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0];
@@ -480,6 +496,17 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         r.shouldBe(t, "t.steps", "9");
     }
 
+    function convertDomPointsToSteps_Cached_MultipleBookmarksOnSameStep() {
+        var doc = createDoc("<text:tracked-changes><text:p>1</text:p></text:tracked-changes><text:p>A</text:p><text:p>B</text:p>");
+
+        t.paragraphs = extractParagraphBoundaries(doc).map(function(b) { return {start: b.start, length: b.length }; });
+
+        r.shouldBe(t, "t.paragraphs.shift()", "({start: 0, length: 0})");
+        r.shouldBe(t, "t.paragraphs.shift()", "({start: 0, length: 1})");
+        r.shouldBe(t, "t.paragraphs.shift()", "({start: 2, length: 1})");
+        r.shouldBe(t, "t.paragraphs.shift()", "undefined");
+    }
+
     function handleStepsInserted_InsertMultipleStepsIndividually() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>IJKL</text:p>"),
             paragraphs = extractParagraphBoundaries(doc),
@@ -640,6 +667,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
             convertStepsToDomPoint_Cached_HasContentBeforeWalkablePosition,
             convertStepsToDomPoint_Cached_ContentAddedBeforeWalkablePosition,
             convertStepsToDomPoint_Cached_CopesWithClonedNode,
+            convertStepsToDomPoint_Cached_MultipleBookmarksOnSameStep,
 
             convertDomPointsToSteps_At0,
             convertDomPointsToSteps_Before0,
@@ -657,6 +685,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
             convertDomPointsToSteps_Cached_CopesWithClonedNode,
             convertDomPointsToSteps_Cached_CopesWithBookmarkedNodeBeingRemoved,
             convertDomPointsToSteps_Cached_FindsNearestKnownPosition,
+            convertDomPointsToSteps_Cached_MultipleBookmarksOnSameStep,
 
             handleStepsInserted_InsertMultipleStepsIndividually,
             handleStepsInserted_InsertMultipleParagraphsIndividually,
