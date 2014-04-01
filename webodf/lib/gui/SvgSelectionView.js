@@ -50,8 +50,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     var /**@type{!ops.Document}*/
         document = cursor.getDocument(),
         documentRoot, // initialized by addOverlay
-        /**@type{!Element}*/
-        root, // initialized by addOverlays
+        /**@type{!HTMLElement}*/
+        sizer,
         doc = document.getDOMDocument(),
         svgns = "http://www.w3.org/2000/svg",
         overlay = doc.createElementNS(svgns, 'svg'),
@@ -86,8 +86,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         var newDocumentRoot = document.getRootNode();
         if (documentRoot !== newDocumentRoot) {
             documentRoot = newDocumentRoot;
-            root = /**@type{!Element}*/(documentRoot.parentNode.parentNode.parentNode);
-            root.appendChild(overlay);
+            sizer = document.getCanvas().getSizer();
+            sizer.appendChild(overlay);
             overlay.setAttribute('class', 'webodf-selectionOverlay');
             handle1.setAttribute('class', 'webodf-draggable');
             handle2.setAttribute('class', 'webodf-draggable');
@@ -109,7 +109,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * @return {!{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}}
      */
     function translateRect(rect) {
-        var rootRect = domUtils.getBoundingClientRect(root),
+        var rootRect = domUtils.getBoundingClientRect(sizer),
             zoomLevel = zoomHelper.getZoomLevel(),
             resultRect = {};
 
@@ -670,7 +670,8 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      * @param {function(!Object=)} callback
      */
     function destroy(callback) {
-        root.removeChild(overlay);
+        sizer.removeChild(overlay);
+        sizer.classList.remove('webodf-virtualSelections');
         cursor.getDocument().unsubscribe(ops.Document.signalCursorMoved, handleCursorMove);
         zoomHelper.unsubscribe(gui.ZoomHelper.signalZoomChanged, scaleHandles);
         callback();
@@ -691,6 +692,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         renderTask = core.Task.createRedrawTask(rerender);
         addOverlay();
         overlay.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
+        sizer.classList.add('webodf-virtualSelections');
         cursor.getDocument().subscribe(ops.Document.signalCursorMoved, handleCursorMove);
         zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, scaleHandles);
         scaleHandles(zoomHelper.getZoomLevel());

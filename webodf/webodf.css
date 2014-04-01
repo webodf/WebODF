@@ -60,10 +60,10 @@ office|text::selection {
   background: transparent;
 }
 
-office|document *::selection {
+.webodf-virtualSelections *::selection {
   background: transparent;
 }
-office|document *::-moz-selection {
+.webodf-virtualSelections *::-moz-selection {
   background: transparent;
 }
 
@@ -516,13 +516,6 @@ office|annotation text|p {
     font-style: normal;
     text-decoration: none;
     font-family: sans-serif;
-}
-
-dc|*::selection {
-    background: transparent;
-}
-dc|*::-moz-selection {
-    background: transparent;
 }
 
 #annotationsPane {
