@@ -39,6 +39,7 @@
 runtime.loadClass("core.Zip");
 runtime.loadClass("core.Base64");
 runtime.loadClass("xmldom.RelaxNG");
+runtime.loadClass("xmldom.RelaxNGParser");
 
 /** This code runs a number of tests on an ODF document.
  * Ideally, it would use ODFContainer, but for now, it uses a custome container
