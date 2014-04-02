@@ -963,4 +963,36 @@ odf.OdfUtils = function OdfUtils() {
         newRange.detach();
         return links;
     };
+
+    /**
+     * Normalize the font-family name as defined in
+     * http://www.w3.org/TR/2008/REC-CSS2-20080411/fonts.html#propdef-font-family
+     * (see there text behind: "There are two types of font family names: <family-name>")
+     * @param {!string} fontFamilyName
+     * @return {!string}
+     */
+    /*jslint regexp: true*/
+    this.getNormalizedFontFamilyName = function(fontFamilyName) {
+        // not quoted with either single- or double-quotes?
+        // (\n & \r are syntactically okay as whitespaces, so need to be accepted as well)
+        //     ^(["'])        -> match either " or ' at begin (and store match)
+        //     (?:.|[\n\r])*? -> match non-greedy any number of any char or \r and \n
+        //     \1$            -> match content of first match at end
+        if (!(/^(["'])(?:.|[\n\r])*?\1$/).test(fontFamilyName)) {
+            // remove any whitespaces at begin and end of full name (ignore internal yet)
+            //     ^[ \t\r\n\f]*    -> match whitespace at begin
+            //     ((?:.|[\n\r])*?) -> match non-greedy any number of any char or \r and \n (and store match)
+            //     [ \t\r\n\f]*$    -> match whitespace at end
+            fontFamilyName = fontFamilyName.replace(/^[ \t\r\n\f]*((?:.|[\n\r])*?)[ \t\r\n\f]*$/, "$1");
+            // if there is any internal whitespace, reduce it to just one normal whitespace per group
+            // and add quotes around the full name
+            // (quotes should be only added if there is whitespace inside, as the passed fontFamilyName could
+            // be a generic-family one, which must not be quoted)
+            if ((/[ \t\r\n\f]/).test(fontFamilyName)) {
+                fontFamilyName = "'" + fontFamilyName.replace(/[ \t\r\n\f]+/g, " ") + "'";
+            }
+        }
+        return fontFamilyName;
+    };
+    /*jslint regexp: false*/
 };
