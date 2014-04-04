@@ -817,7 +817,7 @@
   </ops>
   <after><office:text><text:p>hello</text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
  </test>
- <test name="SplitParagraph_BeforeSpace_2" isFailing="true">
+ <test name="SplitParagraph_BeforeSpace_2">
   <before><office:text><text:p><text:span>hello</text:span><text:span> world</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
