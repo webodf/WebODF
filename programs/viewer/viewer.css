@@ -3,8 +3,9 @@
     margin: 0;
 }
 
-body {
+html > body {
   font-family: sans-serif;
+  overflow: hidden;
 }
 
 .titlebar > span,
@@ -687,20 +688,46 @@ html[dir='rtl'] .dropdownToolbarButton {
     opacity: 0.5;
 }
 
-@media only screen and (max-width: 600px) and (max-height: 1000px) {
+@media only screen and (max-device-width: 800px) and (max-device-height: 800px) {
     #canvasContainer {
         top: 0;
         bottom: 0;
     }
+
+    #overlayNavigator {
+        height: 100px;
+        pointer-events: none;
+    }
+    #nextPage, #previousPage {
+        pointer-events: all;
+    }
+
     #titlebar, #toolbarContainer {
         background-color: rgba(0, 0, 0, 0.6);
         background-image: none;
+        -webkit-transition: all 0.5s;
+        -moz-transition: all 0.5s;
+        transition: all 0.5s;
     }
-    #overlayNavigator.touched {
+
+    #titlebar {
+        top: -32px;
+    }
+    #titlebar.viewer-touched {
+        top: 0px;
+    }
+    #toolbarContainer {
+        bottom: -32px;
+    }
+    #toolbarContainer.viewer-touched {
+        bottom: 0px;
+    }
+
+    .viewer-touched {
         display: block;
-        opacity: 1;
-        height: 100px;
+        opacity: 1 !important;
     }
+
     #next, #previous {
         display: none;
     }
