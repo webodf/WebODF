@@ -181,39 +181,44 @@ var webodfEditor = (function () {
                 "webodf/editor/Editor"],
                     function (Translator, Editor) {
                         var locale = navigator.language || "en-US",
-                            translationsDir = 'translations',
-                            t = new Translator(translationsDir, locale, function (editorTranslator) {
-                                var canvasContainerElement;
+                            editorBase = dojo.config && dojo.config.paths && dojo.config.paths["webodf/editor"],
+                            translationsDir = '/translations',
+                            t;
 
-                                runtime.setTranslator(editorTranslator.translate);
+                        runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
 
-                                editorOptions = editorOptions || {}; // TODO: cleanup
-                                editorOptions.networkSecurityToken = token;
-                                editorOptions.closeCallback = closeEditing;
+                        t = new Translator(editorBase + translationsDir, locale, function (editorTranslator) {
+                            var canvasContainerElement;
 
-                                editorInstance = new Editor("mainContainer", editorOptions, server, serverFactory);
-                                canvasContainerElement = editorInstance.getCanvasContainerElement();
-                                savingOverlay = addStatusOverlay(canvasContainerElement, "document-save.png", 0);
-                                hasLocalUnsyncedOpsOverlay = addStatusOverlay(canvasContainerElement, "vcs-locally-modified.png", 0);
-                                disconnectedOverlay = addStatusOverlay(canvasContainerElement, "network-disconnect.png", 1);
+                            runtime.setTranslator(editorTranslator.translate);
 
-                                editorInstance.addEventListener(Editor.EVENT_BEFORESAVETOFILE, function() {
-                                    savingOverlay.style.display = "";
-                                });
-                                editorInstance.addEventListener(Editor.EVENT_SAVEDTOFILE, function() {
-                                    savingOverlay.style.display = "none";
-                                });
-                                editorInstance.addEventListener(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function(has) {
-                                    hasLocalUnsyncedOpsOverlay.style.display = has ? "" : "none";
-                                });
-                                editorInstance.addEventListener(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function(has) {
-                                    disconnectedOverlay.style.display = has ? "none" : "";
-                                });
-                                editorInstance.addEventListener(Editor.EVENT_ERROR, handleEditingError);
+                            editorOptions = editorOptions || {}; // TODO: cleanup
+                            editorOptions.networkSecurityToken = token;
+                            editorOptions.closeCallback = closeEditing;
 
-                                // load the document and get called back when it's live
-                                editorInstance.openSession(sessionId, memberId, startEditing);
+                            editorInstance = new Editor("mainContainer", editorOptions, server, serverFactory);
+                            canvasContainerElement = editorInstance.getCanvasContainerElement();
+                            savingOverlay = addStatusOverlay(canvasContainerElement, "document-save.png", 0);
+                            hasLocalUnsyncedOpsOverlay = addStatusOverlay(canvasContainerElement, "vcs-locally-modified.png", 0);
+                            disconnectedOverlay = addStatusOverlay(canvasContainerElement, "network-disconnect.png", 1);
+
+                            editorInstance.addEventListener(Editor.EVENT_BEFORESAVETOFILE, function() {
+                                savingOverlay.style.display = "";
                             });
+                            editorInstance.addEventListener(Editor.EVENT_SAVEDTOFILE, function() {
+                                savingOverlay.style.display = "none";
+                            });
+                            editorInstance.addEventListener(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function(has) {
+                                hasLocalUnsyncedOpsOverlay.style.display = has ? "" : "none";
+                            });
+                            editorInstance.addEventListener(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function(has) {
+                                disconnectedOverlay.style.display = has ? "none" : "";
+                            });
+                            editorInstance.addEventListener(Editor.EVENT_ERROR, handleEditingError);
+
+                            // load the document and get called back when it's live
+                            editorInstance.openSession(sessionId, memberId, startEditing);
+                        });
                     }
                 );
             } else {

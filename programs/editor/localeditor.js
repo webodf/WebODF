@@ -208,8 +208,13 @@ var webodfEditor = (function () {
             "webodf/editor/Editor"],
             function (Translator, Editor) {
                 var locale = navigator.language || "en-US",
-                    translationsDir = 'translations',
-                    t = new Translator(translationsDir, locale, function (editorTranslator) {
+                    editorBase = dojo.config && dojo.config.paths && dojo.config.paths["webodf/editor"],
+                    translationsDir = '/translations',
+                    t;
+
+                    runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
+
+                    t = new Translator(editorBase + translationsDir, locale, function (editorTranslator) {
                         runtime.setTranslator(editorTranslator.translate);
                         editorInstance = new Editor("mainContainer", editorOptions);
                         editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
