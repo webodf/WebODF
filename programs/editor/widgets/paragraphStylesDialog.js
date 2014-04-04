@@ -132,7 +132,7 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 * based on the mapping defined in propertyMapping.
                 * @param {!Object} properties
                 * @param {!Array.<!{propertyName:string,attributeName:string,unit:string}>} propertyMapping
-                * @return {undefined}
+                * @return {!Object}
                 */
                 function mappedProperties(properties, propertyMapping) {
                     var i, m, value,
