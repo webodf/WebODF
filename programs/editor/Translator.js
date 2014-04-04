@@ -41,7 +41,7 @@
 define("webodf/editor/Translator", [], function () {
     "use strict";
 
-    return function Translator(locale, callback) {
+    return function Translator(translationsPath, locale, callback) {
         var self = this,
             dictionary = {};
 
@@ -59,7 +59,7 @@ define("webodf/editor/Translator", [], function () {
             }
 
             var xhr = new XMLHttpRequest(),
-                path = "translations/" + newLocale + ".json";
+                path = translationsPath + '/' + newLocale + ".json";
             xhr.open("GET", path);
             xhr.onload = function () {
                 if (xhr.status === 200) {// HTTP OK
