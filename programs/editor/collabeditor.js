@@ -181,7 +181,8 @@ var webodfEditor = (function () {
                 "webodf/editor/Editor"],
                     function (Translator, Editor) {
                         var locale = navigator.language || "en-US",
-                            t = new Translator(locale, function (editorTranslator) {
+                            translationsDir = 'translations',
+                            t = new Translator(translationsDir, locale, function (editorTranslator) {
                                 var canvasContainerElement;
 
                                 runtime.setTranslator(editorTranslator.translate);

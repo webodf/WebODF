@@ -208,7 +208,8 @@ var webodfEditor = (function () {
             "webodf/editor/Editor"],
             function (Translator, Editor) {
                 var locale = navigator.language || "en-US",
-                    t = new Translator(locale, function (editorTranslator) {
+                    translationsDir = 'translations',
+                    t = new Translator(translationsDir, locale, function (editorTranslator) {
                         runtime.setTranslator(editorTranslator.translate);
                         editorInstance = new Editor("mainContainer", editorOptions);
                         editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
