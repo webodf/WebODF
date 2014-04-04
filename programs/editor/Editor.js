@@ -125,15 +125,30 @@ define("webodf/editor/Editor", [
                 eventNotifier.emit(eventid, args);
             }
 
-            function getFileBlob(cbSuccess, cbError) {
+            /**
+             * Create an Uint8Array containing the ODT file of the current state of the document
+             * and pass it to the callback method.
+             * Should be only called when a document is loaded, so either between "openDocument"
+             * and "closeDocument" or between "openSession" and "closeSession"
+             * TODO: define error object passed to callback
+             * @param {!function(err:?Object, !Uint8Array=):undefined} cb receiving ODT file as ByteArray
+             * @return {undefined}
+             */
+            function getDocumentAsByteArray(cb) {
                 var odfContainer = odfCanvas.odfContainer();
 
                 if (odfContainer) {
-                    odfContainer.createByteArray(cbSuccess, cbError);
+                    odfContainer.createByteArray(function(ba) {
+                        cb(null, ba);
+                    }, function(err) {
+                        cb(err ? err : "Could not create bytearray.");
+                    });
                 } else {
-                    cbError("No odfContainer!");
+                    cb("No odfContainer!");
                 }
             }
+
+            this.getDocumentAsByteArray = getDocumentAsByteArray;
 
             /**
              * prepare all gui elements and load the given document.
@@ -230,7 +245,13 @@ define("webodf/editor/Editor", [
              * @return {undefined}
              */
             this.saveDocument = function (filename, callback) {
-                function onsuccess(data) {
+                function onFileBlob(err, data) {
+                    if (err) {
+                        // TODO: use callback for that
+                        alert(error);
+                        return;
+                    }
+
                     var mimebase = "application/vnd.oasis.opendocument.",
                         mimetype = mimebase + "text",
                         blob;
@@ -245,13 +266,9 @@ define("webodf/editor/Editor", [
                     //TODO: add callback as event handler to saveAs
                     fireEvent(Editor.EVENT_SAVEDTOFILE, null);
                 }
-                function onerror(error) {
-                    // TODO: use callback for that
-                    alert(error);
-                }
 
                 fireEvent(Editor.EVENT_BEFORESAVETOFILE, null);
-                getFileBlob(onsuccess, onerror);
+                getDocumentAsByteArray(onFileBlob);
             };
 
             /**
