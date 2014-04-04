@@ -123,14 +123,16 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     }, {
                         propertyName:  'textAlign',
                         attributeName: 'fo:text-align'
-                    }];
+                    }],
+                    originalFontEffectsPaneValue,
+                    originalAlignmentPaneValue;
 
                 /**
                 * Sets attributes of a node by the properties of the object properties,
                 * based on the mapping defined in propertyMapping.
                 * @param {!Object} properties
                 * @param {!Array.<!{propertyName:string,attributeName:string,unit:string}>} propertyMapping
-                * @return {undefined}
+                * @return {!Object}
                 */
                 function mappedProperties(properties, propertyMapping) {
                     var i, m, value,
@@ -147,10 +149,33 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     return result;
                 }
 
+                /**
+                 * Returns an flat object containing only the key-value mappings
+                 * from the 'new' flat object which are different from the 'old' object's.
+                 * @param {!Object} oldProperties
+                 * @param {!Object} newProperties
+                 * @return {!Object}
+                 */
+                function updatedProperties(oldProperties, newProperties) {
+                    var properties = {};
+                    Object.keys(newProperties).forEach(function (key) {
+                        if (newProperties[key] !== oldProperties[key]) {
+                            properties[key] = newProperties[key];
+                        }
+                    });
+                    return properties;
+                }
+
                 function accept() {
                     editorSession.updateParagraphStyle(stylePicker.value(), {
-                        "style:paragraph-properties": mappedProperties(alignmentPane.value(), paragraphPropertyMapping),
-                        "style:text-properties": mappedProperties(fontEffectsPane.value(), textPropertyMapping)
+                        "style:paragraph-properties": mappedProperties(
+                                                        updatedProperties(originalAlignmentPaneValue, alignmentPane.value()),
+                                                        paragraphPropertyMapping
+                                                     ),
+                        "style:text-properties": mappedProperties(
+                                                    updatedProperties(originalFontEffectsPaneValue, fontEffectsPane.value()),
+                                                    textPropertyMapping
+                                                 )
                     });
 
                     dialog.hide();
@@ -164,8 +189,12 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                     if (value !== stylePicker.value()) {
                         stylePicker.setValue(value);
                     }
+
                     alignmentPane.setStyle(value);
                     fontEffectsPane.setStyle(value);
+                    originalAlignmentPaneValue = alignmentPane.value();
+                    originalFontEffectsPaneValue = fontEffectsPane.value();
+
                     // If it is a default (nameless) style or is used, make it undeletable.
                     if (value === "" || editorSession.isStyleUsed(editorSession.getParagraphStyleElement(value))) {
                         deleteButton.domNode.style.display = 'none';
