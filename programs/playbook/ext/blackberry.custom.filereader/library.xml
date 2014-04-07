@@ -8,7 +8,7 @@
 			<target version="default" config="AIR_XHR" />
 		</platform>
 	</platforms>
-	
+
 	<configurations>
 		<configuration name="AIR_XHR" version="1.0" comment="For XHR architecture for implementation">
 			<src type="text/javascript" path="js/common/custom_filereader_dispatcher.js" comment="Application JS interface" />
