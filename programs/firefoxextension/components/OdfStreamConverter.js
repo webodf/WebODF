@@ -42,7 +42,7 @@ function makeODFStreamConverters() {
         Ci = Components.interfaces,
         Cr = Components.results,
         Cu = Components.utils,
-        WEBODFJS_EVENT_ID = 'webodf.js.message';
+        WEBODF_MESSAGE_EVENT_ID = 'webodf.message';
 
     Cu["import"]('resource://gre/modules/XPCOMUtils.jsm');
     Cu["import"]('resource://gre/modules/Services.jsm');
@@ -138,35 +138,14 @@ function makeODFStreamConverters() {
     }
     // Receive an event and synchronously or asynchronously responds.
     RequestListener.prototype.receive = function (event) {
-        var message = event.target,
-            doc = message.ownerDocument,
-            action = message.getUserData('action'),
-            data = message.getUserData('data'),
-            sync = message.getUserData('sync'),
-            actions = this.actions,
-            response,
-            listener;
+        var action = event.detail.action,
+            data = event.detail.data,
+            actions = this.actions;
         if (!(action in actions)) {
             log('Unknown action: ' + action);
             return;
         }
-        if (sync) {
-            response = actions[action].call(this.actions, data);
-            message.setUserData('response', response, null);
-        } else {
-            if (!message.getUserData('callback')) {
-                doc.documentElement.removeChild(message);
-                response = null;
-            } else {
-                response = function sendResponse(response) {
-                    message.setUserData('response', response, null);
-                    listener = doc.createEvent('HTMLEvents');
-                    listener.initEvent('webodf.js.response', true, false);
-                    return message.dispatchEvent(listener);
-                };
-            }
-            actions[action].call(this.actions, data, response);
-        }
+        actions[action].call(this.actions, data);
     };
 
     /* common base for ODT, ODS and ODP stream converters */
@@ -260,10 +239,10 @@ function makeODFStreamConverters() {
                             requestListener = new RequestListener(
                                 new ChromeActions(domWindow)
                             );
-                            domWindow.addEventListener(WEBODFJS_EVENT_ID,
+                            domWindow.addEventListener(WEBODF_MESSAGE_EVENT_ID,
                                 function (event) {
                                     requestListener.receive(event);
-                                }, false, true);
+                                }, false, true, true);
                         }
                         listener.onStopRequest.apply(listener, arguments);
                     }
@@ -284,25 +263,37 @@ function makeODFStreamConverters() {
     }
     OdtStreamConverter.prototype = {
         // properties required for XPCOM registration:
-        classID: Components.ID('{7457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
+        classID: Components.ID('{43d50559-3e72-435e-9526-482b93f05bf1}'),
         classDescription: 'OpenDocument Text converter',
-        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text&to=*/*'
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
     };
 
     function OdsStreamConverter() {
     }
     OdsStreamConverter.prototype = {
         // properties required for XPCOM registration:
-        classID: Components.ID('{8457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
+        classID: Components.ID('{5f0cd28d-cd7a-4c38-8dd9-72135474b9bc}'),
         classDescription: 'OpenDocument Spreadsheet converter',
-        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet&to=*/*'
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
     };
 
     function OdpStreamConverter() {
     }
     OdpStreamConverter.prototype = {
       // properties required for XPCOM registration:
-        classID: Components.ID('{9457a96b-2d68-439a-bcfa-44465fbcdbb1}'),
+        classID: Components.ID('{84492c35-9c3a-41cc-a512-eb8eb06744a0}'),
         classDescription: 'OpenDocument Presentation converter',
         contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.presentation&to=*/*',
         QueryInterface: OdfStreamConverter.QueryInterface,

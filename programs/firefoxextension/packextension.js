@@ -66,7 +66,7 @@ function addFiles(dirname, pos, files, callback) {
                 fs.mkdirSync(dir);
             }
         });
-        fs.writeFile(target, data, {encoding: "binary"}, function (err) {
+        fs.writeFile(target, new Buffer(data), {encoding: "binary"}, function (err) {
             if (err) {
                 throw err;
             }

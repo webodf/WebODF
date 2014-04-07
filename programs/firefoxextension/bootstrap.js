@@ -44,7 +44,10 @@ function bootstrap() {
         Cm = Components.manager,
         Cr = Components.results,
         Cu = Components.utils,
-        Factory,
+        ComponentFactory,
+        odtComponentFactory,
+        odpComponentFactory,
+        odsComponentFactory,
         odfStreamConverterUrl = null;
 
     Cu["import"]('resource://gre/modules/XPCOMUtils.jsm');
@@ -55,35 +58,46 @@ function bootstrap() {
     }
 
     // Register/unregister a constructor as a component.
-    Factory = {
-        QueryInterface: XPCOMUtils.generateQI([Ci.nsIFactory]),
-        _targetConstructor: null,
-        register: function register(targetConstructor) {
-            this._targetConstructor = targetConstructor;
+    ComponentFactory = function () {
+        var self = this,
+            targetConstructor = null;
+
+        this.QueryInterface = XPCOMUtils.generateQI([Ci.nsIFactory]);
+
+        this.register = function(tC) {
+            var proto = tC.prototype,
+                registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
+            targetConstructor = tC;
+
+            registrar.registerFactory(proto.classID, proto.classDescription,
+                            proto.contractID, self);
+        };
+
+        this.unregister = function() {
             var proto = targetConstructor.prototype,
                 registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
-            registrar.registerFactory(proto.classID, proto.classDescription,
-                              proto.contractID, this);
-        },
-        unregister: function unregister() {
-            var proto = this._targetConstructor.prototype,
-                registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
-            registrar.unregisterFactory(proto.classID, this);
-            this._targetConstructor = null;
-        },
+
+            registrar.unregisterFactory(proto.classID, self);
+            targetConstructor = null;
+        };
+
         // nsIFactory
-        createInstance: function createInstance(aOuter, iid) {
+        this.createInstance = function(aOuter, iid) {
             if (aOuter !== null) {
                 throw Cr.NS_ERROR_NO_AGGREGATION;
             }
-            return (new this._targetConstructor()).QueryInterface(iid);
-        },
+            return (new targetConstructor()).QueryInterface(iid);
+        };
         // nsIFactory
-        lockFactory: function lockFactory(lock) {
+        this.lockFactory = function(lock) {
             // No longer used as of gecko 1.7.
             throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-        }
+        };
     };
+
+    odtComponentFactory = new ComponentFactory();
+    odpComponentFactory = new ComponentFactory();
+    odsComponentFactory = new ComponentFactory();
 
 // As of Firefox 13 bootstrapped add-ons don't support automatic registering and
 // unregistering of resource urls and components/contracts. Until then we do
@@ -101,9 +115,9 @@ function bootstrap() {
         odfStreamConverterUrl = aData.resourceURI.spec
             + 'components/OdfStreamConverter.js';
         Cu["import"](odfStreamConverterUrl);
-        Factory.register(OdtStreamConverter);
-        Factory.register(OdsStreamConverter);
-        Factory.register(OdpStreamConverter);
+        odtComponentFactory.register(OdtStreamConverter);
+        odsComponentFactory.register(OdsStreamConverter);
+        odpComponentFactory.register(OdpStreamConverter);
     }
     function shutdown(aData, aReason) {
         if (aReason === APP_SHUTDOWN) {
@@ -115,7 +129,9 @@ function bootstrap() {
         // Remove the resource url.
         resProt.setSubstitution(RESOURCE_NAME, null);
         // Remove the contract/component.
-        Factory.unregister();
+        odtComponentFactory.unregister();
+        odsComponentFactory.unregister();
+        odpComponentFactory.unregister();
         // Unload the converter
         Cu.unload(odfStreamConverterUrl);
         odfStreamConverterUrl = null;

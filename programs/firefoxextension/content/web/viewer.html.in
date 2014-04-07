@@ -36,31 +36,10 @@
 //]]>
   </script>
   <script type="text/javascript">
+var WEBODF_MESSAGE_EVENT_ID = 'webodf.message';
 var FirefoxCom = (function FirefoxComClosure() {
-  return {
-    /**
-     * Creates an event that the extension is listening for and will
-     * synchronously respond to.
-     * NOTE: It is reccomended to use request() instead since one day we may not
-     * be able to synchronously reply.
-     * @param {String} action The action to trigger.
-     * @param {String} data Optional data to send.
-     * @return {*} The response.
-     */
-    requestSync: function(action, data) {
-      var request = document.createTextNode('');
-      request.setUserData('action', action, null);
-      request.setUserData('data', data, null);
-      request.setUserData('sync', true, null);
-      document.documentElement.appendChild(request);
 
-      var sender = document.createEvent('Events');
-      sender.initEvent('webodf.js.message', true, false);
-      request.dispatchEvent(sender);
-      var response = request.getUserData('response');
-      document.documentElement.removeChild(request);
-      return response;
-    },
+  return {
     /**
      * Creates an event that the extension is listening for and will
      * asynchronously respond by calling the callback.
@@ -70,29 +49,14 @@ var FirefoxCom = (function FirefoxComClosure() {
      * with one data argument.
      */
     request: function(action, data, callback) {
-      var request = document.createTextNode('');
-      request.setUserData('action', action, null);
-      request.setUserData('data', data, null);
-      request.setUserData('sync', false, null);
-      if (callback) {
-        request.setUserData('callback', callback, null);
+      var event,
+          eventDetail = {
+            "action" : action,
+            "data": data
+          };
 
-        document.addEventListener('webodf.js.response', function listener(event) {
-          var node = event.target,
-              callback = node.getUserData('callback'),
-              response = node.getUserData('response');
-
-          document.documentElement.removeChild(node);
-
-          document.removeEventListener('webodf.js.response', listener, false);
-          return callback(response);
-        }, false);
-      }
-      document.documentElement.appendChild(request);
-
-      var sender = document.createEvent('HTMLEvents');
-      sender.initEvent('webodf.js.message', true, false);
-      return request.dispatchEvent(sender);
+      event = new CustomEvent(WEBODF_MESSAGE_EVENT_ID, {"bubbles":true, "detail":eventDetail});
+      return document.dispatchEvent(event);
     }
   };
 })();
@@ -105,7 +69,7 @@ function loadODF() {
     runtime.loadClass("odf.OdfCanvas");
     var wf = webodffirefox,
         odfelement = document.getElementById("odf");
-    wf.url = document.location.href,
+    wf.url = document.location.href;
     wf.odfcanvas = new odf.OdfCanvas(odfelement);
     wf.odfcanvas.load(wf.url);
 }
