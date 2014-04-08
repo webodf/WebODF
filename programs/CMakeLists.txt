@@ -1,3 +1,5 @@
+add_subdirectory(touchui)
+
 if(QT4_FOUND)
   add_subdirectory(qtjsruntime)
   add_subdirectory(nativeQtClient)
@@ -10,7 +12,6 @@ endif(ANDROID_SDK_DIR AND ANT)
 
 add_subdirectory(firefoxextension)
 
-add_subdirectory(touchui)
 add_subdirectory(playbook)
 add_subdirectory(benchmark)
 add_subdirectory(editor)

@@ -266,26 +266,6 @@ execute_process(
 )
 include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
 
-set(HTML5UIFILES
-  app/app.js
-  app/controller/Files.js
-  app/model/FileSystem.js
-  app/views/FileDetail.js
-  app/views/FilesList.js
-  app/views/OdfView.js
-  app/views/Viewport.js
-  sencha-touch.css
-  sencha-touch.js
-  app/store/FileStore.js
-  ZoomOut.png
-  ZoomIn.png
-  go-previous.png
-  go-next.png
-  zoom-fit-width.png
-  zoom-fit-best.png
-  zoom-fit-height.png
-)
-
 set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
 
 # COPY_FILES (varname srcdir tgtdir files)
