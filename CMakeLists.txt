@@ -259,12 +259,6 @@ if (NOT ANDROID_SDK_DIR)
 endif(NOT ANDROID_SDK_DIR)
 
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
-# update the list of needed files
-execute_process(
-  COMMAND ${NODE} lib/runtime.js tools/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/webodf
-)
-include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
 
 set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
 

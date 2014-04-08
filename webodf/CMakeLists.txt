@@ -4,6 +4,13 @@ if(WRONGCMAKEDIR)
   message(FATAL_ERROR "You should point CMake to the parent directory.")
 endif(WRONGCMAKEDIR)
 
+# update the list of needed files
+execute_process(
+  COMMAND ${NODE} lib/runtime.js tools/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
+
 configure_file(webodfversion.js.in ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
 
 set(TESTJSFILES tests/core/ZipTests.js
