@@ -317,8 +317,8 @@ macro(COPY_FILES _varname _srcdir _tgtdir)
 endmacro(COPY_FILES _directory _files)
 
 set (VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
-set(WEBODFXPIDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
-set(WEBODFXPI ${WEBODFXPIDIR}.xpi)
+set(FIREFOX_EXTENSION_ODFVIEWER_DIR ${CMAKE_CURRENT_BINARY_DIR}/firefox-extension-odfviewer-${WEBODF_VERSION})
+set(FIREFOX_EXTENSION_ODFVIEWER ${FIREFOX_EXTENSION_ODFVIEWER_DIR}.xpi)
 
 add_subdirectory(webodf)
 add_subdirectory(programs)
@@ -341,7 +341,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/benchmark ${WEBODFZIPDIR}/benchmark
 
     # firefox
-    COMMAND ${CMAKE_COMMAND} -E copy ${WEBODFXPI} ${WEBODFZIPDIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${FIREFOX_EXTENSION_ODFVIEWER} ${WEBODFZIPDIR}
 
     # zip using javascript code running in node.js
     COMMAND ${NODE} ARGS webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools/zipdir.js
