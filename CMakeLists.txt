@@ -258,10 +258,6 @@ if (NOT ANDROID_SDK_DIR)
   endif()
 endif(NOT ANDROID_SDK_DIR)
 
-set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
-
-set (RUNTIME ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
-
 # COPY_FILES (varname srcdir tgtdir files)
 # Creates a target that copies the listed files from the srcdir to the tgtdir,
 # preserving their relative path.
@@ -289,6 +285,10 @@ macro(COPY_FILES _varname _srcdir _tgtdir)
     set(${_varname} ${${_varname}} ${_tgtdir}/${_dstfile})
   endforeach(_file)
 endmacro(COPY_FILES _directory _files)
+
+set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools)
+set(RUNTIMEJS ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
+set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
 set (VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
 set(FIREFOX_EXTENSION_ODFVIEWER_DIR ${CMAKE_CURRENT_BINARY_DIR}/firefox-extension-odfviewer-${WEBODF_VERSION})
@@ -318,10 +318,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${FIREFOX_EXTENSION_ODFVIEWER} ${WEBODFZIPDIR}
 
     # zip using javascript code running in node.js
-    COMMAND ${NODE} ARGS webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools/zipdir.js
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
         ${WEBODFZIPDIR}
         ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
     DEPENDS
+        ${TOOLS_DIR}/zipdir.js
         webodf-debug.js-target
         webodf.js-target
         editor-compiled.js-target

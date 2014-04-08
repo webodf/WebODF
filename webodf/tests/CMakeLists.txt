@@ -13,11 +13,11 @@ FILE( GLOB_RECURSE TESTS_TESTFILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 COPY_FILES(tests_nodetests ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}/_nodetest ${TESTS_TESTFILES} )
 add_custom_target(nodetest ALL
-	COMMAND ${NODE} ${RUNTIME} tests.js
+	COMMAND ${NODE} ${RUNTIMEJS} tests.js
 	WORKING_DIRECTORY _nodetest
     DEPENDS ${tests_nodetests}
 )
-add_dependencies(nodetest NodeJS manifest.json-target)
+add_dependencies(nodetest ${NODE} manifest.json-target)
 
 if (QT4_FOUND)
 	COPY_FILES(tests_qtjsruntimetest ${CMAKE_CURRENT_SOURCE_DIR}
@@ -25,10 +25,10 @@ if (QT4_FOUND)
     COPY_FILES(tests_qtjsruntimetest2 ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${CMAKE_CURRENT_BINARY_DIR} webodf.css)
 	add_custom_target(qtjsruntimetest ALL
-		COMMAND qtjsruntime ${RUNTIME} tests.js
+		COMMAND qtjsruntime ${RUNTIMEJS} tests.js
 		WORKING_DIRECTORY _qtjsruntimetest
 		DEPENDS ${tests_qtjsruntimetest} ${tests_qtjsruntimetest2}
 	)
-    add_dependencies(qtjsruntimetest NodeJS qtjsruntime manifest.json-target)
+    add_dependencies(qtjsruntimetest ${NODE} qtjsruntime manifest.json-target)
 endif (QT4_FOUND)
 

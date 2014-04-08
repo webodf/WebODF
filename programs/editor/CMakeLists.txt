@@ -82,7 +82,7 @@ add_custom_command(
     # cleanup
     # COMMAND ${CMAKE_COMMAND} -E remove_directory dojo-deps/dist
 
-    DEPENDS NodeJS Dojo
+    DEPENDS ${NODE} Dojo
 )
 
 add_custom_target(editor-compiled.js-target DEPENDS dojo-amalgamation.js editor-webodf.js-target ${EDITORDEPS} more-editor-deps-target)

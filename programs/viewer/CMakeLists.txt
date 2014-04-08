@@ -12,18 +12,17 @@ set(VIEWER_IMAGES
        images/kogmbh.png
 )
 
-set (TOOLSDIR ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
-
 # amalgamation:
 # (write js code into into viewer-amalgamation.html), currently unused
 add_custom_command(
-	OUTPUT viewer-amalgamation.html
-	COMMAND ${NODE} ARGS ${RUNTIME} ${TOOLSDIR}/replaceByFileContents.js
-		${CMAKE_CURRENT_SOURCE_DIR}/index-amalgamation-template.html
-		viewer-amalgamation.html
-		@VIEWER_JS@ ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
-		@WEBODF_JS@ ${CMAKE_BINARY_DIR}/webodf/webodf.js
-    DEPENDS NodeJS ${TOOLSDIR}/replaceByFileContents.js
+    OUTPUT viewer-amalgamation.html
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/replaceByFileContents.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/index-amalgamation-template.html
+        viewer-amalgamation.html
+        @VIEWER_JS@ ${CMAKE_CURRENT_SOURCE_DIR}/viewer.js
+        @WEBODF_JS@ ${CMAKE_BINARY_DIR}/webodf/webodf.js
+    DEPENDS ${NODE}
+        ${TOOLS_DIR}/replaceByFileContents.js
         viewer.js
         webodf.js-target
         index-amalgamation-template.html

@@ -7,27 +7,26 @@ set(FIREFOXEXTENSIONFILES
 )
 configure_file(install.rdf.in ${CMAKE_CURRENT_BINARY_DIR}/install.rdf)
 
-set (TOOLSDIR ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools)
-
 # write webodf.js into viewer.html
 add_custom_command(
     OUTPUT ${FIREFOX_EXTENSION_ODFVIEWER}
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${FIREFOX_EXTENSION_ODFVIEWER_DIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${FIREFOX_EXTENSION_ODFVIEWER_DIR}/content/web
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/install.rdf ${FIREFOX_EXTENSION_ODFVIEWER_DIR}
-    COMMAND ${NODE} ARGS ${RUNTIME} ${TOOLSDIR}/replaceByFileContents.js
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/replaceByFileContents.js
         ${CMAKE_CURRENT_SOURCE_DIR}/content/web/viewer.html.in
         ${FIREFOX_EXTENSION_ODFVIEWER_DIR}/content/web/viewer.html
         @WEBODF_JS@ ${CMAKE_BINARY_DIR}/webodf/webodf.js
-    COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js packextension.js
+    COMMAND ${NODE} ARGS ${RUNTIMEJS}  packextension.js
         ${FIREFOX_EXTENSION_ODFVIEWER_DIR}
         ${FIREFOXEXTENSIONFILES}
-    COMMAND ${NODE} ARGS ../../webodf/lib/runtime.js ${CMAKE_CURRENT_SOURCE_DIR}/../../webodf/tools/zipdir.js
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
         ${FIREFOX_EXTENSION_ODFVIEWER_DIR}
         ${FIREFOX_EXTENSION_ODFVIEWER}
         notopdir
-    DEPENDS NodeJS
-         ${TOOLSDIR}/replaceByFileContents.js
+    DEPENDS ${NODE}
+        ${TOOLS_DIR}/replaceByFileContents.js
+        ${TOOLS_DIR}/zipdir.js
         packextension.js
         ${FIREFOXEXTENSIONFILES}
         webodf.js-target
