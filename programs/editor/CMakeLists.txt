@@ -130,6 +130,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojox/ ${WODOTEXTEDITORBUILDDIR}/dojox/
 
     COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${WODOTEXTEDITORBUILDDIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/HOWTO-wodotexteditor.md  ${WODOTEXTEDITORBUILDDIR}/HOWTO.md
 
     DEPENDS editor-compiled.js-target
 )
