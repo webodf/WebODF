@@ -1,5 +1,9 @@
+# This makefile 'compiles' WebODF using various tools, instruments the code and
+# builds and packages programs that use WebODF.
+
 # WebODF is mostly a JavaScript project. CMake needs to know about the C++ parts
 project (WebODF C CXX)
+
 # version 2.8.2 is needed to have support for zip files in external projects
 # issues with version 2.8.4 on Windows makes us test for a higher version
 if(WIN32)
@@ -7,14 +11,21 @@ if(WIN32)
 else()
     cmake_minimum_required(VERSION 2.8.2)
 endif(WIN32)
+
+# Require separate build dir
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+  message(FATAL_ERROR "Compiling in the source directory is not supported. Use for example 'mkdir build; cd build; cmake ..'.")
+endif (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+
+# Tools must be obtained to work with:
+include (ExternalProject)
+
 include(ProcessorCount OPTIONAL RESULT_VARIABLE ProcessorCountFound)
 if (ProcessorCountFound)
   ProcessorCount(NProcessors)
 else (ProcessorCountFound)
   set(NProcessors 1)
 endif (ProcessorCountFound)
-
-SET(REQUIRED_NODEJS_VERSION 0.10.5)
 
 # At this point, the version number that is used throughout is defined
 # The version number is gotten from either the git repository or the name of the
@@ -47,10 +58,11 @@ else (OVERRULED_WEBODF_VERSION)
 endif (OVERRULED_WEBODF_VERSION)
 message(STATUS "WebODF version " ${WEBODF_VERSION})
 
-# This makefile 'compiles' WebODF using various tools, instruments the code and
-# builds and packages programs that use WebODF.
 
-# Find installed dependencies
+#########################################################
+## Find installed dependencies
+#########################################################
+
 find_package(Qt4 4.7.0 COMPONENTS QtCore QtGui QtXml QtNetwork QtWebKit)
 if (NOT QT4_FOUND)
   message(WARNING "Qt4 with modules QtCore QtGui QtXml QtNetwork QtWebKit was not found. qtjsruntime will no be built.")
@@ -59,17 +71,18 @@ endif (NOT QT4_FOUND)
 # java runtime is needed for Closure Compiler
 find_package(Java COMPONENTS Runtime)
 
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-  message(FATAL_ERROR "Compiling in the source directory is not supported. Use for example 'mkdir build; cd build; cmake ..'.")
-endif (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+# Node.js will be downloaded on Windows systems, so check for installed version is below
+SET(REQUIRED_NODEJS_VERSION 0.10.5)
 
-# Tools must be obtained to work with:
-include (ExternalProject)
+
+#########################################################
+## Download stuff that is not commonly installed/packaged
+#########################################################
 
 # allow specification of a directory with pre-downloaded
 # requirements by evaluating environment variable
 # $WEBODF_DOWNLOAD_DIR
-# defaults to ./downloads in the build directory.
+# defaults to "./downloads" in the build directory.
 if ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
     SET ( EXTERNALS_DOWNLOAD_DIR $ENV{WEBODF_DOWNLOAD_DIR} )
 else ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
@@ -168,7 +181,6 @@ add_custom_target(copy_node_modules ALL
     COMMENT copying node_modules from source to build
 )
 
-
 # JSCoverage
 if(WIN32)
     # JSCoverage only builds with Cygwin/MiniGW
@@ -229,7 +241,6 @@ if(WIN32)
     )
 endif(WIN32)
 
-
 # Ant
 # Required for building Android applications
 if(WIN32)
@@ -257,6 +268,11 @@ if (NOT ANDROID_SDK_DIR)
     find_path(ANDROID_SDK_DIR platform-tools/aapt)
   endif()
 endif(NOT ANDROID_SDK_DIR)
+
+
+##############################
+## Define custom macros
+##############################
 
 # COPY_FILES (varname srcdir tgtdir files)
 # Creates a target that copies the listed files from the srcdir to the tgtdir,
@@ -286,18 +302,36 @@ macro(COPY_FILES _varname _srcdir _tgtdir)
   endforeach(_file)
 endmacro(COPY_FILES _directory _files)
 
+
+#############################
+## Define some files and dirs
+#############################
+
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools)
 set(RUNTIMEJS ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
-set (VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
+set(VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
+
 set(FIREFOX_EXTENSION_ODFVIEWER_DIR ${CMAKE_CURRENT_BINARY_DIR}/firefox-extension-odfviewer-${WEBODF_VERSION})
 set(FIREFOX_EXTENSION_ODFVIEWER ${FIREFOX_EXTENSION_ODFVIEWER_DIR}.xpi)
 
+
+#############################
+## Build Library and programs
+#############################
+
+# the lib
 add_subdirectory(webodf)
+
+# the programs/components
 add_subdirectory(programs)
 
-# package webodf
+
+############
+## Package
+############
+
 set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
 set(WEBODFZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
 add_custom_command(
