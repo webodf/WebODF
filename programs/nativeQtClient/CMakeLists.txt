@@ -7,24 +7,22 @@ QT4_WRAP_CPP(NATIVEQTCLIENT_MOC
 )
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/application.qrc
         "<RCC><qresource prefix='/'>")
-foreach(FILE ${HTML5UIFILES} index.html scripts.js webodf.js)
+foreach(FILE ${TOUCHUI_FILES} index.html scripts.js webodf.js)
     if (IS_ABSOLUTE ${FILE})
         GET_FILENAME_COMPONENT(_wwwfile ${FILE} NAME)
     else (IS_ABSOLUTE ${FILE})
         SET(_wwwfile ${FILE})
     endif (IS_ABSOLUTE ${FILE})
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/application.qrc "<file>www/${_wwwfile}</file>\n")
-endforeach(FILE ${HTML5UIFILES})
+endforeach(FILE ${TOUCHUI_FILES})
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/application.qrc
         "</qresource></RCC>")
 COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
-    ${CMAKE_CURRENT_BINARY_DIR}/www ${HTML5UIFILES})
+    ${CMAKE_CURRENT_BINARY_DIR}/www ${TOUCHUI_FILES})
 COPY_FILES(NATIVEDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}/www scripts.js)
 COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
     ${CMAKE_CURRENT_BINARY_DIR}/www index.html)
-COPY_FILES(NATIVEDEPS ${CMAKE_SOURCE_DIR}/webodf
-    ${CMAKE_CURRENT_BINARY_DIR}/www webodf.css)
 QT4_ADD_RESOURCES(NATIVEQTCLIENT_RES
     ${CMAKE_CURRENT_BINARY_DIR}/application.qrc)
 

@@ -8,7 +8,7 @@ endif()
 set(APKDEPS ${APKDEPS} webodf.js-target)
 
 COPY_FILES(APKDEPS ${CMAKE_SOURCE_DIR}/programs/touchui
-    ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${HTML5UIFILES})
+    ${CMAKE_CURRENT_BINARY_DIR}/assets/www ${TOUCHUI_FILES})
 COPY_FILES(APKDEPS ${CMAKE_CURRENT_SOURCE_DIR}/assets/www
     ${CMAKE_CURRENT_BINARY_DIR}/assets/www
     index.html icon.png cordova-1.8.0.js nativezip.js)

@@ -4,6 +4,13 @@ if(WRONGCMAKEDIR)
   message(FATAL_ERROR "You should point CMake to the parent directory.")
 endif(WRONGCMAKEDIR)
 
+# update the list of needed files
+execute_process(
+  COMMAND ${NODE} ${RUNTIMEJS} ${TOOLS_DIR}/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
+
 configure_file(webodfversion.js.in ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
 
 set(TESTJSFILES tests/core/ZipTests.js
@@ -37,15 +44,16 @@ set(TESTJSFILES tests/core/ZipTests.js
 
 add_custom_target(manifest.json-target
     COMMAND ${NODE}
-    lib/runtime.js tools/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
+    ${RUNTIMEJS} ${TOOLS_DIR}/updateJS.js ${CMAKE_BINARY_DIR}/jsfileslist.txt
+    DEPENDS ${TOOLS_DIR}/updateJS.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_command(
     OUTPUT webodf.css.js
-    COMMAND "${NODE}"
-    ARGS lib/runtime.js tools/css2js.js webodf.css ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
-    DEPENDS NodeJS lib/runtime.js tools/css2js.js webodf.css
+    COMMAND ${NODE}
+    ARGS ${RUNTIMEJS} ${TOOLS_DIR}/css2js.js webodf.css ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js
+    DEPENDS ${TOOLS_DIR}/css2js.js webodf.css
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 add_custom_target(webodf.css.js-target DEPENDS webodf.css.js)
@@ -171,7 +179,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_target(doc DEPENDS docs/index.html)
   add_custom_target(simplenodetest ALL
       COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
-      DEPENDS NodeJS simplecompiled.js-target
+      DEPENDS ${NODE} simplecompiled.js-target
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

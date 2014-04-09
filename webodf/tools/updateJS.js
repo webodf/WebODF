@@ -237,7 +237,7 @@ function Main(cmakeListPath) {
     function createCMakeLists(typed) {
         var path = cmakeListPath, content;
         content = "set(LIBJSFILES\n" +
-                "    ${CMAKE_CURRENT_BINARY_DIR}/webodf/webodfversion.js\n" +
+                "    ${CMAKE_BINARY_DIR}/webodf/webodfversion.js\n" +
                 "    lib/runtime.js\n    lib/" +
                 typed.join("\n    lib/") + "\n)\n";
         saveIfDifferent(path, content, function () {
