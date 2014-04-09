@@ -283,9 +283,14 @@
         "odf.OdfCanvas",
         "ops.Member",
         "ops.OdtCursor",
+        "ops.OdtStepsTranslator",
         "ops.Operation",
-        "ops.StepsTranslator",
         "ops.TextPositionFilter"
+    ],
+    "ops.OdtStepsTranslator": [
+        "core.PositionFilter",
+        "odf.OdfUtils",
+        "ops.StepsCache"
     ],
     "ops.OpAddAnnotation": [
         "ops.OdtDocument"
@@ -411,12 +416,9 @@
         "ops.TrivialOperationRouter"
     ],
     "ops.StepsCache": [
+        "core.DomUtils",
         "core.LoopWatchDog",
-        "core.PositionFilter",
-        "odf.OdfUtils"
-    ],
-    "ops.StepsTranslator": [
-        "ops.StepsCache"
+        "core.PositionIterator"
     ],
     "ops.TextPositionFilter": [
         "core.PositionFilter",

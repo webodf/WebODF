@@ -39,7 +39,7 @@
  * @param {core.UnitTestRunner} runner
  * @implements {core.UnitTest}
  */
-ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
+ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
     "use strict";
     var t,
         domUtils = new core.DomUtils(),
@@ -49,11 +49,11 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         CACHE_STEP_SIZE = 5;
 
     function roundDown(step) {
-        return step === ops.StepsTranslator.PREVIOUS_STEP;
+        return step === ops.OdtStepsTranslator.PREVIOUS_STEP;
     }
 
     function roundUp(step) {
-        return step === ops.StepsTranslator.NEXT_STEP;
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
     }
 
     /**
@@ -140,7 +140,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         t = {
             filter: new CallCountedPositionFilter(new ops.TextPositionFilter(function() { return testarea; }))
         };
-        t.translator = new ops.StepsTranslator(function() { return testarea; },
+        t.translator = new ops.OdtStepsTranslator(function() { return testarea; },
             gui.SelectionMover.createPositionIterator,
             t.filter, CACHE_STEP_SIZE);
     };
@@ -304,6 +304,22 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         t.actualOriginalDomPoint = t.translator.convertStepsToDomPoint(10); // First position in original p
         r.shouldBe(t, "t.actualOriginalDomPoint.node", "t.originalParagraph.firstChild");
         r.shouldBe(t, "t.actualOriginalDomPoint.offset", "0");
+    }
+
+    function convertStepsToDomPoint_Cached_MultipleBookmarksOnSameStep() {
+        var doc = createDoc("<text:tracked-changes><text:p>1</text:p></text:tracked-changes><text:p>A</text:p><text:p>B</text:p>"),
+            paragraphs = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p"),
+            step;
+
+        t.expected0 = {node: paragraphs[1].firstChild, offset: 0};
+        t.expected1 = {node: paragraphs[1], offset: 1};
+        t.expected2 = {node: paragraphs[2].firstChild, offset: 0};
+        t.expected3 = {node: paragraphs[2], offset: 1};
+
+        for (step = 0; step <= 3; step += 1) {
+            t["position" + step] = t.translator.convertStepsToDomPoint(step);
+            r.shouldBe(t, "t.position" + step, "t.expected" + step);
+        }
     }
 
     function convertDomPointsToSteps_At0() {
@@ -480,6 +496,17 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         r.shouldBe(t, "t.steps", "9");
     }
 
+    function convertDomPointsToSteps_Cached_MultipleBookmarksOnSameStep() {
+        var doc = createDoc("<text:tracked-changes><text:p>1</text:p></text:tracked-changes><text:p>A</text:p><text:p>B</text:p>");
+
+        t.paragraphs = extractParagraphBoundaries(doc).map(function(b) { return {start: b.start, length: b.length }; });
+
+        r.shouldBe(t, "t.paragraphs.shift()", "({start: 0, length: 0})");
+        r.shouldBe(t, "t.paragraphs.shift()", "({start: 0, length: 1})");
+        r.shouldBe(t, "t.paragraphs.shift()", "({start: 2, length: 1})");
+        r.shouldBe(t, "t.paragraphs.shift()", "undefined");
+    }
+
     function handleStepsInserted_InsertMultipleStepsIndividually() {
         var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>IJKL</text:p>"),
             paragraphs = extractParagraphBoundaries(doc),
@@ -583,19 +610,20 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
     }
 
     function handleStepsRemoved_AtDocumentStart() {
-        var doc = createDoc("<text:p>ABCD</text:p><text:p>EFG</text:p>"),
+        var doc = createDoc("<text:p>ABCD</text:p><text:p>E</text:p><text:p>F</text:p>"),
             removedParagraph = doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0],
-            paragraphs = [];
+            paragraphs = extractParagraphBoundaries(doc);
 
-        paragraphs.push(createParagraphBoundary(doc.getElementsByTagNameNS(odf.Namespaces.textns, "p")[1]));
         t.translator.prime();
         t.filter.popCallCount();
 
         removedParagraph.parentNode.removeChild(removedParagraph);
-        paragraphs[0].node.firstChild.deleteData(0, 2);
-        t.translator.handleStepsRemoved({position: 0, length: 7});
+        paragraphs.shift(); // remove the first boundary to match the removed paragraph
+        t.translator.handleStepsRemoved({position: 0, length: 5});
+        // manually update the remaining paragraph boundaries to reflect what they should now be
         paragraphs[0].start = 0;
         paragraphs[0].length = 1;
+        paragraphs[1].start = 2;
 
         verifyParagraphBoundaries(paragraphs);
     }
@@ -639,6 +667,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertStepsToDomPoint_Cached_HasContentBeforeWalkablePosition,
             convertStepsToDomPoint_Cached_ContentAddedBeforeWalkablePosition,
             convertStepsToDomPoint_Cached_CopesWithClonedNode,
+            convertStepsToDomPoint_Cached_MultipleBookmarksOnSameStep,
 
             convertDomPointsToSteps_At0,
             convertDomPointsToSteps_Before0,
@@ -656,6 +685,7 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
             convertDomPointsToSteps_Cached_CopesWithClonedNode,
             convertDomPointsToSteps_Cached_CopesWithBookmarkedNodeBeingRemoved,
             convertDomPointsToSteps_Cached_FindsNearestKnownPosition,
+            convertDomPointsToSteps_Cached_MultipleBookmarksOnSameStep,
 
             handleStepsInserted_InsertMultipleStepsIndividually,
             handleStepsInserted_InsertMultipleParagraphsIndividually,
@@ -671,11 +701,11 @@ ops.StepsTranslatorTests = function StepsTranslatorTests(runner) {
         ];
     };
 };
-ops.StepsTranslatorTests.prototype.description = function () {
+ops.OdtStepsTranslatorTests.prototype.description = function () {
     "use strict";
-    return "Test the StepsTranslator class.";
+    return "Test the OdtStepsTranslator class.";
 };
 (function () {
     "use strict";
-    return ops.StepsTranslatorTests;
+    return ops.OdtStepsTranslatorTests;
 }());
