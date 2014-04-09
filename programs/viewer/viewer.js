@@ -55,6 +55,8 @@ function Viewer(viewerPlugin) {
         viewerElement = document.getElementById('viewer'),
         canvasContainer = document.getElementById('canvasContainer'),
         overlayNavigator = document.getElementById('overlayNavigator'),
+        titlebar = document.getElementById('titlebar'),
+        toolbar = document.getElementById('toolbarContainer'),
         pageSwitcher = document.getElementById('toolbarLeft'),
         zoomWidget = document.getElementById('toolbarMiddleContainer'),
         scaleSelector = document.getElementById('scaleSelect'),
@@ -65,7 +67,10 @@ function Viewer(viewerPlugin) {
         pages = [],
         currentPage,
         scaleChangeTimer,
-        touchTimer;
+        touchTimer,
+        toolbarTouchTimer,
+        /**@const*/
+        UI_FADE_DURATION = 5000;
 
     function initializeAboutInformation() {
         var basedOnDiv, aboutButton, pluginName, pluginVersion, pluginURL;
@@ -364,9 +369,7 @@ function Viewer(viewerPlugin) {
      * Presentation mode involves fullscreen + hidden UI controls
      */
     this.togglePresentationMode = function () {
-        var titlebar = document.getElementById('titlebar'),
-            toolbar = document.getElementById('toolbarContainer'),
-            overlayCloseButton = document.getElementById('overlayCloseButton');
+        var overlayCloseButton = document.getElementById('overlayCloseButton');
 
         if (!presentationMode) {
             titlebar.style.display = toolbar.style.display = 'none';
@@ -454,11 +457,36 @@ function Viewer(viewerPlugin) {
 
     function showOverlayNavigator() {
         if (isSlideshow) {
-            overlayNavigator.className = 'touched';
+            overlayNavigator.className = 'viewer-touched';
             window.clearTimeout(touchTimer);
             touchTimer = window.setTimeout(function () {
                 overlayNavigator.className = '';
-            }, 2000);
+            }, UI_FADE_DURATION);
+        }
+    }
+
+    /**
+     * @param {!boolean} timed Fade after a while
+     */
+    function showToolbars() {
+        titlebar.classList.add('viewer-touched');
+        toolbar.classList.add('viewer-touched');
+        window.clearTimeout(toolbarTouchTimer);
+        toolbarTouchTimer = window.setTimeout(function () {
+            hideToolbars();
+        }, UI_FADE_DURATION);
+    }
+
+    function hideToolbars() {
+        titlebar.classList.remove('viewer-touched');
+        toolbar.classList.remove('viewer-touched');
+    }
+
+    function toggleToolbars() {
+        if (titlebar.classList.contains('viewer-touched')) {
+            hideToolbars();
+        } else {
+            showToolbars();
         }
     }
 
@@ -526,6 +554,9 @@ function Viewer(viewerPlugin) {
 
             canvasContainer.addEventListener('click', showOverlayNavigator);
             overlayNavigator.addEventListener('click', showOverlayNavigator);
+            canvasContainer.addEventListener('click', toggleToolbars);
+            titlebar.addEventListener('click', showToolbars);
+            toolbar.addEventListener('click', showToolbars);
 
             window.addEventListener('scalechange', function (evt) {
                 var customScaleOption = document.getElementById('customScaleOption'),
