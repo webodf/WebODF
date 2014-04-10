@@ -63,6 +63,11 @@
          */
         function convertToPxValue(value) {
             var parsedLength = odfUtils.parseLength(value);
+            if (!parsedLength) {
+                runtime.log("Could not parse value '"+value+"'.");
+                // Return 0 as fallback, might have least bad results if used
+                return 0;
+            }
             return cssUnits.convert(parsedLength.value, parsedLength.unit, "px");
         }
 
@@ -190,7 +195,8 @@
             if (listLevelPositionSpaceMode === "label-alignment") {
                 // TODO: fetch the margin and indent from the paragraph style if it is defined there
                 // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-style_list-level-label-alignment
-                listIndent = listLevelLabelAlign.getAttributeNS(fons, "margin-left");
+                // for now just fallback to "0px" if not defined on <style:list-level-label-alignment>
+                listIndent = listLevelLabelAlign.getAttributeNS(fons, "margin-left") || "0px";
                 bulletIndent = listLevelLabelAlign.getAttributeNS(fons, "text-indent");
                 followedBy = listLevelLabelAlign.getAttributeNS(textns, "label-followed-by");
                 leftOffset = convertToPxValue(listIndent);
