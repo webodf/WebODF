@@ -668,6 +668,7 @@ gui.SessionControllerOptions = function () {
                     }
                 }
             }
+            // TODO assumes the mouseup/contextmenu is the same button as the mousedown that initialized the clickCount
             clickCount = 0;
             clickStartedWithinCanvas = false;
             isMouseMoved = false;
