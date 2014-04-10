@@ -104,7 +104,7 @@ core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
 
     /**
      * Cancel any pending requests
-     * @param {!function(!Object=)} callback
+     * @param {!function(!Error=)} callback
      */
     this.destroy = function (callback) {
         cancel();

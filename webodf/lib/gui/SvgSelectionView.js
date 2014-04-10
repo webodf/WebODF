@@ -679,7 +679,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
 
     /**
      * @inheritDoc
-     * @param {function(!Object=)} callback
+     * @param {function(!Error=)} callback
      */
     this.destroy = function (callback) {
         core.Async.destroyAll([renderTask.destroy, destroy], callback);

@@ -88,7 +88,7 @@
         }
 
         /**
-         * @param {function()} callback
+         * @param {function(!Error=)} callback
          */
         this.destroy = function (callback) {
             eventManager.unsubscribe("textInput", clearSuppression);
@@ -270,7 +270,7 @@
         };
 
         /**
-         * @param {function()} callback
+         * @param {function(!Error=)} callback
          */
         this.destroy = function (callback) {
             eventManager.unsubscribe('compositionstart', compositionStart);

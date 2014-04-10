@@ -49,7 +49,7 @@ core.Destroyable = function Destroyable() {
 /**
  * Destroy the object.
  * Do not access any member of this object after this call.
- * @param {function(!Object=):undefined} callback
+ * @param {function(!Error=):undefined} callback
  * @return {undefined}
  */
 core.Destroyable.prototype.destroy = function (callback) {"use strict"; };

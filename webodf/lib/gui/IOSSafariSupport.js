@@ -59,7 +59,7 @@ gui.IOSSafariSupport = function (eventManager) {
     }
 
     /**
-     * @param {!function(!Object=)} callback
+     * @param {!function(!Error=)} callback
      * @return {undefined}
      */
     this.destroy = function (callback) {

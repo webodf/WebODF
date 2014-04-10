@@ -617,7 +617,7 @@ gui.EventManager = function EventManager(odtDocument) {
     };
 
     /**
-      * @param {!function(!Object=)} callback passing an error object in case of error
+      * @param {!function(!Error=)} callback passing an error object in case of error
       * @return {undefined}
       */
     this.destroy = function (callback) {

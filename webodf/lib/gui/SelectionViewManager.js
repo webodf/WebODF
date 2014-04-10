@@ -134,14 +134,14 @@ gui.SelectionViewManager = function SelectionViewManager(SelectionView) {
     };
 
     /**
-     * @param {function(!Object=)} callback
+     * @param {function(!Error=)} callback
      */
     this.destroy = function (callback) {
         var selectionViewArray = getSelectionViews();
 
         /**
          * @param {!number} i
-         * @param {!Object=} err
+         * @param {!Error=} err
          * @return {undefined}
          */
         function destroySelectionView(i, err) {
