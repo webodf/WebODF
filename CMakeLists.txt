@@ -14,7 +14,7 @@ endif(WIN32)
 
 # Require separate build dir
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-  message(FATAL_ERROR "Compiling in the source directory is not supported. Use for example 'mkdir build; cd build; cmake ..'.")
+  message(FATAL_ERROR "Compiling in the source directory is not supported.")
 endif (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 
 # Tools must be obtained to work with:
