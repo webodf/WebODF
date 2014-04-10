@@ -72,8 +72,8 @@ office|text * draw|text-box {
     display: block;
     border: 1px solid #d3d3d3;
 }
-draw|frame {
-  /** make sure frames are above the main body. */
+office|text draw|frame {
+  /** make sure frames are above the main text. */
   z-index: 1;
 }
 office|spreadsheet {
