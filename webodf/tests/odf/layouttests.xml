@@ -229,6 +229,87 @@
    </check>
   </layoutchecks>
  </test>
+
+ <test name="list-level-properties-missing">
+  <input>
+   <office:document-styles>
+    <office:automatic-styles>
+     <text:list-style style:name="L1">
+      <text:list-level-style-number style:num-format="1" style:num-suffix=")" text:level="1">
+      </text:list-level-style-number>
+      <text:list-level-style-number style:num-format="a" style:num-letter-sync="true" style:num-suffix=")" text:level="2">
+      </text:list-level-style-number>
+     </text:list-style>
+    </office:automatic-styles>
+   </office:document-styles>
+   <office:text>
+    <text:list text:style-name="L1" xml:id="list432847329805709832">
+     <text:list-item>
+      <text:p text:style-name="P1">This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test.</text:p>
+      <text:list>
+       <text:list-item>
+        <text:p text:style-name="P1">This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test.</text:p>
+       </text:list-item>
+      </text:list>
+     </text:list-item>
+    </text:list>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="(.//text:list)[1]">
+    <marginLeft value="0px"/>
+   </check>
+   <check xpath="(.//text:list)[2]">
+    <marginLeft value="0px"/>
+   </check>
+  </layoutchecks>
+ </test>
+
+ <test name="list-label-alignment-missing">
+  <input>
+   <office:document-styles>
+    <office:automatic-styles>
+     <text:list-style style:name="L1">
+      <text:list-level-style-number style:num-format="1" style:num-suffix="." text:level="1" text:style-name="Numbering_20_Symbols">
+       <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+       </style:list-level-properties>
+      </text:list-level-style-number>
+      <text:list-level-style-number style:num-format="1" style:num-suffix="." text:display-levels="2" text:level="2" text:style-name="Numbering_20_Symbols">
+       <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+       </style:list-level-properties>
+      </text:list-level-style-number>
+     </text:list-style>
+    </office:automatic-styles>
+   </office:document-styles>
+   <office:text>
+    <text:list text:style-name="L1" xml:id="list555894327569445">
+     <text:list-item>
+      <text:p text:style-name="P1">This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test.</text:p>
+      <text:list>
+       <text:list-item>
+        <text:p text:style-name="P1">This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test, This is a numbering test.</text:p>
+       </text:list-item>
+      </text:list>
+     </text:list-item>
+    </text:list>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="(.//text:list)[1]">
+    <marginLeft value="0px"/>
+   </check>
+   <check xpath="(.//text:list)[2]">
+    <marginLeft value="0px"/>
+   </check>
+   <check xpath="(.//text:list-item)[1]">
+    <marginLeft value="0px"/>
+   </check>
+   <check xpath="(.//text:list-item)[2]">
+    <marginLeft value="0px"/>
+   </check>
+  </layoutchecks>
+ </test>
+
  <test name="label-alignment-list">
   <input>
    <office:document-styles>
