@@ -40,7 +40,7 @@
     "use strict";
 
     /**
-     * @return {!{forEach:!function(!Array.<*>,!function(*, !function(!string):undefined):undefined,!function(?string)):undefined, destroyAll:function(!Array.<!function(!function(!Object=))>,!function(!Object=)):undefined}}
+     * @return {!{forEach:!function(!Array.<*>,!function(*, !function(!string):undefined):undefined,!function(?string)):undefined, destroyAll:function(!Array.<!function(!function(!Error=))>,!function(!Error=)):undefined}}
      */
     function createASyncSingleton() {
         /**
@@ -76,14 +76,14 @@
         }
 
         /**
-         * @param {!Array.<!function(!function(!Object=))>} items
-         * @param {!function(!Object=)} callback
+         * @param {!Array.<!function(!function(!Error=))>} items
+         * @param {!function(!Error=)} callback
          * @return {undefined}
          */
         function destroyAll(items, callback) {
             /**
              * @param {!number} itemIndex
-             * @param {!Object|undefined} err
+             * @param {!Error|undefined} err
              * @return {undefined}
              */
             function destroy(itemIndex, err) {
@@ -109,7 +109,7 @@
     /**
      * Wrapper for Async functions
      * @const
-     * @type {!{forEach:!function(!Array.<*>,!function(*, !function(!string):undefined):undefined,!function(?string)):undefined, destroyAll:function(!Array.<!function(!function(!Object=))>,!function(!Object=)):undefined}}
+     * @type {!{forEach:!function(!Array.<*>,!function(*, !function(!string):undefined):undefined,!function(?string)):undefined, destroyAll:function(!Array.<!function(!function(!Error=))>,!function(!Error=)):undefined}}
      */
     core.Async = createASyncSingleton();
 }());

@@ -203,7 +203,7 @@ define("webodf/editor/Editor", [
 
             /**
              * Closes a single-user document, and does cleanup.
-             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @param {!function(!Error=)} callback, passing an error object in case of error
              * @return undefined;
              */
             this.closeDocument = function (callback) {
@@ -323,7 +323,7 @@ define("webodf/editor/Editor", [
             /**
              * Closes the current editing running editing (polling-timer),
              * cleanup.
-             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @param {!function(!Error=)} callback, passing an error object in case of error
              * @return {undefined}
              */
             this.closeSession = function (callback) {
@@ -469,7 +469,7 @@ define("webodf/editor/Editor", [
             }
 
             /**
-             * @param {!function(!Object=)} callback, passing an error object in case of error
+             * @param {!function(!Error=)} callback, passing an error object in case of error
              * @return {undefined}
              */
             this.destroy = function (callback) {

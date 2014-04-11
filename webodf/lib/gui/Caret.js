@@ -532,7 +532,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
-     * @param {!function(!Object=)} callback Callback to call when the destroy is complete, passing an error object in case of error
+     * @param {!function(!Error=)} callback Callback to call when the destroy is complete, passing an error object in case of error
      * @return {undefined}
      */
     this.destroy = function (callback) {
