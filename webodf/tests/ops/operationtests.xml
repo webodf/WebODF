@@ -808,7 +808,7 @@
   </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span><text:span>hello</text:span></text:span></text:p></text:list-item><text:list-item><text:p><text:span><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
- <test name="SplitParagraph_InSpaceBlock">
+ <test name="SplitParagraph_BeforeSpace">
   <before><office:text><text:p>hello world</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
@@ -816,6 +816,24 @@
    <op optype="SplitParagraph" memberid="Bob" position="5" moveCursor="true"/>
   </ops>
   <after><office:text><text:p>hello</text:p><text:p><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:p></office:text></after>
+ </test>
+ <test name="SplitParagraph_BeforeSpace_2">
+  <before><office:text><text:p><text:span>hello</text:span><text:span> world</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5"/>
+   <op optype="SplitParagraph" memberid="Bob" position="5" moveCursor="true"/>
+  </ops>
+  <after><office:text><text:p><text:span>hello</text:span></text:p><text:p><text:span/><text:span><c:cursor c:memberId="Bob"/><text:s> </text:s>world</text:span></text:p></office:text></after>
+ </test>
+ <test name="SplitParagraph_DoesntSplitAtNodeEnd" isFailing="true">
+  <before><office:text><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5"/>
+   <op optype="SplitParagraph" memberid="Bob" position="5" moveCursor="true"/>
+  </ops>
+  <after><office:text><text:p><text:span>hello</text:span></text:p><text:p><text:span><c:cursor c:memberId="Bob"/>world</text:span></text:p></office:text></after>
  </test>
  <test name="SplitParagraph_InSpaceBlock_LeadingSpace">
   <before><office:text><text:p>hello <text:s> </text:s>world</text:p></office:text></before>

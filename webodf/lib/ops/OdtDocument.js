@@ -530,36 +530,50 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
-     * @param {!number} position
+     * @param {!number} step
+     * @return {undefined}
      */
-    function upgradeWhitespacesAtPosition(position) {
-        var iterator = getIteratorAtPosition(position),
-            /**@type{!Node}*/
+    function upgradeWhitespacesAtPosition(step) {
+        var positionIterator = getIteratorAtPosition(step),
+            stepIterator = new core.StepIterator(filter, positionIterator),
+            /**@type{?Node}*/
             container,
             offset,
-            i;
+            stepsToUpgrade = 2;
 
-        // Ideally we have to check from *two* positions to the left and right
-        // because the position may be surrounded by node boundaries. Slightly hackish.
-        iterator.previousPosition();
-        iterator.previousPosition();
-        for (i = -1; i <= 1; i += 1) {
-            container = iterator.container();
-            offset = iterator.unfilteredDomOffset();
-            if (container.nodeType === Node.TEXT_NODE
-                    && container.data[offset] === ' '
-                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset)) {
-                container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
-                // Reset the iterator position to be after the newly created space character
-                iterator.moveToEndOfNode(container);
+        // The step passed into this function is the point of change. Need to
+        // upgrade whitespace to the left of the current step, and to the left of the next step
+        runtime.assert(stepIterator.isStep(), "positionIterator is not at a step (requested step: " + step + ")");
+
+        do {
+            container = stepIterator.container();
+            offset = stepIterator.offset();
+            // A step is to the left of the corresponding text content according to the TextPositionFilter.
+            // If the container is not a text node, or is just before a text node, the content will be found in the
+            // node to the left of the current position.
+            if (container.nodeType !== Node.TEXT_NODE || offset === 0) {
+                container = positionIterator.leftNode();
+                offset = container && container.nodeType === Node.TEXT_NODE ? /**@type{!Text}*/(container).length : -1;
             }
-            iterator.nextPosition();
-        }
+
+            if (container
+                    && container.nodeType === Node.TEXT_NODE
+                    && offset > 0
+                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset - 1)) {
+                container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset - 1);
+                // Reset the iterator position to the same step it was just on, which was just to
+                // the left of a space
+                stepIterator.setPosition(container, container.childNodes.length);
+                stepIterator.roundToPreviousStep();
+            }
+            stepsToUpgrade -= 1;
+        } while (stepsToUpgrade > 0 && stepIterator.nextStep());
     }
+
     /**
-     * Upgrades any significant whitespace at, one step left, and one step right of the given
+     * Upgrades any significant whitespace at the requested step, and one step right of the given
      * position to space elements.
-     * @param {!number} position
+     * @param {!number} step
      * @return {undefined}
      */
     this.upgradeWhitespacesAtPosition = upgradeWhitespacesAtPosition;
