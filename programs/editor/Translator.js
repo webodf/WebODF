@@ -52,6 +52,8 @@ define("webodf/editor/Translator", [], function () {
             // TODO: Add smarter locale resolution at some point
             if (newLocale.split('-')[0] === "de" || newLocale.split('_')[0] === "de") {
                 newLocale = "de-DE";
+            } else if (newLocale.split('-')[0] === "nl" || newLocale.split('_')[0] === "nl") {
+                newLocale = "nl-NL";
             } else if (newLocale.split('-')[0] === "en" || newLocale.split('_')[0] === "en") {
                 newLocale = "en-US";
             } else {
