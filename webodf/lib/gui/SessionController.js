@@ -37,6 +37,25 @@
 
 /*global runtime, core, gui, Node, ops, odf */
 
+/**
+ * @constructor
+ * @struct
+ */
+gui.SessionControllerOptions = function () {
+    "use strict";
+
+    /**
+     * Sets direct paragraph styling should be enabled.
+     * @type {!boolean}
+     */
+    this.directParagraphStylingEnabled = false;
+    /**
+     * Sets whether annotation creation/deletion should be enabled.
+     * @type {!boolean}
+     */
+    this.annotationsEnabled = false;
+};
+
 (function () {
     "use strict";
 
@@ -48,7 +67,7 @@
      * @param {!ops.Session} session
      * @param {!string} inputMemberId
      * @param {!ops.OdtCursor} shadowCursor
-     * @param {!{directParagraphStylingEnabled:boolean}=} args
+     * @param {!gui.SessionControllerOptions} args
      */
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
@@ -70,6 +89,7 @@
             handleMouseClickTimeoutId,
             undoManager = null,
             eventManager = new gui.EventManager(odtDocument),
+            annotationsEnabled = args.annotationsEnabled,
             annotationController = new gui.AnnotationController(session, inputMemberId),
             directFormattingController = new gui.DirectFormattingController(session, inputMemberId, objectNameGenerator, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
@@ -814,7 +834,9 @@
                 keyDownHandler.bind(keyCode.E, modifier.MetaShift, rangeSelectionOnly(directFormattingController.alignParagraphCenter));
                 keyDownHandler.bind(keyCode.R, modifier.MetaShift, rangeSelectionOnly(directFormattingController.alignParagraphRight));
                 keyDownHandler.bind(keyCode.J, modifier.MetaShift, rangeSelectionOnly(directFormattingController.alignParagraphJustified));
-                keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
+                if (annotationsEnabled) {
+                    keyDownHandler.bind(keyCode.C, modifier.MetaShift, annotationController.addAnnotation);
+                }
                 keyDownHandler.bind(keyCode.Z, modifier.Meta, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.MetaShift, redo);
             } else {
@@ -825,7 +847,9 @@
                 keyDownHandler.bind(keyCode.E, modifier.CtrlShift, rangeSelectionOnly(directFormattingController.alignParagraphCenter));
                 keyDownHandler.bind(keyCode.R, modifier.CtrlShift, rangeSelectionOnly(directFormattingController.alignParagraphRight));
                 keyDownHandler.bind(keyCode.J, modifier.CtrlShift, rangeSelectionOnly(directFormattingController.alignParagraphJustified));
-                keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
+                if (annotationsEnabled) {
+                    keyDownHandler.bind(keyCode.C, modifier.CtrlAlt, annotationController.addAnnotation);
+                }
                 keyDownHandler.bind(keyCode.Z, modifier.Ctrl, undo);
                 keyDownHandler.bind(keyCode.Z, modifier.CtrlShift, redo);
             }
@@ -874,7 +898,9 @@
                 keyDownHandler.unbind(keyCode.E, modifier.MetaShift);
                 keyDownHandler.unbind(keyCode.R, modifier.MetaShift);
                 keyDownHandler.unbind(keyCode.J, modifier.MetaShift);
-                keyDownHandler.unbind(keyCode.C, modifier.MetaShift);
+                if (annotationsEnabled) {
+                    keyDownHandler.unbind(keyCode.C, modifier.MetaShift);
+                }
                 keyDownHandler.unbind(keyCode.Z, modifier.Meta);
                 keyDownHandler.unbind(keyCode.Z, modifier.MetaShift);
             } else {
@@ -885,7 +911,9 @@
                 keyDownHandler.unbind(keyCode.E, modifier.CtrlShift);
                 keyDownHandler.unbind(keyCode.R, modifier.CtrlShift);
                 keyDownHandler.unbind(keyCode.J, modifier.CtrlShift);
-                keyDownHandler.unbind(keyCode.C, modifier.CtrlAlt);
+                if (annotationsEnabled) {
+                    keyDownHandler.unbind(keyCode.C, modifier.CtrlAlt);
+                }
                 keyDownHandler.unbind(keyCode.Z, modifier.Ctrl);
                 keyDownHandler.unbind(keyCode.Z, modifier.CtrlShift);
             }
