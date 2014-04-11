@@ -107,7 +107,7 @@ define([
             benchmark = new Benchmark(canvasElement),
             renderer = new HTMLResultsRenderer(benchmark, benchmarkResultsElement);
 
-        versionElement.textContent = benchmark.getWebODFVersion();
+        versionElement.textContent = webodf.Version;
         renderer.setBackgroundColour(config.colour);
 
         loadingScreenElement.style.display = "none";

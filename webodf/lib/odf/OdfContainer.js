@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document, webodf_version */
+/*global Node, NodeFilter, runtime, core, xmldom, odf, DOMParser, document, webodf */
 
 
 (function () {
@@ -1123,11 +1123,7 @@
             var generatorString,
                 window = runtime.getWindow();
 
-            generatorString = "WebODF/" + (
-                String(typeof webodf_version) !== "undefined"
-                    ? webodf_version
-                    : "FromSource"
-            );
+            generatorString = "WebODF/" + webodf.Version;
 
             if (window) {
                 generatorString = generatorString + " " + window.navigator.userAgent;
