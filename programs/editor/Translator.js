@@ -54,6 +54,8 @@ define("webodf/editor/Translator", [], function () {
                 newLocale = "de-DE";
             } else if (newLocale.split('-')[0] === "nl" || newLocale.split('_')[0] === "nl") {
                 newLocale = "nl-NL";
+            } else if (newLocale.split('-')[0] === "it" || newLocale.split('_')[0] === "it") {
+                newLocale = "it-IT";
             } else if (newLocale.split('-')[0] === "en" || newLocale.split('_')[0] === "en") {
                 newLocale = "en-US";
             } else {
