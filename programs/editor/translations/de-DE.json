@@ -39,7 +39,6 @@
     "Right": "Rechts",
     "Top": "Oben",
     "Bottom": "Unten",
-    "Center": "Zentriert",
     "Justified": "Blocksatz",
     "Spacing": "Abstand",
     "Options": "Optionen",
@@ -61,5 +60,7 @@
     "Edit link": "Link bearbeiten",
     "Remove link": "Link entfernen",
     "Display Text": "Angezeigter Text",
-    "URL": "URL"
+    "URL": "URL",
+    "Ctrl-click to follow link": "Strg-Klick um Hyperlink zu öffnen",
+    "⌘-click to follow link": "⌘-Klick um Hyperlink zu öffnen"
 }
