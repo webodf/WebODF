@@ -179,7 +179,9 @@
                 level -= 1;
             }
 
-            textAlign = listLevelProps.getAttributeNS(fons, "text-align");
+            // TODO: fo:text-align is only an optional attribute with <style:list-level-properties>,
+            // needs to be found what should be done if not present. For now falling back to "left"
+            textAlign = listLevelProps.getAttributeNS(fons, "text-align") || "left";
             // convert the start and end text alignments to left and right as
             // IE does not support the start and end values for text alignment
             switch (textAlign) {
