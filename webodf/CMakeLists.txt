@@ -26,6 +26,7 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/gui/UndoStateRulesTests.js
     tests/odf/FormattingTests.js
     tests/odf/LayoutTests.js
+    tests/odf/ListStyleToCssTests.js
     tests/odf/ObjectNameGeneratorTests.js
     tests/odf/OdfContainerTests.js
     tests/odf/OdfUtilsTests.js
