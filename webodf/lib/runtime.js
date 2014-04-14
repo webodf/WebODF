@@ -262,11 +262,20 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
                     }
                 }
             }
-            if (chars.length === 1000) {
+            if (chars.length >= 1000) {
+                // more than 2 chars can be added in the above logic, so the length might exceed 1000
+
+                // Char-to-string conversion is done using apply as it provides a roughly %30 improvement vs.
+                // converting the characters 1-by-1, and improves memory usage significantly as well.
+
+                // However, the apply function has an upper limit on the size of the arguments array. If it is exceeded,
+                // most browsers with throw a RangeError. Avoid this problem by converting no more than 1000(ish)
+                // characters per call.
                 s += String.fromCharCode.apply(null, chars);
                 chars.length = 0;
             }
         }
+        // Based on the above chars.length check, there is guaranteed to be less than 1000 chars left in the array
         return s + String.fromCharCode.apply(null, chars);
     }
     var result;
