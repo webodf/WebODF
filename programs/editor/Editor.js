@@ -611,8 +611,7 @@ define("webodf/editor/Editor", [
                     editorSession = new EditorSession(session, pendingMemberId, {
                         viewOptions: viewOptions,
                         directParagraphStylingEnabled: directParagraphStylingEnabled,
-                        imageInsertingEnabled: imageInsertingEnabled,
-                        hyperlinkEditingEnabled: hyperlinkEditingEnabled
+                        annotationsEnabled: annotationsEnabled
                     });
                     if (undoRedoEnabled) {
                         editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());

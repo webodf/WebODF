@@ -67,7 +67,7 @@ define("webodf/editor/EditorSession", [
      * Instantiate a new editor session attached to an existing operation session
      * @param {!ops.Session} session
      * @param {!string} localMemberId
-     * @param {{viewOptions:gui.SessionViewOptions,directParagraphStylingEnabled:boolean}} config
+     * @param {{viewOptions:gui.SessionViewOptions,directParagraphStylingEnabled:boolean,annotationsEnabled:boolean}} config
      * @constructor
      */
     var EditorSession = function EditorSession(session, localMemberId, config) {
@@ -626,7 +626,8 @@ define("webodf/editor/EditorSession", [
             head.appendChild(fontStyles);
 
             self.sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {
-                directParagraphStylingEnabled: config.directParagraphStylingEnabled
+                directParagraphStylingEnabled: config.directParagraphStylingEnabled,
+                annotationsEnabled: config.annotationsEnabled
             });
             eventManager = self.sessionController.getEventManager();
             hyperlinkTooltipView = new gui.HyperlinkTooltipView(session.getOdtDocument().getOdfCanvas(),
