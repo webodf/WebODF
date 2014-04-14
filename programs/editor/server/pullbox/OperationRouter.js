@@ -150,14 +150,14 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
                 isPlayingUnplayedServerOpSpecs = false;
 
                 // take start time
-                startTime = (new Date()).getTime();
+                startTime = Date.now();
 
                 eventNotifier.emit(ops.OperationRouter.signalProcessingBatchStart, {});
 
                 // apply as much as possible in the given time
                 while (unplayedServerOpspecQueue.length > 0) {
                     // time over?
-                    if ((new Date().getTime()) - startTime > replayTime) {
+                    if (Date.now() - startTime > replayTime) {
                         break;
                     }
 
@@ -488,7 +488,7 @@ runtime.log("OperationRouter: instant opsSync requested");
          */
         this.push = function (operations) {
             var i, op, opspec,
-                timestamp = (new Date()).getTime();
+                timestamp = Date.now();
 
             if (hasError) {
                 return;

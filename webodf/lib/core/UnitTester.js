@@ -143,13 +143,13 @@ core.UnitTestLogger = function UnitTestLogger() {
         errors = 0;
         suite = suiteName;
         test = testName;
-        start = (new Date()).getTime();
+        start = Date.now();
     };
     /**
      * @return {!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number}}
      */
     this.endTest = function () {
-        var end = (new Date()).getTime();
+        var end = Date.now();
         return {
             description: test,
             suite: [suite, test],

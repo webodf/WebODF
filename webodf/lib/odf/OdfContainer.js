@@ -61,7 +61,7 @@
             'automatic-styles', 'master-styles', 'body'],
         /**@const
            @type{!string}*/
-        automaticStylePrefix = (new Date()).getTime() + "_webodf_",
+        automaticStylePrefix = Date.now() + "_webodf_",
         base64 = new core.Base64(),
         /**@const
            @type{!string}*/
