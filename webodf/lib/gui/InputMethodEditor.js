@@ -181,7 +181,14 @@
             processUpdates.trigger();
         }
 
-        function resetWindowSelection() {
+        /**
+         * Synchronize the window's selection to the local user's cursor selection. This only changes whether the
+         * selection is a Range or a Caret (i.e., non-collapsed or collapsed). This allows most browsers to properly
+         * enable the cut/copy/paste items + shortcut keys.
+         * 
+         * @return {undefined}
+         */
+        function synchronizeWindowSelection() {
             flushEvent();
 
             // If there is a local cursor, and it is collapsed, collapse the window selection as well.
@@ -197,6 +204,17 @@
             }
 
             eventTrap.setSelectionRange(0, eventTrap.value.length);
+        }
+
+        /**
+         * If the document has focus, queue up a window selection synchronization action to occur. If the document does
+         * not have focus, no action is necessary as the window selection will be resynchronized when focus is returned.
+         * @return {undefined}
+         */
+        function handleCursorUpdated() {
+            if (eventManager.hasFocus()) {
+                processUpdates.trigger();
+            }
         }
 
         function compositionStart() {
@@ -250,6 +268,7 @@
             if (cursor.getMemberId() === inputMemberId) {
                 localCursor = cursor;
                 localCursor.getNode().appendChild(compositionElement);
+                cursor.subscribe(ops.OdtCursor.signalCursorUpdated, handleCursorUpdated);
                 eventManager.subscribe('input', synchronizeCompositionText);
                 eventManager.subscribe('compositionupdate', synchronizeCompositionText);
             }
@@ -263,6 +282,7 @@
         this.removeCursor = function (memberid) {
             if (localCursor && memberid ===  inputMemberId) {
                 localCursor.getNode().removeChild(compositionElement);
+                localCursor.unsubscribe(ops.OdtCursor.signalCursorUpdated, handleCursorUpdated);
                 eventManager.unsubscribe('input', synchronizeCompositionText);
                 eventManager.unsubscribe('compositionupdate', synchronizeCompositionText);
                 localCursor = null;
@@ -277,7 +297,7 @@
             eventManager.unsubscribe('compositionend', compositionEnd);
             eventManager.unsubscribe('textInput', textInput);
             eventManager.unsubscribe('keypress', flushEvent);
-            eventManager.unsubscribe('focus', resetWindowSelection);
+            eventManager.unsubscribe('focus', synchronizeWindowSelection);
 
             core.Async.destroyAll(cleanup, callback);
         };
@@ -287,7 +307,7 @@
             eventManager.subscribe('compositionend', compositionEnd);
             eventManager.subscribe('textInput', textInput);
             eventManager.subscribe('keypress', flushEvent);
-            eventManager.subscribe('focus', resetWindowSelection);
+            eventManager.subscribe('focus', synchronizeWindowSelection);
 
             filters.push(new DetectSafariCompositionError(eventManager));
             /**
@@ -303,7 +323,7 @@
             compositionElement = doc.createElement('span');
             compositionElement.setAttribute('id', 'composer');
 
-            processUpdates = core.Task.createTimeoutTask(resetWindowSelection, 1);
+            processUpdates = core.Task.createTimeoutTask(synchronizeWindowSelection, 1);
             cleanup.push(processUpdates.destroy);
         }
 
