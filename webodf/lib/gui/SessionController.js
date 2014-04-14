@@ -709,6 +709,7 @@ gui.SessionControllerOptions = function () {
                 annotationNode = null;
 
             if (target.className === "annotationRemoveButton") {
+                runtime.assert(annotationsEnabled, "Remove buttons are displayed on annotations while annotation editing is disabled in the controller.");
                 annotationNode = domUtils.getElementsByTagNameNS(/**@type{!Element}*/(target.parentNode), odf.Namespaces.officens, 'annotation')[0];
                 annotationController.removeAnnotation(annotationNode);
                 eventManager.focus();
