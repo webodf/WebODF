@@ -77,6 +77,12 @@
         "odf.OdfUtils",
         "xmldom.XPath"
     ],
+    "odf.ListStyleToCssTests": [
+        "core.UnitTester",
+        "odf.ListStylesToCss",
+        "odf.Namespaces",
+        "odf.StyleTree"
+    ],
     "odf.ObjectNameGeneratorTests": [
         "core.UnitTester",
         "odf.ObjectNameGenerator",
