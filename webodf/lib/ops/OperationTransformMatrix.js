@@ -598,22 +598,13 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /**
      * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
-     * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
-    function transformInsertTextSplitParagraph(insertTextSpec, splitParagraphSpec, hasAPriority) {
-        if (insertTextSpec.position < splitParagraphSpec.position) {
+    function transformInsertTextSplitParagraph(insertTextSpec, splitParagraphSpec) {
+        if (insertTextSpec.position <= splitParagraphSpec.position) {
             splitParagraphSpec.position += insertTextSpec.text.length;
-        } else if (insertTextSpec.position > splitParagraphSpec.position) {
-            insertTextSpec.position += 1;
         } else {
-            if (hasAPriority) {
-                splitParagraphSpec.position += insertTextSpec.text.length;
-            } else {
-                insertTextSpec.position += 1;
-            }
-            // TODO: cursors get out of sync, so for now have OT fail
-            return null;
+            insertTextSpec.position += 1;
         }
 
         return {
