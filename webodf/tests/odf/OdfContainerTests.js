@@ -65,15 +65,9 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         }
 
         xmlFragments.forEach(function(xmlFragment) {
-            var xml, doc, rootNode;
+            var doc, rootNode;
 
-            xml = "<?xml version='1.0' encoding='UTF-8'?><dummy";
-            Object.keys(odf.Namespaces.namespaceMap).forEach(function(key) {
-                xml += " xmlns:" + key + '="' + odf.Namespaces.namespaceMap[key] + '"';
-            });
-            xml += ">" + xmlFragment + "</dummy>";
-
-            doc = runtime.parseXML(xml);
+            doc = core.UnitTest.createXmlDocument("dummy", xmlFragment, odf.Namespaces.namespaceMap);
             rootNode = node.ownerDocument.importNode(doc.documentElement, true);
             while (rootNode.firstChild) {
                 node.appendChild(rootNode.firstChild);

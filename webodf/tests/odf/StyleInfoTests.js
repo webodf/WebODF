@@ -55,16 +55,8 @@ odf.StyleInfoTests = function StyleInfoTests(runner) {
         t = {};
     };
     function createDocument(dom) {
-        var header = "<?xml version='1.0' encoding='UTF-8'?>",
-            footer = "</office:text>";
+        return core.UnitTest.createXmlDocument("dummy", dom, namespace).documentElement.firstChild;
 
-        header += "<office:text";
-        Object.keys(namespace).forEach(function (key) {
-            header += " xmlns:" + key + '="' + namespace[key] + '"';
-        });
-        header += ">";
-
-        return runtime.parseXML(header + dom + footer).documentElement.firstChild;
     }
     function determineStylesForNode() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'>A</text:span></text:p>");

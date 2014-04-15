@@ -52,18 +52,6 @@ odf.ObjectNameGeneratorTests = function ObjectNameGeneratorTests(runner) {
             "xlink": "http://www.w3.org/1999/xlink"
         };
 
-    function parseXML(data) {
-        var xml = "<?xml version='1.0' encoding='UTF-8'?>";
-
-        xml += "<office:document";
-        Object.keys(namespace).forEach(function (key) {
-            xml += " xmlns:" + key + '="' + namespace[key] + '"';
-        });
-        xml += ">";
-        xml += data;
-        xml += "</office:document>";
-        return runtime.parseXML(xml).documentElement;
-    }
     /**
      * Mocking OdfContainer allows some simplification in the testing setup
      * @param {!Node} styles
@@ -120,7 +108,8 @@ odf.ObjectNameGeneratorTests = function ObjectNameGeneratorTests(runner) {
         xml += "    </text:p>";
         xml += "</office:text>";
 
-        t.testArea.appendChild(parseXML(xml));
+        t.testArea.appendChild(core.UnitTest.createXmlDocument("office:document", xml, namespace).documentElement);
+
         containerMock = new OdfContainerMock(
             t.testArea.firstChild.childNodes[0],
             t.testArea.firstChild.childNodes[1],

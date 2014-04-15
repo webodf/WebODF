@@ -99,6 +99,30 @@ core.UnitTest.cleanupTestAreaDiv = function () {
 };
 
 /**
+ * Creates and returns an XML document
+ * @param {!string} rootElementName  name of the root element, "prefix:localName"
+ * @param {!string} xmlBodyString  XML fragment to insert in the document between the root tags
+ * @param {!Object.<!string, !string>} namespaceMap Name-value pairs that map the
+ *                                     prefix onto the appropriate uri namespace
+ * @return {?Document}
+ */
+core.UnitTest.createXmlDocument = function (rootElementName, xmlBodyString, namespaceMap) {
+    "use strict";
+    var /**@type{!string}*/
+        xmlDoc = "<?xml version='1.0' encoding='UTF-8'?>";
+
+    xmlDoc += "<"+ rootElementName;
+    Object.keys(namespaceMap).forEach(function (key) {
+        xmlDoc += " xmlns:" + key + '="' + namespaceMap[key] + '"';
+    });
+    xmlDoc += ">";
+    xmlDoc += xmlBodyString;
+    xmlDoc += "</"+rootElementName+">";
+
+    return runtime.parseXML(xmlDoc);
+};
+
+/**
  * Creates and returns a simple ODT document
  * @param {!string} xml Xml fragment to insert in the document between the
  *                      <office:document>..</office:document> tags
@@ -108,19 +132,9 @@ core.UnitTest.cleanupTestAreaDiv = function () {
  */
 core.UnitTest.createOdtDocument = function (xml, namespaceMap) {
     "use strict";
-    var /**@type{!string}*/
-        xmlDoc = "<?xml version='1.0' encoding='UTF-8'?>";
-
-    xmlDoc += "<office:document";
-    Object.keys(namespaceMap).forEach(function (key) {
-        xmlDoc += " xmlns:" + key + '="' + namespaceMap[key] + '"';
-    });
-    xmlDoc += ">";
-    xmlDoc += xml;
-    xmlDoc += "</office:document>";
-
-    return runtime.parseXML(xmlDoc);
+    return core.UnitTest.createXmlDocument("office:document", xml, namespaceMap);
 };
+
 
 /**
  * @constructor
