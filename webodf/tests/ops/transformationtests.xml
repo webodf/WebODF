@@ -500,6 +500,48 @@
   </opsB>
   <after><office:text><text:p>a</text:p><text:p><c:cursor c:memberId="Bob"/></text:p><text:p><c:cursor c:memberId="Alice"/>b</text:p></office:text></after>
  </test>
+ <test name="InsertTextSplitParagraph_TaVT">
+  <before><office:text><text:p>TT</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
+   <op optype="InsertText" memberid="Alice" position="1" text="a" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+  </opsB>
+  <after><office:text><text:p>Ta<c:cursor c:memberId="Alice"/></text:p><text:p><c:cursor c:memberId="Bob"/>T</text:p></office:text></after>
+ </test>
+ <test name="InsertTextSplitParagraph_TaTV">
+  <before><office:text><text:p>TT</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
+   <op optype="InsertText" memberid="Alice" position="1" text="a" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true"/>
+  </opsB>
+  <after><office:text><text:p>Ta<c:cursor c:memberId="Alice"/>T</text:p><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
+ <test name="InsertTextSplitParagraph_TVTa">
+  <before><office:text><text:p>TT</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
+   <op optype="InsertText" memberid="Alice" position="2" text="a" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+  </opsB>
+  <after><office:text><text:p>T</text:p><text:p><c:cursor c:memberId="Bob"/>Ta<c:cursor c:memberId="Alice"/></text:p></office:text></after>
+ </test>
 
  <test name="RemoveTextRemoveText_{B}[CDE]">
   <before><office:text><text:p>ABCDEFG</text:p></office:text></before>
