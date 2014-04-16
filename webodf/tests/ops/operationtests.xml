@@ -157,7 +157,7 @@
   </ops>
   <after><office:text><text:p>ab</text:p></office:text></after>
  </test>
- <test name="InsertText_InsertNewLineChar" isFailing="true">
+ <test name="InsertText_InsertNewLineChar">
   <before><office:text><text:p>a</text:p></office:text></before>
   <ops>
    <op optype="InsertText" position="1" text="&#10;"/>

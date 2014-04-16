@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops*/
+/*global ops, odf, runtime*/
 
 /**
  * This operation inserts the given text
@@ -52,8 +52,7 @@
 ops.OpInsertText = function OpInsertText() {
     "use strict";
 
-    var space = " ",
-        tab = "\t",
+    var tab = "\t",
         memberid,
         timestamp,
         /**@type{number}*/
@@ -61,7 +60,8 @@ ops.OpInsertText = function OpInsertText() {
         /**@type{boolean}*/
         moveCursor,
         /**@type{string}*/
-        text;
+        text,
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @param {!ops.OpInsertText.InitSpec} data
@@ -93,6 +93,15 @@ ops.OpInsertText = function OpInsertText() {
     }
 
     /**
+     * Returns true if the supplied character is a non-tab ODF whitespace character
+     * @param {!string} character
+     * @return {!boolean}
+     */
+    function isNonTabWhiteSpace(character) {
+        return character !== tab && odfUtils.isODFWhitespace(character);
+    }
+
+    /**
      * Returns true if the particular character in the text string is a space character that is immediately
      * preceded by another space character (or is the first or last space in the text block).
      * Logic is based on http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-text_s
@@ -101,7 +110,7 @@ ops.OpInsertText = function OpInsertText() {
      * @return {boolean}
      */
     function requiresSpaceElement(text, index) {
-        return text[index] === space && (index === 0 || index === text.length - 1 || text[index - 1] === space);
+        return isNonTabWhiteSpace(text[index]) && (index === 0 || index === text.length - 1 || isNonTabWhiteSpace(text[index - 1]));
     }
 
     /**
@@ -118,7 +127,6 @@ ops.OpInsertText = function OpInsertText() {
             paragraphElement,
             textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             toInsertIndex = 0,
-            spaceTag,
             spaceElement,
             cursor = odtDocument.getCursor(memberid),
             i;
@@ -141,7 +149,7 @@ ops.OpInsertText = function OpInsertText() {
 
             // first do the insertion with any contained tabs or spaces
             for (i = 0; i < text.length; i += 1) {
-                if (requiresSpaceElement(text, i) || text[i] === tab) {
+                if (text[i] === tab || requiresSpaceElement(text, i)) {
                     // no nodes inserted yet?
                     if (toInsertIndex === 0) {
                         // if inserting in the middle the given text node needs to be split up
@@ -161,10 +169,17 @@ ops.OpInsertText = function OpInsertText() {
                     }
                     toInsertIndex = i + 1;
 
-                    // insert space element
-                    spaceTag = text[i] === space ? "text:s" : "text:tab";
-                    spaceElement = ownerDocument.createElementNS(textns, spaceTag);
-                    spaceElement.appendChild(ownerDocument.createTextNode(text[i]));
+                    // insert appropriate spacing element
+                    if (text[i] === tab) {
+                        spaceElement = ownerDocument.createElementNS(textns, "text:tab");
+                        spaceElement.appendChild(ownerDocument.createTextNode("\t"));
+                    } else {
+                        if (text[i] !== " ") {
+                            runtime.log("WARN: InsertText operation contains non-tab, non-space whitespace character (character code " + text.charCodeAt(i) + ")");
+                        }
+                        spaceElement = ownerDocument.createElementNS(textns, "text:s");
+                        spaceElement.appendChild(ownerDocument.createTextNode(" "));
+                    }
                     parentElement.insertBefore(spaceElement, nextNode);
                 }
             }
