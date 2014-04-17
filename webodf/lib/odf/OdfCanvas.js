@@ -717,6 +717,30 @@
     }
 
     /**
+     * COPIED FROM ListStylesToCss - Will be removed when this logic is deduped
+     * Appends the rule into the stylesheets and logs any errors that occur
+     * @param {!CSSStyleSheet} styleSheet
+     * @param {!string} rule
+     */
+    function appendRule(styleSheet, rule) {
+        try {
+            styleSheet.insertRule(rule, styleSheet.cssRules.length);
+        } catch (/**@type{!DOMException}*/e) {
+            runtime.log("cannot load rule: " + rule + " - " + e);
+        }
+    }
+
+    /**
+     * COPIED FROM ListStylesToCss - Will be removed when this logic is deduped
+     * Return the supplied value with any backslashes escaped, and double-quotes escaped
+     * @param {!string} value
+     * @return {!string}
+     */
+    function escapeCSSString(value) {
+        return value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+    }
+
+    /**
      * @param {!Element} node
      * @return {!string}
      */
@@ -735,19 +759,21 @@
             },
             content;
 
-        content = prefix;
+        if (prefix) {
+            content = '"' + escapeCSSString(prefix) + '"';
+        }
 
         if (stylemap.hasOwnProperty(style)) {
             content += " counter(list, " + stylemap[style] + ")";
         } else if (style) {
             content += "'" + style + "';";
         } else {
-            content += " ''";
+            content += ' ""';
         }
         if (suffix) {
-            content += " '" + suffix + "'";
+            content += ' "' + escapeCSSString(suffix) + '"';
         }
-        rule = "content: " + content + ";";
+        rule = 'content:' + content + ';';
         return rule;
     }
     /**
@@ -763,7 +789,7 @@
      */
     function getBulletRule(node) {
         var bulletChar = node.getAttributeNS(textns, "bullet-char");
-        return "content: '" + bulletChar + "';";
+        return 'content: "' + escapeCSSString(bulletChar) + '";';
     }
 
     /**
@@ -859,7 +885,7 @@
                         rule += 'content: counter(' + id + ');';
                     }
                     rule += 'counter-increment:' + id + ';';
-                    stylesheet.insertRule('text|list#' + id + ' {counter-reset:' + id + '}', stylesheet.cssRules.length);
+                    appendRule(stylesheet, 'text|list#' + id + ' {counter-reset:' + id + '}');
                 }
                 rule += '}';
 
@@ -867,7 +893,7 @@
 
                 if (rule) {
                     // Add this stylesheet
-                    stylesheet.insertRule(rule, stylesheet.cssRules.length);
+                    appendRule(stylesheet, rule);
                 }
             }
         }

@@ -85,6 +85,15 @@
         }
 
         /**
+         * Return the supplied value with any backslashes escaped, and double-quotes escaped
+         * @param {!string} value
+         * @return {!string}
+         */
+        function escapeCSSString(value) {
+            return value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+        }
+
+        /**
          * Gets the CSS content for a numbered list
          * @param {!Element} node
          * @return {!string}
@@ -98,16 +107,16 @@
                 /**@type{!string}*/
                 content = "";
             if (prefix) {
-                content += ' "' + prefix + '"';
+                content += '"' + escapeCSSString(prefix) + '"';
             }
             if (stylemap.hasOwnProperty(style)) {
                 content += " counter(list, " + stylemap[style] + ")";
             } else if (style) {
                 content += ' "' + style + '"';
             } else {
-                content += " ''";
+                content += ' ""';
             }
-            return 'content:' + content + ' "' + suffix + '"';
+            return 'content:' + content + ' "' + escapeCSSString(suffix) + '"';
         }
 
         /**
@@ -125,7 +134,7 @@
          */
         function getBulletRule(node) {
             var bulletChar = node.getAttributeNS(textns, "bullet-char");
-            return "content: '" + bulletChar + "'";
+            return 'content: "' + escapeCSSString(bulletChar) + '"';
         }
 
         /**
