@@ -102,7 +102,7 @@ ops.TrivialOperationRouter = function TrivialOperationRouter() {
                 timedOp,
                 opspec = op.spec();
 
-            opspec.timestamp = (new Date()).getTime();
+            opspec.timestamp = Date.now();
             timedOp = operationFactory.create(opspec);
             timedOp.group = "g" + groupIdentifier;
 
