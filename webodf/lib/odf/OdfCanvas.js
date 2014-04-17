@@ -760,7 +760,9 @@
             content;
 
         if (prefix) {
-            content = '"' + escapeCSSString(prefix) + '"';
+            // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+            // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+            content = '"' + escapeCSSString(prefix) + '"\n';
         }
 
         if (stylemap.hasOwnProperty(style)) {
@@ -789,7 +791,9 @@
      */
     function getBulletRule(node) {
         var bulletChar = node.getAttributeNS(textns, "bullet-char");
-        return 'content: "' + escapeCSSString(bulletChar) + '";';
+        // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+        // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+        return 'content: "' + escapeCSSString(bulletChar) + '"\n;';
     }
 
     /**
@@ -861,6 +865,9 @@
                     node = listStyleMap[styleName];
                     // TODO: getFirstNonWhitespaceChild() could also return a comment. Ensure the result is proper!
                     bulletRule = getBulletsRule(/**@type{Element|undefined}*/(odfUtils.getFirstNonWhitespaceChild(node)));
+                    // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+                    // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+                    bulletRule = "\n" + bulletRule + "\n";
                 }
 
                 if (continueList) {

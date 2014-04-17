@@ -107,7 +107,9 @@
                 /**@type{!string}*/
                 content = "";
             if (prefix) {
-                content += '"' + escapeCSSString(prefix) + '"';
+                // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+                // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+                content += '"' + escapeCSSString(prefix) + '"\n';
             }
             if (stylemap.hasOwnProperty(style)) {
                 content += " counter(list, " + stylemap[style] + ")";
@@ -255,7 +257,9 @@
                 listItemRule += 'margin-left: -' + bulletWidth + ';';
                 listItemRule += 'padding-right: ' + labelDistance + ';';
             }
-            listItemRule += itemRule + ';';
+            // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+            // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+            listItemRule += "\n" + itemRule + ';\n';
             listItemRule += '}';
             appendRule(styleSheet, listItemRule);
         }
