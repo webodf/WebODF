@@ -1195,7 +1195,7 @@
                 // Optional according to package spec
                 // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__440346_826425813
                 data = runtime.byteArrayFromString(settings, "utf8");
-            zip.save("settings.xml", data, true, date);
+                zip.save("settings.xml", data, true, date);
             } else {
                 zip.remove("settings.xml");
             }
