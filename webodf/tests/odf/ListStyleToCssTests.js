@@ -34,7 +34,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
     "use strict";
     var t,
         r = runner,
-        namespace = odf.Namespaces.namespaceMap;
+        namespaceMap = odf.Namespaces.namespaceMap;
 
     /**
      * @extends {CSSRuleList} Well.... we don't really, but please shut your face closure compiler :)
@@ -69,22 +69,6 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
         };
     }
 
-    /**
-     * @return {!Element}
-     */
-    function createDocument(dom) {
-        var header = "<?xml version='1.0' encoding='UTF-8'?>",
-            footer = "</document>";
-
-        header += "<document";
-        Object.keys(namespace).forEach(function (key) {
-            header += " xmlns:" + key + '="' + namespace[key] + '"';
-        });
-        header += ">";
-
-        return /**@type{!Element}*/(runtime.parseXML(header + dom + footer).documentElement.firstChild);
-    }
-
     this.setUp = function () {
         t = {
             list2css : new odf.ListStyleToCss()
@@ -103,8 +87,8 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
         var stylesTree,
             automaticStylesTree;
 
-        stylesTree = createDocument('<office:styles>' + styles + '</office:styles>');
-        automaticStylesTree = createDocument('<office:automatic-styles>' + automaticStyles + '</office:automatic-styles>');
+        stylesTree = core.UnitTest.createXmlDocument('office:styles', styles, namespaceMap).documentElement;
+        automaticStylesTree = core.UnitTest.createXmlDocument('office:automatic-styles', automaticStyles, namespaceMap).documentElement;
 
         t.styleSheet = new MockCSSStyleSheet();
         t.styleTree = new odf.StyleTree(stylesTree, automaticStylesTree).getStyleTree();

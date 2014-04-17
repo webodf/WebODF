@@ -65,16 +65,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
         core.UnitTest.cleanupTestAreaDiv();
     };
     function parseXML(data) {
-        var xml = "<?xml version='1.0' encoding='UTF-8'?>";
-
-        xml += "<office:document";
-        Object.keys(namespace).forEach(function (key) {
-            xml += " xmlns:" + key + '="' + namespace[key] + '"';
-        });
-        xml += ">";
-        xml += data;
-        xml += "</office:document>";
-        return runtime.parseXML(xml).documentElement;
+        return core.UnitTest.createOdtDocument(data, namespace).documentElement;
     }
     function createDocument(dom) {
         var xml = "";
