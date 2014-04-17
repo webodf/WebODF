@@ -44,7 +44,17 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     var r = runner,
         t,
         testarea,
-        inputMemberId = "Joe";
+        inputMemberId = "Joe",
+        prefixToNamespace = {
+            fo: odf.Namespaces.namespaceMap.fo,
+            text: odf.Namespaces.namespaceMap.text,
+            style: odf.Namespaces.namespaceMap.style,
+            office: odf.Namespaces.namespaceMap.office,
+            draw: odf.Namespaces.namespaceMap.draw,
+            e: "urn:webodf:names:editinfo",
+            c: "urn:webodf:names:cursor",
+            html: "http://www.w3.org/1999/xhtml"
+        };
 
     /**
      * Class that filters runtime specific nodes from the DOM.
@@ -59,7 +69,9 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
          * @return {!number}
          */
         this.acceptNode = function (node) {
-            if (node.namespaceURI === "urn:webodf:names:cursor") {
+            if (node.namespaceURI === prefixToNamespace.c ||
+                node.namespaceURI === prefixToNamespace.e ||
+                node.namespaceURI === prefixToNamespace.html) {
                 return NodeFilter.FILTER_ACCEPT;
             }
             return odfFilter.acceptNode(node);
@@ -81,7 +93,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     }
     function createOdtDocument(xml) {
         var domDocument = testarea.ownerDocument,
-            doc = core.UnitTest.createOdtDocument("<office:text>" + xml + "</office:text>", odf.Namespaces.namespaceMap),
+            doc = core.UnitTest.createOdtDocument("<office:text>" + xml + "</office:text>", prefixToNamespace),
             node = /**@type{!Element}*/(domDocument.importNode(doc.documentElement, true));
 
         testarea.appendChild(node);
@@ -137,7 +149,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             return false;
         }
     }
-    
+
     /**
      * Test cursor iteration over a document fragment. Each supported cursor position should be indicated in
      * the fragment using the pipe character ('|'). This exercises both forwards and backwards iteration.
@@ -147,24 +159,28 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     function testCursorPositions(documentString) {
         var segments = documentString.split("|"),
             serializer = new xmldom.LSSerializer(),
-            cursorSerialized = /<ns\d:cursor[^>]*><\/ns\d:cursor>/,
+            cursorSerialized = /<c:cursor[^>]*><\/c:cursor>/,
             position,
-            step = 0;
+            step = 0,
+            documentRoot;
 
         serializer.filter = new OdfOrCursorNodeFilter();
         runtime.log("Scenario: " + documentString);
         t.segmentCount = segments.length;
         r.shouldBe(t, "t.segmentCount > 1", "true");
-        createOdtDocument(segments.join(""));
+        documentRoot = createOdtDocument(segments.join(""));
+        t.documentLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length);
 
         // Test iteration forward
         for (position = 1; position < segments.length; position += 1) {
             setCursorPosition(step);
+            t.currentDocLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length);
+            r.shouldBe(t, "t.currentDocLength", "t.documentLength");
             t.lastValidStep = step;
             t.expected = "<office:text>" +
                 segments.slice(0, position).join("") + "|" + segments.slice(position, segments.length).join("") +
                 "</office:text>";
-            t.result = serializer.writeToString(t.root.firstChild, odf.Namespaces.namespaceMap);
+            t.result = serializer.writeToString(t.root.firstChild, prefixToNamespace);
             t.result = t.result.replace(cursorSerialized, "|");
             r.shouldBe(t, "t.result", "t.expected");
             step += 1;
@@ -177,10 +193,11 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         // Test iteration backward
         for (position = segments.length - 1; position > 0; position -= 1) {
             setCursorPosition(step);
+            r.shouldBe(t, "t.currentDocLength", "t.documentLength");
             t.expected = "<office:text>" +
                 segments.slice(0, position).join("") + "|" + segments.slice(position, segments.length).join("") +
                 "</office:text>";
-            t.result = serializer.writeToString(t.root.firstChild, odf.Namespaces.namespaceMap);
+            t.result = serializer.writeToString(t.root.firstChild, prefixToNamespace);
             t.result = t.result.replace(cursorSerialized, "|");
             r.shouldBe(t, "t.result", "t.expected");
             step -= 1;
@@ -531,6 +548,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         testCursorPositions("<text:p>|<text:tab>    </text:tab>|<text:s> </text:s>|<text:s> </text:s>|</text:p>");
         testCursorPositions("<text:p>|<text:tab>    </text:tab>| |<text:s> </text:s>|</text:p>");
         testCursorPositions("<text:p>|a| | <text:s> </text:s>|   </text:p>");
+        testCursorPositions("<text:p><e:editinfo></e:editinfo><text:span></text:span>|a|<text:s> </text:s>|<text:s> </text:s>|<text:span></text:span><text:span></text:span></text:p>");
     }
     function testAvailablePositions_DrawElements() {
         testCursorPositions("<text:p>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:p>");
@@ -538,9 +556,13 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
     }
     function testAvailablePositions_Annotations() {
         testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>|c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>');
+        testCursorPositions('<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|c|<office:annotation-end></office:annotation-end>1|2|</text:p>');
+        testCursorPositions('<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|<office:annotation-end></office:annotation-end>1|2|</text:p>');
     }
     function testAvailablePositions_BetweenAnnotationAndSpan() {
-        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>c|d|e|</text:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
+        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>|c|d|</text:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
+        testCursorPositions('<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|c|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
+        testCursorPositions('<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
     }
 
 
