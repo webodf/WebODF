@@ -80,7 +80,7 @@
             try {
                 styleSheet.insertRule(rule, styleSheet.cssRules.length);
             } catch (/**@type{!DOMException}*/e) {
-                runtime.log("cannot load rule: " + rule);
+                runtime.log("cannot load rule: " + rule + " - " + e);
             }
         }
 
