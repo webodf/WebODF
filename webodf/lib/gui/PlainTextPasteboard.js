@@ -69,28 +69,38 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
             paragraphs;
 
         paragraphs = data.replace(/\r/g, "").split("\n");
-        paragraphs.forEach(function (text) {
-            operations.push(createOp(new ops.OpSplitParagraph(), {
-                memberid: inputMemberId,
-                position: cursorPosition,
-                moveCursor: true
-            }));
-            cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
+        if (paragraphs.length === 1) {
+            // Slight optimization: if there is only one line of text, there is no need to create any split or remove commands
             operations.push(createOp(new ops.OpInsertText(), {
                 memberid: inputMemberId,
                 position: cursorPosition,
-                text: text,
+                text: paragraphs[0],
                 moveCursor: true
             }));
-            cursorPosition += text.length;
-        });
+        } else if (paragraphs.length > 1) {
+            paragraphs.forEach(function (text) {
+                operations.push(createOp(new ops.OpSplitParagraph(), {
+                    memberid: inputMemberId,
+                    position: cursorPosition,
+                    moveCursor: true
+                }));
+                cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
+                operations.push(createOp(new ops.OpInsertText(), {
+                    memberid: inputMemberId,
+                    position: cursorPosition,
+                    text: text,
+                    moveCursor: true
+                }));
+                cursorPosition += text.length;
+            });
 
-        // Merge the first element back into the first paragraph
-        operations.push(createOp(new ops.OpRemoveText(), {
-            memberid: inputMemberId,
-            position: originalCursorPosition,
-            length: 1
-        }));
+            // Merge the first element back into the first paragraph
+            operations.push(createOp(new ops.OpRemoveText(), {
+                memberid: inputMemberId,
+                position: originalCursorPosition,
+                length: 1
+            }));
+        }
 
         return operations;
     };

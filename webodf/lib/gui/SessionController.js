@@ -729,7 +729,13 @@ gui.SessionControllerOptions = function () {
             // https://dvcs.w3.org/hg/dom3events/raw-file/tip/html/DOM3-Events.html#event-type-compositionend
             var input = e.data;
             if (input) {
-                textController.insertText(input);
+                if (input.indexOf("\n") === -1) {
+                    textController.insertText(input);
+                } else {
+                    // Multi-line input should be handled as if it was pasted, rather than inserted as one giant
+                    // single string.
+                    session.enqueue(pasteHandler.createPasteOps(input));
+                }
             }
         }
 
