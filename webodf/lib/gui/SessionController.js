@@ -450,6 +450,17 @@ gui.SessionControllerOptions = function () {
         }
 
         /**
+         * Return the number of mouse clicks if the mouse event is for the primary button. Otherwise return 0.
+         * @param {!Event} event
+         * @return {!number}
+         */
+        function computeClickCount(event) {
+            // According to the spec, button === 0 indicates the primary button (the left button by default, or the
+            // right button if the user has switched their mouse buttons around).
+            return event.button === 0 ? event.detail : 0;
+        }
+
+        /**
          * Updates a flag indicating whether the mouse down event occurred within the OdfCanvas element.
          * This is necessary because the mouse-up binding needs to be global in order to handle mouse-up
          * events that occur when the user releases the mouse button outside the canvas.
@@ -463,7 +474,7 @@ gui.SessionControllerOptions = function () {
             if (clickStartedWithinCanvas) {
                 isMouseMoved = false;
                 mouseDownRootFilter = odtDocument.createRootFilter(/**@type{!Node}*/(target));
-                clickCount = e.detail;
+                clickCount = computeClickCount(e);
                 if (cursor && e.shiftKey) {
                     // Firefox seems to get rather confused about the window selection when shift+extending it.
                     // Help this poor browser by resetting the window selection back to the anchor node if the user
@@ -568,7 +579,7 @@ gui.SessionControllerOptions = function () {
             if (selection.anchorNode && selection.focusNode) {
                 selectionRange = selectionController.selectionToRange(selection);
                 selectionController.selectRange(selectionRange.range,
-                    selectionRange.hasForwardSelection, event.detail);
+                    selectionRange.hasForwardSelection, computeClickCount(event));
             }
             eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
         }
@@ -638,7 +649,7 @@ gui.SessionControllerOptions = function () {
                             }
                         }
                     }
-                    selectionController.selectRange(range, shadowCursor.hasForwardSelection(), event.detail);
+                    selectionController.selectRange(range, shadowCursor.hasForwardSelection(), computeClickCount(event));
                     eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
                 } else {
                     // Clicking in already selected text won't update window.getSelection() until just after
@@ -657,6 +668,7 @@ gui.SessionControllerOptions = function () {
                     }
                 }
             }
+            // TODO assumes the mouseup/contextmenu is the same button as the mousedown that initialized the clickCount
             clickCount = 0;
             clickStartedWithinCanvas = false;
             isMouseMoved = false;
