@@ -181,16 +181,17 @@ define("webodf/editor/Editor", [
              * call editorReadyCallback once everything is done.
              *
              * @param {!string} docUrl
-             * @param {!string} memberId
              * @param {!function()} editorReadyCallback
              * @return {undefined}
              */
-            this.openDocument = function (docUrl, memberId, editorReadyCallback) {
-                initDocLoading(docUrl, memberId, function () {
+            this.openDocument = function (docUrl, editorReadyCallback) {
+                var localMemberId = "localuser";
+
+                initDocLoading(docUrl, localMemberId, function () {
                     runtime.loadClass("ops.OpAddMember");
                     var op = new ops.OpAddMember();
                     op.init({
-                        memberid: memberId,
+                        memberid: localMemberId,
                         setProperties: {
                             fullName: runtime.tr("Unknown Author"),
                             color: "black",
