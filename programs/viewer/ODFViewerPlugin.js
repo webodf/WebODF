@@ -216,7 +216,15 @@ function ODFViewerPlugin() {
     };
 
     this.getPluginVersion = function () {
-        return webodf.Version;
+        var version;
+
+        if (String(typeof webodf) !== "undefined") {
+            version = webodf.Version;
+        } else {
+            version = "Unknown";
+        }
+
+        return version;
     };
 
     this.getPluginURL = function () {
