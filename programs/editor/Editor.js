@@ -67,13 +67,12 @@ define("webodf/editor/Editor", [
          * @param {{unstableFeaturesEnabled:boolean,
          *          allFeaturesEnabled:boolean,
          *          reviewModeEnabled: boolean,
+         *          collabEditingEnabled:boolean,
          *          loadCallback:function(),
          *          saveCallback:function(),
          *          closeCallback:function()}}
-         * param {!ops.Server=} server
-         * @param {!ServerFactory=} serverFactory
          */
-        function Editor(mainContainerElementId, args, server, serverFactory) {
+        function Editor(mainContainerElementId, args) {
 
             var self = this,
                 // Private
@@ -288,17 +287,14 @@ define("webodf/editor/Editor", [
              * request a replay of previous operations, call
              * editorReadyCallback once everything is done.
              *
-             * @param {!string} sessionId
-             * @param {!string} memberId
+             * @param {!SessionBackend} sessionBackend
              * @param {!function()} editorReadyCallback
              * @return {undefined}
              */
-            this.openSession = function (sessionId, memberId, editorReadyCallback) {
-                initDocLoading(server.getGenesisUrl(sessionId), memberId, function () {
-                    // overwrite router 
-                    // TODO: serverFactory should be a backendFactory,
-                    // and there should be a backendFactory for local editing
-                    var opRouter = serverFactory.createOperationRouter(sessionId, memberId, server, odfCanvas.odfContainer(), handleOperationRouterErrors);
+            this.openSession = function (sessionBackend, editorReadyCallback) {
+                initDocLoading(sessionBackend.getGenesisUrl(), sessionBackend.getMemberId(), function () {
+                    // overwrite router
+                    var opRouter = sessionBackend.createOperationRouter(odfCanvas.odfContainer(), handleOperationRouterErrors);
                     session.setOperationRouter(opRouter);
                     // forward events
                     // TODO: relying here on that opRouter uses the same id strings ATM, those should be defined at OperationRouter interface
@@ -553,16 +549,14 @@ define("webodf/editor/Editor", [
              * @return {!boolean}
              */
             function isEnabled(isFeatureEnabled, flag) {
-                var collabEditing = Boolean(server);
-
                 switch (flag) {
                     case FEATURE.COLLAB_UNSTABLE:
-                        if (collabEditing && ! args.unstableFeaturesEnabled) {
+                        if (args.collabEditingEnabled && ! args.unstableFeaturesEnabled) {
                             return false;
                         }
                         break;
                     case FEATURE.COLLAB_MISSING:
-                        if (collabEditing) {
+                        if (args.collabEditingEnabled) {
                             return false;
                         }
                         break;
@@ -586,7 +580,6 @@ define("webodf/editor/Editor", [
                     membersElementId = "webodfeditor-members" + editorInstanceCounter,
                     documentns = document.documentElement.namespaceURI,
                     //
-                    collabEditing = Boolean(server),
                     directTextStylingEnabled = isEnabled(args.directTextStylingEnabled),
                     directParagraphStylingEnabled = isEnabled(args.directParagraphStylingEnabled, FEATURE.COLLAB_UNSTABLE),
                     paragraphStyleSelectingEnabled = isEnabled(args.paragraphStyleSelectingEnabled),
@@ -599,7 +592,7 @@ define("webodf/editor/Editor", [
                      // undo manager is not yet integrated with collaboration
                     undoRedoEnabled = isEnabled(args.undoRedoEnabled, FEATURE.COLLAB_MISSING),
                     zoomingEnabled = isEnabled(args.zoomingEnabled),
-                    aboutEnabled = (! collabEditing),
+                    aboutEnabled = (! args.collabEditingEnabled),
                     closeCallback;
 
                 editorInstanceCounter += 1;
@@ -631,7 +624,7 @@ define("webodf/editor/Editor", [
                 editorElement.appendChild(canvasContainerElement);
                 mainContainerElement.appendChild(editorElement);
 
-                if (collabEditing) {
+                if (args.collabEditingEnabled) {
                     // memberlist plugin
                     memberListElement = createElement('div', undefined, "webodfeditor-memberList");
                     membersElement = createElement('div', membersElementId, "webodfeditor-members");
@@ -649,7 +642,7 @@ define("webodf/editor/Editor", [
                 }, editorElementId);
                 mainContainer.addChild(editorPane);
 
-                if (collabEditing) {
+                if (args.collabEditingEnabled) {
                     memberListPane = new ContentPane({
                         region: 'right',
                         title: runtime.tr("Members")
@@ -682,8 +675,8 @@ define("webodf/editor/Editor", [
 
                 odfCanvas.addListener("statereadychange", function () {
                     var viewOptions = {
-                            editInfoMarkersInitiallyVisible: collabEditing,
-                            caretAvatarsInitiallyVisible: collabEditing,
+                            editInfoMarkersInitiallyVisible: Boolean(args.collabEditingEnabled),
+                            caretAvatarsInitiallyVisible: Boolean(args.collabEditingEnabled),
                             caretBlinksOnRangeSelect: true
                         };
 

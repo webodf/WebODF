@@ -48,7 +48,8 @@ var webodfEditor = (function () {
         serverFactory = null,
         server = null,
         editorOptions = {
-            allFeaturesEnabled: true
+            allFeaturesEnabled: true,
+            collabEditingEnabled: true
         },
         currentPageId = null,
         savingOverlay, disconnectedOverlay, hasLocalUnsyncedOpsOverlay,
@@ -184,7 +185,7 @@ var webodfEditor = (function () {
                             editorOptions.networkSecurityToken = token;
                             editorOptions.closeCallback = closeEditing;
 
-                            editorInstance = new Editor("mainContainer", editorOptions, server, serverFactory);
+                            editorInstance = new Editor("mainContainer", editorOptions);
                             canvasContainerElement = editorInstance.getCanvasContainerElement();
                             savingOverlay = addStatusOverlay(canvasContainerElement, "document-save.png", 0);
                             hasLocalUnsyncedOpsOverlay = addStatusOverlay(canvasContainerElement, "vcs-locally-modified.png", 0);
@@ -205,12 +206,12 @@ var webodfEditor = (function () {
                             editorInstance.addEventListener(Editor.EVENT_ERROR, handleEditingError);
 
                             // load the document and get called back when it's live
-                            editorInstance.openSession(sessionId, memberId, startEditing);
+                            editorInstance.openSession(serverFactory.createSessionBackend(sessionId, memberId, server), startEditing);
                         });
                     }
                 );
             } else {
-                editorInstance.openSession(sessionId, memberId, startEditing);
+                editorInstance.openSession(serverFactory.createSessionBackend(sessionId, memberId, server), startEditing);
             }
         }, function() {
             // TODO: handle error

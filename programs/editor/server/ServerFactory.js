@@ -38,11 +38,9 @@ ServerFactory.prototype.createServer = function () {"use strict"; };
  * @param {!string} sessionId
  * @param {!string} memberId
  * @param {!ops.Server} server
- * @param {!odf.OdfContainer} odfContainer TODO: needed for pullbox writing to server at end, find better solution
- * @param {!function(!Object)} errorCallback
- * @return {!ops.OperationRouter}
+ * @return {!SessionBackend}
  */
-ServerFactory.prototype.createOperationRouter = function (sessionId, memberId, server, odfContainer, errorCallback) {"use strict"; };
+ServerFactory.prototype.createSessionBackend = function (sessionId, memberId, server) {"use strict"; };
 
 /**
  * @param {!ops.Server} server
