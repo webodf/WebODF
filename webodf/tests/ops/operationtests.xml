@@ -529,7 +529,7 @@
    <op optype="RemoveText" position="0" length="1"/>
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
-  <after><office:text><text:p text:style-name="B"><text:span><c:cursor c:memberId="Bob"/>cde</text:span></text:p></office:text></after>
+  <after><office:text><text:p text:style-name="A"><text:span><c:cursor c:memberId="Bob"/>cde</text:span></text:p></office:text></after>
  </test>
  <test name="Remove_MergeEmptyParagraph">
   <before><office:text><text:p text:style-name="A"><draw:frame text:anchor-type="as-char"/></text:p><text:p text:style-name="B"/><text:p text:style-name="C"></text:p></office:text></before>
@@ -538,8 +538,18 @@
    <op optype="RemoveText" position="0" length="2"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
   </ops>
+  <after><office:text><text:p text:style-name="A"/><text:p text:style-name="C"><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
+ <test name="Remove_MergeEmptyParagraph_naturalStyling">
+  <before><office:text><text:p text:style-name="A"><draw:frame text:anchor-type="as-char"/></text:p><text:p text:style-name="B"/><text:p text:style-name="C"></text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="RemoveText" position="0" length="2" mergedParagraphStyleName="B"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+  </ops>
   <after><office:text><text:p text:style-name="B"/><text:p text:style-name="C"><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
+
  <test name="Remove_DeleteLastCharacterNearTabs">
   <before><office:text><text:p><text:span><text:tab>&#09;</text:tab><text:tab>&#09;</text:tab>a</text:span></text:p></office:text></before>
   <ops>
@@ -616,12 +626,26 @@
   <ops>
    <op optype="RemoveText" position="0" length="1"/>
   </ops>
+  <after><office:text><text:p text:style-name="A">efgh</text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMergeEmpty1_naturalStyling">
+  <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="1" mergedParagraphStyleName="B"/>
+  </ops>
   <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
+ </test>
+ <test name="Remove_deleteMergeEmpty1_naturalStyling_unspecifiedName">
+  <before><office:text><text:p text:style-name="A"></text:p><text:p>efgh</text:p></office:text></before>
+  <ops>
+   <op optype="RemoveText" position="0" length="1" mergedParagraphStyleName=""/>
+  </ops>
+  <after><office:text><text:p>efgh</text:p></office:text></after>
  </test>
  <test name="Remove_deleteMergeEmpty_WithNonOdfChildren">
   <before><office:text><text:p text:style-name="A"><foreign:test foreign:id="1"/><foreign:test foreign:id="2"/></text:p><text:p text:style-name="B"><foreign:test foreign:id="3"/>efgh<foreign:test foreign:id="4"/></text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="RemoveText" position="0" length="1" mergedParagraphStyleName="B"/>
   </ops>
   <after><office:text><text:p text:style-name="B"><foreign:test foreign:id="1"/><foreign:test foreign:id="2"/><foreign:test foreign:id="3"/>efgh<foreign:test foreign:id="4"/></text:p></office:text></after>
  </test>
