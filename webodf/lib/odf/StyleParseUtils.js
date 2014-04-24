@@ -158,7 +158,8 @@ odf.StyleParseUtils = function () {
     /**
      * Find a child element from the ODF style namespace with the given local
      * name.
-     * The search is started from the given previousPropertyElement.
+     * The search is started after the given previousPropertyElement or, if
+     * previousPropertyElement is not given, from the first child element.
      * @param {!string} name
      * @param {!Element} styleElement
      * @param {?Element=} previousPropertyElement

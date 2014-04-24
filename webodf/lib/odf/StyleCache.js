@@ -52,21 +52,21 @@ odf.MasterPage = function (element, pageLayoutCache) {
 /**
  * @interface
  */
-odf.MasterStyleCache = function () {"use strict"; };
+odf.MasterPageCache = function () {"use strict"; };
 /**
  * @param {!string} name
  * @return {?odf.MasterPage}
  */
-odf.MasterStyleCache.prototype.getMasterPage = function (name) {"use strict"; };
+odf.MasterPageCache.prototype.getMasterPage = function (name) {"use strict"; };
 /*jslint emptyblock: false, unparam: false*/
 /**
  * @constructor
  * @param {!Element} element
  * @param {!odf.StyleParseUtils} styleParseUtils
- * @param {!odf.MasterStyleCache} stylesCache
- * @param {!odf.LocalStyle=} parent
+ * @param {!odf.MasterPageCache} masterPageCache
+ * @param {!odf.StylePileEntry=} parent
  */
-odf.LocalStyle = function (element, styleParseUtils, stylesCache, parent) {
+odf.StylePileEntry = function (element, styleParseUtils, masterPageCache, parent) {
     "use strict";
     /**
      * @type {!odf.TextProperties|undefined}
@@ -87,13 +87,13 @@ odf.LocalStyle = function (element, styleParseUtils, stylesCache, parent) {
         var masterPageName = element.getAttributeNS(odf.Namespaces.stylens,
                     "master-page-name"),
             masterPage = null;
-        if (masterPageName.length > 1) {
-            masterPage = stylesCache.getMasterPage(masterPageName);
+        if (masterPageName.length > 0) {
+            masterPage = masterPageCache.getMasterPage(masterPageName);
         }
         return masterPage;
     };
     /**
-     * @param {!odf.LocalStyle} self
+     * @param {!odf.StylePileEntry} self
      * @return {undefined}
      */
     function init(self) {
@@ -131,29 +131,31 @@ odf.LocalStyle = function (element, styleParseUtils, stylesCache, parent) {
     init(this);
 };
 /**
+ * Collection of all the styles in the document for one style family.
+ * There are separate style piles for family 'text', 'paragraph', 'graphic' etc.
  * @constructor
  * @param {!odf.StyleParseUtils} styleParseUtils
- * @param {!odf.MasterStyleCache} stylesCache
+ * @param {!odf.MasterPageCache} masterPageCache
  */
-odf.StylePile = function (styleParseUtils, stylesCache) {
+odf.StylePile = function (styleParseUtils, masterPageCache) {
     "use strict";
     var stylens = odf.Namespaces.stylens,
         /**@type{!Object.<!string,!Element>}*/
         styles = {},
         /**@type{!Object.<!string,!Element>}*/
         automaticStyles = {},
-        /**@type{!odf.LocalStyle|undefined}*/
+        /**@type{!odf.StylePileEntry|undefined}*/
         defaultStyle,
-        /**@type{!Object.<!string,!odf.LocalStyle>}*/
+        /**@type{!Object.<!string,!odf.StylePileEntry>}*/
         parsedAutomaticStyles = {},
-        /**@type{!Object.<!string,!odf.LocalStyle>}*/
+        /**@type{!Object.<!string,!odf.StylePileEntry>}*/
         parsedStyles = {},
-        /**@type{!function(!string,!Array.<!string>):(!odf.LocalStyle|undefined)}*/
+        /**@type{!function(!string,!Array.<!string>):(!odf.StylePileEntry|undefined)}*/
         getCommonStyle;
     /**
      * @param {!Element} element
      * @param {!Array.<!string>} visited
-     * @return {!odf.LocalStyle}
+     * @return {!odf.StylePileEntry}
      */
     function parseStyle(element, visited) {
         var parent,
@@ -165,13 +167,13 @@ odf.StylePile = function (styleParseUtils, stylesCache) {
                 parent = getCommonStyle(parentName, visited);
             }
         }
-        style = new odf.LocalStyle(element, styleParseUtils, stylesCache, parent);
+        style = new odf.StylePileEntry(element, styleParseUtils, masterPageCache, parent);
         return style;
     }
     /**
      * @param {!string} styleName
      * @param {!Array.<!string>} visited
-     * @return {!odf.LocalStyle|undefined}
+     * @return {!odf.StylePileEntry|undefined}
      */
     getCommonStyle = function (styleName, visited) {
         var style = parsedStyles[styleName],
@@ -188,7 +190,7 @@ odf.StylePile = function (styleParseUtils, stylesCache) {
     };
     /**
      * @param {!string} styleName
-     * @return {!odf.LocalStyle|undefined}
+     * @return {!odf.StylePileEntry|undefined}
      */
     function getStyle(styleName) {
         var style = parsedAutomaticStyles[styleName] || parsedStyles[styleName],
@@ -245,7 +247,7 @@ odf.StylePile = function (styleParseUtils, stylesCache) {
         }
     };
     /**
-     * @return {!odf.LocalStyle|undefined}
+     * @return {!odf.StylePileEntry|undefined}
      */
     this.getDefaultStyle = function () {
         return defaultStyle;
@@ -357,7 +359,7 @@ odf.ComputedTextStyle = function () {
  * XML element or attribute is missing or invalid.
  *
  * @constructor
- * @implements {odf.MasterStyleCache}
+ * @implements {odf.MasterPageCache}
  * @implements {odf.PageLayoutCache}
  * @param {!odf.ODFDocumentElement} odfroot
  */
