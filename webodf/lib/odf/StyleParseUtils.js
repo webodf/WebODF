@@ -130,7 +130,7 @@ odf.StyleParseUtils = function () {
         return isNaN(v) ? undefined : v;
     }
     /**
-     * Parse a percentage of the form -?([0-9]+(\.[0-9]*)?|\.[0-9]+)%.
+     * Parse a value that is a positive length or a percentage.
      * If parsing fails undefined is returned.
      * @param {!string} value
      * @param {!string} name
