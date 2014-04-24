@@ -201,6 +201,9 @@
         "odf.OdfContainer",
         "odf.OdfUtils"
     ],
+    "odf.GraphicProperties": [
+        "odf.StyleParseUtils"
+    ],
     "odf.ListStylesToCss": [
         "core.CSSUnits",
         "odf.OdfUtils",
@@ -236,18 +239,37 @@
         "core.DomUtils",
         "odf.Namespaces"
     ],
+    "odf.PageLayoutProperties": [
+        "odf.StyleParseUtils"
+    ],
+    "odf.ParagraphProperties": [
+        "odf.StyleParseUtils"
+    ],
     "odf.Style2CSS": [
         "core.CSSUnits",
         "odf.OdfUtils",
         "odf.StyleTree",
         "xmldom.XPath"
     ],
+    "odf.StyleCache": [
+        "odf.GraphicProperties",
+        "odf.OdfContainer",
+        "odf.PageLayoutProperties",
+        "odf.ParagraphProperties",
+        "odf.TextProperties"
+    ],
     "odf.StyleInfo": [
         "odf.Namespaces",
         "xmldom.XPath"
     ],
+    "odf.StyleParseUtils": [
+        "odf.Namespaces"
+    ],
     "odf.StyleTree": [
         "odf.Namespaces"
+    ],
+    "odf.TextProperties": [
+        "odf.StyleParseUtils"
     ],
     "odf.TextSerializer": [
         "odf.OdfUtils",

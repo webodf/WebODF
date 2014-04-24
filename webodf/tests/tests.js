@@ -54,6 +54,7 @@ runtime.loadClass("odf.ObjectNameGeneratorTests");
 runtime.loadClass("odf.OdfContainerTests");
 runtime.loadClass("odf.OdfUtilsTests");
 runtime.loadClass("odf.StyleInfoTests");
+runtime.loadClass("odf.StyleCacheTests");
 runtime.loadClass("odf.TextStyleApplicatorTests");
 runtime.loadClass("ops.OdtDocumentTests");
 runtime.loadClass("ops.OperationTests");
@@ -108,6 +109,7 @@ if (runtime.type() === "BrowserRuntime") {
     tests.push(xmldom.LSSerializerTests);
     tests.push(xmldom.XPathTests);
     tests.push(odf.LayoutTests);
+    tests.push(odf.StyleCacheTests);
     tests.push(ops.SessionTests);
     tests.push(ops.OperationTests);
     tests.push(ops.TransformationTests);
