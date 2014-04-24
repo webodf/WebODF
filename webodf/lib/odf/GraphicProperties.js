@@ -54,12 +54,8 @@ odf.GraphicProperties = function (element, styleParseUtils, parent) {
             return v === "" ? undefined : v;
         },
         strokeWidth: function () {
-            var a, value;
-            if (element) {
-                a = element.getAttributeNS(svgns, "stroke-width");
-                value = styleParseUtils.parseLength(a);
-            }
-            return value;
+            var a = element.getAttributeNS(svgns, "stroke-width");
+            return styleParseUtils.parseLength(a);
         }
     };
     /**
