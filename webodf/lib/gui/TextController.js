@@ -36,7 +36,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global core, ops, gui, runtime*/
+/*global core, ops, gui, odf, runtime*/
 
 
 /**
@@ -50,6 +50,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
+        odfUtils = new odf.OdfUtils(),
         /**
          * @const
          * @type {!boolean}
@@ -67,11 +68,33 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!ops.OpRemoveText}
      */
     function createOpRemoveSelection(selection) {
-        var op = new ops.OpRemoveText();
+        var range = odtDocument.convertCursorToDomRange(selection.position, selection.length),
+            firstParagraph,
+            lastParagraph,
+            mergedParagraphStyleName,
+            op = new ops.OpRemoveText();
+
+        firstParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(range.startContainer));
+        lastParagraph = odtDocument.getParagraphElement(range.endContainer);
+        // If the removal range spans several paragraphs,
+        // decide the final paragraph's style name.
+        if (firstParagraph !== lastParagraph) {
+            // If the first paragraph is empty, the last paragraph's style wins,
+            // otherwise the first wins.
+            // If there is no explicitly defined style, the attribute will be returned
+            // as "", which is gracefully handled by the operation to delete the attribute.
+            if (odfUtils.hasNoODFContent(firstParagraph)) {
+                mergedParagraphStyleName = lastParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name');
+            } else {
+                mergedParagraphStyleName = firstParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name');
+            }
+        }
+
         op.init({
             memberid: inputMemberId,
             position: selection.position,
-            length: selection.length
+            length: selection.length,
+            mergedParagraphStyleName: mergedParagraphStyleName
         });
         return op;
     }
@@ -178,12 +201,7 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
                     focusNode: stepIterator.container(),
                     focusOffset: stepIterator.offset()
                 }));
-                op = new ops.OpRemoveText();
-                op.init({
-                    memberid: inputMemberId,
-                    position: selection.position,
-                    length: selection.length
-                });
+                op = createOpRemoveSelection(selection);
                 session.enqueue([op]);
             }
         } else {

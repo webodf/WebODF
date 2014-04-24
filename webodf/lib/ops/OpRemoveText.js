@@ -51,11 +51,12 @@ ops.OpRemoveText = function OpRemoveText() {
         position,
         /**@type {number}*/
         length,
+        /**@type {string|undefined}*/
+        mergedParagraphStyleName,
         /**@type{!odf.OdfUtils}*/
         odfUtils,
         /**@type{!core.DomUtils}*/
-        domUtils,
-        editinfons = 'urn:webodf:names:editinfo';
+        domUtils;
 
     /**
      * @param {!ops.OpRemoveText.InitSpec} data
@@ -66,6 +67,7 @@ ops.OpRemoveText = function OpRemoveText() {
         timestamp = data.timestamp;
         position = parseInt(data.position, 10);
         length = parseInt(data.length, 10);
+        mergedParagraphStyleName = data.mergedParagraphStyleName;
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
 
@@ -100,7 +102,7 @@ ops.OpRemoveText = function OpRemoveText() {
          * @return {!boolean}
          */
         function isCollapsibleContainer(node) {
-            return !odfUtils.isParagraph(node) && node !== rootNode && odfUtils.isEmpty(node);
+            return !odfUtils.isParagraph(node) && node !== rootNode && odfUtils.hasNoODFContent(node);
         }
 
         /**
@@ -138,10 +140,9 @@ ops.OpRemoveText = function OpRemoveText() {
         var child,
             destination = first,
             source = second,
-            secondParent,
-            insertionPoint = null;
+            secondParent;
 
-        if (odfUtils.isEmpty(first)) {
+        if (odfUtils.hasNoODFContent(first)) {
             if (second.parentNode !== first.parentNode) {
                 // We're just about to move the second paragraph in to the right position for the merge.
                 // Therefore, we need to remember if the second paragraph is from a different parent in order to clean
@@ -149,20 +150,17 @@ ops.OpRemoveText = function OpRemoveText() {
                 secondParent = second.parentNode;
                 first.parentNode.insertBefore(second, first.nextSibling);
             }
-            source = first;
-            destination = second;
-            insertionPoint = destination.getElementsByTagNameNS(editinfons, 'editinfo').item(0) || destination.firstChild;
         }
 
         while (source.firstChild) {
             child = source.firstChild;
             source.removeChild(child);
             if (child.localName !== 'editinfo') {
-                destination.insertBefore(child, insertionPoint);
+                destination.appendChild(child);
             }
         }
 
-        if (secondParent && odfUtils.isEmpty(secondParent)) {
+        if (secondParent && odfUtils.hasNoODFContent(secondParent)) {
             // Make sure the second paragraph's original parent is checked to see if it can be cleaned up too
             collapseRules.mergeChildrenIntoParent(secondParent);
         }
@@ -216,6 +214,15 @@ ops.OpRemoveText = function OpRemoveText() {
         }
         destinationParagraph = paragraphs.reduce(merge);
 
+        if (mergedParagraphStyleName !== undefined) {
+            // An empty string means no style name, so remove the attribute
+            if (mergedParagraphStyleName === "") {
+                destinationParagraph.removeAttributeNS(odf.Namespaces.textns, 'style-name');
+            } else {
+                destinationParagraph.setAttributeNS(odf.Namespaces.textns, 'text:style-name', mergedParagraphStyleName);
+            }
+        }
+
         odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position, length: length});
         odtDocument.downgradeWhitespacesAtPosition(position);
         odtDocument.fixCursorPositions();
@@ -245,7 +252,8 @@ ops.OpRemoveText = function OpRemoveText() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
-            length: length
+            length: length,
+            mergedParagraphStyleName: mergedParagraphStyleName
         };
     };
 };
@@ -254,6 +262,7 @@ ops.OpRemoveText = function OpRemoveText() {
     memberid:string,
     timestamp:number,
     position:number,
+    mergedParagraphStyleName: (string|undefined),
     length:number
 }}*/
 ops.OpRemoveText.Spec;
@@ -261,6 +270,7 @@ ops.OpRemoveText.Spec;
     memberid:string,
     timestamp:(number|undefined),
     position:number,
+    mergedParagraphStyleName: (string|undefined),
     length:number
 }}*/
 ops.OpRemoveText.InitSpec;
