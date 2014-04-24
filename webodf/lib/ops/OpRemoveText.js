@@ -55,9 +55,7 @@ ops.OpRemoveText = function OpRemoveText() {
         odfUtils,
         /**@type{!core.DomUtils}*/
         domUtils,
-        editinfons = 'urn:webodf:names:editinfo',
-        /**@type {!Object.<!string, !boolean>}*/
-        odfNodeNamespaceMap = {};
+        editinfons = 'urn:webodf:names:editinfo';
 
     /**
      * @param {!ops.OpRemoveText.InitSpec} data
@@ -71,21 +69,6 @@ ops.OpRemoveText = function OpRemoveText() {
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
 
-        // only add odf element namespaces here.
-        // Namespaces solely used for attributes are excluded. eg. fo, xlink & xml
-        odfNodeNamespaceMap[odf.Namespaces.dbns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.dcns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.dr3dns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.drawns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.chartns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.formns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.numberns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.officens] = true;
-        odfNodeNamespaceMap[odf.Namespaces.presentationns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.stylens] = true;
-        odfNodeNamespaceMap[odf.Namespaces.svgns] = true;
-        odfNodeNamespaceMap[odf.Namespaces.tablens] = true;
-        odfNodeNamespaceMap[odf.Namespaces.textns] = true;
     };
 
     this.isEdit = true;
@@ -98,49 +81,16 @@ ops.OpRemoveText = function OpRemoveText() {
      * @constructor
      */
     function CollapsingRules(rootNode) {
-        /**
-         * Returns true if the given node is an odf node
-         * @param {!Node} node
-         * @return {!boolean}
-         */
-        function isOdfNode(node) {
-            return odfNodeNamespaceMap.hasOwnProperty(node.namespaceURI);
-        }
-
-        /**
+       /**
          * Returns true if a given node is odf node or a text node that has a odf parent.
          * @param {!Node} node
          * @return {!boolean}
          */
         function shouldRemove(node) {
-            return isOdfNode(node)
+            return odfUtils.isODFNode(node)
                 || (node.localName === "br" && odfUtils.isLineBreak(node.parentNode))
-                || (node.nodeType === Node.TEXT_NODE && isOdfNode(/** @type {!Node}*/(node.parentNode)));
+                || (node.nodeType === Node.TEXT_NODE && odfUtils.isODFNode(/** @type {!Node}*/(node.parentNode)));
         }
-
-        /**
-         * Returns true if the supplied node contains no text or ODF elements
-         * @param {!Node} node
-         * @return {!boolean}
-         */
-        function isEmpty(node) {
-            var childNode;
-            if (odfUtils.isCharacterElement(node)) {
-                return false;
-            }
-            if (node.nodeType === Node.TEXT_NODE) {
-                return node.textContent.length === 0;
-            }
-            childNode = node.firstChild;
-            while (childNode) {
-                if (isOdfNode(childNode) || !isEmpty(childNode)) {
-                    return false;
-                }
-                childNode = childNode.nextSibling;
-            }
-            return true;
-        }
-        this.isEmpty = isEmpty;
 
         /**
          * Returns true if the supplied node should be automatically collapsed (i.e., removed) if it contains no
@@ -150,7 +100,7 @@ ops.OpRemoveText = function OpRemoveText() {
          * @return {!boolean}
          */
         function isCollapsibleContainer(node) {
-            return !odfUtils.isParagraph(node) && node !== rootNode && isEmpty(node);
+            return !odfUtils.isParagraph(node) && node !== rootNode && odfUtils.isEmpty(node);
         }
 
         /**
@@ -191,7 +141,7 @@ ops.OpRemoveText = function OpRemoveText() {
             secondParent,
             insertionPoint = null;
 
-        if (collapseRules.isEmpty(first)) {
+        if (odfUtils.isEmpty(first)) {
             if (second.parentNode !== first.parentNode) {
                 // We're just about to move the second paragraph in to the right position for the merge.
                 // Therefore, we need to remember if the second paragraph is from a different parent in order to clean
@@ -212,7 +162,7 @@ ops.OpRemoveText = function OpRemoveText() {
             }
         }
 
-        if (secondParent && collapseRules.isEmpty(secondParent)) {
+        if (secondParent && odfUtils.isEmpty(secondParent)) {
             // Make sure the second paragraph's original parent is checked to see if it can be cleaned up too
             collapseRules.mergeChildrenIntoParent(secondParent);
         }

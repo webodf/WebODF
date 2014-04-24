@@ -57,7 +57,24 @@ odf.OdfUtils = function OdfUtils() {
         /**@const
            @type{!RegExp}*/
         whitespaceOnly = /^\s*$/,
-        domUtils = new core.DomUtils();
+        domUtils = new core.DomUtils(),
+        // only add odf element namespaces here.
+        // Namespaces solely used for attributes are excluded. eg. fo, xlink & xml
+        odfNodeNamespaceMap = [
+            odf.Namespaces.dbns,
+            odf.Namespaces.dcns,
+            odf.Namespaces.dr3dns,
+            odf.Namespaces.drawns,
+            odf.Namespaces.chartns,
+            odf.Namespaces.formns,
+            odf.Namespaces.numberns,
+            odf.Namespaces.officens,
+            odf.Namespaces.presentationns,
+            odf.Namespaces.stylens,
+            odf.Namespaces.svgns,
+            odf.Namespaces.tablens,
+            odf.Namespaces.textns
+        ];
 
     /**
      * Determine if the node is a draw:image element.
@@ -285,6 +302,41 @@ odf.OdfUtils = function OdfUtils() {
         return r;
     }
     this.isSpaceElement = isSpaceElement;
+
+    /**
+     * Returns true if the given node is an odf node
+     * @param {!Node} node
+     * @return {!boolean}
+     */
+    function isODFNode(node) {
+        return odfNodeNamespaceMap.indexOf(node.namespaceURI) !== -1;
+    }
+    this.isODFNode = isODFNode;
+
+    /**
+     * Returns true if the supplied node contains no text or ODF elements
+     * @param {!Node} node
+     * @return {!boolean}
+     */
+    function isEmpty(node) {
+        var childNode;
+        if (isCharacterElement(node)) {
+            return false;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent.length === 0;
+        }
+        childNode = node.firstChild;
+        while (childNode) {
+            if (isODFNode(childNode) || !isEmpty(childNode)) {
+                return false;
+            }
+            childNode = childNode.nextSibling;
+        }
+        return true;
+    }
+    this.isEmpty = isEmpty;
+
     /**
      * @param {!Node} node
      * @return {!Node}
