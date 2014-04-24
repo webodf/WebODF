@@ -350,7 +350,7 @@ odf.ComputedTextStyle = function () {
  *
  * The style names can be concatenated into a key. The parent styles are not
  * needed in the key. For the above example, the key is:
- *   text:T2/text:T1/text:C1/text:C2/paragraph:P1
+ *   text/T2/text/T1/text/C1/text/C2/paragraph/P1
  * StyleCache creates computed style objects on demand and caches them.
  *
  * StyleCache also provides convenient access to page layout and master page
