@@ -314,28 +314,28 @@ odf.OdfUtils = function OdfUtils() {
     this.isODFNode = isODFNode;
 
     /**
-     * Returns true if the supplied node contains no text or ODF elements
+     * Returns true if the supplied node contains no text-in-ODF, or ODF elements
      * @param {!Node} node
      * @return {!boolean}
      */
-    function isEmpty(node) {
+    function hasNoODFContent(node) {
         var childNode;
         if (isCharacterElement(node)) {
             return false;
         }
-        if (node.nodeType === Node.TEXT_NODE) {
+        if (isODFNode(/**@type{!Node}*/(node.parentNode)) && node.nodeType === Node.TEXT_NODE) {
             return node.textContent.length === 0;
         }
         childNode = node.firstChild;
         while (childNode) {
-            if (isODFNode(childNode) || !isEmpty(childNode)) {
+            if (isODFNode(childNode) || !hasNoODFContent(childNode)) {
                 return false;
             }
             childNode = childNode.nextSibling;
         }
         return true;
     }
-    this.isEmpty = isEmpty;
+    this.hasNoODFContent= hasNoODFContent;
 
     /**
      * @param {!Node} node
