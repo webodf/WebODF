@@ -52,18 +52,18 @@ odf.MasterPage = function (element, pageLayoutCache) {
 /**
  * @interface
  */
-odf.StylesCache = function () {"use strict"; };
+odf.MasterStyleCache = function () {"use strict"; };
 /**
  * @param {!string} name
  * @return {?odf.MasterPage}
  */
-odf.StylesCache.prototype.getMasterPage = function (name) {"use strict"; };
+odf.MasterStyleCache.prototype.getMasterPage = function (name) {"use strict"; };
 /*jslint emptyblock: false, unparam: false*/
 /**
  * @constructor
  * @param {!Element} element
  * @param {!odf.StyleParseUtils} styleParseUtils
- * @param {!odf.StylesCache} stylesCache
+ * @param {!odf.MasterStyleCache} stylesCache
  * @param {!odf.LocalStyle=} parent
  */
 odf.LocalStyle = function (element, styleParseUtils, stylesCache, parent) {
@@ -133,7 +133,7 @@ odf.LocalStyle = function (element, styleParseUtils, stylesCache, parent) {
 /**
  * @constructor
  * @param {!odf.StyleParseUtils} styleParseUtils
- * @param {!odf.StylesCache} stylesCache
+ * @param {!odf.MasterStyleCache} stylesCache
  */
 odf.StylePile = function (styleParseUtils, stylesCache) {
     "use strict";
@@ -297,8 +297,67 @@ odf.ComputedTextStyle = function () {
  * Fast and type-safe access to styling properties an ODF document.
  * When the document changes, update() has to be called to update the
  * information.
+ *
+ * This class gives access to computed styles. The term 'computed' is used
+ * similarly to its use in the DOM function window.getComputedStyle().
+ * In ODF, as in CSS but differently, the evaluation of styles is influenced by
+ * the position of an element in a document. Specifically, the types and styles
+ * of the ancestor elements determine properties of a style. This is explained
+ * in chapter 16 of the ODF 1.2 specification.
+ *   http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1416272_253892949
+ *
+ * Here is an example. Consider the following style and content:
+   <s:styles>
+     <s:default-style s:family="text">...</s:default-style>
+     <s:default-style s:family="paragraph">...</s:default-style>
+     <s:style s:name="Standard" s:family="text">...</s:style>
+     <s:style s:name="Bold" s:parent-style-name="Standard" s:family="text">...</s:style>
+     <s:style s:name="Standard" s:family="paragraph">...</s:style>
+   </s:styles>
+   <s:automatic-styles>
+     <s:style s:name="T1" s:parent-style-name="Standard" s:family="text">...</s:style>
+     <s:style s:name="T2" s:parent-style-name="Bold" s:family="text">...</s:style>
+     <s:style s:name="C1" s:parent-style-name="Standard" s:family="text">...</s:style>
+     <s:style s:name="C2" s:parent-style-name="Standard" s:family="text">...</s:style>
+     <s:style s:name="P1" s:parent-style-name="Standard" s:family="paragraph">...</s:style>
+   </s:automatic-styles>
+   ...
+   <text:p text:style-name="P1">
+     <text:span text:style-name="T1" text:class-names="C1 C2">
+       <text:span text:style-name="T2">
+         hello
+       </text:span>
+     </text:span>
+   </text:p>
+
+ * The style properties for the word 'hello' are looked for, in order, in this
+ * list of styles:
+ *   text:T2
+ *     text:Bold
+ *       text:Standard
+ *   text:T1
+ *     text:Standard
+ *   text:C1
+ *     text:Standard
+ *   text:C2
+ *     text:Standard
+ *   paragraph:P1
+ *     paragraph:Standard
+ *       paragraph-document-default
+ *         paragraph-implementation-default
+ *
+ * The style names can be concatenated into a key. The parent styles are not
+ * needed in the key. For the above example, the key is:
+ *   text:T2/text:T1/text:C1/text:C2/paragraph:P1
+ * StyleCache creates computed style objects on demand and caches them.
+ *
+ * StyleCache also provides convenient access to page layout and master page
+ * information.
+ * Each property of the style objects has a valid value even if the underlying
+ * XML element or attribute is missing or invalid.
+ *
  * @constructor
- * @implements {odf.StylesCache}
+ * @implements {odf.MasterStyleCache}
  * @implements {odf.PageLayoutCache}
  * @param {!odf.ODFDocumentElement} odfroot
  */

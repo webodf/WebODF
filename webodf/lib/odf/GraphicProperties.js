@@ -24,8 +24,9 @@
  */
 /*global runtime, odf, console*/
 /**
+ * Convenient access to style attributes for graphic-properties.
  * @constructor
- * @param {!Element} element
+ * @param {!Element} element <style:graphic-properties/> element
  * @param {!odf.StyleParseUtils} styleParseUtils
  * @param {!odf.GraphicProperties|undefined} parent
  */
@@ -131,7 +132,7 @@ odf.ComputedGraphicProperties = function () {
      * @return {!string}
      */
     this.horizontalPos = function () {
-        return (g && g.horizontalPos()) || "from-top";
+        return (g && g.horizontalPos()) || "from-left";
     };
     /**
      * @return {!string}

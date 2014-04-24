@@ -24,18 +24,24 @@
  */
 /*global runtime, odf, console*/
 /**
- * Object that retrieved properties lazily from an element.
+ * Object that retrieves properties lazily and caches them.
  * If the element does not define the property it is retrieved from a parent
  * LazyStyleProperties object.
+ * An object with getters functions is passed into the constructor. There must
+ * be a getter function for each property.
  * @constructor
  * @param {!odf.LazyStyleProperties|undefined} parent
- * @param {!Object.<!string,function():*>} getter
+ * @param {!Object.<!string,function():*>} getters
  */
-odf.LazyStyleProperties = function (parent, getter) {
+odf.LazyStyleProperties = function (parent, getters) {
     "use strict";
     var /**@type{!Object.<!string,*>}*/
         data = {};
     /**
+     * Retrieve a value by name.
+     * The getter for the value must be defined in the getters object.
+     * If the getter returns undefined and a parent object is provided, the
+     * value is gotten from the parent object.
      * @param {!string} name
      * @return {*}
      */
@@ -45,7 +51,7 @@ odf.LazyStyleProperties = function (parent, getter) {
         if (data.hasOwnProperty(name)) {
             v = data[name];
         } else {
-            v = getter[name]();
+            v = getters[name]();
             if (v === undefined && parent) {
                 v = parent.value(name);
             }
@@ -54,6 +60,8 @@ odf.LazyStyleProperties = function (parent, getter) {
         return v;
     };
     /**
+     * Give a new parent to the LazyStyleProperties.
+     * The cache is invalidated when this is done.
      * @param {!odf.LazyStyleProperties|undefined} p
      * @return {undefined}
      */
@@ -63,13 +71,15 @@ odf.LazyStyleProperties = function (parent, getter) {
     };
 };
 /**
+ * A collection of helper functions for parsing style attributes.
  * @constructor
  */
 odf.StyleParseUtils = function () {
     "use strict";
     var stylens = odf.Namespaces.stylens;
     /**
-     * Returns the length split as value and unit, from an ODF attribute
+     * Returns the length split as value and unit, from an ODF attribute.
+     * If the length does not match the regular expression, null is returned.
      * @param {!string} length
      * @return {?{value:!number,unit:!string}}
      */
@@ -85,6 +95,7 @@ odf.StyleParseUtils = function () {
      * Convert a unit in a string to number of pixels at 96 dpi.
      * If the input value has unit 'px' or is a number, the number is taken as
      * is. Other allowed unit: cm, mm, pt, pc.
+     * If the value cannot be parsed, the value undefined is returned.
      * @param {!string} val
      * @return {!number|undefined}
      */
@@ -145,6 +156,9 @@ odf.StyleParseUtils = function () {
     }
     this.parsePositiveLengthOrPercent = parsePositiveLengthOrPercent;
     /**
+     * Find a child element from the ODF style namespace with the given local
+     * name.
+     * The search is started from the given previousPropertyElement.
      * @param {!string} name
      * @param {!Element} styleElement
      * @param {?Element=} previousPropertyElement
