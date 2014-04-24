@@ -438,14 +438,14 @@ odf.StyleCache = function (odfroot) {
      */
     function getParagraphStyleChain(element, chain) {
         var stylename = styleInfo.getStyleName("paragraph", element);
+        if (stylename !== undefined) {
+            chain.push("paragraph");
+            chain.push(stylename);
+        }
         // text:p and text:h can have text:class-names
         if (element.namespaceURI === textns &&
                 (element.localName === "h" || element.localName === "p")) {
             appendStyles("paragraph", textns, element, chain);
-        }
-        if (stylename !== undefined) {
-            chain.push("paragraph");
-            chain.push(stylename);
         }
         return chain;
     }
@@ -536,13 +536,13 @@ odf.StyleCache = function (odfroot) {
     function getTextStyleChain(element, chain) {
         var stylename = styleInfo.getStyleName("text", element),
             parent = element.parentElement;
-        // a text:span can have text:class-names
-        if (element.localName === "span" && element.namespaceURI === textns) {
-            appendStyles("text", textns, element, chain);
-        }
         if (stylename !== undefined) {
             chain.push("text");
             chain.push(stylename);
+        }
+        // a text:span can have text:class-names
+        if (element.localName === "span" && element.namespaceURI === textns) {
+            appendStyles("text", textns, element, chain);
         }
         if (!parent || parent === odfroot) {
             return chain;
