@@ -22,7 +22,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global runtime, odf, console*/
+/*global runtime, odf*/
 /**
  * Object that retrieves properties lazily and caches them.
  * If the element does not define the property it is retrieved from a parent

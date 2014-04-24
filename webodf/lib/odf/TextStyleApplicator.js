@@ -35,7 +35,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global Node, odf, runtime, console, core*/
+/*global Node, odf, runtime, core*/
 
 
 /**

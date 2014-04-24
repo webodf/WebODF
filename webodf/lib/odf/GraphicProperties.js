@@ -22,7 +22,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global runtime, odf, console*/
+/*global runtime, odf*/
 /**
  * Convenient access to style attributes for graphic-properties.
  * @constructor
