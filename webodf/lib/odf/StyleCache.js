@@ -141,30 +141,30 @@ odf.StylePile = function (styleParseUtils, masterPageCache) {
     "use strict";
     var stylens = odf.Namespaces.stylens,
         /**@type{!Object.<!string,!Element>}*/
-        styles = {},
+        commonStyles = {},
         /**@type{!Object.<!string,!Element>}*/
         automaticStyles = {},
         /**@type{!odf.StylePileEntry|undefined}*/
         defaultStyle,
         /**@type{!Object.<!string,!odf.StylePileEntry>}*/
-        parsedAutomaticStyles = {},
+        parsedCommonStyles = {},
         /**@type{!Object.<!string,!odf.StylePileEntry>}*/
-        parsedStyles = {},
+        parsedAutomaticStyles = {},
         /**@type{!function(!string,!Array.<!string>):(!odf.StylePileEntry|undefined)}*/
         getCommonStyle;
     /**
      * @param {!Element} element
-     * @param {!Array.<!string>} visited
+     * @param {!Array.<!string>} visitedStyles track visited styles to avoid loops
      * @return {!odf.StylePileEntry}
      */
-    function parseStyle(element, visited) {
+    function parseStyle(element, visitedStyles) {
         var parent,
             parentName,
             style;
         if (element.hasAttributeNS(stylens, "parent-style-name")) {
             parentName = element.getAttributeNS(stylens, "parent-style-name");
-            if (visited.indexOf(parentName) === -1) {
-                parent = getCommonStyle(parentName, visited);
+            if (visitedStyles.indexOf(parentName) === -1) {
+                parent = getCommonStyle(parentName, visitedStyles);
             }
         }
         style = new odf.StylePileEntry(element, styleParseUtils, masterPageCache, parent);
@@ -172,18 +172,18 @@ odf.StylePile = function (styleParseUtils, masterPageCache) {
     }
     /**
      * @param {!string} styleName
-     * @param {!Array.<!string>} visited
+     * @param {!Array.<!string>} visitedStyles track visited styles to avoid loops
      * @return {!odf.StylePileEntry|undefined}
      */
-    getCommonStyle = function (styleName, visited) {
-        var style = parsedStyles[styleName],
+    getCommonStyle = function (styleName, visitedStyles) {
+        var style = parsedCommonStyles[styleName],
             element;
         if (!style) {
-            element = styles[styleName];
+            element = commonStyles[styleName];
             if (element) {
-                visited.push(styleName);
-                style = parseStyle(element, visited);
-                parsedStyles[styleName] = style;
+                visitedStyles.push(styleName);
+                style = parseStyle(element, visitedStyles);
+                parsedCommonStyles[styleName] = style;
             }
         }
         return style;
@@ -193,19 +193,20 @@ odf.StylePile = function (styleParseUtils, masterPageCache) {
      * @return {!odf.StylePileEntry|undefined}
      */
     function getStyle(styleName) {
-        var style = parsedAutomaticStyles[styleName] || parsedStyles[styleName],
+        var style = parsedAutomaticStyles[styleName]
+                || parsedCommonStyles[styleName],
             element,
-            visited = [];
+            visitedStyles = [];
         if (!style) {
             element = automaticStyles[styleName];
             if (!element) {
-                element = styles[styleName];
+                element = commonStyles[styleName];
                 if (element) {
-                    visited.push(styleName);
+                    visitedStyles.push(styleName);
                 }
             }
             if (element) {
-                style = parseStyle(element, visited);
+                style = parseStyle(element, visitedStyles);
             }
         }
         return style;
@@ -215,12 +216,12 @@ odf.StylePile = function (styleParseUtils, masterPageCache) {
      * @param {!Element} style
      * @return {undefined}
      */
-    this.addStyle = function (style) {
+    this.addCommonStyle = function (style) {
         var name;
         if (style.hasAttributeNS(stylens, "name")) {
             name = style.getAttributeNS(stylens, "name");
-            if (!styles.hasOwnProperty(name)) {
-                styles[name] = style;
+            if (!commonStyles.hasOwnProperty(name)) {
+                commonStyles[name] = style;
             }
         }
     };
@@ -296,7 +297,7 @@ odf.ComputedTextStyle = function () {
     this.text = new odf.ComputedTextProperties();
 };
 /**
- * Fast and type-safe access to styling properties an ODF document.
+ * Fast and type-safe access to styling properties of an ODF document.
  * When the document changes, update() has to be called to update the
  * information.
  *
@@ -403,7 +404,7 @@ odf.StyleCache = function (odfroot) {
      * @param {!Array.<!string>} chain
      * @return {undefined}
      */
-    function appendStyles(family, ns, element, chain) {
+    function appendClassNames(family, ns, element, chain) {
         var names = element.getAttributeNS(ns, "class-names"),
             stylename,
             i;
@@ -445,7 +446,7 @@ odf.StyleCache = function (odfroot) {
         // text:p and text:h can have text:class-names
         if (element.namespaceURI === textns &&
                 (element.localName === "h" || element.localName === "p")) {
-            appendStyles("paragraph", textns, element, chain);
+            appendClassNames("paragraph", textns, element, chain);
         }
         return chain;
     }
@@ -542,7 +543,7 @@ odf.StyleCache = function (odfroot) {
         }
         // a text:span can have text:class-names
         if (element.localName === "span" && element.namespaceURI === textns) {
-            appendStyles("text", textns, element, chain);
+            appendClassNames("text", textns, element, chain);
         }
         if (!parent || parent === odfroot) {
             return chain;
@@ -625,7 +626,12 @@ odf.StyleCache = function (odfroot) {
             element;
         if (masterPage === undefined) {
             element = masterPages[name];
-            masterPage = element ? new odf.MasterPage(element, self) : null;
+            if (element) {
+                masterPage = new odf.MasterPage(element, self);
+                parsedMasterPages[name] = masterPage;
+            } else {
+                masterPage = null;
+            }
         }
         return masterPage;
     }
@@ -666,7 +672,7 @@ odf.StyleCache = function (odfroot) {
                 pile = getPileFromElement(e);
                 if (pile) {
                     if (e.localName === "style") {
-                        pile.addStyle(e);
+                        pile.addCommonStyle(e);
                     } else if (e.localName === "default-style") {
                         pile.setDefaultStyle(e);
                     }
