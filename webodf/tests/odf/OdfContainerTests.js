@@ -75,8 +75,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
-    function createNew() {
-        t.odf = new odf.OdfContainer("", null);
+    function testEmptyDocument() {
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         r.shouldBeNonNull(t, "t.odf.rootElement");
         r.shouldBeNonNull(t, "t.odf.rootElement.meta");
@@ -89,9 +88,27 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         r.shouldBeNonNull(t, "t.odf.rootElement.body");
     }
 
+    function createNewText() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
+        testEmptyDocument();
+        r.shouldBeNonNull(t, "t.odf.rootElement.text");
+    }
+
+    function createNewPresentation() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.PRESENTATION, null);
+        testEmptyDocument();
+        r.shouldBeNonNull(t, "t.odf.rootElement.presentation");
+    }
+
+    function createNewSpreadsheet() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.SPREADSHEET, null);
+        testEmptyDocument();
+        r.shouldBeNonNull(t, "t.odf.rootElement.spreadsheet");
+    }
+
     function setRootElement_OverwritesAllDocumentElements() {
         var originalProperties = {};
-        t.odf = new odf.OdfContainer("", null);
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.originalRoot = t.odf.rootElement;
         // The properties values for the original root will change when it is disconnected from the document
@@ -117,7 +134,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     }
 
     function createNewSaveAsAndLoad(callback) {
-        t.odf = new odf.OdfContainer("", null);
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.saveAs("test.odt", function (err) {
             t.err = err;
@@ -131,7 +148,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     }
 
     function createNewSaveAsAndLoad_OptionalElement_SettingsXml(callback) {
-        t.odf = new odf.OdfContainer("", null);
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.rootElement.settings = null;
         t.odf.saveAs("test.odt", function (err) {
@@ -150,7 +167,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     }
 
     function createNewSaveAsAndLoad_OptionalElement_MetaXml(callback) {
-        t.odf = new odf.OdfContainer("", null);
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.rootElement.meta = null;
         t.odf.saveAs("test.odt", function (err) {
@@ -168,7 +185,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     }
 
     function doFontFaceDeclsSaveAsAndLoadRoundTrip(args, callback) {
-        t.odf = new odf.OdfContainer("", null);
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         appendXmlsToNode(t.odf.rootElement.fontFaceDecls,   args.keptFontFaceDecls);
         appendXmlsToNode(t.odf.rootElement.fontFaceDecls,   args.droppedFontFaceDecls);
         appendXmlsToNode(t.odf.rootElement.styles,          args.styles);
@@ -331,7 +348,9 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
 */
     this.tests = function () {
         return r.name([
-            createNew,
+            createNewText,
+            createNewPresentation,
+            createNewSpreadsheet,
             setRootElement_OverwritesAllDocumentElements
         ]);
     };

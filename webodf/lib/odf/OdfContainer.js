@@ -314,18 +314,24 @@
     /**
      * The OdfContainer class manages the various parts that constitues an ODF
      * document.
+     * The constructor takes a url or a type. If urlOrType is a type, an empty
+     * document of that type is created. Otherwise, urlOrType is interpreted as
+     * a url and loaded from that url.
+     *
      * @constructor
-     * @param {!string} url
+     * @param {!string|!odf.OdfContainer.DocumentType} urlOrType
      * @param {?function(!odf.OdfContainer)=} onstatereadychange
      * @return {?}
      */
-    odf.OdfContainer = function OdfContainer(url, onstatereadychange) {
+    odf.OdfContainer = function OdfContainer(urlOrType, onstatereadychange) {
         var self = this,
             /**@type {!core.Zip}*/
             zip,
             partMimetypes = {},
             /**@type {?Element}*/
-            contentElement;
+            contentElement,
+            /**@type{!string}*/
+            url = "";
 
         // NOTE each instance of OdfContainer has a copy of the private functions
         // it would be better to have a class OdfContainerPrivate where the
@@ -1133,16 +1139,17 @@
         }
 
         /**
+         * @param {!string} type
          * @return {!core.Zip}
          */
-        function createEmptyTextDocument() {
+        function createEmptyDocument(type) {
             var emptyzip = new core.Zip("", null),
                 data = runtime.byteArrayFromString(
-                    "application/vnd.oasis.opendocument.text",
+                    "application/vnd.oasis.opendocument." + type,
                     "utf8"
                 ),
                 root = self.rootElement,
-                text = document.createElementNS(officens, 'text');
+                content = document.createElementNS(officens, type);
             emptyzip.save("mimetype", data, false, new Date());
             /**
              * @param {!string} memberName  variant of the real local name which allows dot notation
@@ -1167,8 +1174,8 @@
             addToplevelElement("automaticStyles", "automatic-styles");
             addToplevelElement("masterStyles",    "master-styles");
             addToplevelElement("body");
-            root.body.appendChild(text);
-            partMimetypes["/"] = "application/vnd.oasis.opendocument.text";
+            root.body.appendChild(content);
+            partMimetypes["/"] = "application/vnd.oasis.opendocument." + type;
             partMimetypes["settings.xml"] = "text/xml";
             partMimetypes["meta.xml"] = "text/xml";
             partMimetypes["styles.xml"] = "text/xml";
@@ -1177,6 +1184,7 @@
             setState(OdfContainer.DONE);
             return emptyzip;
         }
+
         /**
          * Fill the zip with current data.
          * @return {undefined}
@@ -1282,7 +1290,14 @@
         );
 
         // initialize private variables
-        if (url) {
+        if (urlOrType === odf.OdfContainer.DocumentType.TEXT) {
+            zip = createEmptyDocument("text");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.PRESENTATION) {
+            zip = createEmptyDocument("presentation");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.SPREADSHEET) {
+            zip = createEmptyDocument("spreadsheet");
+        } else {
+            url = /**@type{!string}*/(urlOrType);
             zip = new core.Zip(url, function (err, zipobject) {
                 zip = zipobject;
                 if (err) {
@@ -1296,8 +1311,6 @@
                     loadComponents();
                 }
             });
-        } else {
-            zip = createEmptyTextDocument();
         }
     };
     odf.OdfContainer.EMPTY = 0;
@@ -1315,3 +1328,11 @@
     };
     return odf.OdfContainer;
 }());
+/**
+ * @enum {number}
+ */
+odf.OdfContainer.DocumentType = {
+    TEXT:         1,
+    PRESENTATION: 2,
+    SPREADSHEET:  3
+};

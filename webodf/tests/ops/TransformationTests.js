@@ -381,7 +381,7 @@ ops.TransformationTests = function TransformationTests(runner) {
             i,
             op;
 
-        odfContainer = new odf.OdfContainer("", null);
+        odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         t.odfcanvas.setOdfContainer(odfContainer);
         odtDocument = new ops.OdtDocument(t.odfcanvas);
         text = odtDocument.getRootNode();
