@@ -145,16 +145,29 @@ odf.LayoutTests = function LayoutTests(runner) {
      */
     function fillDocument(test, callback) {
         var officens = odf.Namespaces.officens,
-            odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null),
+            input = test.input,
+            // test input should have a text or presentation tag
+            text = input.getElementsByTagNameNS(officens, "text"),
+            presentation = input.getElementsByTagNameNS(officens, "presentation"),
+            isText = text.length > 0,
+            type = isText ? odf.OdfContainer.DocumentType.TEXT : odf.OdfContainer.DocumentType.PRESENTATION,
+            tag = isText ? "text" : "presentation",
+            odfContainer = new odf.OdfContainer(type),
             root = odfContainer.rootElement,
-            path = test.name + ".odt",
-            input = test.input;
+            oldContent = root.body.getElementsByTagNameNS(officens, tag)[0],
+            extension = isText ? ".odt" : ".odp",
+            path = test.name + extension;
+        replaceChildren(root.styles,
+            input.getElementsByTagNameNS(officens, "styles"));
         replaceChildren(root.automaticStyles,
             input.getElementsByTagNameNS(officens, "automatic-styles"));
         replaceChildren(root.masterStyles,
             input.getElementsByTagNameNS(officens, "master-styles"));
-        replaceChildren(root.body.getElementsByTagNameNS(officens, "text")[0],
-            input.getElementsByTagNameNS(officens, "text"));
+        if (isText) {
+            replaceChildren(oldContent, text);
+        } else {
+            replaceChildren(oldContent, presentation);
+        }
         function handler() {
             t.odfContainer = t.odfCanvas.odfContainer();
             callback();
@@ -305,7 +318,8 @@ odf.LayoutTests = function LayoutTests(runner) {
         var pre = r.resourcePrefix();
         if (!tests) {
             tests = makeTestsIntoFunction(loadTestFiles([
-                pre + "odf/layouttests.xml"
+                pre + "odf/layouttests.xml",
+                pre + "odf/odplayouttests.xml"
             ]));
         }
         return tests;
