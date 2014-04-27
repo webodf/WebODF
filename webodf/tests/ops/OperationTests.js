@@ -416,7 +416,7 @@ ops.OperationTests = function OperationTests(runner) {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         t.odfcanvas = new odf.OdfCanvas(testarea);
-        t.odfContainer = new odf.OdfContainer("", null);
+        t.odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         t.odfcanvas.setOdfContainer(t.odfContainer);
         t.odtDocument = new ops.OdtDocument(t.odfcanvas);
         properties = new ops.MemberProperties();

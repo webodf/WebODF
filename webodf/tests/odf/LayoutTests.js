@@ -145,7 +145,7 @@ odf.LayoutTests = function LayoutTests(runner) {
      */
     function fillDocument(test, callback) {
         var officens = odf.Namespaces.officens,
-            odfContainer = new odf.OdfContainer("", null),
+            odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null),
             root = odfContainer.rootElement,
             path = test.name + ".odt",
             input = test.input;

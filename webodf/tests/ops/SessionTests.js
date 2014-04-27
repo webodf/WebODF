@@ -49,7 +49,7 @@ ops.SessionTests = function SessionTests(runner) {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         odfcanvas = new odf.OdfCanvas(testarea);
-        odfcanvas.setOdfContainer(new odf.OdfContainer("", null));
+        odfcanvas.setOdfContainer(new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null));
         t.odf = odfcanvas.odfContainer();
     };
     this.tearDown = function () {
