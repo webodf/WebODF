@@ -149,12 +149,13 @@ odf.LayoutTests = function LayoutTests(runner) {
             // test input should have a text or presentation tag
             text = input.getElementsByTagNameNS(officens, "text"),
             presentation = input.getElementsByTagNameNS(officens, "presentation"),
-            type = text.length > 0 ? odf.OdfContainer.DocumentType.TEXT : odf.OdfContainer.DocumentType.PRESENTATION,
-            tag = text.length > 0 ? "text" : "presentation",
+            isText = text.length > 0,
+            type = isText ? odf.OdfContainer.DocumentType.TEXT : odf.OdfContainer.DocumentType.PRESENTATION,
+            tag = isText ? "text" : "presentation",
             odfContainer = new odf.OdfContainer(type),
             root = odfContainer.rootElement,
             oldContent = root.body.getElementsByTagNameNS(officens, tag)[0],
-            extension = text.length > 0 ? ".odt" : ".odp",
+            extension = isText ? ".odt" : ".odp",
             path = test.name + extension;
         replaceChildren(root.styles,
             input.getElementsByTagNameNS(officens, "styles"));
@@ -162,7 +163,7 @@ odf.LayoutTests = function LayoutTests(runner) {
             input.getElementsByTagNameNS(officens, "automatic-styles"));
         replaceChildren(root.masterStyles,
             input.getElementsByTagNameNS(officens, "master-styles"));
-        if (text.length > 0) {
+        if (isText) {
             replaceChildren(oldContent, text);
         } else {
             replaceChildren(oldContent, presentation);
