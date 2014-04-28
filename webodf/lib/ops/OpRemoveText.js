@@ -129,26 +129,22 @@ ops.OpRemoveText = function OpRemoveText() {
 
     /**
      * Merges the 'second' paragraph into the 'first' paragraph.
-     * If the first paragraph is empty, it will be replaced by the second
-     * paragraph instead (all non-odt elements will be migrated however).
-     * @param {!Element} first Paragraph to merge content into
-     * @param {!Element} second Paragraph to merge content from
+     * @param {!Element} destination Paragraph to merge content into
+     * @param {!Element} source Paragraph to merge content from
      * @param {!CollapsingRules} collapseRules
      * @return {!Element} Destination paragraph
      */
-    function mergeParagraphs(first, second, collapseRules) {
+    function mergeParagraphs(destination, source, collapseRules) {
         var child,
-            destination = first,
-            source = second,
-            secondParent;
+            sourceParent;
 
-        if (odfUtils.hasNoODFContent(first)) {
-            if (second.parentNode !== first.parentNode) {
+        if (odfUtils.hasNoODFContent(destination)) {
+            if (source.parentNode !== destination.parentNode) {
                 // We're just about to move the second paragraph in to the right position for the merge.
                 // Therefore, we need to remember if the second paragraph is from a different parent in order to clean
                 // it up afterwards
-                secondParent = second.parentNode;
-                first.parentNode.insertBefore(second, first.nextSibling);
+                sourceParent = source.parentNode;
+                destination.parentNode.insertBefore(source, destination.nextSibling);
             }
         }
 
@@ -160,9 +156,9 @@ ops.OpRemoveText = function OpRemoveText() {
             }
         }
 
-        if (secondParent && odfUtils.hasNoODFContent(secondParent)) {
+        if (sourceParent && odfUtils.hasNoODFContent(sourceParent)) {
             // Make sure the second paragraph's original parent is checked to see if it can be cleaned up too
-            collapseRules.mergeChildrenIntoParent(secondParent);
+            collapseRules.mergeChildrenIntoParent(sourceParent);
         }
         // All children have been migrated, now consume up the source parent chain
         collapseRules.mergeChildrenIntoParent(source);
