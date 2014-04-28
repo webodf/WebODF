@@ -135,18 +135,7 @@ ops.OpRemoveText = function OpRemoveText() {
      * @return {!Element} Destination paragraph
      */
     function mergeParagraphs(destination, source, collapseRules) {
-        var child,
-            sourceParent;
-
-        if (odfUtils.hasNoODFContent(destination)) {
-            if (source.parentNode !== destination.parentNode) {
-                // We're just about to move the second paragraph in to the right position for the merge.
-                // Therefore, we need to remember if the second paragraph is from a different parent in order to clean
-                // it up afterwards
-                sourceParent = source.parentNode;
-                destination.parentNode.insertBefore(source, destination.nextSibling);
-            }
-        }
+        var child;
 
         while (source.firstChild) {
             child = source.firstChild;
@@ -156,10 +145,6 @@ ops.OpRemoveText = function OpRemoveText() {
             }
         }
 
-        if (sourceParent && odfUtils.hasNoODFContent(sourceParent)) {
-            // Make sure the second paragraph's original parent is checked to see if it can be cleaned up too
-            collapseRules.mergeChildrenIntoParent(sourceParent);
-        }
         // All children have been migrated, now consume up the source parent chain
         collapseRules.mergeChildrenIntoParent(source);
         return destination;
