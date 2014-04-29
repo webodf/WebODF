@@ -81,12 +81,14 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
         if (firstParagraph !== lastParagraph) {
             // If the first paragraph is empty, the last paragraph's style wins,
             // otherwise the first wins.
-            // If there is no explicitly defined style, the attribute will be returned
-            // as "", which is gracefully handled by the operation to delete the attribute.
+
+            // According to https://developer.mozilla.org/en-US/docs/Web/API/element.getAttributeNS, if there is no
+            // explicitly defined style, getAttributeNS might return either "" or null or undefined depending on the
+            // implementation. Simplify the operation by combining all these cases to be ""
             if (odfUtils.hasNoODFContent(firstParagraph)) {
-                mergedParagraphStyleName = lastParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name');
+                mergedParagraphStyleName = lastParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name') || "";
             } else {
-                mergedParagraphStyleName = firstParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name');
+                mergedParagraphStyleName = firstParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name') || "";
             }
         }
 
