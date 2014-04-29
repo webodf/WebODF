@@ -612,7 +612,7 @@
             // If there was a master-page-name attribute, then we are dealing with a draw:page.
             // Get the referenced master page element from the master styles
             masterPageName = element.getAttributeNS(drawns, 'master-page-name');
-            masterPageElement = formatting.getMasterPageElement(masterPageName);
+            masterPageElement = masterPageName ? formatting.getMasterPageElement(masterPageName) : null;
 
             // If the referenced master page exists, create a new page and copy over it's contents into the new page,
             // except for the ones that are placeholders. Also, call setDrawElementPosition on each of those child frames.
