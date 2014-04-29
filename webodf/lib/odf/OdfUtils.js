@@ -160,7 +160,7 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!string}
      */
     this.getHyperlinkTarget = function (element) {
-        return element.getAttributeNS(xlinkns, 'href');
+        return element.getAttributeNS(xlinkns, 'href') || "";
     };
 
     /**
