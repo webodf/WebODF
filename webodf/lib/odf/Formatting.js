@@ -656,7 +656,7 @@ odf.Formatting = function Formatting() {
     }
 
     /**
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @param {string=} defaultValue
      * @return {!number|undefined}
      */
