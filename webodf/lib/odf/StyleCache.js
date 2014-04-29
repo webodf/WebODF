@@ -87,7 +87,7 @@ odf.StylePileEntry = function (element, styleParseUtils, masterPageCache, parent
         var masterPageName = element.getAttributeNS(odf.Namespaces.stylens,
                     "master-page-name"),
             masterPage = null;
-        if (masterPageName.length > 0) {
+        if (masterPageName) {
             masterPage = masterPageCache.getMasterPage(masterPageName);
         }
         return masterPage;
