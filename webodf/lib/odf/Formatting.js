@@ -460,7 +460,7 @@ odf.Formatting = function Formatting() {
                 if (styleElement) {
                     parentStyle = getInheritedStyleAttributes(/**@type{!Element}*/(styleElement));
                     mergedChildStyle = utils.mergeObjects(parentStyle, mergedChildStyle);
-                    styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name');
+                    styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name') || undefined;
                     styleSummary.isCommonStyle = isCommonStyleElement(styleElement);
                 } else {
                     runtime.log("No style element found for '" + styleName + "' of family '" + styleFamily + "'");
