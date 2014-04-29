@@ -262,12 +262,12 @@
 
         /**
          * @param {!Node} node
-         * @return {string}
+         * @return {!string}
          */
         function getNodeId(node) {
             var id = "";
             if (node.nodeType === Node.ELEMENT_NODE) {
-                id = /**@type{!Element}*/(node).getAttributeNS(coordinatens, "nodeId");
+                id = /**@type{!Element}*/(node).getAttributeNS(coordinatens, "nodeId") || "";
             }
             return id;
         }
