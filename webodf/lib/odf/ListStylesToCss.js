@@ -199,16 +199,17 @@
                 // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-style_list-level-label-alignment
                 // for now just fallback to "0px" if not defined on <style:list-level-label-alignment>
                 listIndent = listLevelLabelAlign.getAttributeNS(fons, "margin-left") || "0px";
-                bulletIndent = listLevelLabelAlign.getAttributeNS(fons, "text-indent");
+                bulletIndent = listLevelLabelAlign.getAttributeNS(fons, "text-indent") || "0px";
                 followedBy = listLevelLabelAlign.getAttributeNS(textns, "label-followed-by");
                 leftOffset = convertToPxValue(listIndent);
 
             } else {
                 // this block is entered if list-level-position-and-space-mode
                 // has the value label-width-and-position or is not present
+                // TODO: fallback values should be read from parent styles or (system) defaults
                 listIndent = listLevelProps.getAttributeNS(textns, "space-before") || "0px";
                 bulletWidth = listLevelProps.getAttributeNS(textns, "min-label-width") || "0px";
-                labelDistance = listLevelProps.getAttributeNS(textns, "min-label-distance");
+                labelDistance = listLevelProps.getAttributeNS(textns, "min-label-distance") || "0px";
                 leftOffset = convertToPxValue(listIndent) + convertToPxValue(bulletWidth);
             }
 

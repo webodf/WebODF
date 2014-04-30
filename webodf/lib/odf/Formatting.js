@@ -337,18 +337,20 @@ odf.Formatting = function Formatting() {
      * Get the name of the first common style in the parent style chain.
      * If none is found, null is returned and you should assume the Default style.
      * @param {!string} styleName
-     * @return {!string|null}
+     * @return {?string}
      */
     this.getFirstCommonParentStyleNameOrSelf = function (styleName) {
         var automaticStyleElementList = odfContainer.rootElement.automaticStyles,
             styleElementList = odfContainer.rootElement.styles,
             styleElement;
 
-        // first look for automatic style with the name
+        // first look for automatic style with the name and get its parent style
         styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList]);
-        while (styleElement) {
+        if (styleElement) {
             styleName = styleElement.getAttributeNS(stylens, 'parent-style-name');
-            styleElement = getStyleElement(styleName, "paragraph", [automaticStyleElementList]);
+            if (!styleName) {
+                return null;
+            }
         }
         // then see if that style is in common styles
         styleElement = getStyleElement(styleName, "paragraph", [styleElementList]);
@@ -458,7 +460,7 @@ odf.Formatting = function Formatting() {
                 if (styleElement) {
                     parentStyle = getInheritedStyleAttributes(/**@type{!Element}*/(styleElement));
                     mergedChildStyle = utils.mergeObjects(parentStyle, mergedChildStyle);
-                    styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name');
+                    styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name') || undefined;
                     styleSummary.isCommonStyle = isCommonStyleElement(styleElement);
                 } else {
                     runtime.log("No style element found for '" + styleName + "' of family '" + styleFamily + "'");
@@ -654,7 +656,7 @@ odf.Formatting = function Formatting() {
     }
 
     /**
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @param {string=} defaultValue
      * @return {!number|undefined}
      */

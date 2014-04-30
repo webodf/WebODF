@@ -594,9 +594,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             newIndent;
         if (paragraphProperties) {
             indentValue = paragraphProperties["fo:margin-left"];
-            if (indentValue) {
-                indent = odfUtils.parseLength(indentValue);
-            }
+            indent = odfUtils.parseLength(indentValue);
         }
 
         if (indent && indent.unit === tabStopDistance.unit) {

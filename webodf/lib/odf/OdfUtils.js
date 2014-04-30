@@ -160,7 +160,7 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!string}
      */
     this.getHyperlinkTarget = function (element) {
-        return element.getAttributeNS(xlinkns, 'href');
+        return element.getAttributeNS(xlinkns, 'href') || "";
     };
 
     /**
@@ -617,7 +617,7 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Returns the length split as value and unit, from an ODF attribute
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @return {?{value:!number,unit:!string}}
      */
     function parseLength(length) {
@@ -632,7 +632,7 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Returns the value and unit of the length, if it is positive ( > 0)
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @return {?{value:!number,unit:!string}}
      */
     function parsePositiveLength(length) {
@@ -645,7 +645,7 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Returns the value and unit of the length, if it is non-negative ( >= 0)
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @return {?{value:!number,unit:!string}}
      */
     function parseNonNegativeLength(length) {
@@ -659,7 +659,7 @@ odf.OdfUtils = function OdfUtils() {
 
     /**
      * Returns the value and unit(%) of the length, if it is specified in %age
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @return {?{value:!number,unit:!string}}
      */
     function parsePercentage(length) {
@@ -673,7 +673,7 @@ odf.OdfUtils = function OdfUtils() {
     /**
      * Returns the value and unit of the font size, in conformance with fo:font-size
      * constraints
-     * @param {!string} fontSize
+     * @param {?string|undefined} fontSize
      * @return {?{value:!number,unit:!string}}
      */
     function parseFoFontSize(fontSize) {
@@ -684,7 +684,7 @@ odf.OdfUtils = function OdfUtils() {
     /**
      * Returns the value and unit of the line height, in conformance with fo:line-height
      * constraints
-     * @param {!string} lineHeight
+     * @param {?string|undefined} lineHeight
      * @return {?{value:!number,unit:!string}}
      */
     function parseFoLineHeight(lineHeight) {

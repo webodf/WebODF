@@ -136,15 +136,15 @@ xmldom.RelaxNG2 = function RelaxNG2() {
         }
         var att, a, l = elementdef.localnames.length, i;
         for (i = 0; i < l; i += 1) {
-            a = element.getAttributeNS(elementdef.namespaces[i],
-                    elementdef.localnames[i]);
-            // if an element is not present, getAttributeNS will return an empty
-            // string but an empty string is possible attribute value, so an
-            // extra check is needed
-            if (a === "" && !element.hasAttributeNS(elementdef.namespaces[i],
-                    elementdef.localnames[i])) {
+            // with older browsers getAttributeNS for a non-existing attribute
+            // can return an empty string still, so explicitly check before
+            // if the attribute is set
+            if (element.hasAttributeNS(elementdef.namespaces[i], elementdef.localnames[i])) {
+                a = element.getAttributeNS(elementdef.namespaces[i], elementdef.localnames[i]);
+            } else {
                 a = undefined;
             }
+
             if (att !== undefined && a !== undefined) {
                 return [new RelaxNGParseError("Attribute defined too often.",
                         element)];

@@ -99,7 +99,7 @@ define("webodf/editor/widgets/paragraphStyles",
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
-                    label: availableStyles[i].displayName,
+                    label: availableStyles[i].displayName || availableStyles[i].name,
                     value: availableStyles[i].name
                 });
             }

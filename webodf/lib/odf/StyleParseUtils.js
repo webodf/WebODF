@@ -80,7 +80,7 @@ odf.StyleParseUtils = function () {
     /**
      * Returns the length split as value and unit, from an ODF attribute.
      * If the length does not match the regular expression, null is returned.
-     * @param {!string} length
+     * @param {?string|undefined} length
      * @return {?{value:!number,unit:!string}}
      */
     function splitLength(length) {
@@ -96,7 +96,7 @@ odf.StyleParseUtils = function () {
      * If the input value has unit 'px' or is a number, the number is taken as
      * is. Other allowed unit: cm, mm, pt, pc.
      * If the value cannot be parsed, the value undefined is returned.
-     * @param {!string} val
+     * @param {?string|undefined} val
      * @return {!number|undefined}
      */
     function parseLength(val) {
@@ -122,17 +122,23 @@ odf.StyleParseUtils = function () {
     /**
      * Parse a percentage of the form -?([0-9]+(\.[0-9]*)?|\.[0-9]+)%.
      * If parsing fails undefined is returned.
-     * @param {!string} value
+     * @param {?string|undefined} value
      * @return {!number|undefined}
      */
     function parsePercent(value) {
-        var v = parseFloat(value.substr(0, value.indexOf("%")));
-        return isNaN(v) ? undefined : v;
+        var v;
+        if (value) {
+            v = parseFloat(value.substr(0, value.indexOf("%")));
+            if (isNaN(v)) {
+                v = undefined;
+            }
+        }
+        return v;
     }
     /**
      * Parse a value that is a positive length or a percentage.
      * If parsing fails undefined is returned.
-     * @param {!string} value
+     * @param {?string|undefined} value
      * @param {!string} name
      * @param {!odf.LazyStyleProperties|undefined} parent
      * @return {!number|undefined}
