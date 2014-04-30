@@ -84,7 +84,7 @@ odf.StyleParseUtils = function () {
      * @return {?{value:!number,unit:!string}}
      */
     function splitLength(length) {
-        var re = /(-?[0-9]*[0-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc))/,
+        var re = /(-?[0-9]*[0-9][0-9]*(\.[0-9]*)?|0+\.[0-9]*[1-9][0-9]*|\.[0-9]*[1-9][0-9]*)((cm)|(mm)|(in)|(pt)|(pc)|(px))/,
             m = re.exec(length);
         if (!m) {
             return null;
