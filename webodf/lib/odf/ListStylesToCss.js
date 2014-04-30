@@ -80,8 +80,17 @@
             try {
                 styleSheet.insertRule(rule, styleSheet.cssRules.length);
             } catch (/**@type{!DOMException}*/e) {
-                runtime.log("cannot load rule: " + rule);
+                runtime.log("cannot load rule: " + rule + " - " + e);
             }
+        }
+
+        /**
+         * Return the supplied value with any backslashes escaped, and double-quotes escaped
+         * @param {!string} value
+         * @return {!string}
+         */
+        function escapeCSSString(value) {
+            return value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
         }
 
         /**
@@ -98,16 +107,18 @@
                 /**@type{!string}*/
                 content = "";
             if (prefix) {
-                content += ' "' + prefix + '"';
+                // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+                // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+                content += '"' + escapeCSSString(prefix) + '"\n';
             }
             if (stylemap.hasOwnProperty(style)) {
                 content += " counter(list, " + stylemap[style] + ")";
             } else if (style) {
                 content += ' "' + style + '"';
             } else {
-                content += " ''";
+                content += ' ""';
             }
-            return 'content:' + content + ' "' + suffix + '"';
+            return 'content:' + content + ' "' + escapeCSSString(suffix) + '"';
         }
 
         /**
@@ -125,7 +136,7 @@
          */
         function getBulletRule(node) {
             var bulletChar = node.getAttributeNS(textns, "bullet-char");
-            return "content: '" + bulletChar + "'";
+            return 'content: "' + escapeCSSString(bulletChar) + '"';
         }
 
         /**
@@ -246,7 +257,9 @@
                 listItemRule += 'margin-left: -' + bulletWidth + ';';
                 listItemRule += 'padding-right: ' + labelDistance + ';';
             }
-            listItemRule += itemRule + ';';
+            // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+            // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+            listItemRule += "\n" + itemRule + ';\n';
             listItemRule += '}';
             appendRule(styleSheet, listItemRule);
         }

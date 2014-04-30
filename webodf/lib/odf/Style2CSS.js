@@ -686,11 +686,7 @@ odf.Style2CSS = function Style2CSS() {
             return;
         }
         rule = selector + '{' + rule + '}';
-        try {
-            sheet.insertRule(rule, sheet.cssRules.length);
-        } catch (/**@type{!DOMException}*/e) {
-            throw e;
-        }
+        sheet.insertRule(rule, sheet.cssRules.length);
     }
 
     /**
@@ -738,12 +734,8 @@ odf.Style2CSS = function Style2CSS() {
                             + applySimpleMapping(props, pageSizePropertySimpleMapping)
                             + ' }';
 
-                    try {
-                        sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
-                        sheet.insertRule(pageSizeRule, sheet.cssRules.length);
-                    } catch (/**@type{!DOMException}*/e1) {
-                        throw e1;
-                    }
+                    sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
+                    sheet.insertRule(pageSizeRule, sheet.cssRules.length);
                 }
                 e = e.nextElementSibling;
             }
@@ -759,12 +751,8 @@ odf.Style2CSS = function Style2CSS() {
                 + 'width: ' + props.getAttributeNS(fons, 'page-width') + ';'
                 + '}';
 
-            try {
-                sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
-                sheet.insertRule(pageSizeRule, sheet.cssRules.length);
-            } catch (/**@type{!DOMException}*/e2) {
-                throw e2;
-            }
+            sheet.insertRule(contentLayoutRule, sheet.cssRules.length);
+            sheet.insertRule(pageSizeRule, sheet.cssRules.length);
         }
 
     }
