@@ -1,7 +1,7 @@
 #include "nativeio.h"
-#include <QtWebKit/QWebPage>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QTextCodec>
+#include <QWebPage>
+#include <QCoreApplication>
+#include <QTextCodec>
 
 NativeIO::NativeIO(QObject* parent, const QDir& runtimedir_,
          const QDir& cwd_,
@@ -22,7 +22,7 @@ NativeIO::readFileSync(const QString& path, const QString& encoding) {
     }
     QString out;
     if (encoding != "binary") {
-        QTextCodec *codec = QTextCodec::codecForName(encoding.toAscii());
+        QTextCodec *codec = QTextCodec::codecForName(encoding.toLatin1());
         if (codec) {
             out = codec->toUnicode(data);
         }

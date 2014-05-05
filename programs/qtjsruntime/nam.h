@@ -1,8 +1,8 @@
 #ifndef NAM_H
 #define NAM_H
 
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
 
 class NAM : public QNetworkAccessManager {
 Q_OBJECT

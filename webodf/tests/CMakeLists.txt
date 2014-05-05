@@ -20,7 +20,7 @@ add_custom_target(nodetest ALL
 )
 add_dependencies(nodetest ${NODE} manifest.json-target)
 
-if (QT4_FOUND)
+if (BUILD_QTJSRUNTIME)
 	COPY_FILES(tests_qtjsruntimetest ${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}/_qtjsruntimetest ${TESTS_TESTFILES} )
     COPY_FILES(tests_qtjsruntimetest2 ${CMAKE_CURRENT_SOURCE_DIR}/..
@@ -31,5 +31,5 @@ if (QT4_FOUND)
 		DEPENDS ${tests_qtjsruntimetest} ${tests_qtjsruntimetest2}
 	)
     add_dependencies(qtjsruntimetest ${NODE} qtjsruntime manifest.json-target)
-endif (QT4_FOUND)
+endif (BUILD_QTJSRUNTIME)
 

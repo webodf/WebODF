@@ -1,14 +1,15 @@
 add_subdirectory(touchui)
 
-if(QT4_FOUND)
+if(BUILD_QTJSRUNTIME)
   add_subdirectory(qtjsruntime)
-  add_subdirectory(nativeQtClient)
-  add_subdirectory(docnosis)
-endif(QT4_FOUND)
+#   add_subdirectory(nativeQtClient)
+endif(BUILD_QTJSRUNTIME)
 
 if(ANDROID_SDK_DIR AND ANT)
   add_subdirectory(android)
 endif(ANDROID_SDK_DIR AND ANT)
+
+add_subdirectory(docnosis)
 
 add_subdirectory(firefoxextension)
 

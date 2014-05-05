@@ -1,9 +1,9 @@
 #ifndef NATIVEIO_H
 #define NATIVEIO_H
 
-#include <QtCore/QFile>
-#include <QtCore/QDir>
-#include <QtCore/QMap>
+#include <QFile>
+#include <QDir>
+#include <QMap>
 
 class QWebPage;
 

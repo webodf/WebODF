@@ -4,13 +4,7 @@
 # WebODF is mostly a JavaScript project. CMake needs to know about the C++ parts
 project (WebODF C CXX)
 
-# version 2.8.2 is needed to have support for zip files in external projects
-# issues with version 2.8.4 on Windows makes us test for a higher version
-if(WIN32)
-    cmake_minimum_required(VERSION 2.8.6)
-else()
-    cmake_minimum_required(VERSION 2.8.2)
-endif(WIN32)
+cmake_minimum_required(VERSION 2.8.11)
 
 # Require separate build dir
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
@@ -63,10 +57,18 @@ message(STATUS "WebODF version " ${WEBODF_VERSION})
 ## Find installed dependencies
 #########################################################
 
-find_package(Qt4 4.7.0 COMPONENTS QtCore QtGui QtXml QtNetwork QtWebKit)
-if (NOT QT4_FOUND)
-  message(WARNING "Qt4 with modules QtCore QtGui QtXml QtNetwork QtWebKit was not found. qtjsruntime will no be built.")
-endif (NOT QT4_FOUND)
+set(QT_MIN_VERSION "5.1.1")
+find_package(Qt5Network)
+find_package(Qt5Xml)
+find_package(Qt5PrintSupport)
+find_package(Qt5WebKitWidgets)
+
+if (Qt5Network_FOUND AND Qt5Xml_FOUND AND Qt5PrintSupport_FOUND AND Qt5WebKitWidgets_FOUND)
+  set(BUILD_QTJSRUNTIME TRUE)
+else ()
+  message(WARNING "Qt5 with modules Qt5Network Qt5Xmle Qt5PrintSupport Qt5WebKitWidgets was not found. qtjsruntime will no be built.")
+  set(BUILD_QTJSRUNTIME FALSE)
+endif ()
 
 # java runtime is needed for Closure Compiler
 find_package(Java COMPONENTS Runtime)
