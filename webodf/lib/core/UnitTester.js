@@ -370,9 +370,12 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
     /**
      * @param {!*} actual
      * @param {!*} expected
+     * @param {!number=} absoluteTolerance  absolute tolerance for number comparison
      * @return {!boolean}
      */
-    function isResultCorrect(actual, expected) {
+    function isResultCorrect(actual, expected, absoluteTolerance) {
+        var diff;
+
         if (expected === 0) {
             return actual === expected && (1 / actual) === (1 / expected);
         }
@@ -384,6 +387,24 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
         }
         if (typeof expected === "number" && isNaN(expected)) {
             return typeof actual === "number" && isNaN(actual);
+        }
+        if (typeof expected === "number" && typeof actual === "number") {
+            // simple to check?
+            if (actual === expected) {
+                return true;
+            }
+
+            // default (randomly chosen, no theory behind)
+            if (absoluteTolerance === undefined) {
+                absoluteTolerance = 0.0001;
+            }
+
+            runtime.assert(typeof absoluteTolerance === "number", "Absolute tolerance not given as number.");
+            runtime.assert(absoluteTolerance >= 0, "Absolute tolerance should be given as positive number, was "+absoluteTolerance);
+
+            diff = Math.abs(actual - expected);
+
+            return (diff <= absoluteTolerance);
         }
         if (Object.prototype.toString.call(expected) ===
                 Object.prototype.toString.call([])) {
@@ -415,9 +436,10 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
      * @param {!Object} t
      * @param {!string} a
      * @param {!string} b
+     * @param {!number=} absoluteTolerance  absolute tolerance for number comparison
      * @return {undefined}
      */
-    function shouldBe(t, a, b) {
+    function shouldBe(t, a, b, absoluteTolerance) {
         if (typeof a !== "string" || typeof b !== "string") {
             debug("WARN: shouldBe() expects string arguments");
         }
@@ -432,7 +454,7 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
         if (exception) {
             testFailed(a + " should be " + bv + ". Threw exception " +
                     exception);
-        } else if (isResultCorrect(av, bv)) {
+        } else if (isResultCorrect(av, bv, absoluteTolerance)) {
             testPassed(a + " is " + b);
         } else if (String(typeof av) === String(typeof bv)) {
             testFailed(a + " should be " + bv + ". Was " + stringify(av) + ".");
@@ -441,6 +463,7 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
                     "). Was " + av + " (of type " + typeof av + ").");
         }
     }
+
     /**
      * @param {!Object} t context in which values to be tested are placed
      * @param {!string} a the value to be checked

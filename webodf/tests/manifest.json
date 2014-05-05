@@ -108,6 +108,10 @@
         "core.UnitTester",
         "odf.StyleInfo"
     ],
+    "odf.StyleParseUtilsTests": [
+        "core.UnitTester",
+        "odf.StyleParseUtils"
+    ],
     "odf.TextStyleApplicatorTests": [
         "core.DomUtils",
         "core.UnitTester",
