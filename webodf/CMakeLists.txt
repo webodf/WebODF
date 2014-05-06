@@ -62,36 +62,37 @@ add_custom_command(
 add_custom_target(webodf.css.js-target DEPENDS webodf.css.js)
 
 if (Java_JAVA_EXECUTABLE)
-  # Windows has a command-line limit of around 8,000 chars, soCC flags are passed into the compiler using a file to help
-  # keep the length of the compilation command as small as possible.
-  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/cc-flags.txt "--warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3")
-  # nonStandardJsDocs is not used because we use @licstart @licend and @source
-  # ideally we would enable --jscomp_error reportUnknownTypes
-  # -XX:+TieredCompilation reduces compilation time by about 30%
-  set(SHARED_CLOSURE_ARGS -XX:+TieredCompilation -jar ${CLOSURE_JAR} --flagfile ${CMAKE_CURRENT_BINARY_DIR}/cc-flags.txt)
+  # Windows has a command-line limit of around 8,000 chars, so files to be compiled are supplied to CC using the --flagfile
+  # option to help keep the length of the compilation command as small as possible.
+  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt "--warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3")
 
   foreach(JSFILE ${LIBJSFILES})
     if (IS_ABSOLUTE ${JSFILE})
-      set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
-          --js ${JSFILE})
+      file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt " --js ${JSFILE}")
     else (IS_ABSOLUTE ${JSFILE})
-      set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
-          --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+      file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt " --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE}")
     endif (IS_ABSOLUTE ${JSFILE})
   endforeach(JSFILE ${LIBJSFILES})
 
+  file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt " --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js")
+
+  # copy the flagfile for some targets which require the test files to be passed into CC
+  # this requires a separate file as other targets don't want to compile the test files
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt ${CMAKE_CURRENT_BINARY_DIR}/cc-withTestFiles.txt)
+
   foreach(JSFILE ${TESTJSFILES})
-    set(TEST_CLOSURE_ARGS ${TEST_CLOSURE_ARGS}
-        --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE})
+    file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/cc-withTestFiles.txt " --js ${CMAKE_CURRENT_SOURCE_DIR}/${JSFILE}")
   endforeach(JSFILE ${TESTJSFILES})
 
-  set(LIB_CLOSURE_ARGS ${LIB_CLOSURE_ARGS}
-      --js ${CMAKE_CURRENT_BINARY_DIR}/webodf.css.js)
+  # nonStandardJsDocs is not used because we use @licstart @licend and @source
+  # ideally we would enable --jscomp_error reportUnknownTypes
+  # -XX:+TieredCompilation reduces compilation time by about 30%
+  set(SHARED_CLOSURE_ARGS -XX:+TieredCompilation -jar ${CLOSURE_JAR})
 
   add_custom_command(
       OUTPUT simplecompiled.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
+      ARGS ${SHARED_CLOSURE_ARGS} --flagfile ${CMAKE_CURRENT_BINARY_DIR}/cc-withTestFiles.txt
          --compilation_level WHITESPACE_ONLY
          --formatting PRETTY_PRINT
          --js_output_file simplecompiled.js-
@@ -106,7 +107,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT compiled.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS} ${TEST_CLOSURE_ARGS}
+      ARGS ${SHARED_CLOSURE_ARGS} --flagfile ${CMAKE_CURRENT_BINARY_DIR}/cc-withTestFiles.txt
          --define IS_COMPILED_CODE=true
          --compilation_level ADVANCED_OPTIMIZATIONS
          --formatting PRETTY_PRINT
@@ -121,7 +122,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT webodf.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
+      ARGS ${SHARED_CLOSURE_ARGS} --flagfile ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt
          --jscomp_error reportUnknownTypes
          --define IS_COMPILED_CODE=true
          --compilation_level SIMPLE_OPTIMIZATIONS
@@ -137,7 +138,7 @@ if (Java_JAVA_EXECUTABLE)
   add_custom_command(
       OUTPUT webodf-debug.js
       COMMAND ${Java_JAVA_EXECUTABLE}
-      ARGS ${SHARED_CLOSURE_ARGS} ${LIB_CLOSURE_ARGS}
+      ARGS ${SHARED_CLOSURE_ARGS} --flagfile ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt
          --jscomp_error reportUnknownTypes
          --define IS_COMPILED_CODE=true
          --compilation_level WHITESPACE_ONLY
