@@ -50,6 +50,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     "use strict";
 
     var self = this,
+        /**@type{!odf.StepUtils}*/
+        stepUtils,
         /**@type{!odf.OdfUtils}*/
         odfUtils,
         /**@type{!core.DomUtils}*/
@@ -536,6 +538,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function upgradeWhitespacesAtPosition(step) {
         var positionIterator = getIteratorAtPosition(step),
             stepIterator = new core.StepIterator(filter, positionIterator),
+            contentBounds,
             /**@type{?Node}*/
             container,
             offset,
@@ -546,25 +549,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         runtime.assert(stepIterator.isStep(), "positionIterator is not at a step (requested step: " + step + ")");
 
         do {
-            container = stepIterator.container();
-            offset = stepIterator.offset();
-            // A step is to the left of the corresponding text content according to the TextPositionFilter.
-            // If the container is not a text node, or is just before a text node, the content will be found in the
-            // node to the left of the current position.
-            if (container.nodeType !== Node.TEXT_NODE || offset === 0) {
-                container = positionIterator.leftNode();
-                offset = container && container.nodeType === Node.TEXT_NODE ? /**@type{!Text}*/(container).length : -1;
-            }
-
-            if (container
-                    && container.nodeType === Node.TEXT_NODE
-                    && offset > 0
-                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset - 1)) {
-                container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset - 1);
-                // Reset the iterator position to the same step it was just on, which was just to
-                // the left of a space
-                stepIterator.setPosition(container, container.childNodes.length);
-                stepIterator.roundToPreviousStep();
+            contentBounds = stepUtils.getContentBounds(stepIterator);
+            if (contentBounds) {
+                container = contentBounds.container;
+                offset = contentBounds.startOffset;
+                if (container.nodeType === Node.TEXT_NODE
+                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset)) {
+                    container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
+                    // Reset the iterator position to the same step it was just on, which was just to
+                    // the right of a space
+                    stepIterator.setPosition(container, container.childNodes.length);
+                    stepIterator.roundToPreviousStep();
+                }
             }
             stepsToUpgrade -= 1;
         } while (stepsToUpgrade > 0 && stepIterator.nextStep());
@@ -941,6 +937,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         filter = new ops.TextPositionFilter(getRootNode);
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
+        stepUtils = new odf.StepUtils();
         stepsTranslator = new ops.OdtStepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);

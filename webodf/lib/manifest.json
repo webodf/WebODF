@@ -245,6 +245,9 @@
     "odf.ParagraphProperties": [
         "odf.StyleParseUtils"
     ],
+    "odf.StepUtils": [
+        "core.StepIterator"
+    ],
     "odf.Style2CSS": [
         "core.CSSUnits",
         "odf.OdfUtils",
@@ -301,8 +304,8 @@
     ],
     "ops.OdtDocument": [
         "core.PositionFilterChain",
-        "core.StepIterator",
         "odf.OdfCanvas",
+        "odf.StepUtils",
         "ops.Member",
         "ops.OdtCursor",
         "ops.OdtStepsTranslator",

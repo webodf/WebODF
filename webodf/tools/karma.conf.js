@@ -58,6 +58,7 @@ module.exports = function (config) {
             'lib/gui/ZoomHelper.js',
             'lib/ops/Canvas.js',
             'lib/odf/OdfCanvas.js',
+            'lib/odf/StepUtils.js',
             'lib/ops/Member.js',
             'lib/gui/SelectionMover.js',
             'lib/ops/Document.js',
