@@ -40,6 +40,7 @@ define(["OdfBenchmarkContext"], function(OdfBenchmarkContext) {
         "use strict";
 
         runtime.loadClass("core.EventNotifier");
+        runtime.loadClass("core.Task");
         runtime.loadClass("odf.OdfCanvas");
 
         /**
@@ -80,6 +81,7 @@ define(["OdfBenchmarkContext"], function(OdfBenchmarkContext) {
                 });
 
                 events.emit("start", {});
+                core.Task.SUPPRESS_MANUAL_PROCESSING = true;
                 context.odfCanvas = new odf.OdfCanvas(canvasElement);
                 currentActionIndex = -1;
                 executeNextAction();

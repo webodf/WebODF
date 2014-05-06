@@ -91,13 +91,23 @@
     core.Task =  {};
 
     /**
+     * Disable manually processing of tasks when core.Task.processTasks is called.
+     * This is only used during benchmarks to prevent caret redraws from skewing
+     * the resulting numbers
+     * @type {!boolean}
+     */
+    core.Task.SUPPRESS_MANUAL_PROCESSING = false;
+
+    /**
      * Process any outstanding redraw tasks that may be queued up
      * waiting for an animation frame
      * 
      * @return {undefined}
      */
     core.Task.processTasks = function() {
-        redrawTasks.performRedraw();
+        if (!core.Task.SUPPRESS_MANUAL_PROCESSING) {
+            redrawTasks.performRedraw();
+        }
     };
 
     /**
