@@ -94,7 +94,7 @@ PageRunner::PageRunner(const QStringList& args)
         html = "<html>"
                 "<head><title></title>"
                 "<script>var arguments=[" + html + "];</script>"
-                "<script src=\"" + arguments[0].toUtf8() + "\"></script>";
+                "<script src=\"" + QUrl::fromLocalFile(arguments[0]).toEncoded() + "\"></script>";
         // add runtime modification
         html += "<script>//<![CDATA[\n" + getRuntimeBindings() +
              "if (typeof(runtime) !== 'undefined' && typeof(nativeio) !== 'undefined') {\n"
