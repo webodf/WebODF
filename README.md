@@ -27,6 +27,6 @@ webodf.js is compiled by using the Closure Compiler. This compiler concatenates 
     cmake ../webodf
     make webodf.js-target
 
-A successfull run will yield the file "webodf.js" in the subfolder "build/webodf/" (among other things), from where you can then copy it and use for your website.
+A successful run will yield the file "webodf.js" in the subfolder "build/webodf/" (among other things), from where you can then copy it and use for your website.
 
-For building webodf.js on Windows please study "README-Windows.md".
+For more details about building webodf.js, e.g. on Windows or OSX, please study "README-Building.md".
