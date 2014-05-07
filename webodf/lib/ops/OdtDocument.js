@@ -78,7 +78,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalProcessingBatchEnd,
             ops.OdtDocument.signalUndoStackChanged,
             ops.OdtDocument.signalStepsInserted,
-            ops.OdtDocument.signalStepsRemoved
+            ops.OdtDocument.signalStepsRemoved,
+            ops.OdtDocument.signalMetadataUpdated
         ]),
         /**@const*/
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
@@ -466,22 +467,39 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             memberId = spec.memberid,
             date = new Date(spec.timestamp).toISOString(),
             odfContainer = odfCanvas.odfContainer(),
+            /**@type{!{setProperties: !Object, removedProperties: ?Array.<!string>}}*/
+            changedMetadata = {
+                setProperties: {},
+                removedProperties: []
+            },
             fullName;
 
         // If the operation is an edit (that changes the
         // ODF that will be saved), then update metadata.
         if (op.isEdit) {
-            fullName = self.getMember(memberId).getProperties().fullName;
+            if (op.spec().optype === "UpdateMetadata") {
+                // HACK: Cannot typecast this to OpUpdateMetadata's spec because that would be a cyclic dependency,
+                // therefore forcibly typecast this to advertise the two required properties. Also, deep clone to avoid
+                // unintended modification of the op spec.
+                spec = /**@type{!{setProperties: !Object, removedProperties: ?{attributes: string}}}*/(JSON.parse(JSON.stringify(op.spec())));
+                changedMetadata.setProperties = /**@type{!Object}*/(spec.setProperties);
+                if (spec.removedProperties) {
+                    changedMetadata.removedProperties = /**@type{?Array.<!string>}*/(spec.removedProperties);
+                }
+            }
 
+            fullName = self.getMember(memberId).getProperties().fullName;
             odfContainer.setMetadata({
                 "dc:creator": fullName,
                 "dc:date": date
             }, null);
+            changedMetadata.setProperties["dc:creator"] = fullName;
+            changedMetadata.setProperties["dc:date"] = date;
 
             // If no previous op was found in this session,
             // then increment meta:editing-cycles by 1.
             if (!lastEditingOp) {
-                odfContainer.incrementEditingCycles();
+                changedMetadata.setProperties["meta:editing-cycles"] = odfContainer.incrementEditingCycles();
                 // Remove certain metadata fields that
                 // should be updated as soon as edits happen,
                 // but cannot be because we don't support those yet.
@@ -494,6 +512,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             }
 
             lastEditingOp = op;
+            self.emit(ops.OdtDocument.signalMetadataUpdated, changedMetadata);
         }
     }
 
@@ -971,6 +990,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalUndoStackChanged = "undo/changed";
 /**@const*/ops.OdtDocument.signalStepsInserted = "steps/inserted";
 /**@const*/ops.OdtDocument.signalStepsRemoved = "steps/removed";
+/**@const*/ops.OdtDocument.signalMetadataUpdated = "metadata/updated";
 
 (function () {
     "use strict";

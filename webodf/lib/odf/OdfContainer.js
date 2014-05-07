@@ -1103,7 +1103,7 @@
 
         /**
          * Increment the number of times the document has been edited.
-         * @return {undefined}
+         * @return {!number} new number of editing cycles
          */
         this.incrementEditingCycles = function () {
             var currentValueString = getMetaData(odf.Namespaces.metans, "editing-cycles"),
@@ -1114,6 +1114,7 @@
             }
 
             setMetadata({"meta:editing-cycles": currentCycles + 1}, null);
+            return currentCycles + 1;
         };
 
         /**

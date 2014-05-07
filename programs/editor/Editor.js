@@ -111,7 +111,8 @@ define("webodf/editor/Editor", [
                     Editor.EVENT_BEFORESAVETOFILE,
                     Editor.EVENT_SAVEDTOFILE,
                     Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED,
-                    Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED
+                    Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED,
+                    Editor.EVENT_METADATACHANGED
                 ]),
                 pendingMemberId,
                 pendingEditorReadyCallback;
@@ -502,6 +503,10 @@ define("webodf/editor/Editor", [
                 editorSession.sessionController.getEventManager().focus();
             }
 
+            function relayMetadataSignal(changes) {
+                fireEvent(Editor.EVENT_METADATACHANGED, changes);
+            }
+
             // init
             function init() {
                 var editorPane, memberListPane,
@@ -623,6 +628,9 @@ define("webodf/editor/Editor", [
                         memberListView.setEditorSession(editorSession);
                     }
 
+                    // Relay any metadata changes to the Editor's consumer as an event
+                    session.getOdtDocument().subscribe(ops.OdtDocument.signalMetadataUpdated, relayMetadataSignal);
+
                     // and report back to caller
                     pendingEditorReadyCallback();
                     // reset
@@ -651,6 +659,8 @@ define("webodf/editor/Editor", [
         Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED = "hasLocalUnsyncedOperationsChanged";
         /**@const @type {!string}*/
         Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED =   "hasSessionHostConnectionChanged";
+        /**@const @type {!string}*/
+        Editor.EVENT_METADATACHANGED =                   "metadataChanged";
 
         return Editor;
     });
