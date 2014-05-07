@@ -456,7 +456,7 @@
          * @param {!string} metadataLocalName
          * @return {?string}
          */
-        function getMetaData(metadataNs, metadataLocalName) {
+        function getMetadata(metadataNs, metadataLocalName) {
             var node = self.rootElement.meta, textNode;
 
             node = node && node.firstChild;
@@ -473,6 +473,7 @@
             }
             return null;
         }
+        this.getMetadata = getMetadata;
 
         /**
          * Returns key with a number postfix or none, as key unused both in map1 and map2.
@@ -1106,7 +1107,7 @@
          * @return {!number} new number of editing cycles
          */
         this.incrementEditingCycles = function () {
-            var currentValueString = getMetaData(odf.Namespaces.metans, "editing-cycles"),
+            var currentValueString = getMetadata(odf.Namespaces.metans, "editing-cycles"),
                 currentCycles = currentValueString ? parseInt(currentValueString, 10) : 0;
 
             if (isNaN(currentCycles)) {
