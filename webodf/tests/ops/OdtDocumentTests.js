@@ -91,6 +91,9 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         this.getContentElement = function () { return node.getElementsByTagNameNS(odf.Namespaces.officens, 'text')[0]; };
         this.rootElement = node;
     }
+    function appendCssRule(rule) {
+        t.styles.insertRule(rule, t.styles.cssRules.length);
+    }
     function createOdtDocument(xml) {
         var domDocument = testarea.ownerDocument,
             doc = core.UnitTest.createOdtDocument("<office:text>" + xml + "</office:text>", prefixToNamespace),
@@ -106,11 +109,10 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
         t.range = t.root.ownerDocument.createRange();
         t.filter = t.odtDocument.getPositionFilter();
+        appendCssRule("text|p { font-family: monospace; }\n"); // Ensure font chars are always monospaced
         return node;
     }
-    function appendCssRule(rule) {
-        t.styles.insertRule(rule, t.styles.cssRules.length);
-    }
+
     /**
      * @param {!number} stepsToAnchor Number of steps to advance the cursor
      * @param {!number=} stepsDiffToFocus
@@ -214,19 +216,19 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.steps", "5");
     }
     function testCountLinesStepsDown_FromParagraphEnd() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        createOdtDocument("<text:p>ABCDE</text:p><text:p>FGHIJ</text:p>");
         setCursorPosition(4);
         t.steps = t.counter.countLinesSteps(1, t.filter);
         r.shouldBe(t, "t.steps", "6");
     }
     function testCountLinesStepsDown_FromJaggedParagraphEnd() {
-        createOdtDocument("<text:p>ABCDE</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(5);
+        createOdtDocument("<text:p>ABCDE1</text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(6);
         t.steps = t.counter.countLinesSteps(1, t.filter);
         r.shouldBe(t, "t.steps", "6");
     }
     function testCountLinesStepsDown_OverWrap() {
-        createOdtDocument("<text:p text:style-name='width4em'>ABCD FGHIJ</text:p>");
+        createOdtDocument("<text:p text:style-name='width4em'>ABCDE FGHIJ</text:p>");
         appendCssRule("text|p[text|style-name=width4em] { width: 4em; }\n"); // Width calculated to wrap at first space
         setCursorPosition(4);
         t.steps = t.counter.countLinesSteps(1, t.filter);
@@ -245,7 +247,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.steps", "-6");
     }
     function testCountLinesStepsUp_FromJaggedParagraphEnd() {
-        createOdtDocument("<text:p>ABCDE</text:p><text:p>FGHIJ</text:p>");
+        createOdtDocument("<text:p>ABCDE1</text:p><text:p>FGHIJ</text:p>");
         setCursorPosition(11);
         t.steps = t.counter.countLinesSteps(-1, t.filter);
         r.shouldBe(t, "t.steps", "-7");
@@ -326,8 +328,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.steps", "-2");
     }
     function testCountStepsToLineBoundary_Backward_OverWrapping2() {
-        createOdtDocument("<text:p text:style-name='width40px'>ABC D <text:span>E</text:span>F</text:p>");
-        appendCssRule("text|p[text|style-name=width40px] { width: 40px; }\n"); // Width calculated to wrap at first space
+        createOdtDocument("<text:p text:style-name='width3em'>ABC D <text:span>E</text:span>F</text:p>");
+        appendCssRule("text|p[text|style-name=width3em] { width: 3em; }\n"); // Width calculated to wrap at first space
         setCursorPosition(8);
         t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
         r.shouldBe(t, "t.steps", "-4");
