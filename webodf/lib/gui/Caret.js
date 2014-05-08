@@ -51,15 +51,13 @@
 gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
     var /**@const*/
-        MIN_CARET_HEIGHT_PX = 8, /** 8px = 6pt font size */
-        /**@const*/
-        DEFAULT_CARET_TOP = "5%",
-        /**@const*/
-        DEFAULT_CARET_HEIGHT = "1em",
+        MIN_OVERLAY_HEIGHT_PX = 8, /** 8px = 6pt font size */
         /**@const*/
         BLINK_PERIOD_MS = 500,
-        /**@type{!HTMLSpanElement}*/
-        span,
+        /**@type{!HTMLElement}*/
+        caretOverlay,
+        /**@type{!HTMLElement}*/
+        caretElement,
         /**@type{!gui.Avatar}*/
         avatar,
         /**@type{!Element}*/
@@ -95,7 +93,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     function blinkCaret() {
         // switch between transparent and color
-        span.style.opacity = span.style.opacity === "0" ? "1" : "0";
+        caretElement.style.opacity = caretElement.style.opacity === "0" ? "1" : "0";
         blinkTask.trigger(); // Trigger next blink to occur in BLINK_PERIOD_MS
     }
 
@@ -206,45 +204,45 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * - STIXGeneral (MacOS, Chrome & Safari)
      * @return {undefined}
      */
-    function updateCaretHeightAndPosition() {
+    function updateOverlayHeightAndPosition() {
         var selectionRect = getSelectionRect(),
             canvas = /**@type{!odf.OdfCanvas}*/(cursor.getDocument().getCanvas()),
             zoomLevel = canvas.getZoomLevel(),
             rootRect = domUtils.getBoundingClientRect(canvas.getSizer()),
-            caretRect,
+            overlayRect,
             caretStyle;
 
         if (selectionRect) {
             // Reset the top back to 0 so that the new client rect calculations are simple
             // If this isn't done, the existing span's top setting would need to be taken into
             // account (and converted if not in pixels) when calculating the new top value
-            span.style.top = "0";
-            caretRect = domUtils.getBoundingClientRect(span);
+            caretOverlay.style.top = "0";
+            overlayRect = domUtils.getBoundingClientRect(caretOverlay);
 
-            if (selectionRect.height < MIN_CARET_HEIGHT_PX) {
+            if (selectionRect.height < MIN_OVERLAY_HEIGHT_PX) {
                 // ClientRect's are read-only, so a whole new object is necessary to modify these values
                 selectionRect = {
-                    top: selectionRect.top - ((MIN_CARET_HEIGHT_PX - selectionRect.height) / 2),
-                    height: MIN_CARET_HEIGHT_PX
+                    top: selectionRect.top - ((MIN_OVERLAY_HEIGHT_PX - selectionRect.height) / 2),
+                    height: MIN_OVERLAY_HEIGHT_PX
                 };
             }
-            span.style.height = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.height, zoomLevel) + 'px';
-            span.style.top = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.top - caretRect.top, zoomLevel) + 'px';
+            caretOverlay.style.height = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.height, zoomLevel) + 'px';
+            caretOverlay.style.top = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.top - overlayRect.top, zoomLevel) + 'px';
         } else {
             // fallback to a relatively safe set of values
             // This can happen if the caret is not currently visible, or is in the middle
             // of a collection of nodes that have no client rects. In this case, the caret
-            // will fall back to the existing behaviour
-            span.style.height = DEFAULT_CARET_HEIGHT;
-            span.style.top = DEFAULT_CARET_TOP;
+            // will fall back to the defaults defined in webodf.css
+            caretOverlay.style.removeProperty("height");
+            caretOverlay.style.removeProperty("top");
         }
 
         // Update the overlay element
         if (overlayElement) {
-            caretStyle = runtime.getWindow().getComputedStyle(span, null);
-            caretRect = domUtils.getBoundingClientRect(span);
-            overlayElement.style.bottom = domUtils.adaptRangeDifferenceToZoomLevel(rootRect.bottom - caretRect.bottom, zoomLevel) + 'px';
-            overlayElement.style.left = domUtils.adaptRangeDifferenceToZoomLevel(caretRect.right - rootRect.left, zoomLevel) + 'px';
+            caretStyle = runtime.getWindow().getComputedStyle(caretElement, null);
+            overlayRect = domUtils.getBoundingClientRect(caretOverlay);
+            overlayElement.style.bottom = domUtils.adaptRangeDifferenceToZoomLevel(rootRect.bottom - overlayRect.bottom, zoomLevel) + 'px';
+            overlayElement.style.left = domUtils.adaptRangeDifferenceToZoomLevel(overlayRect.right - rootRect.left, zoomLevel) + 'px';
             if (caretStyle.font) {
                 overlayElement.style.font = caretStyle.font;
             } else {
@@ -287,7 +285,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         // * size of the caret
         // * size of the canvas
 
-        caretRect = getCaretClientRectWithMargin(span, {
+        caretRect = getCaretClientRectWithMargin(caretElement, {
             top: verticalMargin,
             left: horizontalMargin,
             bottom: verticalMargin,
@@ -342,20 +340,20 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // - the selection is not a range selection (e.g., an image has been selected)
             // - the blinkOnRangeSelect is false and the cursor has a non-collapsed range
             state.visibility = "hidden";
-            span.style.visibility = "hidden";
+            caretElement.style.visibility = "hidden";
             blinkTask.cancel();
         } else {
             // For all other cases, the caret is expected to be visible and either static (isFocused = false), or blinking
             state.visibility = "visible";
-            span.style.visibility = "visible";
+            caretElement.style.visibility = "visible";
 
             if (state.isFocused === false) {
-                span.style.opacity = "1";
+                caretElement.style.opacity = "1";
                 blinkTask.cancel();
             } else {
                 if (shouldResetBlink || hasStateChanged("visibility")) {
                     // If the caret has just become visible, reset the opacity so it is immediately shown
-                    span.style.opacity = "1";
+                    caretElement.style.opacity = "1";
                     // Cancel any existing blink instructions to ensure the opacity is not toggled for BLINK_PERIOD_MS
                     // It will immediately be rescheduled below so blinking resumes
                     blinkTask.cancel();
@@ -370,7 +368,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
                 // or is just about to be scrolled into view. This is necessary because client rectangles
                 // are not reported when an element is hidden, so the caret size is likely to be out of date
                 // when it is drawn
-                updateCaretHeightAndPosition();
+                updateOverlayHeightAndPosition();
             }
 
             if (shouldCheckCaretVisibility) {
@@ -409,7 +407,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // To prevent this flicker, we hide the caret until it is redrawn, as an absent caret is far less
             // noticeable than an oversized one.
             state.visibility = "hidden";
-            span.style.visibility = "hidden";
+            caretElement.style.visibility = "hidden";
         }
         redrawTask.trigger();
     };
@@ -462,7 +460,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {undefined}
      */
     this.setColor = function (newColor) {
-        span.style.borderColor = newColor;
+        caretElement.style.borderColor = newColor;
         avatar.setColor(newColor);
     };
     /**
@@ -475,7 +473,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {!Element}
      */
     this.getFocusElement = function () {
-        return span;
+        return caretElement;
     };
     /**
      * @return {undefined}
@@ -527,7 +525,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {undefined}
      */
     function destroy(callback) {
-        cursorNode.removeChild(span);
+        cursorNode.removeChild(caretOverlay);
         callback();
     }
 
@@ -541,14 +539,19 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     };
 
     function init() {
-        var dom = cursor.getDocument().getDOMDocument(),
-            htmlns = dom.documentElement.namespaceURI;
-        span = /**@type{!HTMLSpanElement}*/(dom.createElementNS(htmlns, "span"));
-        span.className = "caret";
-        span.style.top = DEFAULT_CARET_TOP;
+        var dom = cursor.getDocument().getDOMDocument();
+        caretOverlay = /**@type{!HTMLElement}*/(dom.createElement("span"));
+        caretOverlay.className = "webodf-caretOverlay";
+
+        caretElement = /**@type{!HTMLElement}*/(dom.createElement("div"));
+        caretElement.className = "caret";
+        caretOverlay.appendChild(caretElement);
+
+        avatar = new gui.Avatar(caretOverlay, avatarInitiallyVisible);
+
         cursorNode = cursor.getNode();
-        cursorNode.appendChild(span);
-        avatar = new gui.Avatar(cursorNode, avatarInitiallyVisible);
+        cursorNode.appendChild(caretOverlay);
+
         redrawTask = core.Task.createRedrawTask(updateCaret);
         blinkTask = core.Task.createTimeoutTask(blinkCaret, BLINK_PERIOD_MS);
         redrawTask.triggerImmediate();
