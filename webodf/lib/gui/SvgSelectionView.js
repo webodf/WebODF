@@ -102,28 +102,6 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
     }
 
     /**
-     * Takes a rect that is relative to the main viewport, and translates
-     * it to be relative to the 'root' rect of the document.
-     * Also takes the zoom level into account.
-     * @param {!ClientRect|!{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}} rect
-     * @return {!{top: !number, left: !number, bottom: !number, right: !number, width: !number, height: !number}}
-     */
-    function translateRect(rect) {
-        var rootRect = domUtils.getBoundingClientRect(sizer),
-            zoomLevel = zoomHelper.getZoomLevel(),
-            resultRect = {};
-
-        resultRect.top = domUtils.adaptRangeDifferenceToZoomLevel(rect.top - rootRect.top, zoomLevel);
-        resultRect.left = domUtils.adaptRangeDifferenceToZoomLevel(rect.left  - rootRect.left, zoomLevel);
-        resultRect.bottom = domUtils.adaptRangeDifferenceToZoomLevel(rect.bottom - rootRect.top, zoomLevel);
-        resultRect.right = domUtils.adaptRangeDifferenceToZoomLevel(rect.right - rootRect.left, zoomLevel);
-        resultRect.width = domUtils.adaptRangeDifferenceToZoomLevel(rect.width, zoomLevel);
-        resultRect.height = domUtils.adaptRangeDifferenceToZoomLevel(rect.height, zoomLevel);
-
-        return resultRect;
-    }
-
-    /**
      * Returns true if the supplied range has 1 or more visible client rectangles.
      * A range might not be visible if it:
      * - contains only hidden nodes
@@ -529,7 +507,9 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
      *    width are non-zero), otherwise returns false
      */
     function repositionOverlays(selectedRange) {
-        var extremes = getExtremeRanges(selectedRange),
+        var rootRect = /**@type{!ClientRect}*/(domUtils.getBoundingClientRect(sizer)),
+            zoomLevel = zoomHelper.getZoomLevel(),
+            extremes = getExtremeRanges(selectedRange),
             firstRange,
             lastRange,
             fillerRange,
@@ -548,14 +528,14 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
             lastRange = extremes.lastRange;
             fillerRange = extremes.fillerRange;
 
-            firstRect = translateRect(getCollapsedRectOfTextRange(firstRange, false));
-            lastRect = translateRect(getCollapsedRectOfTextRange(lastRange, true));
+            firstRect = domUtils.translateRect(getCollapsedRectOfTextRange(firstRange, false), rootRect, zoomLevel);
+            lastRect = domUtils.translateRect(getCollapsedRectOfTextRange(lastRange, true), rootRect, zoomLevel);
             fillerRect = getFillerRect(fillerRange);
 
             if (!fillerRect) {
                 fillerRect = getBoundingRect(firstRect, lastRect);
             } else {
-                fillerRect = translateRect(fillerRect);
+                fillerRect = domUtils.translateRect(fillerRect, rootRect, zoomLevel);
             }
 
             // These are the absolute bounding left, right, top, and bottom coordinates of the

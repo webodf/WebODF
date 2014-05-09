@@ -233,20 +233,15 @@ cursor|anchor {
 }
 
 cursor|cursor {
-    display: inline;
-    width: 0;
-    height: 1em;
-    /* making the position relative enables the avatar to use
-       the cursor as reference for its absolute position */
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
+    display: none;
 }
 
 .webodf-caretOverlay {
     position: absolute;
     top: 5%; /* push down the caret; 0px can do the job, 5% looks better, 10% is a bit over */
     height: 1em;
+    margin-left: -1px;
+    z-index: 10;
 }
 
 .webodf-caretOverlay .caret {
@@ -330,14 +325,6 @@ cursor|cursor[cursor|composing="true"] {
     display: inline-block;
     width: auto;
     height: inherit;
-}
-
-cursor|cursor[cursor|composing="true"] .webodf-caretOverlay {
-    /* during composition, the caret should be pushed along by the composition text, inline with the text */
-    position: relative;
-    /* as it is now part of an inline-block, it will no longer need correct to top or height values to align properly */
-    height: auto !important;
-    top: auto !important;
 }
 
 editinfo|editinfo {

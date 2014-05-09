@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global core, gui, ops, runtime, Node*/
+/*global core, gui, odf, ops, runtime, Node*/
 
 
 /**
@@ -60,10 +60,10 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         caretElement,
         /**@type{!gui.Avatar}*/
         avatar,
-        /**@type{!Element}*/
-        cursorNode,
         /**@type{?Element}*/
         overlayElement,
+        canvas = cursor.getDocument().getCanvas(),
+        odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         /**@type{!core.ScheduledTask}*/
         redrawTask,
@@ -132,7 +132,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {!number}
      */
     function verticalOverlap(cursorNode, rangeRect) {
-        var cursorRect = cursorNode.getBoundingClientRect(),
+        var cursorRect = domUtils.getBoundingClientRect(cursorNode),
             intersectTop = 0,
             intersectBottom = 0;
 
@@ -148,15 +148,21 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * Get the client rectangle for the nearest selection point to the caret.
      * This works on the assumption that the next or previous sibling is likely to
      * be a text node that will provide an accurate rectangle for the caret's desired
-     * height and vertical position.
-     * @return {?ClientRect}
+     * position. The horizontal position of the caret is specified in the "right" property
+     * as a caret generally appears to the right of the character or object is represents.
+     *
+     * @return {!{height: !number, top: !number, right: !number}}
      */
     function getSelectionRect() {
         var range = cursor.getSelectedRange().cloneRange(),
             node = cursor.getNode(),
+            caretRectangle,
             nextRectangle,
-            selectionRectangle = null,
-            nodeLength;
+            selectionRectangle,
+            nodeLength,
+            paragraph,
+            rootRect = /**@type{!ClientRect}*/(domUtils.getBoundingClientRect(canvas.getSizer())),
+            useLeftEdge = false;
 
         // TODO this might be able to use OdfUtils.scanLeft & scanRight behaviours to find the next odf element
         // By default, assume the selection height should reflect the height of the previousSibling's last client rect
@@ -185,11 +191,45 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
                 // line, rather than the line the cursor element is now actually on.
                 if (!selectionRectangle || verticalOverlap(node, nextRectangle) > verticalOverlap(node, selectionRectangle)) {
                     selectionRectangle = nextRectangle;
+                    useLeftEdge = true;
                 }
             }
         }
 
-        return selectionRectangle;
+        if (!selectionRectangle) {
+            // Handle the case where a cursor ends up inside an empty paragraph. There are no nearby text elements
+            // to get a rect from, so use the paragraph BCR instead, as it's better than nothing
+            paragraph = odfUtils.getParagraphElement(node);
+            if (paragraph) {
+                selectionRectangle = domUtils.getBoundingClientRect(paragraph);
+                useLeftEdge = true;
+            }
+        }
+
+        if (!selectionRectangle) {
+            // Finally, if there is still no selection rectangle, crawl up the DOM hierarchy the cursor node is in
+            // and try and find something visible to use. Less ideal than actually having a visible rect... better than
+            // crashing or hiding the caret entirely though :)
+            
+            runtime.log("WARN: No suitable client rectangle found for visual caret for " + cursor.getMemberId());
+            // TODO are the better fallbacks than this?
+            while (node) {
+                if (/**@type{!Element}*/(node).getClientRects().length > 0) {
+                    selectionRectangle = domUtils.getBoundingClientRect(node);
+                    useLeftEdge = true;
+                    break;
+                }
+                node = node.parentNode;
+            }
+        }
+
+        selectionRectangle = domUtils.translateRect(/**@type{!ClientRect}*/(selectionRectangle), rootRect, canvas.getZoomLevel());
+        caretRectangle = {
+            top: selectionRectangle.top,
+            height: selectionRectangle.height,
+            right: useLeftEdge ? selectionRectangle.left : selectionRectangle.right
+        };
+        return caretRectangle;
     }
 
     /**
@@ -206,43 +246,23 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     function updateOverlayHeightAndPosition() {
         var selectionRect = getSelectionRect(),
-            canvas = /**@type{!odf.OdfCanvas}*/(cursor.getDocument().getCanvas()),
-            zoomLevel = canvas.getZoomLevel(),
-            rootRect = domUtils.getBoundingClientRect(canvas.getSizer()),
-            overlayRect,
             caretStyle;
 
-        if (selectionRect) {
-            // Reset the top back to 0 so that the new client rect calculations are simple
-            // If this isn't done, the existing span's top setting would need to be taken into
-            // account (and converted if not in pixels) when calculating the new top value
-            caretOverlay.style.top = "0";
-            overlayRect = domUtils.getBoundingClientRect(caretOverlay);
-
-            if (selectionRect.height < MIN_OVERLAY_HEIGHT_PX) {
-                // ClientRect's are read-only, so a whole new object is necessary to modify these values
-                selectionRect = {
-                    top: selectionRect.top - ((MIN_OVERLAY_HEIGHT_PX - selectionRect.height) / 2),
-                    height: MIN_OVERLAY_HEIGHT_PX
-                };
-            }
-            caretOverlay.style.height = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.height, zoomLevel) + 'px';
-            caretOverlay.style.top = domUtils.adaptRangeDifferenceToZoomLevel(selectionRect.top - overlayRect.top, zoomLevel) + 'px';
-        } else {
-            // fallback to a relatively safe set of values
-            // This can happen if the caret is not currently visible, or is in the middle
-            // of a collection of nodes that have no client rects. In this case, the caret
-            // will fall back to the defaults defined in webodf.css
-            caretOverlay.style.removeProperty("height");
-            caretOverlay.style.removeProperty("top");
+        if (selectionRect.height < MIN_OVERLAY_HEIGHT_PX) {
+            // ClientRect's are read-only, so a whole new object is necessary to modify these values
+            selectionRect = {
+                top: selectionRect.top - ((MIN_OVERLAY_HEIGHT_PX - selectionRect.height) / 2),
+                height: MIN_OVERLAY_HEIGHT_PX,
+                right: selectionRect.right
+            };
         }
+        caretOverlay.style.height = selectionRect.height + "px";
+        caretOverlay.style.top = selectionRect.top + "px";
+        caretOverlay.style.left = selectionRect.right + "px";
 
         // Update the overlay element
         if (overlayElement) {
             caretStyle = runtime.getWindow().getComputedStyle(caretElement, null);
-            overlayRect = domUtils.getBoundingClientRect(caretOverlay);
-            overlayElement.style.bottom = domUtils.adaptRangeDifferenceToZoomLevel(rootRect.bottom - overlayRect.bottom, zoomLevel) + 'px';
-            overlayElement.style.left = domUtils.adaptRangeDifferenceToZoomLevel(overlayRect.right - rootRect.left, zoomLevel) + 'px';
             if (caretStyle.font) {
                 overlayElement.style.font = caretStyle.font;
             } else {
@@ -504,6 +524,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     this.setOverlayElement  = function (element) {
         overlayElement = element;
+        caretOverlay.appendChild(element);
         shouldUpdateCaretSize = true;
         redrawTask.trigger();
     };
@@ -525,7 +546,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {undefined}
      */
     function destroy(callback) {
-        cursorNode.removeChild(caretOverlay);
+        canvas.getSizer().removeChild(caretOverlay);
         callback();
     }
 
@@ -539,8 +560,11 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     };
 
     function init() {
-        var dom = cursor.getDocument().getDOMDocument();
-        caretOverlay = /**@type{!HTMLElement}*/(dom.createElement("span"));
+        var dom = cursor.getDocument().getDOMDocument(),
+            editinfons = "urn:webodf:names:editinfo";
+
+        caretOverlay = /**@type{!HTMLElement}*/(dom.createElement("div"));
+        caretOverlay.setAttributeNS(editinfons, "editinfo:memberid", cursor.getMemberId());
         caretOverlay.className = "webodf-caretOverlay";
 
         caretElement = /**@type{!HTMLElement}*/(dom.createElement("div"));
@@ -549,8 +573,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
 
         avatar = new gui.Avatar(caretOverlay, avatarInitiallyVisible);
 
-        cursorNode = cursor.getNode();
-        cursorNode.appendChild(caretOverlay);
+        canvas.getSizer().appendChild(caretOverlay);
 
         redrawTask = core.Task.createRedrawTask(updateCaret);
         blinkTask = core.Task.createTimeoutTask(blinkCaret, BLINK_PERIOD_MS);
