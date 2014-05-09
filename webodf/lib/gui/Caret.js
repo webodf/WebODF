@@ -164,62 +164,69 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             rootRect = /**@type{!ClientRect}*/(domUtils.getBoundingClientRect(canvas.getSizer())),
             useLeftEdge = false;
 
-        // TODO this might be able to use OdfUtils.scanLeft & scanRight behaviours to find the next odf element
-        // By default, assume the selection height should reflect the height of the previousSibling's last client rect
-        // This means if the cursor is next to a text node, the client rect will be the dimensions of the text block
-        if (node.previousSibling) {
-            nodeLength = length(node.previousSibling);
-            range.setStart(node.previousSibling, nodeLength > 0 ? nodeLength - 1 : 0);
-            range.setEnd(node.previousSibling, nodeLength);
-            nextRectangle = range.getBoundingClientRect();
-            if (nextRectangle && nextRectangle.height) {
-                selectionRectangle = nextRectangle;
-            }
-        }
-        // Under some circumstances (either no previous sibling, or whitespace wrapping) the client rect of the next
-        // sibling will actually be a more accurate visual representation.
-        if (node.nextSibling) {
-            range.setStart(node.nextSibling, 0);
-            range.setEnd(node.nextSibling, length(node.nextSibling) > 0 ? 1 : 0);
-            nextRectangle = range.getBoundingClientRect();
-            if (nextRectangle && nextRectangle.height) {
-                // The nextSibling's rectangle should take precedence if
-                // 1. There is no previousSibling
-                // or 2. The nextSibling's rectangle has more vertical overlap with the cursor node's bounding rectangle
-                // Check #2 is specifically required to handling whitespace wrapping logic. Without this check,
-                // when a whitespace block is wrapped, the cursor tends to jump to the vertical alignment of the previous
-                // line, rather than the line the cursor element is now actually on.
-                if (!selectionRectangle || verticalOverlap(node, nextRectangle) > verticalOverlap(node, selectionRectangle)) {
+        if (node.getClientRects().length > 0) {
+            // If the cursor node itself is visible, use that as the caret location.
+            // The most common reason for the cursor to be visible is because the user is entering some text
+            // via an IME
+            selectionRectangle = domUtils.getBoundingClientRect(node);
+        } else {
+            // TODO this might be able to use OdfUtils.scanLeft & scanRight behaviours to find the next odf element
+            // By default, assume the selection height should reflect the height of the previousSibling's last client rect
+            // This means if the cursor is next to a text node, the client rect will be the dimensions of the text block
+            if (node.previousSibling) {
+                nodeLength = length(node.previousSibling);
+                range.setStart(node.previousSibling, nodeLength > 0 ? nodeLength - 1 : 0);
+                range.setEnd(node.previousSibling, nodeLength);
+                nextRectangle = range.getBoundingClientRect();
+                if (nextRectangle && nextRectangle.height) {
                     selectionRectangle = nextRectangle;
+                }
+            }
+            // Under some circumstances (either no previous sibling, or whitespace wrapping) the client rect of the next
+            // sibling will actually be a more accurate visual representation.
+            if (node.nextSibling) {
+                range.setStart(node.nextSibling, 0);
+                range.setEnd(node.nextSibling, length(node.nextSibling) > 0 ? 1 : 0);
+                nextRectangle = range.getBoundingClientRect();
+                if (nextRectangle && nextRectangle.height) {
+                    // The nextSibling's rectangle should take precedence if
+                    // 1. There is no previousSibling
+                    // or 2. The nextSibling's rectangle has more vertical overlap with the cursor node's bounding rectangle
+                    // Check #2 is specifically required to handling whitespace wrapping logic. Without this check,
+                    // when a whitespace block is wrapped, the cursor tends to jump to the vertical alignment of the previous
+                    // line, rather than the line the cursor element is now actually on.
+                    if (!selectionRectangle || verticalOverlap(node, nextRectangle) > verticalOverlap(node, selectionRectangle)) {
+                        selectionRectangle = nextRectangle;
+                        useLeftEdge = true;
+                    }
+                }
+            }
+
+            if (!selectionRectangle) {
+                // Handle the case where a cursor ends up inside an empty paragraph. There are no nearby text elements
+                // to get a rect from, so use the paragraph BCR instead, as it's better than nothing
+                paragraph = odfUtils.getParagraphElement(node);
+                if (paragraph) {
+                    selectionRectangle = domUtils.getBoundingClientRect(paragraph);
                     useLeftEdge = true;
                 }
             }
-        }
 
-        if (!selectionRectangle) {
-            // Handle the case where a cursor ends up inside an empty paragraph. There are no nearby text elements
-            // to get a rect from, so use the paragraph BCR instead, as it's better than nothing
-            paragraph = odfUtils.getParagraphElement(node);
-            if (paragraph) {
-                selectionRectangle = domUtils.getBoundingClientRect(paragraph);
-                useLeftEdge = true;
-            }
-        }
+            if (!selectionRectangle) {
+                // Finally, if there is still no selection rectangle, crawl up the DOM hierarchy the cursor node is in
+                // and try and find something visible to use. Less ideal than actually having a visible rect... better than
+                // crashing or hiding the caret entirely though :)
 
-        if (!selectionRectangle) {
-            // Finally, if there is still no selection rectangle, crawl up the DOM hierarchy the cursor node is in
-            // and try and find something visible to use. Less ideal than actually having a visible rect... better than
-            // crashing or hiding the caret entirely though :)
-            
-            runtime.log("WARN: No suitable client rectangle found for visual caret for " + cursor.getMemberId());
-            // TODO are the better fallbacks than this?
-            while (node) {
-                if (/**@type{!Element}*/(node).getClientRects().length > 0) {
-                    selectionRectangle = domUtils.getBoundingClientRect(node);
-                    useLeftEdge = true;
-                    break;
+                runtime.log("WARN: No suitable client rectangle found for visual caret for " + cursor.getMemberId());
+                // TODO are the better fallbacks than this?
+                while (node) {
+                    if (/**@type{!Element}*/(node).getClientRects().length > 0) {
+                        selectionRectangle = domUtils.getBoundingClientRect(node);
+                        useLeftEdge = true;
+                        break;
+                    }
+                    node = node.parentNode;
                 }
-                node = node.parentNode;
             }
         }
 

@@ -302,6 +302,8 @@ cursor|cursor {
     height: auto;
     display: block;
     position: absolute;
+    bottom: 0;
+    right: 0;
     width: 1px;
     outline: none;
     opacity: 0;

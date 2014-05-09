@@ -83,6 +83,9 @@ gui.CaretManager = function CaretManager(sessionController) {
         if (caret) {
             /*jslint emptyblock:true*/
             caret.destroy(function() {});
+            if (memberId === sessionController.getInputMemberId()) {
+                sessionController.getEventManager().unsubscribe("compositionupdate", caret.handleUpdate);
+            }
             /*jslint emptyblock:false*/
             delete carets[memberId];
         }
@@ -196,6 +199,7 @@ gui.CaretManager = function CaretManager(sessionController) {
 
             // wire up the cursor update to caret visibility update
             cursor.subscribe(ops.OdtCursor.signalCursorUpdated, scheduleCaretVisibilityCheck);
+            eventManager.subscribe("compositionupdate", caret.handleUpdate);
             // Add event trap as an overlay element to the caret
             caret.setOverlayElement(eventManager.getEventTrap());
         } else {
