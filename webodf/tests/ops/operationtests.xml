@@ -1688,7 +1688,7 @@
   </ops>
   <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span> <text:s> </text:s>ef</text:span></text:p></office:text></after>
  </test>
- <test name="CacheBugCheck_EnsureProperBookmarkMaintenance" isFailing="true">
+ <test name="CacheBugCheck_EnsureProperBookmarkMaintenance">
   <before>
    <office:text><text:p/><text:p/></office:text>
   </before>
@@ -1717,7 +1717,7 @@
    <office:text><text:p>DEF</text:p><text:p><c:cursor c:memberId="Joe"/></text:p></office:text>.
   </after>
  </test>
- <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots" isFailing="true">
+ <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots">
   <!--- happened when simulating github issue #417 -->
   <before>
    <office:text><text:p/><text:p>ABCDEFGH</text:p><text:p>12345678</text:p></office:text>
