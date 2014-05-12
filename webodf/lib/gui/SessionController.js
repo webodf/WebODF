@@ -533,6 +533,7 @@ gui.SessionControllerOptions = function () {
          */
         function moveByMouseClickEvent(event) {
             var selection = mutableSelection(window.getSelection()),
+                isCollapsed = window.getSelection().isCollapsed,
                 position,
                 selectionRange,
                 rect,
@@ -556,11 +557,19 @@ gui.SessionControllerOptions = function () {
                 // Move the cursor to the next walkable position when clicking on the right side of an image
                 frameNode = /**@type{!Element}*/(selection.focusNode.parentNode);
                 rect = frameNode.getBoundingClientRect();
-                if (event.clientX > rect.right) {
+                if (event.clientX > rect.left) {
+                    // On OSX, right-clicking on an image at the end of a range selection will hit
+                    // this particular branch. The image should remain selected if the right-click occurs on top
+                    // of it as technically it's the same behaviour as right clicking on an existing text selection.
                     position = getNextWalkablePosition(frameNode);
                     if (position) {
-                        selection.anchorNode = selection.focusNode = position.container;
-                        selection.anchorOffset = selection.focusOffset = position.offset;
+                        selection.focusNode = position.container;
+                        selection.focusOffset = position.offset;
+                        if (isCollapsed) {
+                            // See above comment for the circumstances when the range might not be collapsed
+                            selection.anchorNode = selection.focusNode;
+                            selection.anchorOffset = selection.focusOffset;
+                        }
                     }
                 }
             } else if (odfUtils.isImage(selection.focusNode.firstChild) && selection.focusOffset === 1
@@ -568,8 +577,14 @@ gui.SessionControllerOptions = function () {
                 // When click on the right side of an image that has no text elements, non-FireFox browsers
                 // will return focusNode: frame, focusOffset: 1 as the selection. Since this is not a valid cursor
                 // position, move the cursor to the next walkable position after the frame node.
+
+                // To activate this branch (only applicable on OSX + Linux WebKit-derived browsers AFAIK):
+                // 1. With a paragraph containing some text followed by an inline image and no trailing text,
+                //    select from the start of paragraph to the end.
+                // 2. Now click once to the right hand side of the image. The cursor *should* jump to the right side
                 position = getNextWalkablePosition(selection.focusNode);
                 if (position) {
+                    // This should only ever be hit when the selection is intended to become collapsed
                     selection.anchorNode = selection.focusNode = position.container;
                     selection.anchorOffset = selection.focusOffset = position.offset;
                 }
@@ -624,15 +639,22 @@ gui.SessionControllerOptions = function () {
                 wasCollapsed,
                 frameNode,
                 pos;
+
             drawShadowCursorTask.processRequests(); // Resynchronise the shadow cursor before processing anything else
-            // We don't want to just select the image if it is a range selection hence ensure the selection is collapsed.
-            if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode) && window.getSelection().isCollapsed) {
-                selectionController.selectImage(/**@type{!Node}*/(target.parentNode));
-                eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (imageSelector.isSelectorElement(target)) {
-                eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
-            } else if (clickStartedWithinCanvas) {
-                if (isMouseMoved) {
+
+            if (clickStartedWithinCanvas) {
+                // Each mouse down event should only ever result in a single mouse click being processed.
+                // This is to cope with there being no hard rules about whether a contextmenu
+                // should be followed by a mouseup as well according to the HTML5 specs.
+                // See http://www.whatwg.org/specs/web-apps/current-work/multipage/interactive-elements.html#context-menus
+
+                // We don't want to just select the image if it is a range selection hence ensure the selection is collapsed.
+                if (odfUtils.isImage(target) && odfUtils.isCharacterFrame(target.parentNode) && window.getSelection().isCollapsed) {
+                    selectionController.selectImage(/**@type{!Node}*/(target.parentNode));
+                    eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
+                } else if (imageSelector.isSelectorElement(target)) {
+                    eventManager.focus(); // Mouse clicks often cause focus to shift. Recapture this straight away
+                } else if (isMouseMoved) {
                     range = shadowCursor.getSelectedRange();
                     wasCollapsed = range.collapsed;
                     // Resets the endContainer and endOffset when a forward selection end up on an image;
@@ -667,11 +689,11 @@ gui.SessionControllerOptions = function () {
                         }, 0);
                     }
                 }
+                // TODO assumes the mouseup/contextmenu is the same button as the mousedown that initialized the clickCount
+                clickCount = 0;
+                clickStartedWithinCanvas = false;
+                isMouseMoved = false;
             }
-            // TODO assumes the mouseup/contextmenu is the same button as the mousedown that initialized the clickCount
-            clickCount = 0;
-            clickStartedWithinCanvas = false;
-            isMouseMoved = false;
         }
 
         /**
