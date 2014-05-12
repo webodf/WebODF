@@ -1717,7 +1717,7 @@
    <office:text><text:p>DEF</text:p><text:p><c:cursor c:memberId="Joe"/></text:p></office:text>.
   </after>
  </test>
- <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots">
+ <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots" isFailing="true">
   <!--- happened when simulating github issue #417 -->
   <before>
    <office:text><text:p/><text:p>ABCDEFGH</text:p><text:p>12345678</text:p></office:text>

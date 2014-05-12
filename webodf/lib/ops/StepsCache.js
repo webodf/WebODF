@@ -188,7 +188,9 @@
                 previousBookmark,
                 nextBookmark,
                 documentPosition,
-                loopCheck = new core.LoopWatchDog(0, 100000);
+                loopCheck = new core.LoopWatchDog(0, 100000),
+                /**@type{!Object.<!string, !string>}*/
+                stepToDomPointNodeIds = {};
 
             while (bookmark) {
                 loopCheck.check();
@@ -232,6 +234,19 @@
 
                 bookmark = bookmark.nextBookmark;
             }
+
+            Object.keys(stepToDomPoint).forEach(function(step) {
+                var domPointBookmark = stepToDomPoint[step];
+                if (lastUndamagedCacheStep === undefined || step <= lastUndamagedCacheStep) {
+                    runtime.assert(domPointBookmark.steps <= step, "Bookmark step of " + domPointBookmark.steps +
+                        " exceeds cached step lookup for " + step + " @" + inspectBookmarks(domPointBookmark));
+                }
+
+                runtime.assert(stepToDomPointNodeIds.hasOwnProperty(domPointBookmark.nodeId) === false,
+                        "Bookmark " + inspectBookmarks(domPointBookmark) + " appears twice in cached step lookup at steps " +
+                        stepToDomPointNodeIds[domPointBookmark.nodeId] + " and " + step);
+                stepToDomPointNodeIds[domPointBookmark.nodeId] = step;
+            });
         }
 
         /**
@@ -345,6 +360,9 @@
                 loopGuard.check();
                 cachePoint = cachePoint.nextBookmark;
             }
+            runtime.assert(steps === -1 || cachePoint.steps <= steps,
+                    "Bookmark @" + inspectBookmarks(cachePoint) + " at step " + cachePoint.steps +
+                    " exceeds requested step of " + steps);
             return cachePoint;
         }
 
