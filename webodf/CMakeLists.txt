@@ -158,6 +158,10 @@ if (Java_JAVA_EXECUTABLE)
           compiled.js-target
   )
 
+# rhino tests are disabled for now: rhino runtime lacks (wrappers for)
+# essential necessities such as Uint8Array, Node and NodeFilter
+# RHINOTEST is only defined here and hence undefined to disable rhinotest
+if (RHINOTEST)
   add_custom_target(rhinotest
       COMMAND ${Java_JAVA_EXECUTABLE} -jar ${RHINO}
           -debug lib/runtime.js tests/tests.js
@@ -171,6 +175,8 @@ if (Java_JAVA_EXECUTABLE)
       DEPENDS Rhino simplecompiled.js-target
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
+endif (RHINOTEST)
+
   add_custom_command(
       OUTPUT docs/index.html
        COMMAND ${Java_JAVA_EXECUTABLE}
