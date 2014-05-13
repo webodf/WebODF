@@ -2,14 +2,14 @@
 
 #include "nam.h"
 #include "nativeio.h"
-#include <QtCore/QFileInfo>
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QTimer>
-#include <QtCore/QCoreApplication>
-#include <QtGui/QPainter>
-#include <QtGui/QPrinter>
-#include <QtWebKit/QWebFrame>
-#include <QtCore/QDebug>
+#include <QFileInfo>
+#include <QTemporaryFile>
+#include <QTimer>
+#include <QCoreApplication>
+#include <QPainter>
+#include <QPrinter>
+#include <QWebFrame>
+#include <QDebug>
 
 QByteArray getRuntimeBindings() {
     return
@@ -94,7 +94,7 @@ PageRunner::PageRunner(const QStringList& args)
         html = "<html>"
                 "<head><title></title>"
                 "<script>var arguments=[" + html + "];</script>"
-                "<script src=\"" + arguments[0].toUtf8() + "\"></script>";
+                "<script src=\"" + QUrl::fromLocalFile(arguments[0]).toEncoded() + "\"></script>";
         // add runtime modification
         html += "<script>//<![CDATA[\n" + getRuntimeBindings() +
              "if (typeof(runtime) !== 'undefined' && typeof(nativeio) !== 'undefined') {\n"
@@ -119,7 +119,7 @@ PageRunner::PageRunner(const QStringList& args)
         QUrl absurl;
         if (url.isRelative()) {
             absurl = QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absoluteFilePath());
-            absurl.setQueryItems(url.queryItems());
+            absurl.setQuery(url.query());
             absurl.setFragment(url.fragment());
         } else {
             absurl = url;

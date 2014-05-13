@@ -77,8 +77,26 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
     this.tearDown = function () {
         t = {};
     };
+    /**
+     * @param {!string} xml
+     * @return {!Document}
+     */
+    function parseXML(xml) {
+        // Workaround:
+        // libxml2 or something else used by QtWebKit on the CI system (Ubuntu 10.04)
+        // during execution of DOMParser.parseFromString seems to append
+        // things to the passed xml string if it does not have a certain length,
+        // resulting in the error "Extra content at the end of the document"
+        // So prefixing with <?xml?> to reach past the critical length
+        // Remove once CI is updated to something more recent than 2010
+        return /** @type {!Document}*/(runtime.parseXML("<?xml version='1.0'      encoding='UTF-8'?>" + xml));
+    }
+    /**
+     * @param {!string} xml
+     * @return {undefined}
+     */
     function createWalker(xml) {
-        t.doc = runtime.parseXML(xml);
+        t.doc = parseXML(xml);
         t.iterator = new core.PositionIterator(t.doc.documentElement, 0,
             filter);
     }
@@ -284,7 +302,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         var i, xml, n;
         for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
-            t.doc = runtime.parseXML(xml.x);
+            t.doc = parseXML(xml.x);
             insertEmptyTextNodes(t.doc);
             t.iterator = new core.PositionIterator(t.doc.documentElement, 0,
                     filter);
@@ -305,7 +323,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         var i, xml, n;
         for (i = 0; i < testXMLs.length; i += 1) {
             xml = testXMLs[i];
-            t.doc = runtime.parseXML(xml.x);
+            t.doc = parseXML(xml.x);
             splitTextNodes(t.doc);
             t.iterator = new core.PositionIterator(t.doc.documentElement, 0,
                     filter);

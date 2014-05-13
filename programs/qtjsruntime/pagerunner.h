@@ -1,9 +1,9 @@
 #ifndef PAGERUNNER_H
 #define PAGERUNNER_H
 
-#include <QtCore/QTextStream>
-#include <QtCore/QTime>
-#include <QtWebKit/QWebPage>
+#include <QTextStream>
+#include <QTime>
+#include <QWebPage>
 
 class NAM;
 class NativeIO;
