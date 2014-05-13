@@ -1,5 +1,5 @@
 @namespace cursor url(urn:webodf:names:cursor);
 
-span.caret {
+.caret {
     opacity: 0 !important;
 }
