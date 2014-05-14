@@ -208,6 +208,35 @@ if (NOT APPLE)
     add_custom_target(instrumented DEPENDS instrumented/index.html)
 endif(NOT APPLE)
 
+
+add_custom_command(
+    OUTPUT ${WEBODFJS_DIR}
+
+    # clear working dir
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFJS_DIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBODFJS_DIR}
+
+    # API docs
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/docs ${WEBODFJS_DIR}/docs
+    # webodf.js
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/webodf.js ${WEBODFJS_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js ${WEBODFJS_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${WEBODFJS_DIR}
+
+    # zip using javascript code running in Node.js
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
+        ${WEBODFJS_DIR}
+        ${CMAKE_BINARY_DIR}/${WEBODFJS_ZIP}
+
+    DEPENDS
+        ${TOOLS_DIR}/zipdir.js
+        doc
+        webodf.js-target
+        webodf-debug.js-target
+        ${LIBJSLICENSEFILE}
+)
+add_custom_target(webodf.js.zip-target DEPENDS ${WEBODFJS_DIR})
+
 add_subdirectory(tests)
 
 # vim:expandtab
