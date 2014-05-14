@@ -1169,6 +1169,7 @@
 
             element.style.width = Math.round(zoomLevel * sizer.offsetWidth) + "px";
             element.style.height = Math.round(zoomLevel * sizer.offsetHeight) + "px";
+            element.style.display = "inline-block";
         }
 
         /**
@@ -1297,7 +1298,6 @@
                 clear(element);
 
                 // setup
-                element.style.display = "inline-block";
                 var odfnode = odfcontainer.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
 
