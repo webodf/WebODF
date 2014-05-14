@@ -151,8 +151,10 @@ if(WIN32)
     add_custom_target(NodeJS DEPENDS "${NODE}")
 else(WIN32)
     SET(NODEJS_VERSION 0.0.0)
+    # Debian uses nodejs as binary name, due to conflict with node package (Amateur Packet Radio Node Program)
+    # https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
     FIND_PROGRAM(NODEJS_EXECUTABLE
-        NAMES node
+        NAMES nodejs node
         PATHS ""
         DOC "Path to Node.js executable"
     )
