@@ -49,17 +49,16 @@ html, html > body, #mainContainer {
     -webkit-transform-origin: top center;
     -moz-transform-origin: top center;
     -o-transform-origin: top center;
-    overflow: visible;
-}
 
-/* Add shadow to the sizer and not the canvas,
- * so that it will follow the smooth zooming
- * of the slider and not have to be updated
- * every time a gesture ends
- */
-.webodfeditor-canvas > div {
     box-shadow: 0px 0px 20px #aaa;
     border: 1px solid #ccc;
+
+    /*
+     * Hide the canvas overflow because otherwise the CSS-scaled 'sizer' child
+     * of the canvas will still advertise the original size in Firefox, causing
+     * strange scrollbar behavior.
+     */
+    overflow: hidden;
 }
 
 .webodfeditor-members {
