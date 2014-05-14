@@ -336,10 +336,6 @@ add_subdirectory(webodf)
 add_subdirectory(programs)
 
 
-############
-## Package
-############
-
 set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
 set(WEBODFZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
 add_custom_command(
@@ -369,7 +365,7 @@ add_custom_command(
         editor-compiled.js-target
         html-benchmark
         viewer-minimized.js-target
-        firefoxextension-target
+        product-firefoxextension
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(zip DEPENDS ${WEBODFZIP})

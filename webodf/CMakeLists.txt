@@ -235,7 +235,7 @@ add_custom_command(
         webodf-debug.js-target
         ${LIBJSLICENSEFILE}
 )
-add_custom_target(webodf.js.zip-target DEPENDS ${WEBODFJS_DIR})
+add_custom_target(product-library DEPENDS ${WEBODFJS_DIR})
 
 add_subdirectory(tests)
 

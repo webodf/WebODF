@@ -67,4 +67,5 @@ add_custom_command(
         webodf.js-target
         viewer-minimized.js-target
 )
-add_custom_target(viewerbuilddir-target DEPENDS ${VIEWERBUILDDIR})
+add_custom_target(viewerbuilddir-target DEPENDS ${VIEWERBUILDDIR}) # remove once ViewerJS build uses product-viewerjsdir as target
+add_custom_target(product-viewerjsdir DEPENDS viewerbuilddir-target)
