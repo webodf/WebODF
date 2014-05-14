@@ -132,7 +132,7 @@ ExternalProject_Add(
 )
 set(JSDOCDIR ${CMAKE_BINARY_DIR}/JsDoc-prefix/src/JsDoc/jsdoc-toolkit)
 
-# Node.JS
+# Node.js
 set(NODEVERSION 0.10.20)
 if(WIN32)
     # On windows, it is significantly faster and more reliable to download
@@ -151,22 +151,24 @@ if(WIN32)
     add_custom_target(NodeJS DEPENDS "${NODE}")
 else(WIN32)
     SET(NODEJS_VERSION 0.0.0)
+    # Debian uses nodejs as binary name, due to conflict with node package (Amateur Packet Radio Node Program)
+    # https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
     FIND_PROGRAM(NODEJS_EXECUTABLE
-        NAMES node
+        NAMES nodejs node
         PATHS ""
-        DOC "Path to NodeJS executable"
+        DOC "Path to Node.js executable"
     )
     IF(NODEJS_EXECUTABLE)
         EXEC_PROGRAM(${NODEJS_EXECUTABLE} ARGS --version OUTPUT_VARIABLE NODEJS_VERSION)
         string(SUBSTRING ${NODEJS_VERSION} 1 -1 NODEJS_VERSION)
     ENDIF(NODEJS_EXECUTABLE)
-    MESSAGE (STATUS "nodejs found: " ${NODEJS_EXECUTABLE} / ${NODEJS_VERSION})
+    MESSAGE (STATUS "Node.js found: " ${NODEJS_EXECUTABLE} / ${NODEJS_VERSION})
 
     # fail if NodeJS version requirement is not satisfied
     if (${NODEJS_VERSION} VERSION_LESS ${REQUIRED_NODEJS_VERSION})
-        message(FATAL_ERROR "Node.JS is required in version " ${REQUIRED_NODEJS_VERSION}  " or later")
+        message(FATAL_ERROR "Node.js is required in version " ${REQUIRED_NODEJS_VERSION}  " or later")
     else()
-        message(STATUS "good Node.JS found: " ${NODEJS_VERSION} " (" ${REQUIRED_NODEJS_VERSION} " required.)")
+        message(STATUS "good Node.js found: " ${NODEJS_VERSION} " (" ${REQUIRED_NODEJS_VERSION} " required.)")
     endif()
     set(NODE ${NODEJS_EXECUTABLE})
     add_custom_target(NodeJS DEPENDS "${NODEJS_EXECUTABLE}")
@@ -353,7 +355,7 @@ add_custom_command(
     # firefox
     COMMAND ${CMAKE_COMMAND} -E copy ${FIREFOX_EXTENSION_ODFVIEWER} ${WEBODFZIPDIR}
 
-    # zip using javascript code running in node.js
+    # zip using javascript code running in Node.js
     COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
         ${WEBODFZIPDIR}
         ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
