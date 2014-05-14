@@ -457,6 +457,7 @@ editinfo|editinfo {
     position: absolute;
     display: inline;
     z-index: 10;
+    top: 0;
 }
 .annotationNote > office|annotation {
     display: block;
@@ -466,6 +467,7 @@ editinfo|editinfo {
 .annotationConnector {
     position: absolute;
     display: inline;
+    top: 0;
     z-index: 2;
     border-top: 1px dashed brown;
 }
