@@ -87,6 +87,8 @@
             maxZoom = 4.0,
             /**@type{!HTMLElement}*/
             offsetParent,
+            /**@type{!HTMLElement}*/
+            parentElement,
             events = new core.EventNotifier([gui.ZoomHelper.signalZoomChanged]),
             /**@const*/
             gestures = {
@@ -104,7 +106,9 @@
              * custom scrollbars (because webkit hides them).
              * @type{!boolean}
              */
-            requiresCustomScrollBars = runtime.getWindow().hasOwnProperty('ontouchstart');
+            requiresCustomScrollBars = runtime.getWindow().hasOwnProperty('ontouchstart'),
+            /**@type{?string}*/
+            parentOverflow = "";
 
         /**
          * Apply a 3D or 2D CSS transform with the given
@@ -218,6 +222,8 @@
             applyCSSTransform(-panPoint.x, -panPoint.y, zoom, true);
             offsetParent.scrollLeft = 0;
             offsetParent.scrollTop = 0;
+            parentOverflow = parentElement.style.overflow;
+            parentElement.style.overflow = "visible";
             enableScrollBars(false);
         }
 
@@ -232,6 +238,7 @@
             applyCSSTransform(0, 0, zoom, true);
             offsetParent.scrollLeft = panPoint.x;
             offsetParent.scrollTop = panPoint.y;
+            parentElement.style.overflow = parentOverflow || "";
             enableScrollBars(true);
         }
 
@@ -499,6 +506,7 @@
             unregisterGestureListeners();
             zoomableElement = element;
             offsetParent = /**@type{!HTMLElement}*/(zoomableElement.offsetParent);
+            parentElement = /**@type{!HTMLElement}*/(zoomableElement.parentElement);
             // Write out the current transform to the new element.
             applyDetailedTransform();
             registerGestureListeners();
