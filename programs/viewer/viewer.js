@@ -266,6 +266,8 @@ function Viewer(viewerPlugin) {
                 canvasContainer.style.padding = 0;
                 // No scrollbar should be shown for slideshows
                 canvasContainer.style.overflow = "hidden";
+                // Slideshow pages should be centered
+                canvasContainer.classList.add("slideshow");
                 // Show page nav controls only for presentations
                 pageSwitcher.style.visibility = 'visible';
             } else {
