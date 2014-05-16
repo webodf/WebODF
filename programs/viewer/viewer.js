@@ -262,8 +262,8 @@ function Viewer(viewerPlugin) {
 
             isSlideshow = viewerPlugin.isSlideshow();
             if (isSlideshow) {
-                // No padding for slideshows
-                canvasContainer.style.padding = 0;
+                // Slideshow pages should be centered
+                canvasContainer.classList.add("slideshow");
                 // Show page nav controls only for presentations
                 pageSwitcher.style.visibility = 'visible';
             } else {
@@ -374,7 +374,7 @@ function Viewer(viewerPlugin) {
         if (!presentationMode) {
             titlebar.style.display = toolbar.style.display = 'none';
             overlayCloseButton.style.display = 'block';
-            canvasContainer.className = 'presentationMode';
+            canvasContainer.classList.add('presentationMode');
             isSlideshow = true;
             canvasContainer.onmousedown = function (event) {
                 event.preventDefault();
@@ -394,7 +394,7 @@ function Viewer(viewerPlugin) {
         } else {
             titlebar.style.display = toolbar.style.display = 'block';
             overlayCloseButton.style.display = 'none';
-            canvasContainer.className = '';
+            canvasContainer.classList.remove('presentationMode');
             canvasContainer.onmouseup = function () {};
             canvasContainer.oncontextmenu = function () {};
             canvasContainer.onmousedown = function () {};
