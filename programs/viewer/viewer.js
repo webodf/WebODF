@@ -262,10 +262,6 @@ function Viewer(viewerPlugin) {
 
             isSlideshow = viewerPlugin.isSlideshow();
             if (isSlideshow) {
-                // No padding for slideshows
-                canvasContainer.style.padding = 0;
-                // No scrollbar should be shown for slideshows
-                canvasContainer.style.overflow = "hidden";
                 // Slideshow pages should be centered
                 canvasContainer.classList.add("slideshow");
                 // Show page nav controls only for presentations

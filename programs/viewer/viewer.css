@@ -563,6 +563,11 @@ html[dir='rtl'] .dropdownToolbarButton {
     background-image: url(images/texture.png);
 }
 
+#canvasContainer.slideshow {
+    padding: 0;
+    overflow: hidden;
+}
+
 #canvasContainer.slideshow > * {
     margin: auto;
     position: absolute;
