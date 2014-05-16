@@ -524,6 +524,7 @@ define("webodf/editor/Editor", [
                     annotationsEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
                      // undo manager is not yet integrated with collaboration
                     undoRedoEnabled = (! collabEditing),
+                    aboutEnabled = (! collabEditing),
                     closeCallback;
 
                 editorInstanceCounter += 1;
@@ -593,7 +594,8 @@ define("webodf/editor/Editor", [
                     imageInsertingEnabled: imageInsertingEnabled,
                     hyperlinkEditingEnabled: hyperlinkEditingEnabled,
                     annotationsEnabled: annotationsEnabled,
-                    undoRedoEnabled: undoRedoEnabled
+                    undoRedoEnabled: undoRedoEnabled,
+                    aboutEnabled: aboutEnabled
                 });
 
                 odfCanvas = new odf.OdfCanvas(canvasElement);
