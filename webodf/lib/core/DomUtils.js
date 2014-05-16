@@ -692,6 +692,29 @@
         this.adaptRangeDifferenceToZoomLevel = adaptRangeDifferenceToZoomLevel;
 
         /**
+         * Translate a given child client rectangle to be relative to the parent's rectangle.
+         * Adapt to the provided zoom level as per adaptRangeDifferenceToZoomLevel.
+         *
+         * IMPORTANT: due to browser quirks, any element bounding client rect used with this function
+         * MUST be retrieved using DomUtils.getBoundingClientRect.
+         *
+         * @param {!ClientRect|!Object.<!string, !number>} child
+         * @param {!ClientRect|!Object.<!string, !number>} parent
+         * @param {!number} zoomLevel
+         * @return {!ClientRect|{top: !number, left: !number,  bottom: !number, right: !number, width: !number, height: !number}}
+         */
+        this.translateRect = function(child, parent, zoomLevel) {
+            return {
+                top: adaptRangeDifferenceToZoomLevel(child.top - parent.top, zoomLevel),
+                left: adaptRangeDifferenceToZoomLevel(child.left - parent.left, zoomLevel),
+                bottom: adaptRangeDifferenceToZoomLevel(child.bottom - parent.top, zoomLevel),
+                right: adaptRangeDifferenceToZoomLevel(child.right - parent.left, zoomLevel),
+                width: adaptRangeDifferenceToZoomLevel(child.width, zoomLevel),
+                height: adaptRangeDifferenceToZoomLevel(child.height, zoomLevel)
+            };
+        };
+
+        /**
          * Get the bounding client rect for the specified node.
          * This function attempts to cope with various browser quirks, ideally
          * returning a rectangle that can be used in conjunction with rectangles

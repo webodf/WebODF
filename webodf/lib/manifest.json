@@ -62,8 +62,9 @@
         "core.Destroyable"
     ],
     "gui.Caret": [
+        "core.Async",
+        "core.Task",
         "gui.Avatar",
-        "odf.OdfCanvas",
         "ops.OdtCursor"
     ],
     "gui.CaretManager": [
