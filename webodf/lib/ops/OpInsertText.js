@@ -213,18 +213,7 @@ ops.OpInsertText = function OpInsertText() {
                 odtDocument.emit(ops.Document.signalCursorMoved, cursor);
             }
 
-            if (position > 0) {
-                // Necessary to match upgradeWhitespaces behaviour which searches the preceding positions as well
-                if (position > 1) {
-                    odtDocument.downgradeWhitespacesAtPosition(position - 2);
-                }
-                odtDocument.downgradeWhitespacesAtPosition(position - 1);
-            }
-            // Try and downgrade first position in the added text
             odtDocument.downgradeWhitespacesAtPosition(position);
-            // Try and downgrade last position in the added text
-            odtDocument.downgradeWhitespacesAtPosition(position + text.length - 1);
-            // Try and downgrade the next position just *after* the added text
             odtDocument.downgradeWhitespacesAtPosition(position + text.length);
 
             odtDocument.getOdfCanvas().refreshSize();

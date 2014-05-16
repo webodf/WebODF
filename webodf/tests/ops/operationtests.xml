@@ -744,7 +744,7 @@
   <ops>
    <op optype="RemoveText" position="2" length="1"/>
   </ops>
-  <after><office:text><text:p> a<text:s> </text:s><text:s> </text:s></text:p></office:text></after>
+  <after><office:text><text:p> a <text:s> </text:s></text:p></office:text></after>
  </test>
 
  <test name="InsertText_startOfAutomaticStyleSpanAtStartOfParagraph">
@@ -1652,7 +1652,7 @@
   </ops>
   <after><office:text><text:p><c:anchor c:memberId="Joe"/>AB<c:cursor c:memberId="Joe"/>C</text:p></office:text></after>
  </test>
- <test name="RemoveText_NearWhitespaceOverBoundary" isFailing="true">
+ <test name="RemoveText_NearWhitespaceOverBoundary">
   <before><office:text><text:p><text:span>abc <text:s> </text:s></text:span><text:span>def</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -1670,7 +1670,7 @@
   </ops>
   <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span>ef</text:span></text:p></office:text></after>
  </test>
- <test name="RemoveText_NearWhitespaceOverBoundary_3" isFailing="true">
+ <test name="RemoveText_NearWhitespaceOverBoundary_3">
   <before><office:text><text:p><text:span>abc </text:span><text:span>def</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>
@@ -1680,18 +1680,6 @@
   <after><office:text><text:p><text:span>abc <c:cursor c:memberId="Joe"/></text:span><text:span>ef</text:span></text:p></office:text></after>
  </test>
  <test name="RemoveText_NearWhitespaceOverBoundary_4">
-  <!-- This test has a problem with trailing whitespace not being correctly downgraded.
-       When the trailing spaces become correctly downgraded, this test can be removed and
-       the following will replace it -->
-  <before><office:text><text:p><text:span>abc</text:span><text:span>d <text:s> </text:s>ef</text:span></text:p></office:text></before>
-  <ops>
-   <op optype="AddCursor" memberid="Joe"/>
-   <op optype="MoveCursor" memberid="Joe" position="3" length="1"/>
-   <op optype="RemoveText" memberid="Joe" position="3" length="1"/>
-  </ops>
-  <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span><text:s> </text:s><text:s> </text:s>ef</text:span></text:p></office:text></after>
- </test>
- <test name="RemoveText_NearWhitespaceOverBoundary_4_Ideal" isFailing="true">
   <before><office:text><text:p><text:span>abc</text:span><text:span>d <text:s> </text:s>ef</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Joe"/>

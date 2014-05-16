@@ -50,6 +50,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     "use strict";
 
     var self = this,
+        /**@type{!odf.StepUtils}*/
+        stepUtils,
         /**@type{!odf.OdfUtils}*/
         odfUtils,
         /**@type{!core.DomUtils}*/
@@ -536,6 +538,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     function upgradeWhitespacesAtPosition(step) {
         var positionIterator = getIteratorAtPosition(step),
             stepIterator = new core.StepIterator(filter, positionIterator),
+            contentBounds,
             /**@type{?Node}*/
             container,
             offset,
@@ -546,25 +549,18 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         runtime.assert(stepIterator.isStep(), "positionIterator is not at a step (requested step: " + step + ")");
 
         do {
-            container = stepIterator.container();
-            offset = stepIterator.offset();
-            // A step is to the left of the corresponding text content according to the TextPositionFilter.
-            // If the container is not a text node, or is just before a text node, the content will be found in the
-            // node to the left of the current position.
-            if (container.nodeType !== Node.TEXT_NODE || offset === 0) {
-                container = positionIterator.leftNode();
-                offset = container && container.nodeType === Node.TEXT_NODE ? /**@type{!Text}*/(container).length : -1;
-            }
-
-            if (container
-                    && container.nodeType === Node.TEXT_NODE
-                    && offset > 0
-                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset - 1)) {
-                container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset - 1);
-                // Reset the iterator position to the same step it was just on, which was just to
-                // the left of a space
-                stepIterator.setPosition(container, container.childNodes.length);
-                stepIterator.roundToPreviousStep();
+            contentBounds = stepUtils.getContentBounds(stepIterator);
+            if (contentBounds) {
+                container = contentBounds.container;
+                offset = contentBounds.startOffset;
+                if (container.nodeType === Node.TEXT_NODE
+                    && odfUtils.isSignificantWhitespace(/**@type{!Text}*/(container), offset)) {
+                    container = upgradeWhitespaceToElement(/**@type{!Text}*/(container), offset);
+                    // Reset the iterator position to the same step it was just on, which was just to
+                    // the right of a space
+                    stepIterator.setPosition(container, container.childNodes.length);
+                    stepIterator.roundToPreviousStep();
+                }
             }
             stepsToUpgrade -= 1;
         } while (stepsToUpgrade > 0 && stepIterator.nextStep());
@@ -579,45 +575,57 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.upgradeWhitespacesAtPosition = upgradeWhitespacesAtPosition;
 
     /**
-     * Downgrades white space elements to normal spaces at the specified position if possible
-     * @param {!number} position
+     * Returns the maximum available offset for the specified node.
+     * @param {!Node} node
+     * @return {!number}
      */
-    this.downgradeWhitespacesAtPosition = function (position) {
-        var iterator = getIteratorAtPosition(position),
+    function maxOffset(node) {
+        return node.nodeType === Node.TEXT_NODE ? /**@type{!Text}*/(node).length : node.childNodes.length;
+    }
+
+    /**
+     * Downgrades white space elements to normal spaces at the specified step, and one step
+     * to the right.
+     *
+     * @param {!number} step
+     * @return {undefined}
+     */
+    this.downgradeWhitespacesAtPosition = function (step) {
+        var positionIterator = getIteratorAtPosition(step),
+            stepIterator = new core.StepIterator(filter, positionIterator),
+            contentBounds,
             /**@type{!Node}*/
             container,
-            offset,
-            firstSpaceElementChild,
-            lastSpaceElementChild;
+            modifiedNodes = [],
+            lastChild,
+            stepsToUpgrade = 2;
 
-        container = iterator.container();
-        offset = iterator.unfilteredDomOffset();
-        while (!odfUtils.isSpaceElement(container) && container.childNodes.item(offset)) {
-            // iterator.container will likely return a paragraph element with a non-zero offset
-            // easiest way to translate this is to keep diving into child nodes until the either
-            // an odf character element is encountered, or there are no more children
-            container = /**@type{!Node}*/(container.childNodes.item(offset));
-            offset = 0;
-        }
-        if (container.nodeType === Node.TEXT_NODE) {
-            // a space element cannot be a text node. Perhaps it's parent is
-            // this would be hit if iterator.container returns a text node or the previous loop dives
-            // all the way down without finding any odf character elements
-            container = /**@type{!Node}*/(container.parentNode);
-        }
-        if (odfUtils.isDowngradableSpaceElement(container)) {
-            firstSpaceElementChild = container.firstChild;
-            lastSpaceElementChild = container.lastChild;
+        // The step passed into this function is the point of change. Need to
+        // downgrade whitespace to the left of the current step, and to the left of the next step
+        runtime.assert(stepIterator.isStep(), "positionIterator is not at a step (requested step: " + step + ")");
 
-            domUtils.mergeIntoParent(container);
-
-            // merge any now neighbouring textnodes
-            // usually there was just one child node, " "
-            if (lastSpaceElementChild !== firstSpaceElementChild) {
-                domUtils.normalizeTextNodes(lastSpaceElementChild);
+        do {
+            contentBounds = stepUtils.getContentBounds(stepIterator);
+            if (contentBounds) {
+                container = contentBounds.container;
+                if (odfUtils.isDowngradableSpaceElement(container)) {
+                    lastChild = /**@type{!Node}*/(container.lastChild);
+                    while(container.firstChild) {
+                        // Merge contained space text node up to replace container
+                        modifiedNodes.push(container.firstChild);
+                        container.parentNode.insertBefore(container.firstChild, container);
+                    }
+                    container.parentNode.removeChild(container);
+                    // Reset the iterator position to the same step it was just on, which was just to
+                    // the right of a space
+                    stepIterator.setPosition(lastChild, maxOffset(lastChild));
+                    stepIterator.roundToPreviousStep();
+                }
             }
-            domUtils.normalizeTextNodes(firstSpaceElementChild);
-        }
+            stepsToUpgrade -= 1;
+        } while (stepsToUpgrade > 0 && stepIterator.nextStep());
+
+        modifiedNodes.forEach(domUtils.normalizeTextNodes);
     };
 
     this.getParagraphStyleElement = getParagraphStyleElement;
@@ -941,6 +949,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         filter = new ops.TextPositionFilter(getRootNode);
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
+        stepUtils = new odf.StepUtils();
         stepsTranslator = new ops.OdtStepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);

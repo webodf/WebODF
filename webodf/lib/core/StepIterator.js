@@ -194,4 +194,13 @@ core.StepIterator = function StepIterator(filter, iterator) {
         }
         return isAtStep;
     };
+
+    /**
+     * Return the node to the left of the current iterator position.
+     * See PositionIterator.leftNode
+     * @return {?Node}
+     */
+    this.leftNode = function() {
+        return iterator.leftNode();
+    };
 };

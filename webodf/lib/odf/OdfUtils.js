@@ -595,7 +595,7 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     this.isDowngradableSpaceElement = function(node) {
-        if (node.namespaceURI === textns && node.localName === "s") {
+        if (isSpaceElement(node)) {
             return scanLeftForNonSpace(previousNode(node)) && scanRightForAnyCharacter(nextNode(node));
         }
         return false;
