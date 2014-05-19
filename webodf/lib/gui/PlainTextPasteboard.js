@@ -69,38 +69,29 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
             paragraphs;
 
         paragraphs = data.replace(/\r/g, "").split("\n");
-        if (paragraphs.length === 1) {
-            // Slight optimization: if there is only one line of text, there is no need to create any split or remove commands
+        paragraphs.forEach(function (text) {
             operations.push(createOp(new ops.OpInsertText(), {
                 memberid: inputMemberId,
                 position: cursorPosition,
-                text: paragraphs[0],
+                text: text,
                 moveCursor: true
             }));
-        } else if (paragraphs.length > 1) {
-            paragraphs.forEach(function (text) {
-                operations.push(createOp(new ops.OpSplitParagraph(), {
-                    memberid: inputMemberId,
-                    position: cursorPosition,
-                    moveCursor: true
-                }));
-                cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
-                operations.push(createOp(new ops.OpInsertText(), {
-                    memberid: inputMemberId,
-                    position: cursorPosition,
-                    text: text,
-                    moveCursor: true
-                }));
-                cursorPosition += text.length;
-            });
+            cursorPosition += text.length;
 
-            // Merge the first element back into the first paragraph
-            operations.push(createOp(new ops.OpRemoveText(), {
+            operations.push(createOp(new ops.OpSplitParagraph(), {
                 memberid: inputMemberId,
-                position: originalCursorPosition,
-                length: 1
+                position: cursorPosition,
+                moveCursor: true
             }));
-        }
+            cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
+        });
+
+        // Discard the last split paragraph op as unnecessary.
+        // Reasoning through the scenarios, this produces the most intuitive behaviour:
+        // 1. Paste a single line - No line split should be added
+        // 2. Paste two lines - Only one paragraph split is necessary per new paragraph. As pasting MUST occur within an
+        //                      existing paragraph, only a single split should occur.
+        operations.pop();
 
         return operations;
     };
