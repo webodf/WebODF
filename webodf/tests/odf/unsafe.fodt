@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.text">
+<!-- unsafe elements that should not be contained in the loaded dom -->
+ <script/>
+ <style/>
+ <script xmlns="http://www.w3.org/1999/xhtml"/>
+ <style xmlns="http://www.w3.org/1999/xhtml"/>
+<!-- unsafe attributes that should not be contained in the loaded dom -->
+ <office:body onload="oops" onhover="oops">
+  <office:text/>
+ </office:body>
+</office:document>

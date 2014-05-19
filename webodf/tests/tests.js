@@ -44,6 +44,7 @@ runtime.loadClass("odf.ListStyleToCssTests");
 runtime.loadClass("odf.MaliciousDocumentTests");
 runtime.loadClass("odf.ObjectNameGeneratorTests");
 runtime.loadClass("odf.OdfContainerTests");
+runtime.loadClass("odf.OdfContainerSafetyTests");
 runtime.loadClass("odf.OdfUtilsTests");
 runtime.loadClass("odf.StyleInfoTests");
 runtime.loadClass("odf.StyleParseUtilsTests");
@@ -94,6 +95,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(odf.ListStyleToCssTests);
     tests.push(odf.MaliciousDocumentTests);
     tests.push(odf.OdfContainerTests);
+    tests.push(odf.OdfContainerSafetyTests);
     tests.push(odf.StyleInfoTests);
     tests.push(odf.StyleParseUtilsTests);
     tests.push(odf.TextStyleApplicatorTests);

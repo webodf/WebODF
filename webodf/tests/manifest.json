@@ -121,6 +121,10 @@
         "odf.ObjectNameGenerator",
         "odf.OdfContainer"
     ],
+    "odf.OdfContainerSafetyTests": [
+        "core.UnitTester",
+        "odf.OdfContainer"
+    ],
     "odf.OdfContainerTests": [
         "core.UnitTester",
         "core.Zip",
