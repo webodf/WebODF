@@ -65,6 +65,9 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         canvas = cursor.getDocument().getCanvas(),
         odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
+        guiStepUtils = new gui.GuiStepUtils(),
+        /**@type{!core.StepIterator}*/
+        stepIterator,
         /**@type{!core.ScheduledTask}*/
         redrawTask,
         /**@type{!core.ScheduledTask}*/
@@ -116,35 +119,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
-     * Return the maximum available offset for the supplied node.
-     * @param {!Node} node
-     * @return {!number}
-     */
-    function length(node) {
-        return node.nodeType === Node.TEXT_NODE ? node.textContent.length : node.childNodes.length;
-    }
-
-    /**
-     * Calculate the number of pixels of vertical overlap. If there is no overlap,
-     * this number will be negative
-     * @param {!Element} cursorNode
-     * @param {!ClientRect} rangeRect
-     * @return {!number}
-     */
-    function verticalOverlap(cursorNode, rangeRect) {
-        var cursorRect = domUtils.getBoundingClientRect(cursorNode),
-            intersectTop = 0,
-            intersectBottom = 0;
-
-        if (cursorRect && rangeRect) {
-            intersectTop = Math.max(cursorRect.top, rangeRect.top);
-            intersectBottom = Math.min(cursorRect.bottom, rangeRect.bottom);
-
-        }
-        return intersectBottom - intersectTop;
-    }
-
-    /**
      * Get the client rectangle for the nearest selection point to the caret.
      * This works on the assumption that the next or previous sibling is likely to
      * be a text node that will provide an accurate rectangle for the caret's desired
@@ -154,12 +128,10 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {!{height: !number, top: !number, right: !number}}
      */
     function getSelectionRect() {
-        var range = cursor.getSelectedRange().cloneRange(),
-            node = cursor.getNode(),
+        var node = cursor.getNode(),
             caretRectangle,
             nextRectangle,
             selectionRectangle,
-            nodeLength,
             paragraph,
             rootRect = /**@type{!ClientRect}*/(domUtils.getBoundingClientRect(canvas.getSizer())),
             useLeftEdge = false;
@@ -170,35 +142,17 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // via an IME
             selectionRectangle = domUtils.getBoundingClientRect(node);
         } else {
-            // TODO this might be able to use OdfUtils.scanLeft & scanRight behaviours to find the next odf element
-            // By default, assume the selection height should reflect the height of the previousSibling's last client rect
-            // This means if the cursor is next to a text node, the client rect will be the dimensions of the text block
-            if (node.previousSibling) {
-                nodeLength = length(node.previousSibling);
-                range.setStart(node.previousSibling, nodeLength > 0 ? nodeLength - 1 : 0);
-                range.setEnd(node.previousSibling, nodeLength);
-                nextRectangle = range.getBoundingClientRect();
-                if (nextRectangle && nextRectangle.height) {
+            // Need to resync the stepIterator prior to every use as it isn't automatically kept up-to-date
+            // with the cursor's actual document position
+            stepIterator.setPosition(node, 0);
+            selectionRectangle = guiStepUtils.getContentRect(stepIterator);
+            if (!selectionRectangle && stepIterator.nextStep()) {
+                // Under some circumstances (either no associated content, or whitespace wrapping) the client rect of the
+                // next sibling will actually be a more accurate visual representation of the caret's position.
+                nextRectangle = guiStepUtils.getContentRect(stepIterator);
+                if (nextRectangle) {
                     selectionRectangle = nextRectangle;
-                }
-            }
-            // Under some circumstances (either no previous sibling, or whitespace wrapping) the client rect of the next
-            // sibling will actually be a more accurate visual representation.
-            if (node.nextSibling) {
-                range.setStart(node.nextSibling, 0);
-                range.setEnd(node.nextSibling, length(node.nextSibling) > 0 ? 1 : 0);
-                nextRectangle = range.getBoundingClientRect();
-                if (nextRectangle && nextRectangle.height) {
-                    // The nextSibling's rectangle should take precedence if
-                    // 1. There is no previousSibling
-                    // or 2. The nextSibling's rectangle has more vertical overlap with the cursor node's bounding rectangle
-                    // Check #2 is specifically required to handling whitespace wrapping logic. Without this check,
-                    // when a whitespace block is wrapped, the cursor tends to jump to the vertical alignment of the previous
-                    // line, rather than the line the cursor element is now actually on.
-                    if (!selectionRectangle || verticalOverlap(node, nextRectangle) > verticalOverlap(node, selectionRectangle)) {
-                        selectionRectangle = nextRectangle;
-                        useLeftEdge = true;
-                    }
+                    useLeftEdge = true;
                 }
             }
 
@@ -567,7 +521,9 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     };
 
     function init() {
-        var dom = cursor.getDocument().getDOMDocument(),
+        var odtDocument = /**@type{!ops.OdtDocument}*/(cursor.getDocument()),
+            positionFilters = [odtDocument.createRootFilter(cursor.getMemberId()), odtDocument.getPositionFilter()],
+            dom = odtDocument.getDOMDocument(),
             editinfons = "urn:webodf:names:editinfo";
 
         caretOverlay = /**@type{!HTMLElement}*/(dom.createElement("div"));
@@ -581,6 +537,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         avatar = new gui.Avatar(caretOverlay, avatarInitiallyVisible);
 
         canvas.getSizer().appendChild(caretOverlay);
+
+        stepIterator = odtDocument.createStepIterator(cursor.getNode(), 0, positionFilters, odtDocument.getRootNode());
 
         redrawTask = core.Task.createRedrawTask(updateCaret);
         blinkTask = core.Task.createTimeoutTask(blinkCaret, BLINK_PERIOD_MS);
