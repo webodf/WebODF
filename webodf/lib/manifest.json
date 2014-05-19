@@ -121,7 +121,6 @@
     ],
     "gui.PlainTextPasteboard": [
         "ops.OpInsertText",
-        "ops.OpRemoveText",
         "ops.OpSplitParagraph"
     ],
     "gui.SelectionController": [
