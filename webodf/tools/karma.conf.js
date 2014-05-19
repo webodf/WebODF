@@ -99,6 +99,7 @@ module.exports = function (config) {
             'lib/ops/Session.js',
             'lib/gui/AnnotationController.js',
             'lib/gui/Avatar.js',
+            'lib/gui/GuiStepUtils.js',
             'lib/gui/Caret.js',
             'lib/odf/TextSerializer.js',
             'lib/gui/MimeDataExporter.js',
