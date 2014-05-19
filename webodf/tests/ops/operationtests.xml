@@ -1688,6 +1688,35 @@
   </ops>
   <after><office:text><text:p><text:span>abc<c:cursor c:memberId="Joe"/></text:span><text:span> <text:s> </text:s>ef</text:span></text:p></office:text></after>
  </test>
+ <test name="CacheBugCheck_EnsureProperBookmarkMaintenance">
+  <before>
+   <office:text><text:p/><text:p/></office:text>
+  </before>
+  <ops>
+   <op optype="AddCursor" memberid="Joe"/>
+   <!-- Insert 500 chars at the beginning to turn the 2nd paragraph into a cache point @ 1000 steps -->
+   <op optype="InsertText" memberid="Alice" position="0" text="[[[[[.........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................ABCDEF"/>
+   <!-- Move cursor to document end to update cache completely -->
+   <op optype="MoveCursor" memberid="Joe" position="501" length="0"/>
+
+   <!-- Remove 2 chars so the 2nd paragraph is added as a cache point @ 500 steps as well -->
+   <op optype="RemoveText" position="0" length="2"/>
+   <!-- Move cursor to document end to update cache completely -->
+   <op optype="MoveCursor" memberid="Joe" position="499" length="0"/>
+
+   <!-- Insert 505 chars at the beginning to push 2nd paragraph passed the first cache point @ 1000 steps -->
+   <op optype="InsertText" memberid="Alice" position="0" text="|||||...............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................12345"/>
+   <!-- Move cursor to document end to update cache completely -->
+   <op optype="MoveCursor" memberid="Joe" position="1004" length="0"/>
+
+   <!-- Lastly, remove some text where the range end is directly onto a cache point -->
+   <!-- This demonstrates the cache incorrectly uses a node @ step 1004 as a bookmark for step 1000 and throws -->
+   <op optype="RemoveText" position="0" length="1000"/>
+  </ops>
+  <after>
+   <office:text><text:p>DEF</text:p><text:p><c:cursor c:memberId="Joe"/></text:p></office:text>.
+  </after>
+ </test>
  <test name="RemoveText_aroundInlineRootWithoutBreakingPositionsBehind_insertingLotsOfDots">
   <!--- happened when simulating github issue #417 -->
   <before>

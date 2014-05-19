@@ -102,15 +102,14 @@
          * Bookmark tied to a specific node
          * @constructor
          * @param {!string} nodeId
-         * @param {!number} steps
          * @param {!Element} bookmarkNode
          *
          * @implements {ops.StepsCache.Bookmark}
          */
-        function NodeBookmark(nodeId, steps, bookmarkNode) {
+        function NodeBookmark(nodeId, bookmarkNode) {
             var self = this;
             this.nodeId = nodeId;
-            this.steps = steps;
+            this.steps = -1;
             this.node = bookmarkNode;
             this.nextBookmark = null;
             this.previousBookmark = null;
@@ -188,7 +187,9 @@
                 previousBookmark,
                 nextBookmark,
                 documentPosition,
-                loopCheck = new core.LoopWatchDog(0, 100000);
+                loopCheck = new core.LoopWatchDog(0, 100000),
+                /**@type{!Object.<!string, !string>}*/
+                stepToDomPointNodeIds = {};
 
             while (bookmark) {
                 loopCheck.check();
@@ -232,6 +233,19 @@
 
                 bookmark = bookmark.nextBookmark;
             }
+
+            Object.keys(stepToDomPoint).forEach(function(step) {
+                var domPointBookmark = stepToDomPoint[step];
+                if (lastUndamagedCacheStep === undefined || step <= lastUndamagedCacheStep) {
+                    runtime.assert(domPointBookmark.steps <= step, "Bookmark step of " + domPointBookmark.steps +
+                        " exceeds cached step lookup for " + step + " @" + inspectBookmarks(domPointBookmark));
+                }
+
+                runtime.assert(stepToDomPointNodeIds.hasOwnProperty(domPointBookmark.nodeId) === false,
+                        "Bookmark " + inspectBookmarks(domPointBookmark) + " appears twice in cached step lookup at steps " +
+                        stepToDomPointNodeIds[domPointBookmark.nodeId] + " and " + step);
+                stepToDomPointNodeIds[domPointBookmark.nodeId] = step;
+            });
         }
 
         /**
@@ -295,24 +309,21 @@
         }
 
         /**
-         * Fetches (or creates) a bookmark for the specified node. The bookmark's steps
-         * are updated to the specified number of steps
+         * Fetches (or creates) a bookmark for the specified node.
+         *
          * @param {!Element} node
-         * @param {!number} steps
          * @return {!ops.StepsCache.Bookmark}
          */
-        function getNodeBookmark(node, steps) {
+        function getNodeBookmark(node) {
             var nodeId = getNodeId(node) || setNodeId(node),
                 existingBookmark;
             existingBookmark = nodeToBookmark[nodeId];
             if (!existingBookmark) {
-                existingBookmark = nodeToBookmark[nodeId] = new NodeBookmark(nodeId, steps, node);
+                existingBookmark = nodeToBookmark[nodeId] = new NodeBookmark(nodeId, node);
             } else if (!isValidBookmarkForNode(node, existingBookmark)) {
                 runtime.log("Cloned node detected. Creating new bookmark");
                 nodeId = setNodeId(node);
-                existingBookmark = nodeToBookmark[nodeId] = new NodeBookmark(nodeId, steps, node);
-            } else {
-                existingBookmark.steps = steps;
+                existingBookmark = nodeToBookmark[nodeId] = new NodeBookmark(nodeId, node);
             }
             return existingBookmark;
         }
@@ -345,6 +356,9 @@
                 loopGuard.check();
                 cachePoint = cachePoint.nextBookmark;
             }
+            runtime.assert(steps === -1 || cachePoint.steps <= steps,
+                    "Bookmark @" + inspectBookmarks(cachePoint) + " at step " + cachePoint.steps +
+                    " exceeds requested step of " + steps);
             return cachePoint;
         }
 
@@ -494,7 +508,8 @@
          * @return {undefined}
          */
         this.updateBookmark = function(steps, node) {
-            var cacheBucket,
+            var previousCacheBucket,
+                newCacheBucket = getDestinationBucket(steps),
                 existingCachePoint,
                 bookmark,
                 closestPriorBookmark;
@@ -502,14 +517,20 @@
             closestPriorBookmark = repairCacheUpToStep(steps);
             // Note, the node bookmark must be updated after the repair as if steps < lastUndamagedCacheStep
             // the repair will assume any nodes after lastUndamagedCacheStep are damaged.
-            bookmark = getNodeBookmark(/**@type{!Element}*/(node), steps);
+            bookmark = getNodeBookmark(/**@type{!HTMLElement}*/(node));
+            if (bookmark.steps !== steps) {
+                previousCacheBucket = getDestinationBucket(bookmark.steps);
+                if (previousCacheBucket !== newCacheBucket && stepToDomPoint[previousCacheBucket] === bookmark) {
+                    delete stepToDomPoint[previousCacheBucket];
+                }
+                bookmark.steps = steps;
+            }
             insertBookmark(closestPriorBookmark, bookmark);
+            existingCachePoint = stepToDomPoint[newCacheBucket];
             // E.g., steps <= 500 are valid for a request starting at 500 and counting forward
-            cacheBucket = getDestinationBucket(bookmark.steps);
-            existingCachePoint = stepToDomPoint[cacheBucket];
             if (!existingCachePoint || bookmark.steps > existingCachePoint.steps) {
                 // The current node & offset are closer to the cache bucket boundary than the existing entry was
-                stepToDomPoint[cacheBucket] = bookmark;
+                stepToDomPoint[newCacheBucket] = bookmark;
             }
             verifyCache();
         };
