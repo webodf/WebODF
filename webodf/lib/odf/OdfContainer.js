@@ -851,6 +851,36 @@
         }
 
         /**
+         * Remove all attributes that have no namespace and that have
+         * localname like 'on....', the event handler attributes.
+         * @param {!Element} element
+         * @return {undefined}
+         */
+        function removeDangerousAttributes(element) {
+            var e = element.firstElementChild, as = [], i, n, a,
+                atts = element.attributes,
+                l = atts.length;
+            // collect all dangerous attributes
+            for (i = 0; i < l; i += 1) {
+                a = atts.item(i);
+                n = a.localName.substr(0, 2).toLowerCase();
+                if (a.namespaceURI === null && n === "on") {
+                    as.push(a);
+                }
+            }
+            // remove the dangerous attributes
+            l = as.length;
+            for (i = 0; i < l; i += 1) {
+                element.removeAttributeNode(as[i]);
+            }
+            // recurse into the child elements
+            while (e) {
+                removeDangerousAttributes(e);
+                e = e.nextElementSibling;
+            }
+        }
+
+        /**
          * @param {!Array.<!{path:string,handler:function(?Document)}>} remainingComponents
          * @return {undefined}
          */
@@ -861,6 +891,7 @@
                 zip.loadAsDOM(component.path, function (err, xmldoc) {
                     if (xmldoc) {
                         removeDangerousElements(xmldoc);
+                        removeDangerousAttributes(xmldoc.documentElement);
                     }
                     component.handler(xmldoc);
                     if (self.state === OdfContainer.INVALID) {
@@ -1065,6 +1096,7 @@
                     callback("No DOM was loaded.");
                 } else {
                     removeDangerousElements(dom);
+                    removeDangerousAttributes(dom.documentElement);
                     handleFlatXml(dom);
                 }
             }
