@@ -242,6 +242,7 @@ cursor|cursor {
     height: 1em;
     margin-left: -1px;
     z-index: 10;
+    pointer-events: none;
 }
 
 .webodf-caretOverlay .caret {
