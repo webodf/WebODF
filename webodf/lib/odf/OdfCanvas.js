@@ -1169,6 +1169,8 @@
 
             element.style.width = Math.round(zoomLevel * sizer.offsetWidth) + "px";
             element.style.height = Math.round(zoomLevel * sizer.offsetHeight) + "px";
+            // Re-apply inline-block to canvas element on resizing.
+            // Chrome tends to forget this property after a relayout
             element.style.display = "inline-block";
         }
 
@@ -1298,6 +1300,7 @@
                 clear(element);
 
                 // setup
+                element.style.display = "inline-block";
                 var odfnode = odfcontainer.rootElement;
                 element.ownerDocument.importNode(odfnode, true);
 
