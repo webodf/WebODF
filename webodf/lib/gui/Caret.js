@@ -507,7 +507,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * @return {undefined}
      */
     function destroy(callback) {
-        canvas.getSizer().removeChild(caretOverlay);
+        caretOverlay.parentNode.removeChild(caretOverlay);
         callback();
     }
 
