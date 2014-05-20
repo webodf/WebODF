@@ -282,7 +282,7 @@
         };
 
         /**
-         * @param {!{position: !number, length: !number}} eventArgs
+         * @param {!{position: !number}} eventArgs
          * @return {undefined}
          */
         this.handleStepsInserted = function (eventArgs) {
@@ -294,7 +294,7 @@
         };
 
         /**
-         * @param {!{position: !number, length: !number}} eventArgs
+         * @param {!{position: !number}} eventArgs
          * @return {undefined}
          */
         this.handleStepsRemoved = function (eventArgs) {

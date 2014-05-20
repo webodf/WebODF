@@ -295,7 +295,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         t.translator.prime(); // Should already be primed, but just in case!
 
         body.insertBefore(cloneParagraph, originalParagraph.node);
-        t.translator.handleStepsInserted({position: originalParagraph.start - 1, length: originalParagraph.length + 1});
+        t.translator.handleStepsInserted({position: originalParagraph.start - 1});
 
         t.actualCloneDomPoint = t.translator.convertStepsToDomPoint(5); // First position in new p
         r.shouldBe(t, "t.actualCloneDomPoint.node", "t.cloneParagraph.firstChild");
@@ -453,7 +453,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
 
         cloneParagraph = originalParagraph.node.cloneNode(true);
         body.insertBefore(cloneParagraph, originalParagraph.node);
-        t.translator.handleStepsInserted({position: originalParagraph.start - 1, length: originalParagraph.length + 1});
+        t.translator.handleStepsInserted({position: originalParagraph.start - 1});
 
         t.actualOriginalSteps = t.translator.convertDomPointToSteps(originalParagraph.node, 0, roundUp);
         r.shouldBe(t, "t.actualOriginalSteps", "10");
@@ -476,7 +476,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         t.translator.prime(); // Should already be primed, but just in case!
 
         body.removeChild(bookmarkedParagraph.node);
-        t.translator.handleStepsRemoved({position: bookmarkedParagraph.start, length: 2});
+        t.translator.handleStepsRemoved({position: bookmarkedParagraph.start});
 
         t.trailingParagraphSteps = t.translator.convertDomPointToSteps(trailingParagraph, 0);
         r.shouldBe(t, "t.trailingParagraphSteps", "5");
@@ -517,7 +517,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
 
         while (paragraphs[1].length < 10) {
             paragraphs[1].node.firstChild.appendData("e");
-            t.translator.handleStepsInserted({position: paragraphs[1].start + paragraphs[1].length, length: 1});
+            t.translator.handleStepsInserted({position: paragraphs[1].start + paragraphs[1].length});
             paragraphs[1].length += 1;
             paragraphs[2].start += 1;
             verifyParagraphBoundaries(paragraphs, step);
@@ -538,7 +538,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
 
         for(step = 0; step < 10; step += 1) {
             body.insertBefore(dom.createElementNS(textns, "p"), paragraphs[2].node);
-            t.translator.handleStepsInserted({position: paragraphs[2].start-1, length: 1});
+            t.translator.handleStepsInserted({position: paragraphs[2].start-1});
             paragraphs[2].start += 1;
             verifyParagraphBoundaries(paragraphs, step);
         }
@@ -557,7 +557,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         newParagraph = dom.createElementNS(textns, "p");
 
         body.appendChild(newParagraph);
-        t.translator.handleStepsInserted({position: paragraphs[1].start + paragraphs[1].length, length: 1});
+        t.translator.handleStepsInserted({position: paragraphs[1].start + paragraphs[1].length});
 
         paragraphs.push({node: newParagraph, start: paragraphs[1].start + paragraphs[1].length + 1, length: 0});
         verifyParagraphBoundaries(paragraphs);
@@ -576,7 +576,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
             if (paragraphs[1].node.firstChild.length === 0) {
                 paragraphs[1].node.removeChild(paragraphs[1].node.firstChild);
             }
-            t.translator.handleStepsRemoved({position: paragraphs[1].start + paragraphs[1].length - 1, length: 1});
+            t.translator.handleStepsRemoved({position: paragraphs[1].start + paragraphs[1].length - 1});
             paragraphs[1].length -= 1;
             paragraphs[2].start -= 1;
             verifyParagraphBoundaries(paragraphs, step);
@@ -603,7 +603,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
 
         for(step = 0; step < 10; step += 1) {
             body.removeChild(insertionPoint.previousSibling);
-            t.translator.handleStepsRemoved({position: paragraphs[2].start-1, length: 1});
+            t.translator.handleStepsRemoved({position: paragraphs[2].start-1});
             paragraphs[2].start -= 1;
             verifyParagraphBoundaries(paragraphs, step);
         }
@@ -619,7 +619,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
 
         removedParagraph.parentNode.removeChild(removedParagraph);
         paragraphs.shift(); // remove the first boundary to match the removed paragraph
-        t.translator.handleStepsRemoved({position: 0, length: 5});
+        t.translator.handleStepsRemoved({position: 0});
         // manually update the remaining paragraph boundaries to reflect what they should now be
         paragraphs[0].start = 0;
         paragraphs[0].length = 1;
