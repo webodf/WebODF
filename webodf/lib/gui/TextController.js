@@ -65,12 +65,12 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
     /**
      * Creates operations to remove the provided selection and update the destination
      * paragraph's style if necessary.
+     * @param {!Range} range
      * @param {!{position: number, length: number}} selection
      * @return {!Array.<!ops.Operation>}
      */
-    function createOpRemoveSelection(selection) {
-        var range = odtDocument.convertCursorToDomRange(selection.position, selection.length),
-            firstParagraph,
+    function createOpRemoveSelection(range, selection) {
+        var firstParagraph,
             lastParagraph,
             mergedParagraphStyleName,
             removeOp = new ops.OpRemoveText(),
@@ -130,11 +130,12 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     this.enqueueParagraphSplittingOps = function() {
-        var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op, operations = [], styleOps;
 
         if (selection.length > 0) {
-            operations = operations.concat(createOpRemoveSelection(selection));
+            operations = operations.concat(createOpRemoveSelection(range, selection));
         }
 
         op = new ops.OpSplitParagraph();
@@ -195,6 +196,8 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      */
     function removeTextInDirection(isForward) {
         var cursorNode,
+            // Take a clone of the range as it will be modified if the selection length is 0
+            range = /**@type{!Range}*/(odtDocument.getCursor(inputMemberId).getSelectedRange().cloneRange()),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             stepIterator;
 
@@ -213,13 +216,19 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
                     focusNode: stepIterator.container(),
                     focusOffset: stepIterator.offset()
                 }));
+                if (isForward) {
+                    range.setStart(cursorNode, 0);
+                    range.setEnd(stepIterator.container(), stepIterator.offset());
+                } else {
+                    range.setStart(stepIterator.container(), stepIterator.offset());
+                    range.setEnd(cursorNode, 0);
+                }
             }
         }
         if (selection) {
-            session.enqueue(createOpRemoveSelection(selection));
-            return true;
+            session.enqueue(createOpRemoveSelection(range, selection));
         }
-        return false;
+        return selection !== undefined;
     }
 
     /**
@@ -245,9 +254,10 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     this.removeCurrentSelection = function () {
-        var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId));
+        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId));
         if (selection.length !== 0) {
-            session.enqueue(createOpRemoveSelection(selection));
+            session.enqueue(createOpRemoveSelection(range, selection));
         }
         return true; // The function is always considered handled, even if nothing is removed
     };
@@ -258,11 +268,12 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {undefined}
      */
     function insertText(text) {
-        var selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
+        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op, stylingOp, operations = [], useCachedStyle = false;
 
         if (selection.length > 0) {
-            operations = operations.concat(createOpRemoveSelection(selection));
+            operations = operations.concat(createOpRemoveSelection(range, selection));
             useCachedStyle = true;
         }
 
