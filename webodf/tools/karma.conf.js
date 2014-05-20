@@ -90,6 +90,7 @@ module.exports = function (config) {
             'lib/ops/OpRemoveHyperlink.js',
             'lib/ops/OpRemoveMember.js',
             'lib/ops/OpRemoveStyle.js',
+            'lib/odf/CollapsingRules.js',
             'lib/ops/OpRemoveText.js',
             'lib/ops/OpSetBlob.js',
             'lib/ops/OpSetParagraphStyle.js',

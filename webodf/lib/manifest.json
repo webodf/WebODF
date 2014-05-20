@@ -217,6 +217,9 @@
         "core.Destroyable",
         "core.EventNotifier"
     ],
+    "odf.CollapsingRules": [
+        "odf.OdfUtils"
+    ],
     "odf.CommandLineTools": [
         "odf.OdfCanvas"
     ],
@@ -396,6 +399,7 @@
         "ops.OdtDocument"
     ],
     "ops.OpRemoveText": [
+        "odf.CollapsingRules",
         "ops.OdtDocument"
     ],
     "ops.OpSetBlob": [
