@@ -1,5 +1,3 @@
-set(ANDROID_JAR ${ANDROID_SDK_DIR}/platforms/android-8/android.jar)
-
 # Windows requires Ant binary
 if(WIN32)
     set(APKDEPS AntBin)
@@ -31,7 +29,7 @@ COPY_FILES(APKDEPS ${CMAKE_BINARY_DIR}/webodf
 set(WEBODFAPK ${CMAKE_CURRENT_BINARY_DIR}/bin/WebODF-debug.apk)
 add_custom_command(
     OUTPUT ${WEBODFAPK}
-    COMMAND ${ANDROID_SDK_DIR}/tools/android
+    COMMAND ${ANDROID}
         ARGS update project --path . --target android-7 --name WebODF
     COMMAND ${ANT}
         ARGS -lib ${CMAKE_CURRENT_SOURCE_DIR}/libs/cordova-1.8.0.jar debug

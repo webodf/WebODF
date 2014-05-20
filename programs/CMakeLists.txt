@@ -5,9 +5,9 @@ if(BUILD_QTJSRUNTIME)
 #   add_subdirectory(nativeQtClient)
 endif(BUILD_QTJSRUNTIME)
 
-if(ANDROID_SDK_DIR AND ANT)
+if(ANDROID AND ANT)
   add_subdirectory(android)
-endif(ANDROID_SDK_DIR AND ANT)
+endif(ANDROID AND ANT)
 
 add_subdirectory(docnosis)
 
