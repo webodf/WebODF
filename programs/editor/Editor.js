@@ -111,7 +111,8 @@ define("webodf/editor/Editor", [
                     Editor.EVENT_BEFORESAVETOFILE,
                     Editor.EVENT_SAVEDTOFILE,
                     Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED,
-                    Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED
+                    Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED,
+                    Editor.EVENT_METADATACHANGED
                 ]),
                 pendingMemberId,
                 pendingEditorReadyCallback;
@@ -422,6 +423,86 @@ define("webodf/editor/Editor", [
             };
 
             /**
+             * Sets the metadata fields from the given properties map.
+             * Avoid setting certain fields since they are automatically set:
+             *     dc:creator
+             *     dc:date
+             *     meta:editing-cycles
+             * If you do wish to externally set these fields, try getting
+             * the server backend (if any) to inject operations into the timeline
+             * with the relevant properties.
+             *
+             * The following properties are never used and will be removed for semantic
+             * consistency from the document:
+             *     meta:editing-duration
+             *     meta:document-statistic
+             *
+             * Setting any of the above mentioned fields using this method will have no effect.
+             *
+             * @param {?Object.<!string, !string>} setProperties A flat object that is a string->string map of field name -> value.
+             * @param {?Array.<!string>} removedProperties An array of metadata field names (prefixed).
+             * @return {undefined}
+             */
+            this.setMetadata = function (setProperties, removedProperties) {
+                var bannedProperties = [
+                    "dc:creator",
+                    "dc:date",
+                    "meta:editing-cycles",
+                    "meta:editing-duration",
+                    "meta:document-statistic"
+                ],
+                filteredSetProperties = {},
+                filteredRemovedProperties = "",
+                op;
+
+                if (setProperties) {
+                    Object.keys(setProperties).forEach(function (property) {
+                        if (bannedProperties.indexOf(property) === -1) {
+                            filteredSetProperties[property] = setProperties[property];
+                        } else {
+                            runtime.log("Setting " + property + " is restricted");
+                        }
+                    });
+                }
+                if (removedProperties) {
+                    removedProperties.forEach(function (property) {
+                        if (bannedProperties.indexOf(property) === -1) {
+                            if (filteredRemovedProperties.length) {
+                                filteredRemovedProperties += ",";
+                            }
+                            filteredRemovedProperties += property;
+                        } else {
+                            runtime.log("Removing " + property + " is restricted");
+                        }
+                    });
+                }
+
+                if (filteredRemovedProperties.length > 0
+                        || Object.keys(filteredSetProperties).length > 0) {
+                    op = new ops.OpUpdateMetadata();
+                    op.init({
+                        memberid: editorSession.sessionController.getInputMemberId(),
+                        setProperties: filteredSetProperties,
+                        removedProperties: filteredRemovedProperties
+                    });
+                    session.enqueue([op]);
+                }
+            };
+
+            /**
+             * Returns the value of the requested document metadata field
+             * @param {!string} property A namespace-prefixed field name, for example
+             * dc:creator
+             * @return {?string}
+             */
+            this.getMetadata = function (property) {
+                runtime.assert(typeof property === "string", "Property must be a string");
+                var parts = property.split(':');
+                runtime.assert(parts.length === 2, "Property must be a namespace-prefixed string");
+                return odfCanvas.odfContainer().getMetadata(parts[0], parts[1]);
+            };
+
+            /**
              * Applies a CSS transformation to the toolbar
              * to ensure that if there is a body-scroll,
              * the toolbar remains visible at the top of
@@ -500,6 +581,10 @@ define("webodf/editor/Editor", [
 
             function setFocusToOdfCanvas() {
                 editorSession.sessionController.getEventManager().focus();
+            }
+
+            function relayMetadataSignal(changes) {
+                fireEvent(Editor.EVENT_METADATACHANGED, changes);
             }
 
             // init
@@ -623,6 +708,9 @@ define("webodf/editor/Editor", [
                         memberListView.setEditorSession(editorSession);
                     }
 
+                    // Relay any metadata changes to the Editor's consumer as an event
+                    session.getOdtDocument().subscribe(ops.OdtDocument.signalMetadataUpdated, relayMetadataSignal);
+
                     // and report back to caller
                     pendingEditorReadyCallback();
                     // reset
@@ -651,6 +739,8 @@ define("webodf/editor/Editor", [
         Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED = "hasLocalUnsyncedOperationsChanged";
         /**@const @type {!string}*/
         Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED =   "hasSessionHostConnectionChanged";
+        /**@const @type {!string}*/
+        Editor.EVENT_METADATACHANGED =                   "metadataChanged";
 
         return Editor;
     });
