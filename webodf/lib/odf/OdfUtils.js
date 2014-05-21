@@ -160,10 +160,17 @@ odf.OdfUtils = function OdfUtils() {
     this.isParagraph = isParagraph;
 
     /**
+     * Find the paragraph containing the specified node. If an offset is provided and
+     * the node has a child at the specified offset, this will be included in the search
+     * as well if the supplied node is not a paragraph itself.
      * @param {?Node} node
+     * @param {!number=} offset
      * @return {?Element}
      */
-    function getParagraphElement(node) {
+    function getParagraphElement(node, offset) {
+        if (node && offset !== undefined && !isParagraph(node) && node.childNodes.item(offset)) {
+            node = node.childNodes.item(offset);
+        }
         while (node && !isParagraph(node)) {
             node = node.parentNode;
         }

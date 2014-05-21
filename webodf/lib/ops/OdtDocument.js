@@ -237,6 +237,16 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getIteratorAtPosition = getIteratorAtPosition;
 
     /**
+     * Converts the requested step number from root into the equivalent DOM node & offset
+     * pair. If the step is outside the bounds of the document, a RangeError will be thrown.
+     * @param {!number} step
+     * @return {!{node: !Node, offset: !number}}
+     */
+    this.convertCursorStepToDomPoint = function (step) {
+        return stepsTranslator.convertStepsToDomPoint(step);
+    };
+
+    /**
      * @param {!Node} node
      * @param {!number} offset
      * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
@@ -581,16 +591,14 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
-     * Downgrades white space elements to normal spaces at the specified step, and one step
+     * Downgrades white space elements to normal spaces at the step iterators current step, and one step
      * to the right.
      *
-     * @param {!number} step
+     * @param {!core.StepIterator} stepIterator
      * @return {undefined}
      */
-    this.downgradeWhitespacesAtPosition = function (step) {
-        var positionIterator = getIteratorAtPosition(step),
-            stepIterator = new core.StepIterator(filter, positionIterator),
-            contentBounds,
+    function downgradeWhitespaces(stepIterator) {
+        var contentBounds,
             /**@type{!Node}*/
             container,
             modifiedNodes = [],
@@ -599,7 +607,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
         // The step passed into this function is the point of change. Need to
         // downgrade whitespace to the left of the current step, and to the left of the next step
-        runtime.assert(stepIterator.isStep(), "positionIterator is not at a step (requested step: " + step + ")");
+        runtime.assert(stepIterator.isStep(), "positionIterator is not at a step");
 
         do {
             contentBounds = stepUtils.getContentBounds(stepIterator);
@@ -623,6 +631,21 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         } while (stepsToUpgrade > 0 && stepIterator.nextStep());
 
         modifiedNodes.forEach(domUtils.normalizeTextNodes);
+    }
+    this.downgradeWhitespaces = downgradeWhitespaces;
+
+    /**
+     * Downgrades white space elements to normal spaces at the specified step, and one step
+     * to the right.
+     *
+     * @param {!number} step
+     * @return {undefined}
+     */
+    this.downgradeWhitespacesAtPosition = function (step) {
+        var positionIterator = getIteratorAtPosition(step),
+            stepIterator = new core.StepIterator(filter, positionIterator);
+
+        downgradeWhitespaces(stepIterator);
     };
 
     this.getParagraphStyleElement = getParagraphStyleElement;

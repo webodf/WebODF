@@ -654,6 +654,112 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.node.getElementsByTagNameNS('prefix','empty-obj').length", "0");
     }
 
+    function rangeIntersection_ReturnsOverlapBetweenTwoRanges() {
+        var textContentNode,
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        createNodes("<span>abc</span>");
+        textContentNode = t.doc.firstChild.firstChild;
+        range1.setStart(textContentNode, 0);
+        range1.setEnd(textContentNode, 2);
+
+        range2.setStart(textContentNode, 1);
+        range2.setEnd(textContentNode, 3);
+
+        t.intersection = t.utils.rangeIntersection(range1, range2);
+        t.startContainer = textContentNode;
+        t.startOffset = 1;
+        t.endContainer = textContentNode;
+        t.endOffset = 2;
+        r.shouldBe(t, "t.intersection.startContainer", "t.startContainer");
+        r.shouldBe(t, "t.intersection.startOffset", "t.startOffset");
+        r.shouldBe(t, "t.intersection.endContainer", "t.endContainer");
+        r.shouldBe(t, "t.intersection.endOffset", "t.endOffset");
+    }
+
+    function rangeIntersection_Range1BeforeRange2_ReturnsUndefined() {
+        var textContentNode,
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        createNodes("<span>abc</span>");
+        textContentNode = t.doc.firstChild.firstChild;
+        range1.setStart(textContentNode, 0);
+        range1.setEnd(textContentNode, 1);
+
+        range2.setStart(textContentNode, 2);
+        range2.setEnd(textContentNode, 3);
+
+        t.intersection = t.utils.rangeIntersection(range1, range2);
+        r.shouldBe(t, "t.intersection", "undefined");
+    }
+
+    function rangeIntersection_Range2BeforeRange1_ReturnsUndefined() {
+        var textContentNode,
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        createNodes("<span>abc</span>");
+        textContentNode = t.doc.firstChild.firstChild;
+        range1.setStart(textContentNode, 0);
+        range1.setEnd(textContentNode, 1);
+
+        range2.setStart(textContentNode, 2);
+        range2.setEnd(textContentNode, 3);
+
+        t.intersection = t.utils.rangeIntersection(range2, range1);
+        r.shouldBe(t, "t.intersection", "undefined");
+    }
+
+    function rangeIntersection_Range1TouchesRange2_ReturnsCollapsedRangeOnPoint() {
+        var textContentNode,
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        createNodes("<span>abc</span>");
+        textContentNode = t.doc.firstChild.firstChild;
+        range1.setStart(textContentNode, 0);
+        range1.setEnd(textContentNode, 1);
+
+        range2.setStart(textContentNode, 1);
+        range2.setEnd(textContentNode, 3);
+
+        t.intersection = t.utils.rangeIntersection(range1, range2);
+        t.startContainer = textContentNode;
+        t.startOffset = 1;
+        t.endContainer = textContentNode;
+        t.endOffset = 1;
+        r.shouldBe(t, "t.intersection.startContainer", "t.startContainer");
+        r.shouldBe(t, "t.intersection.startOffset", "t.startOffset");
+        r.shouldBe(t, "t.intersection.endContainer", "t.endContainer");
+        r.shouldBe(t, "t.intersection.endOffset", "t.endOffset");
+    }
+
+    function rangeIntersection_Range1ContainsRange2_ReturnsRange2Bounds() {
+        var textContentNode,
+            range1 = document.createRange(),
+            range2 = document.createRange();
+
+        createNodes("<span>abc</span>");
+        textContentNode = t.doc.firstChild.firstChild;
+        range1.setStart(textContentNode, 0);
+        range1.setEnd(textContentNode, 3);
+
+        range2.setStart(textContentNode, 1);
+        range2.setEnd(textContentNode, 2);
+
+        t.intersection = t.utils.rangeIntersection(range1, range2);
+        t.startContainer = textContentNode;
+        t.startOffset = 1;
+        t.endContainer = textContentNode;
+        t.endOffset = 2;
+        r.shouldBe(t, "t.intersection.startContainer", "t.startContainer");
+        r.shouldBe(t, "t.intersection.startOffset", "t.startOffset");
+        r.shouldBe(t, "t.intersection.endContainer", "t.endContainer");
+        r.shouldBe(t, "t.intersection.endOffset", "t.endOffset");
+    }
+
     this.tests = function () {
         return r.name([
             normalizeTextNodes_TextWithTextSilblings,
@@ -695,7 +801,12 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             getNodesInRange_StartsInRejectedNode_IgnoresChildNodes,
             getNodesInRange_EndsInEmptyNode_ReturnsNothing,
 
-            mapObjOntoNode_EmptyObject
+            mapObjOntoNode_EmptyObject,
+            rangeIntersection_ReturnsOverlapBetweenTwoRanges,
+            rangeIntersection_Range1BeforeRange2_ReturnsUndefined,
+            rangeIntersection_Range2BeforeRange1_ReturnsUndefined,
+            rangeIntersection_Range1TouchesRange2_ReturnsCollapsedRangeOnPoint,
+            rangeIntersection_Range1ContainsRange2_ReturnsRange2Bounds
         ]);
     };
     this.asyncTests = function () {

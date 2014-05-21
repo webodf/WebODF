@@ -377,6 +377,10 @@
     "ops.OpInsertText": [
         "ops.OdtDocument"
     ],
+    "ops.OpMergeParagraph": [
+        "odf.CollapsingRules",
+        "ops.OdtDocument"
+    ],
     "ops.OpMoveCursor": [
         "ops.OdtDocument"
     ],
@@ -433,6 +437,7 @@
         "ops.OpInsertImage",
         "ops.OpInsertTable",
         "ops.OpInsertText",
+        "ops.OpMergeParagraph",
         "ops.OpMoveCursor",
         "ops.OpRemoveAnnotation",
         "ops.OpRemoveBlob",
