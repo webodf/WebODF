@@ -126,7 +126,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
         r.shouldBe(t, "t.styleSheet.cssRules.length", "3");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
-        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > *:not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;margin-left: 0px;padding-right: 0.2cm;\\ncontent: \"-\";\\n}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > :not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;margin-left: 0px;padding-right: 0.2cm;\\ncontent: \"-\";\\n}'");
 
     }
 

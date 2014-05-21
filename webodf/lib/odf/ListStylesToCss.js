@@ -138,6 +138,47 @@
         }
 
         /**
+         * Gets the CSS generated content rule for the list style
+         * @param {!Element} node
+         * @return {!string}
+         */
+        function getContentRule(node) {
+            var contentRule = "",
+                listLevelProps,
+                listLevelPositionSpaceMode,
+                listLevelLabelAlign,
+                followedBy;
+
+            if (node.localName === "list-level-style-number") {
+                contentRule = getNumberRule(node);
+            } else if (node.localName === "list-level-style-image") {
+                contentRule = getImageRule();
+            } else if (node.localName === "list-level-style-bullet") {
+                contentRule = getBulletRule(node);
+            }
+
+            listLevelProps = /**@type{!Element}*/(node.getElementsByTagNameNS(stylens, "list-level-properties")[0]);
+            if (listLevelProps) {
+                listLevelPositionSpaceMode = listLevelProps.getAttributeNS(textns, "list-level-position-and-space-mode");
+
+                if (listLevelPositionSpaceMode === "label-alignment") {
+                    listLevelLabelAlign = /**@type{!Element}*/(listLevelProps.getElementsByTagNameNS(stylens, "list-level-label-alignment")[0]);
+                    if (listLevelLabelAlign) {
+                        followedBy = listLevelLabelAlign.getAttributeNS(textns, "label-followed-by");
+                    }
+
+                    if (followedBy === "space") {
+                        contentRule += ' "\\a0"';
+                    }
+                }
+            }
+
+            // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
+            // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
+            return '\n' + contentRule + ';\n';
+        }
+
+        /**
          * In label-width-and-position mode of specifying list layout the margin and indent specified in
          * the paragraph style is additive to the layout specified in the list style.
          *
@@ -166,7 +207,7 @@
          * @param {!string} itemRule
          * @return {undefined}
          */
-        function addListStyleRule(styleSheet, name, node, itemRule) {
+        function addListStyleRule(styleSheet, name, node) {
             var selector = 'text|list[text|style-name="' + name + '"]',
                 level = node.getAttributeNS(textns, "level"),
                 listItemRule,
@@ -242,7 +283,7 @@
             appendRule(styleSheet, listItemRule);
 
             // insert the list label before every immediate child of the list-item, except for lists
-            listItemRule = selector + ' > text|list-item > *:not(text|list):first-child:before';
+            listItemRule = selector + ' > text|list-item > :not(text|list):first-child:before';
             listItemRule += '{';
             listItemRule += 'text-align: ' + textAlign + ';';
             listItemRule += 'counter-increment:list;';
@@ -250,9 +291,7 @@
 
             if (listLevelPositionSpaceMode === "label-alignment") {
                 listItemRule += 'margin-left: ' + bulletIndent + ';';
-                if (followedBy === "space") {
-                    itemRule += ' \'\\a0\'';
-                } else if (followedBy === "listtab") {
+                if (followedBy === "listtab") {
                     // TODO: remove this padding once text:label-followed-by="listtab" is implemented
                     // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#attribute-text_label-followed-by
                     listItemRule += 'padding-right: 0.2cm;';
@@ -262,9 +301,7 @@
                 listItemRule += 'margin-left: ' + (parseFloat(bulletWidth) === 0 ? '' : '-') + bulletWidth + ';';
                 listItemRule += 'padding-right: ' + labelDistance + ';';
             }
-            // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
-            // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
-            listItemRule += "\n" + itemRule + ';\n';
+            listItemRule += getContentRule(node);
             listItemRule += '}';
             appendRule(styleSheet, listItemRule);
         }
@@ -277,22 +314,12 @@
          * @return {undefined}
          */
         function addRule(styleSheet, name, node) {
-            var n = node.firstChild, e, itemrule;
+            var n = node.firstElementChild;
             while (n) {
                 if (n.namespaceURI === textns) {
-                    e = /**@type{!Element}*/(n);
-                    if (n.localName === "list-level-style-number") {
-                        itemrule = getNumberRule(e);
-                        addListStyleRule(styleSheet, name, e, itemrule);
-                    } else if (n.localName === "list-level-style-image") {
-                        itemrule = getImageRule();
-                        addListStyleRule(styleSheet, name, e, itemrule);
-                    } else if (n.localName === "list-level-style-bullet") {
-                        itemrule = getBulletRule(e);
-                        addListStyleRule(styleSheet, name, e, itemrule);
-                    }
+                    addListStyleRule(styleSheet, name, n);
                 }
-                n = n.nextSibling;
+                n = n.nextElementSibling;
             }
         }
 
