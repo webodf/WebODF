@@ -38,7 +38,13 @@
         textns = odf.Namespaces.textns,
         /**@const
            @type{!string}*/
-           listCounterName = "webodf-listLevel",
+        xmlns = odf.Namespaces.xmlns,
+        /**@const
+           @type{!string}*/
+        helperns = "urn:webodf:names:helper",
+        /**@const
+           @type{!string}*/
+        listCounterIdSuffix = "webodf-listLevel",
         /**@const
            @type{!Object.<string,string>}*/
         stylemap = {
@@ -48,6 +54,196 @@
             'i': 'lower-roman',
             'I': 'upper-roman'
         };
+
+    /**
+     * Appends the rule into the stylesheets and logs any errors that occur
+     * @param {!CSSStyleSheet} styleSheet
+     * @param {!string} rule
+     * @return {undefined}
+     */
+    function appendRule(styleSheet, rule) {
+        try {
+            styleSheet.insertRule(rule, styleSheet.cssRules.length);
+        } catch (/**@type{!DOMException}*/e) {
+            runtime.log("cannot load rule: " + rule + " - " + e);
+        }
+    }
+
+    /**
+     * Holds the current state of parsing the text:list elements in the DOM
+     * @param {!Object.<!string, !string>} contentRules
+     * @constructor
+     * @struct
+     */
+    function ParseState(contentRules) {
+        /**
+         * The number of list counters created for a list
+         * This is just a number appended to the list counter identifier to make it unique within the list
+         * @type {!number}
+         */
+        this.listCounterCount = 0;
+
+        /**
+         * The CSS generated content rule keyed by list level
+         * @type {!Object.<!string, !string>}
+         */
+        this.contentRules = contentRules;
+
+        /**
+         * The stack of counters for the list being processed
+         * @type {!Array.<!string>}
+         */
+        this.counterIdStack = [];
+    }
+
+    /**
+     * @param {!CSSStyleSheet} styleSheet
+     * @constructor
+     */
+    function UniqueListCounter(styleSheet) {
+        var /**@type{!number}*/
+            customListIdIndex = 0,
+            /**@type{!string}*/
+            globalCounterResetRule = "";
+
+        /**
+         * Assigns a unique global CSS list counter to this text:list element
+         * @param {!string} topLevelListId This is used to generate a unique identifier for this element
+         * @param {!Element} listElement This is always a text:list element
+         * @param {!number} listLevel
+         * @param {!ParseState} parseState
+         * @return {undefined}
+         */
+        function createCssRulesForList(topLevelListId, listElement, listLevel, parseState) {
+            var /**@type{!string}*/
+                newListCounterId,
+                newRule,
+                contentRule,
+                i;
+
+            // increment counters and create a new identifier for this text:list element
+            // this identifier will be used as the CSS counter name
+            parseState.listCounterCount += 1;
+            newListCounterId = topLevelListId + "-level" + listLevel + "-" + parseState.listCounterCount;
+            listElement.setAttributeNS(helperns, "counter-id", newListCounterId);
+
+            // remove any counters from the stack that are deeper than the current list level
+            // and push the newly created counter on to the stack
+            while (parseState.counterIdStack.length >= listLevel) {
+                parseState.counterIdStack.pop();
+            }
+            parseState.counterIdStack.push(newListCounterId);
+
+            // substitute the unique list counters in for each level up to the current one
+            // this only replaces the first occurrence in the string as the generated rule
+            // will have a different counter for each list level and multi level counter rules
+            // are created by joining counters from different levels together
+            contentRule = parseState.contentRules[listLevel.toString()] || "";
+            for (i = 1; i <= listLevel; i += 1) {
+                contentRule = contentRule.replace(i + listCounterIdSuffix, parseState.counterIdStack[i - 1]);
+            }
+
+            // add the newly created counter to the counter reset rule so it can be
+            // initialised later once we have parsed all the lists in the document.
+            // In the case of a multi-level list with no items the counter increment rule
+            // will not apply. To fix this issue we initialise the counters to a value of 1
+            // instead of the default of 0.
+            globalCounterResetRule += newListCounterId + ' 1 ';
+
+            // Apply the counter increment to EVERY list item in this list that has content (AKA a visible list label)
+            newRule = 'text|list[webodfhelper|counter-id="' + newListCounterId + '"]';
+            newRule += ' > text|list-item > :not(text|list):first-child:before';
+            newRule += '{';
+            newRule += contentRule;
+            newRule += 'counter-increment: ' + newListCounterId + ';';
+            newRule += '}';
+            appendRule(styleSheet, newRule);
+
+            // CSS counters increment the value before displaying the rendered list label. This is not an issue but as
+            // we initialise the counters to a value of 1 above to handle lists with no list items it means that
+            // lists that actually have list items will all start with the counter value of 2 which is not desirable.
+            // To fix this we apply another CSS rule here that overrides the counter increment rule above and
+            // prevents incrementing the counter on the FIRST list item that has content (AKA a visible list label).
+            newRule = 'text|list[webodfhelper|counter-id="' + newListCounterId + '"]';
+            newRule += ' > text|list-item:first-child > :not(text|list):first-child:before';
+            newRule += '{';
+            // Due to https://bugs.webkit.org/show_bug.cgi?id=84985 a value of "none" is ignored by some version of WebKit
+            // (specifically the ones shipped with the Cocoa frameworks on OSX 10.7 + 10.8).
+            // Override the counter-increment on this counter by name to workaround this
+            newRule += 'counter-increment: ' + newListCounterId + ' 0;';
+            newRule += '}';
+            appendRule(styleSheet, newRule);
+        }
+
+        /**
+         * Takes an element and parses it and its subtree for any text:list elements.
+         * The text:list elements then have CSS rules applied that give each one
+         * a unique global CSS counter for the purpose of list numbering.
+         * @param {!string} topLevelListId
+         * @param {!Element} element
+         * @param {!number} listLevel
+         * @param {!ParseState} parseState
+         * @return {undefined}
+         */
+        function iterateOverChildListElements(topLevelListId, element, listLevel, parseState) {
+            var isListElement = element.namespaceURI === textns && element.localName === "list",
+                isListItemElement = element.namespaceURI === textns && element.localName === "list-item",
+                childElement;
+
+            // don't continue iterating over elements that aren't text:list or text:list-item
+            if (!isListElement && !isListItemElement) {
+                return;
+            }
+
+            if (isListElement) {
+                listLevel += 1;
+                createCssRulesForList(topLevelListId, element, listLevel, parseState);
+            }
+
+            childElement = element.firstElementChild;
+            while (childElement) {
+                iterateOverChildListElements(topLevelListId, childElement, listLevel, parseState);
+                childElement = childElement.nextElementSibling;
+            }
+        }
+
+        /**
+         * Takes a text:list element and creates CSS counter rules used for numbering
+         * @param {!Object.<!string, !string>} contentRules
+         * @param {!Element} list
+         * @return {undefined}
+         */
+        this.createCounterRules = function (contentRules, list) {
+            var /**@type{!string}*/
+                listId = list.getAttributeNS(xmlns, "id"),
+                currentParseState = new ParseState(contentRules);
+
+            // ensure there is a unique identifier for each list if it does not have one
+            if (!listId) {
+                customListIdIndex += 1;
+                listId = "X" + customListIdIndex;
+            } else {
+                listId = "Y" + listId;
+            }
+
+            iterateOverChildListElements(listId, list, 0, currentParseState);
+        };
+
+        /**
+         * Initialises all CSS counters created so far by this UniqueListCounter with a counter-reset rule.
+         * Calling this method twice will cause the previous counter reset CSS rule to be overridden
+         * @return {undefined}
+         */
+        this.initialiseCreatedCounters = function () {
+            var newRule;
+
+            newRule = 'office|document';
+            newRule += '{';
+            newRule += 'counter-reset: ' + globalCounterResetRule + ';';
+            newRule += "}";
+            appendRule(styleSheet, newRule);
+        };
+    }
 
     /**
      * @constructor
@@ -65,24 +261,11 @@
         function convertToPxValue(value) {
             var parsedLength = odfUtils.parseLength(value);
             if (!parsedLength) {
-                runtime.log("Could not parse value '"+value+"'.");
+                runtime.log("Could not parse value '" + value + "'.");
                 // Return 0 as fallback, might have least bad results if used
                 return 0;
             }
             return cssUnits.convert(parsedLength.value, parsedLength.unit, "px");
-        }
-
-        /**
-         * Appends the rule into the stylesheets and logs any errors that occur
-         * @param {!CSSStyleSheet} styleSheet
-         * @param {!string} rule
-         */
-        function appendRule(styleSheet, rule) {
-            try {
-                styleSheet.insertRule(rule, styleSheet.cssRules.length);
-            } catch (/**@type{!DOMException}*/e) {
-                runtime.log("cannot load rule: " + rule + " - " + e);
-            }
         }
 
         /**
@@ -123,7 +306,7 @@
                 // and concatenate them for multi level lists
                 // https://wiki.openoffice.org/wiki/Number_labels
                 while (displayLevels > 0) {
-                    content += " counter(" + listCounterName + (textLevel - displayLevels + 1) + "," + stylemap[style] + ")";
+                    content += " counter(" + (textLevel - displayLevels + 1) + listCounterIdSuffix + "," + stylemap[style] + ")";
                     if (displayLevels > 1) {
                         content += '"."';
                     }
@@ -197,6 +380,26 @@
         }
 
         /**
+         * Takes a text:list-style element and returns the generated CSS
+         * content rules for each list level in the list style
+         * @param {!Element} listStyleNode
+         * @return {!Object.<!string, !string>}
+         */
+        function getAllContentRules(listStyleNode) {
+            var childNode = listStyleNode.firstElementChild,
+                level,
+                rules = {};
+
+            while (childNode) {
+                level = childNode.getAttributeNS(textns, "level");
+                level = level && parseInt(level, 10);
+                rules[level] = getContentRule(childNode);
+                childNode = childNode.nextElementSibling;
+            }
+            return rules;
+        }
+
+        /**
          * In label-width-and-position mode of specifying list layout the margin and indent specified in
          * the paragraph style is additive to the layout specified in the list style.
          *
@@ -222,7 +425,6 @@
          * @param {!CSSStyleSheet} styleSheet
          * @param {!string} name
          * @param {!Element} node
-         * @param {!string} itemRule
          * @return {undefined}
          */
         function addListStyleRule(styleSheet, name, node) {
@@ -290,17 +492,6 @@
                 leftOffset = convertToPxValue(listIndent) + convertToPxValue(bulletWidth);
             }
 
-            // give the counter a default value of 1 so that multi level list numbering gives correct values
-            // in the case where a list level does not have any list items
-            listItemRule = selector;
-            listItemRule += "{ counter-reset: " + listCounterName + level + " 1; }";
-            appendRule(styleSheet, listItemRule);
-
-            // dont increment the first list item at each level as it defaults to a value of one
-            listItemRule = selector + '> text|list-item:first-child > :not(text|list):first-child:before';
-            listItemRule += '{ counter-increment: none; }';
-            appendRule(styleSheet, listItemRule);
-
             listItemRule = selector + ' > text|list-item';
             listItemRule += '{';
             listItemRule += 'margin-left: ' + leftOffset + 'px;';
@@ -317,7 +508,6 @@
             listItemRule = selector + ' > text|list-item > :not(text|list):first-child:before';
             listItemRule += '{';
             listItemRule += 'text-align: ' + textAlign + ';';
-            listItemRule += 'counter-increment: ' + listCounterName + level + ';';
             listItemRule += 'display: inline-block;';
 
             if (listLevelPositionSpaceMode === "label-alignment") {
@@ -332,7 +522,6 @@
                 listItemRule += 'margin-left: ' + (parseFloat(bulletWidth) === 0 ? '' : '-') + bulletWidth + ';';
                 listItemRule += 'padding-right: ' + labelDistance + ';';
             }
-            listItemRule += getContentRule(node);
             listItemRule += '}';
             appendRule(styleSheet, listItemRule);
         }
@@ -355,12 +544,50 @@
         }
 
         /**
-         * Creates CSS styles from the given ODF list styles and applies them to the stylesheet
-         * @param {!CSSStyleSheet} stylesheet
-         * @param {!odf.StyleTree.Tree} styleTree
+         * Adds new CSS rules based on any properties in
+         * the ODF list content if they affect the final style
+         * @param {!CSSStyleSheet} styleSheet
+         * @param {!Element} odfBody
+         * @param {!Object.<!string, !odf.StyleTreeNode>} listStyles
          * @return {undefined}
          */
-        this.applyListStyles = function (stylesheet, styleTree) {
+        function applyContentBasedStyles(styleSheet, odfBody, listStyles) {
+            var lists = odfBody.getElementsByTagNameNS(textns, "list"),
+                listCounter = new UniqueListCounter(styleSheet),
+                list,
+                styleName,
+                contentRules,
+                i;
+
+            for (i = 0; i < lists.length; i += 1) {
+                list = /**@type{!Element}*/(lists.item(i));
+                styleName = list.getAttributeNS(textns, "style-name");
+
+                // TODO: Handle default list style
+                // lists that have no text:style-name attribute defined and do not have a parent text:list that
+                // defines a style name use a default implementation defined style as per the spec
+                // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#attribute-text_style-name_element-text_list
+
+                // lists that have no text:style-name attribute defined but do have a parent list that defines a
+                // style name will inherit that style and will be handled correctly as any text:list with a style defined
+                // will have CSS rules applied to its child text:list elements
+                if (styleName) {
+                    contentRules = getAllContentRules(listStyles[styleName].element);
+                    listCounter.createCounterRules(contentRules, list);
+                }
+            }
+
+            listCounter.initialiseCreatedCounters();
+        }
+
+        /**
+         * Creates CSS styles from the given ODF list styles and applies them to the stylesheet
+         * @param {!CSSStyleSheet} styleSheet
+         * @param {!odf.StyleTree.Tree} styleTree
+         * @param {!Element} odfBody
+         * @return {undefined}
+         */
+        this.applyListStyles = function (styleSheet, styleTree, odfBody) {
             var styleFamilyTree,
                 node;
 
@@ -371,9 +598,11 @@
             if (styleFamilyTree) {
                 Object.keys(styleFamilyTree).forEach(function (styleName) {
                     node = /**@type{!odf.StyleTreeNode}*/(styleFamilyTree[styleName]);
-                    addRule(stylesheet, styleName, node.element);
+                    addRule(styleSheet, styleName, node.element);
                 });
             }
+
+            applyContentBasedStyles(styleSheet, odfBody, styleFamilyTree);
         };
     };
 }());

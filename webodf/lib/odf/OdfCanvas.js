@@ -200,6 +200,7 @@
             stylesheet.deleteRule(cssRules.length - 1);
         }
     }
+
     /**
      * A new styles.xml has been loaded. Update the live document with it.
      * @param {!odf.OdfContainer} odfcontainer
@@ -224,7 +225,11 @@
             styleTree
         );
 
-        list2css.applyListStyles(styleSheet, styleTree);
+        list2css.applyListStyles(
+            styleSheet,
+            styleTree,
+            odfcontainer.rootElement.body);
+
     }
 
     /**

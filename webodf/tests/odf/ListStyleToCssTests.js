@@ -42,7 +42,6 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
      */
     function MockCSSRuleList() {
         this.length = 0;
-
         this.rules = [];
     }
 
@@ -52,7 +51,6 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
      */
     function MockCSSStyleSheet() {
         var cssRules = new MockCSSRuleList();
-
         this.cssRules = cssRules;
 
         /**
@@ -76,7 +74,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
 
     this.setUp = function () {
         t = {
-            list2css : new odf.ListStyleToCss(),
+            list2css: new odf.ListStyleToCss(),
             testArea: core.UnitTest.provideTestAreaDiv()
         };
     };
@@ -90,26 +88,30 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
      * @param {!string} automaticStyles
      * @return {undefined}
      */
-    function applyListStyles(styles, automaticStyles) {
+    function applyListStyles(styles, automaticStyles, body) {
         var stylesTree,
             automaticStylesTree,
+            bodyTree,
             styleElement,
             text = "";
 
         stylesTree = core.UnitTest.createXmlDocument('office:styles', styles, namespaceMap).documentElement;
         automaticStylesTree = core.UnitTest.createXmlDocument('office:automatic-styles', automaticStyles, namespaceMap).documentElement;
+        bodyTree = core.UnitTest.createXmlDocument('office:body', body, namespaceMap).documentElement;
 
         styleElement = document.createElement("style");
-        odf.Namespaces.forEachPrefix(function(prefix, ns) {
+        odf.Namespaces.forEachPrefix(function (prefix, ns) {
             text += "@namespace " + prefix + " url(" + ns + ");\n";
         });
+        text += "@namespace webodfhelper url(urn:webodf:names:helper);\n";
+
         styleElement.appendChild(document.createTextNode(text));
         t.testArea.appendChild(styleElement);
         t.styleSheetImpl = styleElement.sheet;
         t.styleSheet = new MockCSSStyleSheet();
         t.styleTree = new odf.StyleTree(stylesTree, automaticStylesTree).getStyleTree();
 
-        t.list2css.applyListStyles(t.styleSheet, t.styleTree);
+        t.list2css.applyListStyles(t.styleSheet, t.styleTree, bodyTree);
     }
 
     function style_list_level_label_alignment_WithNo_fo_margin_left() {
@@ -122,12 +124,17 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
                 '</style:list-level-properties>' +
               '</text:list-level-style-bullet>' +
             '</text:list-style>',
-            "");
-        r.shouldBe(t, "t.styleSheet.cssRules.length", "3");
+            '',
+            '<text:list xml:id="list3909266619294604477" text:style-name="lijst">' +
+              '<text:list-item>' +
+                '<text:p />' +
+              '</text:list-item>' +
+            '</text:list>');
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "6");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
-        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > :not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;margin-left: 0px;padding-right: 0.2cm;\\ncontent: \"-\";\\n}'");
-
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > :not(text|list):first-child:before{text-align: left;display: inline-block;margin-left: 0px;padding-right: 0.2cm;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[3].ruleText", "'text|list[webodfhelper|counter-id=\"webodf-list3909266619294604477-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: \"-\";\\ncounter-increment: webodf-list3909266619294604477-level1-1;}'");
     }
 
     function style_WithNo_list_level_poperties() {
@@ -201,7 +208,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
                     isEscaped = false;
                 } else if (currentCharacter === "\\") {
                     isEscaped = true;
-                } else if(currentCharacter === regionEndDelim) {
+                } else if (currentCharacter === regionEndDelim) {
                     contentSubstring = '[' + content.substring(stringStartIndex, currentCharIndex) + ']';
                     // Replace any escaped quotes with unescaped quotes. This allows us to cope with FF always
                     // escaping any type of quote, whilst Chrome/WebKit only escaping if the quote is the same as
@@ -280,9 +287,9 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
                 inputs: ["'\\\\\"'"]
             }
         ];
-        contentTests.forEach(function(testSetup) {
+        contentTests.forEach(function (testSetup) {
             t.output = testSetup.output;
-            testSetup.inputs.forEach(function(input) {
+            testSetup.inputs.forEach(function (input) {
                 t.input = normalizeCSSContent(input);
                 r.shouldBe(t, "t.input", "t.output");
             });
@@ -290,13 +297,13 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
     }
 
     /**
-     * Searches in the present stylesheet rules for a rule intended for the supplied style
+     * Searches in the present stylesheet rules for a rule intended for the supplied list identifier
      * name who's normalized style.content value matches the expected value
-     * @param {!string} styleName
+     * @param {!string} listId
      * @param {!string} normalizedContentValue
      * @return {undefined}
      */
-    function matchContentBlock(styleName, normalizedContentValue) {
+    function matchContentBlock(listId, normalizedContentValue) {
         var contentFound,
             ruleIndex,
             rule;
@@ -304,7 +311,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
         t.expectedContent = normalizedContentValue;
         for (ruleIndex = 0; ruleIndex < t.styleSheet.cssRules.length; ruleIndex += 1) {
             rule = t.styleSheet.cssRules.rules[ruleIndex];
-            if (rule.cssRule.selectorText.indexOf(styleName) !== -1 && rule.cssRule.style.content) {
+            if (rule.cssRule.selectorText.indexOf(listId) !== -1 && rule.cssRule.style.content) {
                 contentFound = true;
                 t.actualContent = normalizeCSSContent(rule.cssRule.style.content);
                 r.shouldBe(t, "t.actualContent", "t.expectedContent");
@@ -324,16 +331,21 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
      */
     function checkListLevelStyleNumberAttribute(attribute, value, expectedContentValue) {
         applyListStyles(
-                '<text:list-style style:name="check_stylenumber_attribute">' +
-                '<text:list-level-style-number text:level="1" ' + attribute + '="' + value  +'" style:num-format="1">' +
+            '<text:list-style style:name="check_stylenumber_attribute">' +
+              '<text:list-level-style-number text:level="1" ' + attribute + '="' + value  +'" style:num-format="1">' +
                 '<style:list-level-properties text:list-level-position-and-space-mode="label-alignment">' +
-                '<style:list-level-label-alignment text:label-followed-by="listtab" fo:margin-left="0cm"/>' +
+                  '<style:list-level-label-alignment text:label-followed-by="listtab" fo:margin-left="0cm"/>' +
                 '</style:list-level-properties>' +
-                '</text:list-level-style-number>' +
-                '</text:list-style>',
-            "");
+              '</text:list-level-style-number>' +
+            '</text:list-style>',
+            '',
+            '<text:list text:style-name="check_stylenumber_attribute">' +
+              '<text:list-item>' +
+                '<text:p />' +
+              '</text:list-item>' +
+            '</text:list>');
 
-        matchContentBlock("check_stylenumber_attribute", expectedContentValue);
+        matchContentBlock("list1-level1-1", expectedContentValue);
     }
 
     function numberedListPrefixes() {
@@ -358,16 +370,21 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
 
     function checkBulletCharacter(value, expectedContentValue) {
         applyListStyles(
-                '<text:list-style style:name="checkBulletCharacter">' +
-                '<text:list-level-style-bullet text:level="1" text:bullet-char="' + value  +'">' +
+            '<text:list-style style:name="checkBulletCharacter">' +
+              '<text:list-level-style-bullet text:level="1" text:bullet-char="' + value  +'">' +
                 '<style:list-level-properties text:list-level-position-and-space-mode="label-alignment">' +
-                '<style:list-level-label-alignment text:label-followed-by="listtab" fo:margin-left="0cm"/>' +
+                  '<style:list-level-label-alignment text:label-followed-by="listtab" fo:margin-left="0cm"/>' +
                 '</style:list-level-properties>' +
-                '</text:list-level-style-bullet>' +
-                '</text:list-style>',
-            "");
+              '</text:list-level-style-bullet>' +
+            '</text:list-style>',
+            '',
+            '<text:list text:style-name="checkBulletCharacter">' +
+              '<text:list-item>' +
+                '<text:p />' +
+              '</text:list-item>' +
+            '</text:list>');
 
-        matchContentBlock("checkBulletCharacter", expectedContentValue);
+        matchContentBlock("list1-level1-1", expectedContentValue);
     }
 
     function bulletCharacters() {
