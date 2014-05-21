@@ -145,14 +145,6 @@ ops.TransformerTests = function TransformerTests(runner) {
         };
     }
 
-    function opspecs(ops) {
-        var i, result = [];
-        for (i = 0; i < ops.length; i += 1) {
-            result.push(ops[i].spec());
-        }
-        return result;
-    }
-
     /**
      * Creates a deep copy of the spec
      * @param {!Object} object
@@ -181,12 +173,11 @@ ops.TransformerTests = function TransformerTests(runner) {
         var transformer = new ops.OperationTransformer(),
             i;
 
-        transformer.setOperationFactory(t.operationFactory);
         t.transformResult = transformer.transform(cloneSpecs(test["in"].opspecsA), cloneSpecs(test["in"].opspecsB));
         r.shouldBeNonNull(t, "t.transformResult");
         if (t.transformResult) {
-            t.transformedOpspecsA = opspecs(t.transformResult.opsA);
-            t.transformedOpspecsB = opspecs(t.transformResult.opsB);
+            t.transformedOpspecsA = t.transformResult.opSpecsA;
+            t.transformedOpspecsB = t.transformResult.opSpecsB;
             t.refOpspecsA = test.out.opspecsA;
             t.refOpspecsB = test.out.opspecsB;
 
@@ -261,7 +252,6 @@ ops.TransformerTests = function TransformerTests(runner) {
         t = {};
         testarea = core.UnitTest.provideTestAreaDiv();
         t.odfcanvas = new odf.OdfCanvas(testarea);
-        t.operationFactory = new ops.OperationFactory();
     };
     this.tearDown = function () {
         t = {};

@@ -36,23 +36,7 @@
 ops.OperationTransformer = function OperationTransformer() {
     "use strict";
 
-    var /**@type{!ops.OperationFactory}}*/
-        operationFactory,
-        operationTransformMatrix = new ops.OperationTransformMatrix();
-
-    /**
-     * @param {!Array.<!{optype:string}>} opspecs
-     * @return {!Array.<!ops.Operation>}
-     */
-    function operations(opspecs) {
-        var ops = [];
-
-        opspecs.forEach(function (opspec) {
-            ops.push(operationFactory.create(opspec));
-        });
-
-        return ops;
-    }
+    var operationTransformMatrix = new ops.OperationTransformMatrix();
 
     /**
      * TODO: priority could be read from op spec, here be an attribute from-server
@@ -121,16 +105,6 @@ ops.OperationTransformer = function OperationTransformer() {
     }
 
     /**
-     * Sets the factory to use to create operation instances from operation specs.
-     *
-     * @param {!ops.OperationFactory} f
-     * @return {undefined}
-     */
-    this.setOperationFactory = function (f) {
-        operationFactory = f;
-    };
-
-    /**
      * @return {!ops.OperationTransformMatrix}
      */
     this.getOperationTransformMatrix = function () {
@@ -140,8 +114,8 @@ ops.OperationTransformer = function OperationTransformer() {
     /**
      * @param {!Array.<!Object>} opSpecsA   sequence of opspecs with lower priority in case of tie breaking
      * @param {!Array.<!{optype:string}>} opSpecsB   opspecs with higher priority in case of tie breaking
-     * @return {?{opsA:Array.<!ops.Operation>,
-     *            opsB:Array.<!ops.Operation>}}
+     * @return {?{opSpecsA:!Array.<!Object>,
+     *            opSpecsB:!Array.<!Object>}}
      */
     this.transform = function (opSpecsA, opSpecsB) {
         var transformResult,
@@ -160,8 +134,8 @@ ops.OperationTransformer = function OperationTransformer() {
         }
 
         return {
-            opsA: operations(opSpecsA),
-            opsB: operations(transformedOpspecsB)
+            opSpecsA: /**@type{!Array.<!Object>}*/(opSpecsA),
+            opSpecsB: /**@type{!Array.<!Object>}*/(transformedOpspecsB)
         };
     };
 };
