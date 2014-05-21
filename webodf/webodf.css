@@ -206,7 +206,6 @@ text|list:before {
 }
 text|list {
     display: block;
-    counter-reset: list;
 }
 text|list-item {
     display: block;

@@ -37,6 +37,9 @@
            @type{!string}*/
         textns = odf.Namespaces.textns,
         /**@const
+           @type{!string}*/
+           listCounterName = "webodf-listLevel",
+        /**@const
            @type{!Object.<string,string>}*/
         stylemap = {
             '1': 'decimal',
@@ -103,14 +106,29 @@
                 /**@type{!string}*/
                 prefix = node.getAttributeNS(stylens, "num-prefix") || "",
                 /**@type{!string}*/
-                content = "";
+                content = "",
+                textLevel = node.getAttributeNS(textns, "level"),
+                displayLevels = node.getAttributeNS(textns, "display-levels");
             if (prefix) {
                 // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
                 // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
                 content += '"' + escapeCSSString(prefix) + '"\n';
             }
             if (stylemap.hasOwnProperty(style)) {
-                content += " counter(list, " + stylemap[style] + ")";
+                textLevel = textLevel ? parseInt(textLevel, 10) : 1;
+                displayLevels = displayLevels ? parseInt(displayLevels, 10) : 1;
+
+                // as we might want to display a subset of the counters
+                // we assume a different counter for each list level
+                // and concatenate them for multi level lists
+                // https://wiki.openoffice.org/wiki/Number_labels
+                while (displayLevels > 0) {
+                    content += " counter(" + listCounterName + (textLevel - displayLevels + 1) + "," + stylemap[style] + ")";
+                    if (displayLevels > 1) {
+                        content += '"."';
+                    }
+                    displayLevels -= 1;
+                }
             } else if (style) {
                 content += ' "' + style + '"';
             } else {
@@ -210,6 +228,7 @@
         function addListStyleRule(styleSheet, name, node) {
             var selector = 'text|list[text|style-name="' + name + '"]',
                 level = node.getAttributeNS(textns, "level"),
+                selectorLevel,
                 listItemRule,
                 listLevelProps,
                 listLevelPositionSpaceMode,
@@ -231,9 +250,10 @@
 
             // calculate CSS selector based on list level
             level = level && parseInt(level, 10);
-            while (level > 1) {
+            selectorLevel = level;
+            while (selectorLevel > 1) {
                 selector += ' > text|list-item > text|list';
-                level -= 1;
+                selectorLevel -= 1;
             }
 
             // TODO: fo:text-align is only an optional attribute with <style:list-level-properties>,
@@ -270,6 +290,17 @@
                 leftOffset = convertToPxValue(listIndent) + convertToPxValue(bulletWidth);
             }
 
+            // give the counter a default value of 1 so that multi level list numbering gives correct values
+            // in the case where a list level does not have any list items
+            listItemRule = selector;
+            listItemRule += "{ counter-reset: " + listCounterName + level + " 1; }";
+            appendRule(styleSheet, listItemRule);
+
+            // dont increment the first list item at each level as it defaults to a value of one
+            listItemRule = selector + '> text|list-item:first-child > :not(text|list):first-child:before';
+            listItemRule += '{ counter-increment: none; }';
+            appendRule(styleSheet, listItemRule);
+
             listItemRule = selector + ' > text|list-item';
             listItemRule += '{';
             listItemRule += 'margin-left: ' + leftOffset + 'px;';
@@ -286,7 +317,7 @@
             listItemRule = selector + ' > text|list-item > :not(text|list):first-child:before';
             listItemRule += '{';
             listItemRule += 'text-align: ' + textAlign + ';';
-            listItemRule += 'counter-increment:list;';
+            listItemRule += 'counter-increment: ' + listCounterName + level + ';';
             listItemRule += 'display: inline-block;';
 
             if (listLevelPositionSpaceMode === "label-alignment") {
