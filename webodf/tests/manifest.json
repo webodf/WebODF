@@ -163,6 +163,7 @@
         "odf.OdfCanvas",
         "odf.OdfContainer",
         "ops.OdtDocument",
+        "ops.Operation",
         "ops.OperationFactory",
         "ops.OperationTransformer",
         "xmldom.LSSerializer"
@@ -170,7 +171,6 @@
     "ops.TransformerTests": [
         "core.UnitTester",
         "odf.OdfCanvas",
-        "ops.OperationFactory",
         "ops.OperationTransformer"
     ],
     "xmldom.LSSerializerTests": [

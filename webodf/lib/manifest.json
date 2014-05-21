@@ -435,7 +435,6 @@
         "ops.OpUpdateParagraphStyle"
     ],
     "ops.OperationTransformer": [
-        "ops.OperationFactory",
         "ops.OperationTransformMatrix"
     ],
     "ops.Server": [

@@ -239,14 +239,14 @@ define("webodf/editor/server/pullbox/OperationRouter", [], function () {
             }
 
             // store transformed server ops
-            for (i = 0; i < transformResult.opsB.length; i += 1) {
-                unplayedServerOpspecQueue.push(transformResult.opsB[i].spec());
+            for (i = 0; i < transformResult.opSpecsB.length; i += 1) {
+                unplayedServerOpspecQueue.push(transformResult.opSpecsB[i]);
             }
 
             // store opspecs of all transformed client opspecs
             unsyncedClientOpspecQueue = [];
-            for (i = 0; i < transformResult.opsA.length; i += 1) {
-                unsyncedClientOpspecQueue.push(transformResult.opsA[i].spec());
+            for (i = 0; i < transformResult.opSpecsA.length; i += 1) {
+                unsyncedClientOpspecQueue.push(transformResult.opSpecsA[i]);
             }
 
             return true;
@@ -467,7 +467,6 @@ runtime.log("OperationRouter: instant opsSync requested");
          */
         this.setOperationFactory = function (f) {
             operationFactory = f;
-            operationTransformer.setOperationFactory(f);
         };
 
         /**

@@ -75,6 +75,20 @@ ops.TransformationTests = function TransformationTests(runner) {
     }
 
     /**
+     * @param {!Array.<!{optype:string}>} opspecs
+     * @return {!Array.<!ops.Operation>}
+     */
+    function operations(opspecs) {
+        var ops = [];
+
+        opspecs.forEach(function (opspec) {
+            ops.push(t.operationFactory.create(opspec));
+        });
+
+        return ops;
+    }
+
+    /**
      * Traverse the tree and sort cursors that are at the same position,
      * so identic sets of cursors are in an identic order.
      * @param {!Element} element
@@ -366,7 +380,7 @@ ops.TransformationTests = function TransformationTests(runner) {
         return getOfficeNSElement(element, "meta");
     }
 
-    function compareOpsExecution(opspecs, transformedOps, before, after) {
+    function compareOpsExecution(opspecs, transformedOpspecs, before, after) {
         var odfContainer,
             odtDocument,
             text,
@@ -378,6 +392,7 @@ ops.TransformationTests = function TransformationTests(runner) {
             meta,
             metabefore = getOfficeMetaElement(before),
             metaafter = getOfficeMetaElement(after),
+            transformedOps = operations(transformedOpspecs),
             i,
             op;
 
@@ -463,12 +478,11 @@ ops.TransformationTests = function TransformationTests(runner) {
     function runTest(test) {
         var transformer = new ops.OperationTransformer();
 
-        transformer.setOperationFactory(t.operationFactory);
         t.transformResult = transformer.transform(cloneSpecs(test.opspecsA), cloneSpecs(test.opspecsB));
         r.shouldBeNonNull(t, "t.transformResult");
         if (t.transformResult) {
-            compareOpsExecution(test.opspecsA, t.transformResult.opsB, test.before, test.after);
-            compareOpsExecution(test.opspecsB, t.transformResult.opsA, test.before, test.after);
+            compareOpsExecution(test.opspecsA, t.transformResult.opSpecsB, test.before, test.after);
+            compareOpsExecution(test.opspecsB, t.transformResult.opSpecsA, test.before, test.after);
         }
     }
 
