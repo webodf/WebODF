@@ -265,14 +265,15 @@ if (NOT ANT)
 endif(NOT ANT)
 
 # Android
-if (NOT ANDROID_SDK_DIR)
-  if(WIN32)
-    find_path(ANDROID_SDK_DIR platform-tools/aapt.exe)
-  else()
-    find_path(ANDROID_SDK_DIR platform-tools/aapt)
-  endif()
-endif(NOT ANDROID_SDK_DIR)
-
+# If android sdk is properly installed, cmake only needs to know where to find
+# the executable 'android'.
+# The variable ANDROID_SDK_DIR can be provided if a specific android sdk version
+# is desired or if the android executable is not in the path.
+if (ANDROID_SDK_DIR)
+  set(ANDROID ${ANDROID_SDK_DIR}/tools/android)
+else (ANDROID_SDK_DIR)
+  find_program(ANDROID android)
+endif(ANDROID_SDK_DIR)
 
 ##############################
 ## Define custom macros
