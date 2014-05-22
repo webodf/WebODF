@@ -457,9 +457,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @param {!ops.Operation} op
      */
     function handleOperationExecuted(op) {
-        var spec = op.spec(),
-            memberId = spec.memberid,
-            date = new Date(spec.timestamp).toISOString(),
+        var opspec = op.spec(),
+            memberId = opspec.memberid,
+            date = new Date(opspec.timestamp).toISOString(),
             odfContainer = odfCanvas.odfContainer(),
             /**@type{!{setProperties: !Object, removedProperties: ?Array.<!string>}}*/
             changedMetadata = {
@@ -471,14 +471,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         // If the operation is an edit (that changes the
         // ODF that will be saved), then update metadata.
         if (op.isEdit) {
-            if (op.spec().optype === "UpdateMetadata") {
+            if (opspec.optype === "UpdateMetadata") {
                 // HACK: Cannot typecast this to OpUpdateMetadata's spec because that would be a cyclic dependency,
                 // therefore forcibly typecast this to advertise the two required properties. Also, deep clone to avoid
                 // unintended modification of the op spec.
-                spec = /**@type{!{setProperties: !Object, removedProperties: ?{attributes: string}}}*/(JSON.parse(JSON.stringify(op.spec())));
-                changedMetadata.setProperties = /**@type{!Object}*/(spec.setProperties);
-                if (spec.removedProperties) {
-                    changedMetadata.removedProperties = /**@type{?Array.<!string>}*/(spec.removedProperties);
+                changedMetadata.setProperties = /**@type{!Object}*/(JSON.parse(JSON.stringify(/**@type{!{setProperties: !Object}}*/(opspec).setProperties)));
+                if (/**@type{!{removedProperties: ?{attributes: !string}}}*/(opspec).removedProperties) {
+                    changedMetadata.removedProperties = /**@type{!{removedProperties: ?{attributes: !string}}}*/(opspec).removedProperties.attributes.split(',');
                 }
             }
 
