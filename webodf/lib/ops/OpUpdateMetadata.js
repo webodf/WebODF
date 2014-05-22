@@ -61,7 +61,7 @@ ops.OpUpdateMetadata = function OpUpdateMetadata() {
     this.execute = function (document) {
         var odtDocument = /**@type{ops.OdtDocument}*/(document),
             odfContainer = odtDocument.getOdfCanvas().odfContainer(),
-            removedPropertiesArray = [];
+            removedPropertiesArray = null;
 /* dead code
             blockedProperties = ["dc:date", "dc:creator", "meta:editing-cycles"];
 
