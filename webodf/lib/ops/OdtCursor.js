@@ -211,8 +211,3 @@ ops.OdtCursor.RegionSelection = 'Region';
 /**@const
  @type {!string} */
 ops.OdtCursor.signalCursorUpdated = "cursorUpdated";
-
-(function () {
-    "use strict";
-    return ops.OdtCursor;
-}());

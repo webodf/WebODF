@@ -409,7 +409,3 @@ odf.TextStyleApplicatorTests.prototype.description = function () {
     "use strict";
     return "Test the TextStyleApplicator class.";
 };
-(function () {
-    "use strict";
-    return odf.TextStyleApplicatorTests;
-}());

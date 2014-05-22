@@ -849,7 +849,3 @@ ops.OdtDocumentTests.prototype.description = function () {
     "use strict";
     return "Test the OdtDocument class.";
 };
-(function () {
-    "use strict";
-    return ops.OdtDocumentTests;
-}());

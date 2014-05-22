@@ -226,8 +226,3 @@ gui.KeyboardHandler.KeyCode = {
     RightMeta: 93,
     MetaInMozilla: 224
 };
-
-(function () {
-    "use strict";
-    return gui.KeyboardHandler;
-}());

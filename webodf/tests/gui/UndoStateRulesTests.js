@@ -408,7 +408,3 @@ gui.UndoStateRulesTests.prototype.description = function () {
     "use strict";
     return "Test the UndoStateRules class.";
 };
-(function () {
-    "use strict";
-    return gui.UndoStateRulesTests;
-}());

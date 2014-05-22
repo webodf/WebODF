@@ -804,9 +804,3 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
 
 /**@const*/gui.DirectFormattingController.textStylingChanged = "textStyling/changed";
 /**@const*/gui.DirectFormattingController.paragraphStylingChanged = "paragraphStyling/changed";
-
-(function () {
-    "use strict";
-    return gui.DirectFormattingController;
-}());
-

@@ -369,7 +369,3 @@ odf.ListStyleToCssTests.prototype.description = function () {
     "use strict";
     return "Test the ListStyleToCss class.";
 };
-(function () {
-    "use strict";
-    return odf.ListStyleToCssTests;
-}());

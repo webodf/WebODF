@@ -236,7 +236,3 @@ core.StepIteratorTests.prototype.description = function () {
     "use strict";
     return "Test the StepIterator class.";
 };
-(function () {
-    "use strict";
-    return core.StepIteratorTests;
-}());

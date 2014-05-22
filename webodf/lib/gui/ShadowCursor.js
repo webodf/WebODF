@@ -116,8 +116,3 @@ gui.ShadowCursor = function ShadowCursor(document) {
 };
 
 /** @const @type {!string} */gui.ShadowCursor.ShadowCursorMemberId = "";
-
-(function () {
-    "use strict";
-    return gui.ShadowCursor;
-}());

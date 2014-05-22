@@ -377,8 +377,3 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 };
 
 /**@const*/ gui.TrivialUndoManager.signalDocumentRootReplaced = "documentRootReplaced";
-
-(function() {
-    "use strict";
-    return gui.TrivialUndoManager;
-}());

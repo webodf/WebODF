@@ -204,9 +204,3 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
 };
 
 /**@const*/gui.AnnotationController.annotatableChanged = "annotatable/changed";
-
-(function () {
-    "use strict";
-    return gui.AnnotationController;
-}());
-

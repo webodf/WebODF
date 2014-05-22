@@ -705,7 +705,3 @@ ops.OdtStepsTranslatorTests.prototype.description = function () {
     "use strict";
     return "Test the OdtStepsTranslator class.";
 };
-(function () {
-    "use strict";
-    return ops.OdtStepsTranslatorTests;
-}());

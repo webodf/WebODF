@@ -1185,7 +1185,5 @@ gui.SessionControllerOptions = function () {
 
         init();
     };
-
-    return gui.SessionController;
 }());
 // vim:expandtab

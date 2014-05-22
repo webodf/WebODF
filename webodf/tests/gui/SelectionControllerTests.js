@@ -575,7 +575,3 @@ gui.SelectionControllerTests.prototype.description = function () {
     "use strict";
     return "Test the SelectionController class.";
 };
-(function () {
-    "use strict";
-    return gui.SelectionControllerTests;
-}());

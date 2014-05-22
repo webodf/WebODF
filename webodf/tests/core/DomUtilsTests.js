@@ -700,7 +700,3 @@ core.DomUtilsTests.prototype.description = function () {
     "use strict";
     return "Test the DomUtils class.";
 };
-(function () {
-    "use strict";
-    return core.DomUtilsTests;
-}());

@@ -321,7 +321,3 @@ gui.StyleSummaryTests.prototype.description = function () {
     "use strict";
     return "Test the StyleSummary class.";
 };
-(function () {
-    "use strict";
-    return gui.StyleSummaryTests;
-}());
