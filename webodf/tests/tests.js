@@ -43,6 +43,7 @@ runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.StepIteratorTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
+runtime.loadClass("gui.MetadataControllerTests");
 runtime.loadClass("gui.SelectionControllerTests");
 runtime.loadClass("gui.StyleSummaryTests");
 runtime.loadClass("gui.TextControllerTests");
@@ -94,6 +95,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(gui.UndoStateRulesTests);
     tests.push(gui.TextControllerTests);
     tests.push(gui.TrivialUndoManagerTests);
+    tests.push(gui.MetadataControllerTests);
     tests.push(gui.SelectionControllerTests);
     tests.push(gui.StyleSummaryTests);
     tests.push(odf.OdfUtilsTests);

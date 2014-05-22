@@ -118,6 +118,9 @@
     ],
     "gui.KeyboardHandler": [
     ],
+    "gui.MetadataController": [
+        "ops.Session"
+    ],
     "gui.MimeDataExporter": [
         "odf.OdfNodeFilter",
         "odf.TextSerializer"
@@ -152,6 +155,7 @@
         "gui.ImageController",
         "gui.ImageSelector",
         "gui.InputMethodEditor",
+        "gui.MetadataController",
         "gui.PlainTextPasteboard",
         "gui.SelectionController",
         "gui.TextController",

@@ -20,6 +20,7 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/core/PositionIteratorTests.js
     tests/core/RuntimeTests.js
     tests/core/StepIteratorTests.js
+    tests/gui/MetadataControllerTests.js
     tests/gui/SelectionControllerTests.js
     tests/gui/StyleSummaryTests.js
     tests/gui/TextControllerTests.js

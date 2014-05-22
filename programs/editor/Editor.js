@@ -132,6 +132,15 @@ define("webodf/editor/Editor", [
             }
 
             /**
+             * @param {!Object} changes
+             * @return {undefined}
+             */
+            function relayMetadataSignal(changes) {
+                fireEvent(Editor.EVENT_METADATACHANGED, changes);
+            }
+
+
+            /**
              * Create an Uint8Array containing the ODT file of the current state of the document
              * and pass it to the callback method.
              * Should be only called when a document is loaded, so either between "openDocument"
@@ -226,6 +235,7 @@ define("webodf/editor/Editor", [
                     if (err) {
                         callback(err);
                     } else {
+                        editorSession.sessionController.getMetadataController().unsubscribe(gui.MetadataController.signalMetadataChanged, relayMetadataSignal);
                         editorSession.destroy(function (err) {
                             if (err) {
                                 callback(err);
@@ -341,6 +351,7 @@ define("webodf/editor/Editor", [
                     } else {
                         // now also destroy session, will not be reused for new document
                         memberListView.setEditorSession(undefined);
+                        editorSession.sessionController.getMetadataController().unsubscribe(gui.MetadataController.signalMetadataChanged, relayMetadataSignal);
                         editorSession.destroy(function(err) {
                             if (err) {
                                 callback(err);
@@ -449,49 +460,9 @@ define("webodf/editor/Editor", [
              * @return {undefined}
              */
             this.setMetadata = function (setProperties, removedProperties) {
-                var bannedProperties = [
-                    "dc:creator",
-                    "dc:date",
-                    "meta:editing-cycles",
-                    "meta:editing-duration",
-                    "meta:document-statistic"
-                ],
-                filteredSetProperties = {},
-                filteredRemovedProperties = "",
-                op;
+                runtime.assert(editorSession, "editorSession should exist here.");
 
-                if (setProperties) {
-                    Object.keys(setProperties).forEach(function (property) {
-                        if (bannedProperties.indexOf(property) === -1) {
-                            filteredSetProperties[property] = setProperties[property];
-                        } else {
-                            runtime.log("Setting " + property + " is restricted");
-                        }
-                    });
-                }
-                if (removedProperties) {
-                    removedProperties.forEach(function (property) {
-                        if (bannedProperties.indexOf(property) === -1) {
-                            if (filteredRemovedProperties.length) {
-                                filteredRemovedProperties += ",";
-                            }
-                            filteredRemovedProperties += property;
-                        } else {
-                            runtime.log("Removing " + property + " is restricted");
-                        }
-                    });
-                }
-
-                if (filteredRemovedProperties.length > 0
-                        || Object.keys(filteredSetProperties).length > 0) {
-                    op = new ops.OpUpdateMetadata();
-                    op.init({
-                        memberid: editorSession.sessionController.getInputMemberId(),
-                        setProperties: filteredSetProperties,
-                        removedProperties: filteredRemovedProperties
-                    });
-                    session.enqueue([op]);
-                }
+                editorSession.sessionController.getMetadataController().setMetadata(setProperties, removedProperties);
             };
 
             /**
@@ -501,10 +472,9 @@ define("webodf/editor/Editor", [
              * @return {?string}
              */
             this.getMetadata = function (property) {
-                runtime.assert(typeof property === "string", "Property must be a string");
-                var parts = property.split(':');
-                runtime.assert(parts.length === 2, "Property must be a namespace-prefixed string");
-                return odfCanvas.odfContainer().getMetadata(parts[0], parts[1]);
+                runtime.assert(editorSession, "editorSession should exist here.");
+
+                return editorSession.sessionController.getMetadataController().getMetadata(property);
             };
 
             /**
@@ -586,10 +556,6 @@ define("webodf/editor/Editor", [
 
             function setFocusToOdfCanvas() {
                 editorSession.sessionController.getEventManager().focus();
-            }
-
-            function relayMetadataSignal(changes) {
-                fireEvent(Editor.EVENT_METADATACHANGED, changes);
             }
 
             /**
@@ -756,7 +722,7 @@ define("webodf/editor/Editor", [
                     }
 
                     // Relay any metadata changes to the Editor's consumer as an event
-                    session.getOdtDocument().subscribe(ops.OdtDocument.signalMetadataUpdated, relayMetadataSignal);
+                    editorSession.sessionController.getMetadataController().subscribe(gui.MetadataController.signalMetadataChanged, relayMetadataSignal);
 
                     // and report back to caller
                     pendingEditorReadyCallback();

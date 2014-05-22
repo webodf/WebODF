@@ -114,6 +114,7 @@ module.exports = function (config) {
             'lib/gui/ImageController.js',
             'lib/gui/ImageSelector.js',
             'lib/gui/InputMethodEditor.js',
+            'lib/gui/MetadataController.js',
             'lib/gui/PlainTextPasteboard.js',
             'lib/odf/WordBoundaryFilter.js',
             'lib/gui/SelectionController.js',
