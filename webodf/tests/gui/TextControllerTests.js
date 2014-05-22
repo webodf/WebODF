@@ -237,7 +237,3 @@ gui.TextControllerTests.prototype.description = function () {
     "use strict";
     return "Test the TextController class.";
 };
-(function () {
-    "use strict";
-    return gui.TextControllerTests;
-}());
