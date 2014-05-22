@@ -52,7 +52,3 @@ core.PositionFilter.FilterResult = {
  * @return {!core.PositionFilter.FilterResult}
  */
 core.PositionFilter.prototype.acceptPosition = function (point) {"use strict"; };
-(function () {
-    "use strict";
-    return core.PositionFilter;
-}());

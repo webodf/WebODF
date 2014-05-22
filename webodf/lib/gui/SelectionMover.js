@@ -413,7 +413,3 @@ gui.SelectionMover.createPositionIterator = function (rootNode) {
     var filter = new CursorFilter();
     return new core.PositionIterator(rootNode, 5, filter, false);
 };
-(function () {
-    "use strict";
-    return gui.SelectionMover;
-}());

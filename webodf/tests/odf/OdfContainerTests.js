@@ -371,7 +371,3 @@ odf.OdfContainerTests.prototype.description = function () {
     "use strict";
     return "Test the OdfContainer class.";
 };
-(function () {
-    "use strict";
-    return odf.OdfContainerTests;
-}());

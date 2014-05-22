@@ -327,6 +327,4 @@
      * @type {!number}
      */
     ops.OdtStepsTranslator.NEXT_STEP = NEXT_STEP;
-
-    return ops.OdtStepsTranslator;
 }());

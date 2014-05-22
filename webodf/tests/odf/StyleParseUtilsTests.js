@@ -98,7 +98,3 @@ odf.StyleParseUtilsTests.prototype.description = function () {
     "use strict";
     return "Test the methods of StyleParseUtils.";
 };
-(function () {
-    "use strict";
-    return odf.StyleParseUtilsTests;
-}());

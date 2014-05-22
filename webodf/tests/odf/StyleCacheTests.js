@@ -102,7 +102,3 @@ odf.StyleCacheTests.prototype.description = function () {
     "use strict";
     return "Test that the styles of the odf documents are calculated correctly.";
 };
-(function () {
-    "use strict";
-    return odf.StyleCacheTests;
-}());

@@ -1328,7 +1328,6 @@
     odf.OdfContainer.getContainer = function (url) {
         return new odf.OdfContainer(url, null);
     };
-    return odf.OdfContainer;
 }());
 /**
  * @enum {number}

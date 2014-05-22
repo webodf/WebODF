@@ -452,7 +452,3 @@ odf.OdfUtilsTests.prototype.description = function () {
     "use strict";
     return "Test the OdfUtilsTests class.";
 };
-(function () {
-    "use strict";
-    return odf.OdfUtilsTests;
-}());

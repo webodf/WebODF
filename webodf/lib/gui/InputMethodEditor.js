@@ -341,6 +341,4 @@
      * @type {!string}
      */
     gui.InputMethodEditor.signalCompositionEnd = "input/compositionend";
-
-    return gui.InputMethodEditor;
 }());

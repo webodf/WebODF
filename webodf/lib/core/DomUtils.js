@@ -933,6 +933,4 @@
         }
         init(this);
     };
-
-    return core.DomUtils;
 }());

@@ -213,7 +213,3 @@ core.CursorTests.prototype.description = function () {
     "use strict";
     return "Test the Cursor class.";
 };
-(function () {
-    "use strict";
-    return core.CursorTests;
-}());

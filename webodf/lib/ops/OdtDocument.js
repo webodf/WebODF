@@ -992,9 +992,4 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalStepsRemoved = "steps/removed";
 /**@const*/ops.OdtDocument.signalMetadataUpdated = "metadata/updated";
 
-(function () {
-    "use strict";
-    return ops.OdtDocument;
-}());
-
 // vim:expandtab

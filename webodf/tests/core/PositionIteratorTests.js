@@ -623,7 +623,3 @@ core.PositionIteratorTests.prototype.description = function () {
     "use strict";
     return "Test the PositionIterator class.";
 };
-(function () {
-    "use strict";
-    return core.PositionIteratorTests;
-}());

@@ -278,9 +278,3 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
     }
     this.insertText = insertText;
 };
-
-(function () {
-    "use strict";
-    return gui.TextController;
-}());
-

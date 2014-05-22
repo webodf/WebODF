@@ -164,7 +164,3 @@ odf.ObjectNameGeneratorTests.prototype.description = function () {
     "use strict";
     return "Test the ObjectNameGenerator class.";
 };
-(function () {
-    "use strict";
-    return odf.ObjectNameGeneratorTests;
-}());

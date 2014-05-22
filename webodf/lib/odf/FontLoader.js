@@ -173,5 +173,4 @@
             }
         };
     };
-    return odf.FontLoader;
 }());

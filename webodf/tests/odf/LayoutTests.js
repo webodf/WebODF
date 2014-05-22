@@ -329,7 +329,3 @@ odf.LayoutTests.prototype.description = function () {
     "use strict";
     return "Test that the layout of the odf documents is calculated correctly.";
 };
-(function () {
-    "use strict";
-    return odf.LayoutTests;
-}());

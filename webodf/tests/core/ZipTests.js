@@ -176,7 +176,3 @@ core.ZipTests.prototype.description = function () {
     "use strict";
     return "Test the Zip class.";
 };
-(function () {
-    "use strict";
-    return core.ZipTests;
-}());

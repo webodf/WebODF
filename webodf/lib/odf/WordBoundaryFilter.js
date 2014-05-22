@@ -211,8 +211,3 @@ odf.WordBoundaryFilter.IncludeWhitespace = {
     /**@const*/TRAILING: 1,
     /**@const*/LEADING: 2
 };
-
-(function() {
-    "use strict";
-    return odf.WordBoundaryFilter;
-}());

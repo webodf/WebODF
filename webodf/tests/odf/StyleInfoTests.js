@@ -98,7 +98,3 @@ odf.StyleInfoTests.prototype.description = function () {
     "use strict";
     return "Test the StyleInfo class.";
 };
-(function () {
-    "use strict";
-    return odf.StyleInfoTests;
-}());

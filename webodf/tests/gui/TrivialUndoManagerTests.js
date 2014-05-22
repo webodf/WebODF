@@ -396,7 +396,3 @@ gui.TrivialUndoManagerTests.prototype.description = function () {
     "use strict";
     return "Test the TrivialUndoManager class.";
 };
-(function () {
-    "use strict";
-    return gui.TrivialUndoManagerTests;
-}());

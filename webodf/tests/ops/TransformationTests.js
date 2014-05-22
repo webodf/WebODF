@@ -558,7 +558,3 @@ ops.TransformationTests.prototype.description = function () {
     "use strict";
     return "Test the transformations of ODT operations described in an XML file on consistent ODT dom results.";
 };
-(function () {
-    "use strict";
-    return ops.TransformationTests;
-}());

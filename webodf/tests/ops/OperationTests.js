@@ -490,7 +490,3 @@ ops.OperationTests.prototype.description = function () {
     "use strict";
     return "Test the ODT operations described in an XML file.";
 };
-(function () {
-    "use strict";
-    return ops.OperationTests;
-}());
