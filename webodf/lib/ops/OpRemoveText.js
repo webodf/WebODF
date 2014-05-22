@@ -51,8 +51,6 @@ ops.OpRemoveText = function OpRemoveText() {
         position,
         /**@type {number}*/
         length,
-        /**@type {string|undefined}*/
-        mergedParagraphStyleName,
         /**@type{!odf.OdfUtils}*/
         odfUtils,
         /**@type{!core.DomUtils}*/
@@ -67,7 +65,6 @@ ops.OpRemoveText = function OpRemoveText() {
         timestamp = data.timestamp;
         position = parseInt(data.position, 10);
         length = parseInt(data.length, 10);
-        mergedParagraphStyleName = data.mergedParagraphStyleName;
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
 
@@ -195,15 +192,6 @@ ops.OpRemoveText = function OpRemoveText() {
         }
         destinationParagraph = paragraphs.reduce(merge);
 
-        if (mergedParagraphStyleName !== undefined) {
-            // An empty string means no style name, so remove the attribute
-            if (mergedParagraphStyleName === "") {
-                destinationParagraph.removeAttributeNS(odf.Namespaces.textns, 'style-name');
-            } else {
-                destinationParagraph.setAttributeNS(odf.Namespaces.textns, 'text:style-name', mergedParagraphStyleName);
-            }
-        }
-
         odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position, length: length});
         odtDocument.downgradeWhitespacesAtPosition(position);
         odtDocument.fixCursorPositions();
@@ -233,8 +221,7 @@ ops.OpRemoveText = function OpRemoveText() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
-            length: length,
-            mergedParagraphStyleName: mergedParagraphStyleName
+            length: length
         };
     };
 };
@@ -243,7 +230,6 @@ ops.OpRemoveText = function OpRemoveText() {
     memberid:string,
     timestamp:number,
     position:number,
-    mergedParagraphStyleName: (string|undefined),
     length:number
 }}*/
 ops.OpRemoveText.Spec;
@@ -251,7 +237,6 @@ ops.OpRemoveText.Spec;
     memberid:string,
     timestamp:(number|undefined),
     position:number,
-    mergedParagraphStyleName: (string|undefined),
     length:number
 }}*/
 ops.OpRemoveText.InitSpec;

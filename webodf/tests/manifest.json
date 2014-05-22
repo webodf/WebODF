@@ -44,6 +44,19 @@
         "gui.StyleSummary",
         "odf.Formatting"
     ],
+    "gui.TextControllerTests": [
+        "core.UnitTester",
+        "core.Utils",
+        "gui.TextController",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "odf.OdfNodeFilter",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Operation",
+        "ops.Session",
+        "xmldom.LSSerializer"
+    ],
     "gui.TrivialUndoManagerTests": [
         "core.PositionFilterChain",
         "core.UnitTester",
