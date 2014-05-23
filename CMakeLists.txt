@@ -344,7 +344,6 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBODFZIPDIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${WEBODFZIPDIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/programs/viewer/README-viewer.odt ${WEBODFZIPDIR}/README.odt
     # viewer
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${VIEWERBUILDDIR} ${WEBODFZIPDIR}/viewer
     # editor
