@@ -335,7 +335,8 @@ add_subdirectory(webodf)
 # the programs/components
 add_subdirectory(programs)
 
-
+# old target used by the CI, with no user for the actual content
+# to be removed after CI switched to build products directly
 set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
 set(WEBODFZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
 add_custom_command(
