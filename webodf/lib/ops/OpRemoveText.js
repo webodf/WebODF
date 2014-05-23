@@ -192,7 +192,7 @@ ops.OpRemoveText = function OpRemoveText() {
         }
         destinationParagraph = paragraphs.reduce(merge);
 
-        odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position, length: length});
+        odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position});
         odtDocument.downgradeWhitespacesAtPosition(position);
         odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();

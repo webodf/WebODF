@@ -265,23 +265,17 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!{anchorNode: !Node, anchorOffset: !number, focusNode: !Node, focusOffset: !number}} selection
-     * @param {function(!Node, !number):function(!number, !Node, !number):!boolean=} constraint
      * @return {!{position: !number, length: number}}
      */
-    this.convertDomToCursorRange = function (selection, constraint) {
+    this.convertDomToCursorRange = function (selection) {
         var point1,
-            point2,
-            anchorConstraint = constraint && constraint(selection.anchorNode, selection.anchorOffset),
-            focusConstraint;
+            point2;
 
-        point1 = stepsTranslator.convertDomPointToSteps(selection.anchorNode, selection.anchorOffset, anchorConstraint);
-        if (!constraint && selection.anchorNode === selection.focusNode && selection.anchorOffset === selection.focusOffset) {
-            // If the user has specified a constraint, the rounding might differ between the focus and anchor
-            // In this case, it's safest to just look up the next point again.
+        point1 = stepsTranslator.convertDomPointToSteps(selection.anchorNode, selection.anchorOffset);
+        if (selection.anchorNode === selection.focusNode && selection.anchorOffset === selection.focusOffset) {
             point2 = point1;
         } else {
-            focusConstraint = constraint && constraint(selection.focusNode, selection.focusOffset);
-            point2 = stepsTranslator.convertDomPointToSteps(selection.focusNode, selection.focusOffset, focusConstraint);
+            point2 = stepsTranslator.convertDomPointToSteps(selection.focusNode, selection.focusOffset);
         }
 
         return {
