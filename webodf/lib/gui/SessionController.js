@@ -45,7 +45,12 @@ gui.SessionControllerOptions = function () {
     "use strict";
 
     /**
-     * Sets direct paragraph styling should be enabled.
+     * Sets whether direct paragraph styling should be enabled.
+     * @type {!boolean}
+     */
+    this.directTextStylingEnabled = false;
+    /**
+     * Sets whether direct paragraph styling should be enabled.
      * @type {!boolean}
      */
     this.directParagraphStylingEnabled = false;
@@ -91,7 +96,8 @@ gui.SessionControllerOptions = function () {
             eventManager = new gui.EventManager(odtDocument),
             annotationsEnabled = args.annotationsEnabled,
             annotationController = new gui.AnnotationController(session, inputMemberId),
-            directFormattingController = new gui.DirectFormattingController(session, inputMemberId, objectNameGenerator, args.directParagraphStylingEnabled),
+            directFormattingController = new gui.DirectFormattingController(session, inputMemberId, objectNameGenerator,
+                                                                            args.directTextStylingEnabled, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
             createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),
             textController = new gui.TextController(session, inputMemberId, createCursorStyleOp, createParagraphStyleOps),

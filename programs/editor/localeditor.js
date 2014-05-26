@@ -178,7 +178,11 @@ var webodfEditor = (function () {
      *
      */
     function boot(args) {
-        var editorOptions = {};
+        var editorOptions = {
+            loadCallback: load,
+            saveCallback: save,
+            allFeaturesEnabled: true
+        };
         runtime.assert(!booting, "editor creation already in progress");
 
         args = args || {};
@@ -193,9 +197,6 @@ var webodfEditor = (function () {
 
         // start the editor
         booting = true;
-        editorOptions = editorOptions || {};
-        editorOptions.loadCallback = load;
-        editorOptions.saveCallback = save;
 
         if (args.docUrl === undefined) {
             args.docUrl = guessDocUrl();

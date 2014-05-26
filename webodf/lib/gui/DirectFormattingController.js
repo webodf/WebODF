@@ -45,9 +45,10 @@
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
+ * @param {!boolean} directTextStylingEnabled
  * @param {!boolean} directParagraphStylingEnabled
  */
-gui.DirectFormattingController = function DirectFormattingController(session, inputMemberId, objectNameGenerator, directParagraphStylingEnabled) {
+gui.DirectFormattingController = function DirectFormattingController(session, inputMemberId, objectNameGenerator, directTextStylingEnabled, directParagraphStylingEnabled) {
     "use strict";
 
     var self = this,
@@ -778,6 +779,12 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     function emptyFunction() {
     }
     /*jslint emptyblock: false*/
+    /**
+     * @return {!boolean}
+     */
+    function emptyFalseReturningFunction() {
+        return false;
+    }
 
     function init() {
         odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorEvent);
@@ -787,6 +794,20 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
         updateSelectionStylesInfo();
+
+        if (!directTextStylingEnabled) {
+            self.formatTextSelection = emptyFunction;
+            self.setBold = emptyFunction;
+            self.setItalic = emptyFunction;
+            self.setHasUnderline = emptyFunction;
+            self.setHasStrikethrough = emptyFunction;
+            self.setFontSize = emptyFunction;
+            self.setFontName = emptyFunction;
+            self.toggleBold = emptyFalseReturningFunction;
+            self.toggleItalic = emptyFalseReturningFunction;
+            self.toggleUnderline = emptyFalseReturningFunction;
+            self.toggleStrikethrough = emptyFalseReturningFunction;
+        }
 
         if (!directParagraphStylingEnabled) {
             self.alignParagraphCenter = emptyFunction;

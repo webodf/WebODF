@@ -626,6 +626,7 @@ define("webodf/editor/EditorSession", [
             head.appendChild(fontStyles);
 
             self.sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {
+                directTextStylingEnabled: config.directTextStylingEnabled,
                 directParagraphStylingEnabled: config.directParagraphStylingEnabled,
                 annotationsEnabled: config.annotationsEnabled
             });

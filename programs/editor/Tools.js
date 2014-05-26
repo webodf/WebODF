@@ -165,12 +165,14 @@ define("webodf/editor/Tools", [
                 }
 
                 // Simple Style Selector [B, I, U, S]
-                simpleStyles = new SimpleStyles(function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
-                sessionSubscribers.push(simpleStyles);
-                simpleStyles.onToolDone = onToolDone;
+                if (args.directTextStylingEnabled) {
+                    simpleStyles = new SimpleStyles(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    sessionSubscribers.push(simpleStyles);
+                    simpleStyles.onToolDone = onToolDone;
+                }
 
                 // Paragraph direct alignment buttons
                 if (args.directParagraphStylingEnabled) {
@@ -184,20 +186,24 @@ define("webodf/editor/Tools", [
 
 
                 // Paragraph Style Selector
-                currentStyle = new CurrentStyle(function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
-                sessionSubscribers.push(currentStyle);
-                currentStyle.onToolDone = onToolDone;
+                if (args.paragraphStyleSelectingEnabled) {
+                    currentStyle = new CurrentStyle(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    sessionSubscribers.push(currentStyle);
+                    currentStyle.onToolDone = onToolDone;
+                }
 
                 // Zoom Level Selector
-                zoomSlider = new ZoomSlider(function (widget) {
-                    widget.placeAt(toolbar);
-                    widget.startup();
-                });
-                sessionSubscribers.push(zoomSlider);
-                zoomSlider.onToolDone = onToolDone;
+                if (args.zoomingEnabled) {
+                    zoomSlider = new ZoomSlider(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    sessionSubscribers.push(zoomSlider);
+                    zoomSlider.onToolDone = onToolDone;
+                }
 
                 // Load
                 if (loadOdtFile) {
@@ -233,22 +239,34 @@ define("webodf/editor/Tools", [
                 }
 
                 // Format menu
-                formatDropDownMenu = new DropDownMenu({});
-                paragraphStylesMenuItem = new MenuItem({
-                    label: tr("Paragraph...")
-                });
-                formatDropDownMenu.addChild(paragraphStylesMenuItem);
+                if (args.paragraphStyleEditingEnabled) {
+                    formatDropDownMenu = new DropDownMenu({});
+                    paragraphStylesMenuItem = new MenuItem({
+                        label: tr("Paragraph...")
+                    });
+                    formatDropDownMenu.addChild(paragraphStylesMenuItem);
 
-                paragraphStylesDialog = new ParagraphStylesDialog(function (dialog) {
-                    paragraphStylesMenuItem.onClick = function () {
-                        if (editorSession) {
-                            dialog.startup();
-                            dialog.show();
+                    paragraphStylesDialog = new ParagraphStylesDialog(function (dialog) {
+                        paragraphStylesMenuItem.onClick = function () {
+                            if (editorSession) {
+                                dialog.startup();
+                                dialog.show();
+                            }
+                        };
+                    });
+                    sessionSubscribers.push(paragraphStylesDialog);
+                    paragraphStylesDialog.onToolDone = onToolDone;
+
+                    formatMenuButton = new DropDownButton({
+                        dropDown: formatDropDownMenu,
+                        label: tr('Format'),
+                        iconClass: "dijitIconEditTask",
+                        style: {
+                            float: 'left'
                         }
-                    };
-                });
-                sessionSubscribers.push(paragraphStylesDialog);
-                paragraphStylesDialog.onToolDone = onToolDone;
+                    });
+                    formatMenuButton.placeAt(toolbar);
+                }
 
                 if (args.hyperlinkEditingEnabled) {
                     editHyperlinks = new EditHyperlinks(function (widget) {
@@ -258,16 +276,6 @@ define("webodf/editor/Tools", [
                     sessionSubscribers.push(editHyperlinks);
                     editHyperlinks.onToolDone = onToolDone;
                 }
-
-                formatMenuButton = new DropDownButton({
-                    dropDown: formatDropDownMenu,
-                    label: tr('Format'),
-                    iconClass: "dijitIconEditTask",
-                    style: {
-                        float: 'left'
-                    }
-                });
-                formatMenuButton.placeAt(toolbar);
 
                 if (args.imageInsertingEnabled) {
                     imageInserter = new ImageInserter(function (widget) {
