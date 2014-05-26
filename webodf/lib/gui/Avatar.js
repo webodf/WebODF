@@ -105,21 +105,11 @@ gui.Avatar = function Avatar(parentElement, avatarInitiallyVisible) {
     };
 
     function init() {
-        var document = /**@type{!Document}*/(parentElement.ownerDocument),
-            htmlns = document.documentElement.namespaceURI;
+        var document = /**@type{!Document}*/(parentElement.ownerDocument);
 
-        handle = /**@type{!HTMLDivElement}*/
-                 (document.createElementNS(htmlns, "div"));
-        image = /**@type{!HTMLImageElement}*/
-                (document.createElementNS(htmlns, "img"));
-        image.width = 64;
-        image.height = 64;
+        handle = /**@type{!HTMLDivElement}*/(document.createElement("div"));
+        image = /**@type{!HTMLImageElement}*/(document.createElement("img"));
         handle.appendChild(image);
-        handle.style.width = '64px';
-        handle.style.height = '70px';
-        handle.style.position = "absolute";
-        handle.style.top = '-80px';
-        handle.style.left = '-34px'; // TODO: see to automatically calculate this, depending on the style
         handle.style.display = avatarInitiallyVisible ? displayShown : displayHidden;
         handle.className = "handle";
         parentElement.appendChild(handle);
