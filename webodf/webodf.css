@@ -319,16 +319,8 @@ cursor|cursor > #composer {
     text-decoration: underline;
 }
 
-cursor|cursor[cursor|composing="true"] > #composer {
-    display: inline-block;
-    height: auto;
-    width: auto;
-}
-
 cursor|cursor[cursor|composing="true"] {
     display: inline-block;
-    width: auto;
-    height: inherit;
 }
 
 editinfo|editinfo {
