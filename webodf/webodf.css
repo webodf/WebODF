@@ -327,7 +327,7 @@ cursor|cursor > #composer {
 
 cursor|cursor[cursor|caret-sizer-active="true"],
 cursor|cursor[cursor|composing="true"] {
-    display: inline-block;
+    display: inline;
 }
 
 editinfo|editinfo {
