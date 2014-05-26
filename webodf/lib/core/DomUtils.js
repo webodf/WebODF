@@ -444,16 +444,15 @@
                             currentNode = treeWalker.nextSibling();
                         }
                         break;
-                    case NodeFilter.FILTER_ACCEPT:
-                        // The first call to nextNode will return the next node *after* walker.currentNode
-                        // Therefore, need to manually check if currentNode should be included in the elements array
-                        // and save it if it passes the filter
-                        elements.push(currentNode);
+                    case NodeFilter.FILTER_SKIP:
+                        // Immediately advance to the next node without giving an opportunity for the current one to
+                        // be stored.
                         currentNode = treeWalker.nextNode();
                         break;
                     default:
-                    // case NodeFilter.FILTER_SKIP:
-                        currentNode = treeWalker.nextNode();
+                    // case NodeFilter.FILTER_ACCEPT:
+                        // Proceed into the following loop. The current node will be stored at the end of the loop
+                        // if it is contained within the requested range.
                         break;
                 }
 
