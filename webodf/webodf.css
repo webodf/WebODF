@@ -263,7 +263,6 @@ cursor|cursor {
     position: absolute;
     top: 5%; /* push down the caret; 0px can do the job, 5% looks better, 10% is a bit over */
     height: 1em;
-    margin-left: -1px;
     z-index: 10;
     pointer-events: none;
 }
@@ -273,6 +272,7 @@ cursor|cursor {
     border-left: 2px solid black;
     top: 0;
     bottom: 0;
+    right: 0;
 }
 
 .webodf-caretOverlay .handle {
@@ -291,7 +291,7 @@ cursor|cursor {
     border: 1px solid black;
 
     top: -85px;
-    left: -32px;
+    right: -32px;
 }
 
 .webodf-caretOverlay .handle > img {
@@ -335,7 +335,7 @@ cursor|cursor {
     display: block;
     position: absolute;
     bottom: 0;
-    right: 0;
+    left: 0;
     width: 1px;
     outline: none;
     opacity: 0;
