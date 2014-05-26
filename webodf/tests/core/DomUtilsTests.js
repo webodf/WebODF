@@ -33,7 +33,7 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-/*global core, runtime, NodeFilter*/
+/*global core, runtime, NodeFilter, Node*/
 
 /**
  * @constructor
@@ -60,6 +60,10 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
 
     function ignoreSpans(node) {
         return node.localName === "span" ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    }
+
+    function textNodesOnly(node) {
+        return node.nodeType !== Node.TEXT_NODE ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
     }
 
     /**
@@ -639,6 +643,19 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         range.detach();
     }
 
+    function getNodesInRange_EndsInEmptyNode_ReturnsNothing() {
+        var range = document.createRange();
+        createNodes("<div>a</div><div></div>after");
+
+        range.setStart(t.doc.firstChild, t.doc.firstChild.childNodes.length);
+        range.setEnd(t.doc.childNodes[1], 0);
+
+        t.nodes = t.utils.getNodesInRange(range, textNodesOnly, NodeFilter.SHOW_ALL);
+
+        r.shouldBe(t, "t.nodes.shift()", "undefined");
+        range.detach();
+    }
+
     function mapObjOntoNode_EmptyObject() {
         t.node = document.createElement("span");
 
@@ -687,6 +704,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
             getNodesInRange_NodeEndToNodeEnd_ReturnsBracketedNode,
             getNodesInRange_StartsOnRejectedNode_IgnoresChildNodes,
             getNodesInRange_StartsInRejectedNode_IgnoresChildNodes,
+            getNodesInRange_EndsInEmptyNode_ReturnsNothing,
 
             mapObjOntoNode_EmptyObject
         ]);
