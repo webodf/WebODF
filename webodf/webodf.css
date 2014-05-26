@@ -298,6 +298,12 @@ cursor|cursor {
     left: 43%;
 }
 
+.webodf-caretSizer {
+    display: inline-block; /* inline-block is necessary so the width can be set to 0 */
+    width: 0; /* the caret sizer shouldn't take up any horizontal space */
+    visibility: hidden; /* "hidden" means the client rects are still calculated, but the node content is not shown */
+}
+
 /** Input Method Editor input pane & behaviours */
 /* not within a cursor */
 #eventTrap {
@@ -319,16 +325,9 @@ cursor|cursor > #composer {
     text-decoration: underline;
 }
 
-cursor|cursor[cursor|composing="true"] > #composer {
-    display: inline-block;
-    height: auto;
-    width: auto;
-}
-
+cursor|cursor[cursor|caret-sizer-active="true"],
 cursor|cursor[cursor|composing="true"] {
-    display: inline-block;
-    width: auto;
-    height: inherit;
+    display: inline;
 }
 
 editinfo|editinfo {

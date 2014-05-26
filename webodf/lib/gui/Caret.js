@@ -51,6 +51,8 @@
 gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
     var /**@const*/
+        cursorns = 'urn:webodf:names:cursor',
+        /**@const*/
         MIN_OVERLAY_HEIGHT_PX = 8, /** 8px = 6pt font size */
         /**@const*/
         BLINK_PERIOD_MS = 500,
@@ -62,8 +64,11 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         avatar,
         /**@type{?Element}*/
         overlayElement,
+        /**@type{!Element}*/
+        caretSizer,
+        /**@type{!Range}*/
+        caretSizerRange,
         canvas = cursor.getDocument().getCanvas(),
-        odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils(),
         guiStepUtils = new gui.GuiStepUtils(),
         /**@type{!core.StepIterator}*/
@@ -119,6 +124,16 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
+     * @return {?ClientRect}
+     */
+    function getCaretSizeFromCursor() {
+        // The node itself has a slightly different BCR to a range created around it's contents.
+        // Am not quite sure why, and the inspector gives no clues.
+        caretSizerRange.selectNodeContents(caretSizer);
+        return caretSizerRange.getBoundingClientRect();
+    }
+
+    /**
      * Get the client rectangle for the nearest selection point to the caret.
      * This works on the assumption that the next or previous sibling is likely to
      * be a text node that will provide an accurate rectangle for the caret's desired
@@ -132,15 +147,16 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             caretRectangle,
             nextRectangle,
             selectionRectangle,
-            paragraph,
             rootRect = /**@type{!ClientRect}*/(domUtils.getBoundingClientRect(canvas.getSizer())),
             useLeftEdge = false;
 
         if (node.getClientRects().length > 0) {
-            // If the cursor node itself is visible, use that as the caret location.
+            // If the cursor is visible, use that as the caret location.
             // The most common reason for the cursor to be visible is because the user is entering some text
-            // via an IME
-            selectionRectangle = domUtils.getBoundingClientRect(node);
+            // via an IME, or no nearby rect was discovered and cursor was forced visible for caret rect calculations
+            // (see below when the show-caret attribute is set).
+            selectionRectangle = getCaretSizeFromCursor();
+            useLeftEdge = true;
         } else {
             // Need to resync the stepIterator prior to every use as it isn't automatically kept up-to-date
             // with the cursor's actual document position
@@ -157,13 +173,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             }
 
             if (!selectionRectangle) {
-                // Handle the case where a cursor ends up inside an empty paragraph. There are no nearby text elements
-                // to get a rect from, so use the paragraph BCR instead, as it's better than nothing
-                paragraph = odfUtils.getParagraphElement(node);
-                if (paragraph) {
-                    selectionRectangle = domUtils.getBoundingClientRect(paragraph);
-                    useLeftEdge = true;
-                }
+                // Handle the case where there are no nearby visible rects from which to determine the caret position.
+                // Generally, making the cursor visible will cause word-wrapping and other undesirable features
+                // if near an area the end of a wrapped line (e.g., #86).
+                // However, as the previous checks have ascertained, there are no text nodes nearby, hence, making the
+                // cursor visible won't change any wrapping.
+                node.setAttributeNS(cursorns, "caret-sizer-active", "true");
+                selectionRectangle = getCaretSizeFromCursor();
+                useLeftEdge = true;
             }
 
             if (!selectionRectangle) {
@@ -389,6 +406,11 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // noticeable than an oversized one.
             state.visibility = "hidden";
             caretElement.style.visibility = "hidden";
+
+            // Remove the cursor visibility override. This prevents word-wrapping from occurring
+            // as a result of the cursor being incorrectly visible. Will be re-shown if necessary
+            // when the caret is rendered
+            cursor.getNode().removeAttributeNS(cursorns, "caret-sizer-active");
         }
         redrawTask.trigger();
     };
@@ -508,6 +530,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     function destroy(callback) {
         caretOverlay.parentNode.removeChild(caretOverlay);
+        caretSizer.parentNode.removeChild(caretSizer);
         callback();
     }
 
@@ -525,6 +548,13 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             positionFilters = [odtDocument.createRootFilter(cursor.getMemberId()), odtDocument.getPositionFilter()],
             dom = odtDocument.getDOMDocument(),
             editinfons = "urn:webodf:names:editinfo";
+
+        caretSizerRange = /**@type{!Range}*/(dom.createRange());
+
+        caretSizer = dom.createElement("span");
+        caretSizer.className = "webodf-caretSizer";
+        caretSizer.textContent = "|";
+        cursor.getNode().appendChild(caretSizer);
 
         caretOverlay = /**@type{!HTMLElement}*/(dom.createElement("div"));
         caretOverlay.setAttributeNS(editinfons, "editinfo:memberid", cursor.getMemberId());
