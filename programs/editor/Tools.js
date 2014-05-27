@@ -78,6 +78,29 @@ define("webodf/editor/Tools", [
                 aboutDialog,
                 sessionSubscribers = [];
 
+            /**
+             * Creates a tool and installs it, if the enabled flag is set to true.
+             * Only supports tool classes whose constructor has a single argument which
+             * is a callback to pass the created widget object to.
+             * @param {!function(new:Object, function(!Object):undefined)} Tool  constructor method of the tool
+             * @param {!boolean} enabled
+             * @return {?Object}
+             */
+            function createTool(Tool, enabled) {
+                var tool = null;
+
+                if (enabled) {
+                    tool = new Tool(function (widget) {
+                        widget.placeAt(toolbar);
+                        widget.startup();
+                    });
+                    sessionSubscribers.push(tool);
+                    tool.onToolDone = onToolDone;
+                }
+
+                return tool;
+            }
+
             function handleCursorMoved(cursor) {
                 var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
                 if (formatMenuButton) {
@@ -125,6 +148,7 @@ define("webodf/editor/Tools", [
             ready(function () {
                 toolbar = new Toolbar({}, toolbarElementId);
 
+                // About
                 if (args.aboutEnabled) {
                     aboutButton = new Button({
                         label: tr('About WebODF Text Editor'),
@@ -145,65 +169,22 @@ define("webodf/editor/Tools", [
                 }
 
                 // Undo/Redo
-                if (args.undoRedoEnabled) {
-                    undoRedoMenu = new UndoRedoMenu(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(undoRedoMenu);
-                    undoRedoMenu.onToolDone = onToolDone;
-                }
+                undoRedoMenu = createTool(UndoRedoMenu, args.undoRedoEnabled);
 
                 // Add annotation
-                if (args.annotationsEnabled) {
-                    annotationControl = new AnnotationControl(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(annotationControl);
-                    annotationControl.onToolDone = onToolDone;
-                }
+                annotationControl = createTool(AnnotationControl, args.annotationsEnabled);
 
                 // Simple Style Selector [B, I, U, S]
-                if (args.directTextStylingEnabled) {
-                    simpleStyles = new SimpleStyles(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(simpleStyles);
-                    simpleStyles.onToolDone = onToolDone;
-                }
+                simpleStyles = createTool(SimpleStyles, args.directTextStylingEnabled);
 
                 // Paragraph direct alignment buttons
-                if (args.directParagraphStylingEnabled) {
-                    paragraphAlignment = new ParagraphAlignment(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(paragraphAlignment);
-                    paragraphAlignment.onToolDone = onToolDone;
-                }
-
+                paragraphAlignment = createTool(ParagraphAlignment, args.directParagraphStylingEnabled);
 
                 // Paragraph Style Selector
-                if (args.paragraphStyleSelectingEnabled) {
-                    currentStyle = new CurrentStyle(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(currentStyle);
-                    currentStyle.onToolDone = onToolDone;
-                }
+                currentStyle = createTool(CurrentStyle, args.paragraphStyleSelectingEnabled);
 
                 // Zoom Level Selector
-                if (args.zoomingEnabled) {
-                    zoomSlider = new ZoomSlider(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(zoomSlider);
-                    zoomSlider.onToolDone = onToolDone;
-                }
+                zoomSlider = createTool(ZoomSlider, args.zoomingEnabled);
 
                 // Load
                 if (loadOdtFile) {
@@ -268,24 +249,13 @@ define("webodf/editor/Tools", [
                     formatMenuButton.placeAt(toolbar);
                 }
 
-                if (args.hyperlinkEditingEnabled) {
-                    editHyperlinks = new EditHyperlinks(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(editHyperlinks);
-                    editHyperlinks.onToolDone = onToolDone;
-                }
+                // hyper links
+                editHyperlinks = createTool(EditHyperlinks, args.hyperlinkEditingEnabled);
 
-                if (args.imageInsertingEnabled) {
-                    imageInserter = new ImageInserter(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
-                    sessionSubscribers.push(imageInserter);
-                    imageInserter.onToolDone = onToolDone;
-                }
+                // image insertion
+                imageInserter = createTool(ImageInserter, args.imageInsertingEnabled);
 
+                // close button
                 if (close) {
                     closeButton = new Button({
                         label: tr('Close'),
