@@ -62,23 +62,7 @@ ops.OpUpdateMetadata = function OpUpdateMetadata() {
         var odtDocument = /**@type{ops.OdtDocument}*/(document),
             odfContainer = odtDocument.getOdfCanvas().odfContainer(),
             removedPropertiesArray = null;
-/* dead code
-            blockedProperties = ["dc:date", "dc:creator", "meta:editing-cycles"];
 
-        if (setProperties) {
-            blockedProperties.forEach(function (el) {
-                if (setProperties[el]) {
-                    return false;
-                }
-            });
-        }
-        if (removedProperties) {
-            blockedProperties.forEach(function (el) {
-                if (removedPropertiesArray.indexOf(el) !== -1) {
-                    return false;
-                }
-            });
-*/
         if (removedProperties) {
             removedPropertiesArray = removedProperties.attributes.split(',');
         }
