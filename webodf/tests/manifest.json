@@ -29,6 +29,21 @@
         "core.UnitTester",
         "core.Zip"
     ],
+    "gui.MetadataControllerTests": [
+        "core.UnitTester",
+        "gui.MetadataController",
+        "odf.Namespaces",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "odf.OdfNodeFilter",
+        "ops.Member",
+        "ops.OdtDocument",
+        "ops.OpAddMember",
+        "ops.Operation",
+        "ops.OperationFactory",
+        "ops.Session",
+        "xmldom.LSSerializer"
+    ],
     "gui.SelectionControllerTests": [
         "core.LoopWatchDog",
         "core.UnitTester",

@@ -116,6 +116,7 @@ gui.SessionControllerOptions = function () {
                                                                     keyDownHandler, keyUpHandler),
             hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
             selectionController = new gui.SelectionController(session, inputMemberId),
+            metadataController = new gui.MetadataController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,
             keyCode = gui.KeyboardHandler.KeyCode,
             isMacOS = window.navigator.appVersion.toLowerCase().indexOf("mac") !== -1,
@@ -1000,6 +1001,13 @@ gui.SessionControllerOptions = function () {
         };
 
         /**
+         * @return {!gui.MetadataController}
+         */
+        this.getMetadataController = function () {
+            return metadataController;
+        };
+
+        /**
          * @return {?gui.AnnotationController}
          */
         this.getAnnotationController = function () {
@@ -1106,6 +1114,7 @@ gui.SessionControllerOptions = function () {
                 inputMethodEditor.destroy,
                 eventManager.destroy,
                 hyperlinkClickHandler.destroy,
+                metadataController.destroy,
                 destroy
             ];
 
