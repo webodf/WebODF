@@ -72,10 +72,11 @@
     /**
      * Holds the current state of parsing the text:list elements in the DOM
      * @param {!Object.<!string, !string>} contentRules
+     * @param {!Array.<!string>} continuedCounterIdStack
      * @constructor
      * @struct
      */
-    function ParseState(contentRules) {
+    function ParseState(contentRules, continuedCounterIdStack) {
         /**
          * The number of list counters created for a list
          * This is just a number appended to the list counter identifier to make it unique within the list
@@ -94,9 +95,73 @@
          * @type {!Array.<!string>}
          */
         this.counterIdStack = [];
+
+        /**
+         * The stack of counters the list should continue from if any
+         * @type {!Array.<!string>}
+         */
+        this.continuedCounterIdStack = continuedCounterIdStack;
     }
 
     /**
+     * Assigns globally unique CSS list counters to each text:list element in the document.
+     * The reason a global list counter is required is due to how the scope of CSS counters works
+     * which is described here http://www.w3.org/TR/CSS21/generate.html#scope
+     *
+     * The relevant part is that the scope of the counter applies to the element that the counter-reset rule
+     * was applied to and any children or siblings of that element. Applying another counter-reset rule to the
+     * same counter resets this scope and previous values of the counter are lost. These values are also inaccessible
+     * if we inspect the value of the counter outside of the scope and we simply get the default value of zero.
+     *
+     * The above is important for the case of continued numbering combined with multi-level list numbering.
+     * Multi-level lists use a separate counter for each list level and joins each counter value together.
+     * Continued numbering takes the list counter from the list we want to continue and uses it for the list
+     * that is being continued. Combining these two we get the approach of taking the list counter at each list level
+     * from the list that is being continued and then using these counters at each level in the continued list.
+     *
+     * However the scope rules prevent us from continuing counters at any level deeper than the first level and
+     * this behaviour is illustrated in an example of some list content below.
+     * <office:document>
+     *     <text:list>
+     *         <text:list-item> counter: level1 value: 1
+     *             <text:list>
+     *                 <text:list-item><text:p>Item</text:p></text:list-item> counter: level2 value: 1
+     *             </text:list>
+     *         </text:list-item>
+     *     </text:list>
+     *     other doc content
+     *     <text:list text:continue-numbering="true">
+     *         <text:list-item>
+     *             <text:list>
+     *                 <text:list-item><text:p>Item</text:p></text:list-item> counter: level2 value: 0
+     *             </text:list>
+     *         </text:list-item>
+     *     </text:list>
+     * </office:document>
+     *
+     * The solution to this was to hoist the counter initialisation up to the document level so that the counter
+     * scope applies to all lists in the document. Then each text:list element is given a unique counter by default.
+     * Having unique counters is only really required for continuing a list based on its xml:id but having it for
+     * all lists makes the code simpler and reduces the amount of CSS rules being overridden. Hence we end up with a
+     * list counter setup as below.
+     * <office:document> counter-reset: list1-1 list1-2
+     *     <text:list>
+     *         <text:list-item> counter: list1-1 value: 1
+     *             <text:list>
+     *                 <text:list-item><text:p>Item</text:p></text:list-item> counter: list1-2 value: 1
+     *             </text:list>
+     *         </text:list-item>
+     *     </text:list>
+     *     other doc content
+     *     <text:list text:continue-numbering="true">
+     *         <text:list-item>
+     *             <text:list>
+     *                 <text:list-item><text:p>Item</text:p></text:list-item> counter: list1-2 value: 2
+     *             </text:list>
+     *         </text:list-item>
+     *     </text:list>
+     * </office:document>
+     *
      * @param {!CSSStyleSheet} styleSheet
      * @constructor
      */
@@ -104,7 +169,27 @@
         var /**@type{!number}*/
             customListIdIndex = 0,
             /**@type{!string}*/
-            globalCounterResetRule = "";
+            globalCounterResetRule = "",
+            /**@type{!Object.<!string,!Array.<!string>>}*/
+            counterIdStacks = {};
+
+        /**
+         * Gets the stack of list counters for the given list.
+         * Counter stacks are keyed by the list counter id of the first list level.
+         * Returns a deep copy of the counter stack so it can be modified
+         * @param {!Element|undefined} list
+         * @return {!Array.<!string>}
+         */
+        function getCounterIdStack(list) {
+            var counterId,
+                stack = [];
+
+            if (list) {
+                counterId = list.getAttributeNS(helperns, "counter-id");
+                stack = counterIdStacks[counterId].slice(0);
+            }
+            return stack;
+        }
 
         /**
          * Assigns a unique global CSS list counter to this text:list element
@@ -116,19 +201,49 @@
          */
         function createCssRulesForList(topLevelListId, listElement, listLevel, parseState) {
             var /**@type{!string}*/
+                newListSelectorId,
                 newListCounterId,
                 newRule,
                 contentRule,
                 i;
 
             // increment counters and create a new identifier for this text:list element
-            // this identifier will be used as the CSS counter name
+            // this identifier will be used as the CSS counter name if this list is not continuing another list
             parseState.listCounterCount += 1;
-            newListCounterId = topLevelListId + "-level" + listLevel + "-" + parseState.listCounterCount;
-            listElement.setAttributeNS(helperns, "counter-id", newListCounterId);
+            newListSelectorId = topLevelListId + "-level" + listLevel + "-" + parseState.listCounterCount;
+            listElement.setAttributeNS(helperns, "counter-id", newListSelectorId);
+
+            // if we need to continue from a previous list then get the counter from the stack
+            // of the continued list and use it as the counter for this list element
+            newListCounterId = parseState.continuedCounterIdStack.shift();
+            if (!newListCounterId) {
+                newListCounterId = newListSelectorId;
+
+                // add the newly created counter to the counter reset rule so it can be
+                // initialised later once we have parsed all the lists in the document.
+                // In the case of a multi-level list with no items the counter increment rule
+                // will not apply. To fix this issue we initialise the counters to a value of 1
+                // instead of the default of 0.
+                globalCounterResetRule += newListSelectorId + ' 1 ';
+
+                // CSS counters increment the value before displaying the rendered list label. This is not an issue but as
+                // we initialise the counters to a value of 1 above to handle lists with no list items it means that
+                // lists that actually have list items will all start with the counter value of 2 which is not desirable.
+                // To fix this we apply another CSS rule here that overrides the counter increment rule above and
+                // prevents incrementing the counter on the FIRST list item that has content (AKA a visible list label).
+                newRule = 'text|list[webodfhelper|counter-id="' + newListSelectorId + '"]';
+                newRule += ' > text|list-item:first-child > :not(text|list):first-child:before';
+                newRule += '{';
+                // Due to https://bugs.webkit.org/show_bug.cgi?id=84985 a value of "none" is ignored by some version of WebKit
+                // (specifically the ones shipped with the Cocoa frameworks on OSX 10.7 + 10.8).
+                // Override the counter-increment on this counter by name to workaround this
+                newRule += 'counter-increment: ' + newListCounterId + ' 0;';
+                newRule += '}';
+                appendRule(styleSheet, newRule);
+            }
 
             // remove any counters from the stack that are deeper than the current list level
-            // and push the newly created counter on to the stack
+            // and push the newly created or continued counter on to the stack
             while (parseState.counterIdStack.length >= listLevel) {
                 parseState.counterIdStack.pop();
             }
@@ -143,34 +258,12 @@
                 contentRule = contentRule.replace(i + listCounterIdSuffix, parseState.counterIdStack[i - 1]);
             }
 
-            // add the newly created counter to the counter reset rule so it can be
-            // initialised later once we have parsed all the lists in the document.
-            // In the case of a multi-level list with no items the counter increment rule
-            // will not apply. To fix this issue we initialise the counters to a value of 1
-            // instead of the default of 0.
-            globalCounterResetRule += newListCounterId + ' 1 ';
-
             // Apply the counter increment to EVERY list item in this list that has content (AKA a visible list label)
-            newRule = 'text|list[webodfhelper|counter-id="' + newListCounterId + '"]';
+            newRule = 'text|list[webodfhelper|counter-id="' + newListSelectorId + '"]';
             newRule += ' > text|list-item > :not(text|list):first-child:before';
             newRule += '{';
             newRule += contentRule;
             newRule += 'counter-increment: ' + newListCounterId + ';';
-            newRule += '}';
-            appendRule(styleSheet, newRule);
-
-            // CSS counters increment the value before displaying the rendered list label. This is not an issue but as
-            // we initialise the counters to a value of 1 above to handle lists with no list items it means that
-            // lists that actually have list items will all start with the counter value of 2 which is not desirable.
-            // To fix this we apply another CSS rule here that overrides the counter increment rule above and
-            // prevents incrementing the counter on the FIRST list item that has content (AKA a visible list label).
-            newRule = 'text|list[webodfhelper|counter-id="' + newListCounterId + '"]';
-            newRule += ' > text|list-item:first-child > :not(text|list):first-child:before';
-            newRule += '{';
-            // Due to https://bugs.webkit.org/show_bug.cgi?id=84985 a value of "none" is ignored by some version of WebKit
-            // (specifically the ones shipped with the Cocoa frameworks on OSX 10.7 + 10.8).
-            // Override the counter-increment on this counter by name to workaround this
-            newRule += 'counter-increment: ' + newListCounterId + ' 0;';
             newRule += '}';
             appendRule(styleSheet, newRule);
         }
@@ -192,6 +285,7 @@
 
             // don't continue iterating over elements that aren't text:list or text:list-item
             if (!isListElement && !isListItemElement) {
+                parseState.continuedCounterIdStack = [];
                 return;
             }
 
@@ -211,12 +305,13 @@
          * Takes a text:list element and creates CSS counter rules used for numbering
          * @param {!Object.<!string, !string>} contentRules
          * @param {!Element} list
+         * @param {!Element=} continuedList
          * @return {undefined}
          */
-        this.createCounterRules = function (contentRules, list) {
+        this.createCounterRules = function (contentRules, list, continuedList) {
             var /**@type{!string}*/
                 listId = list.getAttributeNS(xmlns, "id"),
-                currentParseState = new ParseState(contentRules);
+                currentParseState = new ParseState(contentRules, getCounterIdStack(continuedList));
 
             // ensure there is a unique identifier for each list if it does not have one
             if (!listId) {
@@ -227,6 +322,8 @@
             }
 
             iterateOverChildListElements(listId, list, 0, currentParseState);
+
+            counterIdStacks[listId + "-level1-1"] = currentParseState.counterIdStack;
         };
 
         /**
@@ -275,6 +372,20 @@
          */
         function escapeCSSString(value) {
             return value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+        }
+
+        /**
+         * Determines whether the list element style-name matches the style-name we require
+         * @param {!Element|undefined} list
+         * @param {!string} matchingStyleName
+         * @return {!boolean}
+         */
+        function isMatchingListStyle(list, matchingStyleName) {
+            var styleName;
+            if (list) {
+                styleName = list.getAttributeNS(textns, "style-name");
+            }
+            return styleName === matchingStyleName;
         }
 
         /**
@@ -555,8 +666,13 @@
             var lists = odfBody.getElementsByTagNameNS(textns, "list"),
                 listCounter = new UniqueListCounter(styleSheet),
                 list,
+                previousList,
+                continueNumbering,
+                continueListXmlId,
+                xmlId,
                 styleName,
                 contentRules,
+                listsWithXmlId = {},
                 i;
 
             for (i = 0; i < lists.length; i += 1) {
@@ -572,8 +688,27 @@
                 // style name will inherit that style and will be handled correctly as any text:list with a style defined
                 // will have CSS rules applied to its child text:list elements
                 if (styleName) {
+                    continueNumbering = list.getAttributeNS(textns, "continue-numbering");
+                    continueListXmlId = list.getAttributeNS(textns, "continue-list");
+                    xmlId = list.getAttributeNS(xmlns, "id");
+
+                    // store the list keyed by the xml:id
+                    if (xmlId) {
+                        listsWithXmlId[xmlId] = list;
+                    }
+
                     contentRules = getAllContentRules(listStyles[styleName].element);
-                    listCounter.createCounterRules(contentRules, list);
+
+                    // lists with different styles cannot be continued
+                    // https://tools.oasis-open.org/issues/browse/OFFICE-3558
+                    if (continueNumbering && !continueListXmlId && isMatchingListStyle(previousList, styleName)) {
+                        listCounter.createCounterRules(contentRules, list, previousList);
+                    } else if (continueListXmlId && isMatchingListStyle(listsWithXmlId[continueListXmlId], styleName)) {
+                        listCounter.createCounterRules(contentRules, list, listsWithXmlId[continueListXmlId]);
+                    } else {
+                        listCounter.createCounterRules(contentRules, list);
+                    }
+                    previousList = list;
                 }
             }
 
