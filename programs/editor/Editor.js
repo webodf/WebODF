@@ -79,6 +79,7 @@ define("webodf/editor/Editor", [
         /**
          * @constructor
          * @param {{unstableFeaturesEnabled:boolean,
+         *          allFeaturesEnabled:boolean,
          *          loadCallback:function(),
          *          saveCallback:function(),
          *          closeCallback:function()}}
@@ -115,7 +116,11 @@ define("webodf/editor/Editor", [
                     Editor.EVENT_METADATACHANGED
                 ]),
                 pendingMemberId,
-                pendingEditorReadyCallback;
+                pendingEditorReadyCallback,
+                FEATURE = {
+                    COLLAB_UNSTABLE: 1,
+                    COLLAB_MISSING: 2
+                };
 
             /**
              * @param {!string} eventid
@@ -587,6 +592,33 @@ define("webodf/editor/Editor", [
                 fireEvent(Editor.EVENT_METADATACHANGED, changes);
             }
 
+            /**
+             * Returns true if either all features are wanted and this one is not explicitely disabled
+             * or if not all features are wanted by default and it is explicitely enabled
+             * @param {?boolean|undefined} isFeatureEnabled explicit flag which enables a feature
+             * @param {!number=} flag
+             * @return {!boolean}
+             */
+            function isEnabled(isFeatureEnabled, flag) {
+                var collabEditing = Boolean(server);
+
+                switch (flag) {
+                    case FEATURE.COLLAB_UNSTABLE:
+                        if (collabEditing && ! args.unstableFeaturesEnabled) {
+                            return false;
+                        }
+                        break;
+                    case FEATURE.COLLAB_MISSING:
+                        if (collabEditing) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return args.allFeaturesEnabled ? (isFeatureEnabled !== false) : isFeatureEnabled;
+            }
+
             // init
             function init() {
                 var editorPane, memberListPane,
@@ -602,13 +634,17 @@ define("webodf/editor/Editor", [
                     documentns = document.documentElement.namespaceURI,
                     //
                     collabEditing = Boolean(server),
-                    directParagraphStylingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
-                    imageInsertingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
-                    hyperlinkEditingEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
+                    directTextStylingEnabled = isEnabled(args.directTextStylingEnabled),
+                    directParagraphStylingEnabled = isEnabled(args.directParagraphStylingEnabled, FEATURE.COLLAB_UNSTABLE),
+                    paragraphStyleSelectingEnabled = isEnabled(args.paragraphStyleSelectingEnabled),
+                    paragraphStyleEditingEnabled = isEnabled(args.paragraphStyleEditingEnabled),
+                    imageInsertingEnabled = isEnabled(args.imageInsertingEnabled, FEATURE.COLLAB_UNSTABLE),
+                    hyperlinkEditingEnabled = isEnabled(args.hyperlinkEditingEnabled, FEATURE.COLLAB_UNSTABLE),
                     // annotations not yet properly supported for OT
-                    annotationsEnabled = (! collabEditing) || args.unstableFeaturesEnabled,
+                    annotationsEnabled = isEnabled(args.annotationsEnabled, FEATURE.COLLAB_UNSTABLE),
                      // undo manager is not yet integrated with collaboration
-                    undoRedoEnabled = (! collabEditing),
+                    undoRedoEnabled = isEnabled(args.undoRedoEnabled, FEATURE.COLLAB_MISSING),
+                    zoomingEnabled = isEnabled(args.zoomingEnabled),
                     aboutEnabled = (! collabEditing),
                     closeCallback;
 
@@ -675,11 +711,15 @@ define("webodf/editor/Editor", [
                     loadOdtFile: loadOdtFile,
                     saveOdtFile: saveOdtFile,
                     close: close,
+                    directTextStylingEnabled: directTextStylingEnabled,
                     directParagraphStylingEnabled: directParagraphStylingEnabled,
+                    paragraphStyleSelectingEnabled: paragraphStyleSelectingEnabled,
+                    paragraphStyleEditingEnabled: paragraphStyleEditingEnabled,
                     imageInsertingEnabled: imageInsertingEnabled,
                     hyperlinkEditingEnabled: hyperlinkEditingEnabled,
                     annotationsEnabled: annotationsEnabled,
                     undoRedoEnabled: undoRedoEnabled,
+                    zoomingEnabled: zoomingEnabled,
                     aboutEnabled: aboutEnabled
                 });
 
@@ -697,8 +737,15 @@ define("webodf/editor/Editor", [
                     session = new ops.Session(odfCanvas);
                     editorSession = new EditorSession(session, pendingMemberId, {
                         viewOptions: viewOptions,
+                        directTextStylingEnabled: directTextStylingEnabled,
                         directParagraphStylingEnabled: directParagraphStylingEnabled,
-                        annotationsEnabled: annotationsEnabled
+                        paragraphStyleSelectingEnabled: paragraphStyleSelectingEnabled,
+                        paragraphStyleEditingEnabled: paragraphStyleEditingEnabled,
+                        imageInsertingEnabled: imageInsertingEnabled,
+                        hyperlinkEditingEnabled: hyperlinkEditingEnabled,
+                        annotationsEnabled: annotationsEnabled,
+                        undoRedoEnabled: undoRedoEnabled,
+                        zoomingEnabled: zoomingEnabled
                     });
                     if (undoRedoEnabled) {
                         editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());

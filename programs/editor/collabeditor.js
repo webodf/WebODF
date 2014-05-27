@@ -60,7 +60,9 @@ var webodfEditor = (function () {
     var editorInstance = null,
         serverFactory = null,
         server = null,
-        editorOptions = {},
+        editorOptions = {
+            allFeaturesEnabled: true
+        },
         currentPageId = null,
         savingOverlay, disconnectedOverlay, hasLocalUnsyncedOpsOverlay,
         sessionList,
@@ -192,7 +194,6 @@ var webodfEditor = (function () {
 
                             runtime.setTranslator(editorTranslator.translate);
 
-                            editorOptions = editorOptions || {}; // TODO: cleanup
                             editorOptions.networkSecurityToken = token;
                             editorOptions.closeCallback = closeEditing;
 
