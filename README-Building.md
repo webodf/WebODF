@@ -78,3 +78,33 @@ Qt5 can be installed via homebrew, but will not be linked by default. CMake must
 specifying the Qt5 location in CMAKE_PATH_PREFIX environment variable:
 
     cmake -DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.2.1 ../webodf
+
+
+## Products
+
+There are several products that can be created during build.
+
+### webodf.js library with API documentation
+
+After you have prepared the buildsystem as described above, you execute this command:
+
+    make product-library
+
+This creates a file "webodf.js-x.y.z.zip", which can be copied and used on a system where you want to develop using the webodf.js library
+and have the documentation of the classes' API as HTML pages.
+
+### Firefox Add-on ODF Viewer
+
+After you have prepared the buildsystem as described above, you execute this command:
+
+    make product-firefoxextension
+
+This creates a file "firefox-extension-odfviewer-x.y.z.xpi", which can be directly installed as add-on in Firefox browsers, so ODF files can be viewed directly in Firefox.
+
+### ViewerJS Plugin
+
+This is currently only called automatically during the build of [ViewerJS](http://viewerjs.org), you will not do this yourself.
+
+    make product-viewerjsdir
+
+It creates a folder "viewer", which is then further processed in the build of ViewerJS.

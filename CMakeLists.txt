@@ -316,6 +316,9 @@ set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools)
 set(RUNTIMEJS ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
 
+set(WEBODFJS_DIR ${CMAKE_CURRENT_BINARY_DIR}/webodf.js-${WEBODF_VERSION})
+set(WEBODFJS_ZIP webodf.js-${WEBODF_VERSION}.zip)
+
 set(VIEWERBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/viewer)
 
 set(FIREFOX_EXTENSION_ODFVIEWER_DIR ${CMAKE_CURRENT_BINARY_DIR}/firefox-extension-odfviewer-${WEBODF_VERSION})
@@ -332,11 +335,8 @@ add_subdirectory(webodf)
 # the programs/components
 add_subdirectory(programs)
 
-
-############
-## Package
-############
-
+# old target used by the CI, with no user for the actual content
+# to be removed after CI switched to build products directly
 set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
 set(WEBODFZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
 add_custom_command(
@@ -366,7 +366,7 @@ add_custom_command(
         editor-compiled.js-target
         html-benchmark
         viewer-minimized.js-target
-        firefoxextension-target
+        product-firefoxextension
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(zip DEPENDS ${WEBODFZIP})

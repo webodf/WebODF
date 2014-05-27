@@ -35,4 +35,4 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(firefoxextension-target DEPENDS ${FIREFOX_EXTENSION_ODFVIEWER})
+add_custom_target(product-firefoxextension DEPENDS ${FIREFOX_EXTENSION_ODFVIEWER})
