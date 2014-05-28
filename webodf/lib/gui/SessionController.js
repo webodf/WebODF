@@ -1122,6 +1122,7 @@ gui.SessionControllerOptions = function () {
                 hyperlinkClickHandler.destroy,
                 hyperlinkController.destroy,
                 metadataController.destroy,
+                selectionController.destroy,
                 textController.destroy,
                 destroy
             ];

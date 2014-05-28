@@ -26,6 +26,7 @@
 
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  */
@@ -39,10 +40,28 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         rootFilter = odtDocument.createRootFilter(inputMemberId),
         /**@type{?function():(!number|undefined)}*/
         caretXPositionLocator = null,
+        /**@type{!number|undefined}*/
+        lastXPosition,
+        /**@type{!core.ScheduledTask}*/
+        resetLastXPositionTask,
         TRAILING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
         LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING,
         PREVIOUS = core.StepDirection.PREVIOUS,
-        NEXT = core.StepDirection.NEXT;
+        NEXT = core.StepDirection.NEXT,
+        // Number of milliseconds to keep the user's last up/down caret X position for
+        /**@const*/ UPDOWN_NAVIGATION_RESET_DELAY_MS = 2000;
+
+    /**
+     * @param {!ops.Operation} op
+     * @return undefined;
+     */
+    function resetLastXPosition(op) {
+        var opspec = op.spec();
+        if (op.isEdit || opspec.memberid === inputMemberId) {
+            lastXPosition = undefined;
+            resetLastXPositionTask.cancel();
+        }
+    }
 
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
@@ -415,7 +434,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      */
     function moveCursorByLine(direction, extend) {
         var stepIterator,
-            currentX = caretXPositionLocator ? caretXPositionLocator() : undefined,
+            currentX = lastXPosition,
             stepScanners = [new gui.LineBoundaryScanner(), new gui.ParagraphBoundaryScanner()];
 
         // Both a line boundary AND a paragraph boundary scanner are necessary to ensure the caret stops correctly
@@ -425,6 +444,10 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         // As a result, the line boundary detection can't determine if an empty paragraph is a line-wrap point, but
         // the paragraph boundary scanner *will* correctly determine that step iterator has moved beyond the
         // current paragraph.
+
+        if (currentX === undefined && caretXPositionLocator) {
+            currentX = caretXPositionLocator();
+        }
 
         if (isNaN(currentX)) {
             // Return as the current X offset is unknown. Either no locator is set or the locator returned
@@ -450,6 +473,8 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         // Finally, move to the closest point to the desired X offset within the current line
         if (guiStepUtils.moveToFilteredStep(stepIterator, direction, stepScanners)) {
             moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
+            lastXPosition = currentX;
+            resetLastXPositionTask.restart();
         }
     }
 
@@ -733,4 +758,21 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         return true;
     }
     this.extendSelectionToEntireDocument = extendSelectionToEntireDocument;
+
+    /**
+     * @param {!function(!Error=)} callback passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function (callback) {
+        odtDocument.unsubscribe(ops.OdtDocument.signalOperationStart, resetLastXPosition);
+        core.Async.destroyAll([resetLastXPositionTask.destroy], callback);
+    };
+
+    function init() {
+        resetLastXPositionTask = core.Task.createTimeoutTask(function() {
+            lastXPosition = undefined;
+        }, UPDOWN_NAVIGATION_RESET_DELAY_MS);
+        odtDocument.subscribe(ops.OdtDocument.signalOperationStart, resetLastXPosition);
+    }
+    init();
 };

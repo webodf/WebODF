@@ -95,6 +95,18 @@ core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
     this.cancel = cancel;
 
     /**
+     * Cancel any scheduled callbacks and immediately reschedule a new call with
+     * any existing arguments.
+     * @return {undefined}
+     */
+    this.restart = function () {
+        runtime.assert(destroyed === false, "Can't trigger destroyed ScheduledTask instance");
+        cancel();
+        scheduled = true;
+        timeoutId = scheduleTask(execute);
+    };
+
+    /**
      * Cancel any pending requests
      * @param {!function(!Error=)} callback
      */
