@@ -200,8 +200,8 @@
     "ops.OdtStepsTranslatorTests": [
         "core.DomUtils",
         "core.PositionFilter",
+        "core.PositionIterator",
         "core.UnitTester",
-        "gui.SelectionMover",
         "odf.Namespaces",
         "ops.OdtStepsTranslator",
         "ops.TextPositionFilter"

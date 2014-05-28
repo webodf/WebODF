@@ -145,8 +145,8 @@ gui.HyperlinkController = function HyperlinkController(
         if (!isEnabled) {
             return;
         }
-
-        var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+        
+        var iterator = odtDocument.createPositionIterator(odtDocument.getRootNode()),
             selectedRange = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             links = odfUtils.getHyperlinkElements(selectedRange),
             removeEntireLink = selectedRange.collapsed && links.length === 1,

@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, core, odf, ops, gui*/
+/*global runtime, core, odf, ops, gui, NodeFilter*/
 
 /**
  * @constructor
@@ -125,13 +125,21 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         return node;
     }
 
+    /**
+     * @param {!Node} rootNode
+     * @return {!core.PositionIterator}
+     */
+    function createPositionIterator(rootNode) {
+        return new core.PositionIterator(rootNode, NodeFilter.SHOW_ALL, undefined, false);
+    }
+
     this.setUp = function () {
         testarea = core.UnitTest.provideTestAreaDiv();
         t = {
             filter: new CallCountedPositionFilter(new ops.TextPositionFilter(function() { return testarea; }))
         };
         t.translator = new ops.OdtStepsTranslator(function() { return testarea; },
-            gui.SelectionMover.createPositionIterator,
+            createPositionIterator,
             t.filter, CACHE_STEP_SIZE);
     };
     this.tearDown = function () {

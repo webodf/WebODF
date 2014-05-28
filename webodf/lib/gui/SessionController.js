@@ -92,7 +92,7 @@ gui.SessionControllerOptions = function () {
             textController = new gui.TextController(session, sessionConstraints, sessionContext, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
             imageController = new gui.ImageController(session, sessionConstraints, sessionContext, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
-            shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
+            shadowCursorIterator = odtDocument.createPositionIterator(odtDocument.getRootNode()),
             /**@type{!core.ScheduledTask}*/
             drawShadowCursorTask,
             /**@type{!core.ScheduledTask}*/

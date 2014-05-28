@@ -44,7 +44,7 @@ module.exports = function (config) {
             'lib/core/Zip.js',
             'lib/gui/CommonConstraints.js',
             'lib/gui/SessionConstraints.js',
-            'lib/gui/SelectionMover.js',
+            'lib/gui/BlacklistNamespaceNodeFilter.js',
             'lib/xmldom/LSSerializerFilter.js',
             'lib/odf/OdfNodeFilter.js',
             'lib/odf/Namespaces.js',

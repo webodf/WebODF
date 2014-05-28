@@ -52,7 +52,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         zoomHelper = document.getCanvas().getZoomHelper(),
         /**@type{boolean}*/
         isVisible = true,
-        positionIterator = gui.SelectionMover.createPositionIterator(document.getRootNode()),
+        positionIterator = cursor.getDocument().createPositionIterator(document.getRootNode()),
         /**@const*/
         FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,
         /**@const*/

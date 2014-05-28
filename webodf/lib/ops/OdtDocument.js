@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global Node, runtime, core, gui, ops, odf*/
+/*global Node, runtime, core, gui, ops, odf, NodeFilter*/
 
 /**
  * A document that keeps all data related to the mapped document.
@@ -74,7 +74,19 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@type{!ops.OdtStepsTranslator}*/
         stepsTranslator,
         lastEditingOp,
-        unsupportedMetadataRemoved = false;
+        unsupportedMetadataRemoved = false,
+        /**@const*/ SHOW_ALL = NodeFilter.SHOW_ALL,
+        defaultNodeFilter = new gui.BlacklistNamespaceNodeFilter(["urn:webodf:names:cursor", "urn:webodf:names:editinfo"]);
+
+    /**
+     *
+     * @param {!Node} rootNode
+     * @return {!core.PositionIterator}
+     */
+    function createPositionIterator(rootNode) {
+        return new core.PositionIterator(rootNode, SHOW_ALL, defaultNodeFilter, false);
+    }
+    this.createPositionIterator = createPositionIterator;
 
     /**
      * Return the office:text element of this document.
@@ -204,7 +216,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!core.StepIterator}
      */
     function createStepIterator(container, offset, filters, subTree) {
-        var positionIterator = gui.SelectionMover.createPositionIterator(subTree),
+        var positionIterator = createPositionIterator(subTree),
             filterOrChain,
             stepIterator;
 
@@ -228,7 +240,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!core.PositionIterator}
      */
     function getIteratorAtPosition(position) {
-        var iterator = gui.SelectionMover.createPositionIterator(getRootNode()),
+        var iterator = createPositionIterator(getRootNode()),
             point = stepsTranslator.convertStepsToDomPoint(position);
 
         iterator.setUnfilteredPosition(point.node, point.offset);
@@ -970,7 +982,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
         stepUtils = new odf.StepUtils();
-        stepsTranslator = new ops.OdtStepsTranslator(getRootNode, gui.SelectionMover.createPositionIterator, filter, 500);
+        stepsTranslator = new ops.OdtStepsTranslator(getRootNode, createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsRemoved, stepsTranslator.handleStepsRemoved);
         eventNotifier.subscribe(ops.OdtDocument.signalOperationEnd, handleOperationExecuted);
