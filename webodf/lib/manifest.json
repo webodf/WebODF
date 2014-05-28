@@ -36,7 +36,8 @@
         "core.Destroyable"
     ],
     "core.StepIterator": [
-        "core.PositionFilter"
+        "core.PositionFilter",
+        "core.enums"
     ],
     "core.Task": [
         "core.ScheduledTask"
@@ -50,6 +51,8 @@
         "core.ByteArray",
         "core.ByteArrayWriter",
         "core.RawInflate"
+    ],
+    "core.enums": [
     ],
     "gui.AnnotationController": [
         "ops.Session"

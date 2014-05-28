@@ -147,6 +147,16 @@ core.StepIterator = function StepIterator(filter, iterator) {
     this.previousStep = previousStep;
 
     /**
+     * Advance the iterator by one step in the specified direction.
+     *
+     * @param {!core.StepDirection} direction
+     * @return {!boolean}
+     */
+    this.advanceStep = function(direction) {
+        return direction === core.StepDirection.NEXT ? nextStep() : previousStep();
+    };
+
+    /**
      * If the current position is not on a valid step, this function will move the iterator
      * to the closest previous step. If there is no previous step, it will advance to the next
      * closest step.
