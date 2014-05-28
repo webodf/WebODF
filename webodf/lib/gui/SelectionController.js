@@ -36,6 +36,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         odfUtils = new odf.OdfUtils(),
         baseFilter = odtDocument.getPositionFilter(),
         keyboardMovementsFilter = new core.PositionFilterChain(),
+        guiStepUtils = new gui.GuiStepUtils(),
         rootFilter = odtDocument.createRootFilter(inputMemberId),
         TRAILING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
         LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING,
@@ -493,15 +494,18 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {undefined}
      */
     function moveCursorToLineBoundary(direction, extend) {
-        var lineDirection = direction === core.StepDirection.NEXT ? 1 : -1,
-            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
-            lineDirection,
-            keyboardMovementsFilter
-        );
-        if (extend) {
-            extendCursorByAdjustment(steps);
-        } else {
-            moveCursorByAdjustment(steps);
+        var stepIterator = createKeyboardStepIterator(),
+            stepScanners = [new gui.LineBoundaryScanner(), new gui.ParagraphBoundaryScanner()];
+
+        // Both a line boundary AND a paragraph boundary scanner are necessary to ensure the caret stops correctly
+        // inside an empty paragraph.
+        // The line boundary scanner requires a visible client rect in order to detect a line break, but for an
+        // empty paragraph, there is no visible leading or trailing rect as there aren't any visible children.
+        // As a result, the line boundary detection can't determine if an empty paragraph is a line-wrap point, but
+        // the paragraph boundary scanner *will* correctly determine that step iterator has moved beyond the
+        // current paragraph.
+        if (guiStepUtils.moveToFilteredStep(stepIterator, direction, stepScanners)) {
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
 

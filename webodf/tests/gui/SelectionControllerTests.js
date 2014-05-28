@@ -88,6 +88,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
 
         testarea.appendChild(node);
 
+        t.root = node;
         t.odtDocument = new ops.OdtDocument(new MockOdfCanvas(node));
         t.session = new MockSession(t.odtDocument);
         t.selectionController = new gui.SelectionController(t.session, inputMemberId);
@@ -96,6 +97,16 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
         return node;
+    }
+
+    /**
+     * @param {!number} stepsToAnchor Number of steps to advance the cursor
+     * @param {!number=} stepsDiffToFocus
+     * @return {undefined}
+     */
+    function setCursorPosition(stepsToAnchor, stepsDiffToFocus) {
+        var newRangeSelection = t.odtDocument.convertCursorToDomRange(stepsToAnchor, stepsDiffToFocus);
+        t.cursor.setSelectedRange(newRangeSelection, stepsDiffToFocus >= 0);
     }
 
     /**
@@ -500,12 +511,146 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.selection.range.endOffset", "4");
     }
 
+    function testCountStepsToLineBoundary_Forward_FromParagraphStart() {
+        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(0);
+        
+        t.selectionController.moveCursorToLineEnd();
+        
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "4");
+    }
+    function testCountStepsToLineBoundary_Forward_StartingAtSpace() {
+        createOdtDocument("<text:p> BCD</text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorToLineEnd();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
+    }
+    function testCountStepsToLineBoundary_Forward_EndingAtSpace() {
+        createOdtDocument("<text:p>ABC </text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorToLineEnd();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
+    }
+    function testCountStepsToLineBoundary_Forward_OverWrapping() {
+        // Width calculated to wrap at first space
+        createOdtDocument("<text:p paragraph-width='3'>ABC DEF</text:p>");
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorToLineEnd();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
+    }
+    function testCountStepsToLineBoundary_Backward_FromParagraphStart() {
+        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace() {
+        createOdtDocument("<text:p> BCD</text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(3);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_FromParagraphEnd() {
+        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        setCursorPosition(4);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWhiteSpace() {
+        createOdtDocument("<text:p>A <text:span> BC</text:span>D</text:p>");
+        setCursorPosition(5);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode() {
+        createOdtDocument("<text:p>A <text:span>   </text:span>D</text:p>");
+        setCursorPosition(3);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_OverEmptyTextNodes() {
+        var spans;
+        createOdtDocument("<text:p>A <text:span/><text:span/> D </text:p>");
+        // Add an empty text node to the span element
+        spans = t.root.getElementsByTagNameNS(odf.Namespaces.textns, "span");
+        spans[0].appendChild(t.root.ownerDocument.createTextNode(""));
+        spans[1].parentNode.insertBefore(t.root.ownerDocument.createTextNode(""), spans[0]);
+        spans[1].appendChild(t.root.ownerDocument.createTextNode(""));
+        spans[1].parentNode.insertBefore(t.root.ownerDocument.createTextNode(""), spans[1]);
+        setCursorPosition(3);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWrapping() {
+        // Width calculated to wrap at first space
+        createOdtDocument("<text:p paragraph-width='3'>ABC DEF</text:p>");
+        setCursorPosition(6);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "4");
+    }
+    function testCountStepsToLineBoundary_Backward_OverWrapping2() {
+        // Width calculated to wrap at first space
+        createOdtDocument("<text:p paragraph-width='2.7'>ABC D <text:span>E</text:span>F</text:p>");
+        setCursorPosition(8);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "4");
+    }
+
     this.setUp = function () {
+        var doc, stylesElement;
         testarea = core.UnitTest.provideTestAreaDiv();
-        t = { doc: testarea.ownerDocument };
+        doc = testarea.ownerDocument;
+        stylesElement = doc.createElement("style");
+        stylesElement.setAttribute("type", "text/css");
+        stylesElement.appendChild(doc.createTextNode("@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);\n"));
+        // Make text:p behave as normal paragraphs
+        // Ensure font chars are always monospaced so widths are consistent between platforms
+        stylesElement.appendChild(doc.createTextNode("text|p { display: block; font-family: monospace; }\n"));
+        stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='2.7'] { width: 2.7em; }\n"));
+        stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='3'] { width: 3em; }\n"));
+        doc.getElementsByTagName("head")[0].appendChild(stylesElement);
+        t = {
+            doc: testarea.ownerDocument,
+            stylesElement: stylesElement
+        };
     };
     this.tearDown = function () {
         core.UnitTest.cleanupTestAreaDiv();
+        t.stylesElement.parentNode.removeChild(t.stylesElement);
         t = {};
     };
 
@@ -553,7 +698,21 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             expandToWordBoundaries_CollasedAtWordStart,
             expandToWordBoundaries_CollasedAtWordEnd,
             expandToWordBoundaries_AlreadyAtWordBoundaries,
-            expandToWordBoundaries_RangeInDifferentRootToCursor
+            expandToWordBoundaries_RangeInDifferentRootToCursor,
+
+            testCountStepsToLineBoundary_Forward_FromParagraphStart,
+            testCountStepsToLineBoundary_Forward_StartingAtSpace,
+            testCountStepsToLineBoundary_Forward_EndingAtSpace,
+            testCountStepsToLineBoundary_Forward_OverWrapping,
+
+            testCountStepsToLineBoundary_Backward_FromParagraphStart,
+            testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace,
+            testCountStepsToLineBoundary_Backward_FromParagraphEnd,
+            testCountStepsToLineBoundary_Backward_OverWhiteSpace,
+            testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode,
+            testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
+            testCountStepsToLineBoundary_Backward_OverWrapping,
+            testCountStepsToLineBoundary_Backward_OverWrapping2
         ]);
     };
     this.asyncTests = function () {
