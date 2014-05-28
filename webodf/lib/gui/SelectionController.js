@@ -155,6 +155,33 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
+     * Move or extend the local member's selection to the specified focus point.
+     *
+     * @param {!Node} focusNode
+     * @param {!number} focusOffset
+     * @param {!boolean} extend Set to true to extend the selection (i.e., the current selection anchor
+     *                          will remain unchanged)
+     * @return {undefined}
+     */
+    function moveCursorFocusPoint(focusNode, focusOffset, extend) {
+        var cursor,
+            newSelection,
+            newCursorSelection;
+
+        cursor = odtDocument.getCursor(inputMemberId);
+        newSelection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection());
+        newSelection.focusNode = focusNode;
+        newSelection.focusOffset = focusOffset;
+
+        if (!extend) {
+            newSelection.anchorNode = newSelection.focusNode;
+            newSelection.anchorOffset = newSelection.focusOffset;
+        }
+        newCursorSelection = odtDocument.convertDomToCursorRange(newSelection);
+        session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
+    }
+
+    /**
      * @param {!Node} frameNode
      */
     function selectImage(frameNode) {
@@ -527,7 +554,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     function moveCursorByWord(direction, extend) {
         var cursor = odtDocument.getCursor(inputMemberId),
             newSelection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
-            newCursorSelection,
             selectionUpdated,
             stepIterator = createWordBoundaryStepIterator(newSelection.focusNode, newSelection.focusOffset, TRAILING_SPACE);
 
@@ -538,15 +564,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         }
 
         if (selectionUpdated) {
-            newSelection.focusNode = stepIterator.container();
-            newSelection.focusOffset = stepIterator.offset();
-
-            if (!extend) {
-                newSelection.anchorNode = newSelection.focusNode;
-                newSelection.anchorOffset = newSelection.focusOffset;
-            }
-            newCursorSelection = odtDocument.convertDomToCursorRange(newSelection);
-            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
     
@@ -635,8 +653,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             containmentNode,
             selection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
             rootElement = odtDocument.getRootElement(selection.focusNode),
-            stepIterator,
-            newCursorSelection;
+            stepIterator;
 
         runtime.assert(Boolean(rootElement), "SelectionController: Cursor outside root");
         stepIterator = odtDocument.createStepIterator(selection.focusNode, selection.focusOffset, [baseFilter, rootFilter], rootElement);
@@ -661,14 +678,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             }
         }
         if (validStepFound) {
-            selection.focusNode = stepIterator.container();
-            selection.focusOffset = stepIterator.offset();
-            if (!extend) {
-                selection.anchorNode = selection.focusNode;
-                selection.anchorOffset = selection.focusOffset;
-            }
-            newCursorSelection = odtDocument.convertDomToCursorRange(selection);
-            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
 
