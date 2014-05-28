@@ -126,28 +126,28 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
             '</text:list-style>',
             '',
             '<text:list xml:id="list3909266619294604477" text:style-name="lijst">' +
-              '<text:list-item>' +
-                '<text:p />' +
-              '</text:list-item>' +
             '</text:list>');
         r.shouldBe(t, "t.styleSheet.cssRules.length", "6");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > :not(text|list):first-child:before{text-align: left;display: inline-block;margin-left: 0px;padding-right: 0.2cm;}'");
-        r.shouldBe(t, "t.styleSheet.cssRules.rules[3].ruleText", "'text|list[webodfhelper|counter-id=\"webodf-list3909266619294604477-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: \"-\";\\ncounter-increment: webodf-list3909266619294604477-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[3].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist3909266619294604477-level1-1\"] > text|list-item:first-child > :not(text|list):first-child:before{counter-increment: Ylist3909266619294604477-level1-1 0;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[4].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist3909266619294604477-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: \"-\";\\ncounter-increment: Ylist3909266619294604477-level1-1;}'");
     }
 
-    function style_WithNo_list_level_poperties() {
+    function style_WithNo_list_level_properties() {
         applyListStyles(
             '<text:list-style style:name="lijst">' +
               '<text:list-level-style-bullet text:bullet-char="-" text:level="1">' +
               '</text:list-level-style-bullet>' +
             '</text:list-style>',
-            "");
-        r.shouldBe(t, "t.styleSheet.cssRules.length", "3");
+            "",
+            '<text:list xml:id="list3909266619294604477" text:style-name="lijst">' +
+            '</text:list>');
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "6");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
-        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > *:not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;min-width: 0px;margin-left: 0px;padding-right: 0px;\\ncontent: \"-\";\\n}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > :not(text|list):first-child:before{text-align: left;display: inline-block;min-width: 0px;margin-left: 0px;padding-right: 0px;}'");
     }
 
     function style_list_level_properties_WithNo_style_list_level_label_alignment() {
@@ -158,11 +158,13 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
                 '</style:list-level-properties>' +
               '</text:list-level-style-bullet>' +
             '</text:list-style>',
-            "");
-        r.shouldBe(t, "t.styleSheet.cssRules.length", "3");
+            "",
+            '<text:list xml:id="list3909266619294604477" text:style-name="lijst">' +
+            '</text:list>');
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "6");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
         r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
-        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > *:not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;margin-left: 0px;\\ncontent: \"-\";\\n}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > :not(text|list):first-child:before{text-align: left;display: inline-block;margin-left: 0px;}'");
     }
 
     /**
@@ -345,7 +347,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
               '</text:list-item>' +
             '</text:list>');
 
-        matchContentBlock("list1-level1-1", expectedContentValue);
+        matchContentBlock("X1-level1-1", expectedContentValue);
     }
 
     function numberedListPrefixes() {
@@ -384,7 +386,7 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
               '</text:list-item>' +
             '</text:list>');
 
-        matchContentBlock("list1-level1-1", expectedContentValue);
+        matchContentBlock("X1-level1-1", expectedContentValue);
     }
 
     function bulletCharacters() {
@@ -396,6 +398,390 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
         checkBulletCharacter(",", "[,]");
     }
 
+    function continueNumberingList_StyleApplied() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='2' style:num-suffix='.' style:num-format='1' text:display-levels='2'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.905cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Initial</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:p>Non List Text</text:p>" +
+            "<text:list text:continue-numbering='true' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                    "<text:list>" +
+                        "<text:list-item>" +
+                            "<text:p>Continued</text:p>" +
+                            "<text:list>" +
+                                "<text:list-item>" +
+                                    "<text:p>From</text:p>" +
+                                "</text:list-item>" +
+                            "</text:list>" +
+                        "</text:list-item>" +
+                    "</text:list>" +
+                "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "14");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[7].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(X1-level1-1,decimal) \".\";\\ncounter-increment: X1-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[8].ruleText", "'text|list[webodfhelper|counter-id=\"X2-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(X1-level1-1,decimal) \".\";\\ncounter-increment: X1-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[13].ruleText", "'office|document{counter-reset: X1-level1-1 1 X2-level2-2 1 X2-level3-3 1 ;}'");
+    }
+
+    function continueNumberingList_DifferentListStyles() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>" +
+             "<text:list-style style:name='L2'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                     "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                         "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                     "</style:list-level-properties>" +
+                 "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Initial</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:p>Non List Text</text:p>" +
+                "<text:list text:continue-numbering='true' text:style-name='L2'>" +
+                    "<text:list-item>" +
+                        "<text:p>Continued</text:p>" +
+                    "</text:list-item>" +
+                    "<text:list-item>" +
+                        "<text:p>List</text:p>" +
+                    "</text:list-item>" +
+                "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "11");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[7].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(X1-level1-1,decimal) \".\";\\ncounter-increment: X1-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[9].ruleText", "'text|list[webodfhelper|counter-id=\"X2-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(X2-level1-1,decimal) \".\";\\ncounter-increment: X2-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[10].ruleText", "'office|document{counter-reset: X1-level1-1 1 X2-level1-1 1 ;}'");
+    }
+
+    function continueNumberingList_AttributeIgnored() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'> " +
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                   "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                       "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                   "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='2' style:num-suffix='.' style:num-format='1' text:display-levels='2'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.905cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Initial</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:p>Non List Text</text:p>" +
+            "<text:list text:continue-numbering='true' text:continue-list='list114920301140620' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Continued</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "11");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[7].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(X1-level1-1,decimal) \".\";\\ncounter-increment: X1-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[9].ruleText", "'text|list[webodfhelper|counter-id=\"X2-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(X2-level1-1,decimal) \".\";\\ncounter-increment: X2-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[10].ruleText", "'office|document{counter-reset: X1-level1-1 1 X2-level1-1 1 ;}'");
+    }
+
+    function continuedListById_StyleApplied() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='2' style:num-suffix='.' style:num-format='1' text:display-levels='2'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.905cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list xml:id='list114920301140620' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Initial</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:p>Non List Text</text:p>" +
+            "<text:list text:continue-list='list114920301140620' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                    "<text:list>" +
+                        "<text:list-item>" +
+                            "<text:p>Continued</text:p>" +
+                            "<text:list>" +
+                                "<text:list-item>" +
+                                    "<text:p>From</text:p>" +
+                                "</text:list-item>" +
+                            "</text:list>" +
+                        "</text:list-item>" +
+                    "</text:list>" +
+                "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "14");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[7].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist114920301140620-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist114920301140620-level1-1,decimal) \".\";\\ncounter-increment: Ylist114920301140620-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[8].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist114920301140620-level1-1,decimal) \".\";\\ncounter-increment: Ylist114920301140620-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[10].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level2-2\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist114920301140620-level1-1,decimal)\".\" counter(X1-level2-2,decimal) \".\";\\ncounter-increment: X1-level2-2;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[13].ruleText", "'office|document{counter-reset: Ylist114920301140620-level1-1 1 X1-level2-2 1 X1-level3-3 1 ;}'");
+    }
+
+    function continuedListById_IncorrectId() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='2' style:num-suffix='.' style:num-format='1' text:display-levels='2'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.905cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list xml:id='list114920301140620' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Initial</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:p>Non List Text</text:p>" +
+            "<text:list xml:id='list7063034328595803263' text:continue-list='wrongId' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                    "<text:list>" +
+                        "<text:list-item>" +
+                            "<text:p>Continued</text:p>" +
+                            "<text:list>" +
+                                "<text:list-item>" +
+                                    "<text:p>From</text:p>" +
+                                "</text:list-item>" +
+                            "</text:list>" +
+                        "</text:list-item>" +
+                    "</text:list>" +
+                "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "15");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[7].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist114920301140620-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist114920301140620-level1-1,decimal) \".\";\\ncounter-increment: Ylist114920301140620-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[9].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist7063034328595803263-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist7063034328595803263-level1-1,decimal) \".\";\\ncounter-increment: Ylist7063034328595803263-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[14].ruleText", "'office|document{counter-reset: Ylist114920301140620-level1-1 1 Ylist7063034328595803263-level1-1 1 Ylist7063034328595803263-level2-2 1 Ylist7063034328595803263-level3-3 1 ;}'");
+    }
+
+    function continuedListById_DifferentListStyles() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>" +
+             "<text:list-style style:name='L2'> "+
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                     "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                         "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                     "</style:list-level-properties>" +
+                 "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list xml:id='list114920301140620' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p>Initial</text:p>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:p>Non List Text</text:p>" +
+            "<text:list xml:id='list7063034328595803263' text:continue-list='list114920301140620' text:style-name='L2'>" +
+                "<text:list-item>" +
+                    "<text:p>List</text:p>" +
+                    "<text:list>" +
+                        "<text:list-item>" +
+                            "<text:p>Continued</text:p>" +
+                            "<text:list>" +
+                                "<text:list-item>" +
+                                    "<text:p>From</text:p>" +
+                                "</text:list-item>" +
+                            "</text:list>" +
+                        "</text:list-item>" +
+                    "</text:list>" +
+                "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "15");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[7].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist114920301140620-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist114920301140620-level1-1,decimal) \".\";\\ncounter-increment: Ylist114920301140620-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[9].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist7063034328595803263-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist7063034328595803263-level1-1,decimal) \".\";\\ncounter-increment: Ylist7063034328595803263-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[14].ruleText", "'office|document{counter-reset: Ylist114920301140620-level1-1 1 Ylist7063034328595803263-level1-1 1 Ylist7063034328595803263-level2-2 1 Ylist7063034328595803263-level3-3 1 ;}'");
+    }
+
+    function continuedListById_MultiLevelContinuation() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'>" +
+                "<text:list-level-style-number text:level='1' style:num-suffix='.' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='2' style:num-suffix='.' style:num-format='1' text:display-levels='2'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.905cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='3' style:num-suffix='.' style:num-format='1' text:display-levels='3'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='2.54cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list xml:id='list9107897735011452913' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:p >Foo</text:p>" +
+                    "<text:list>" +
+                        "<text:list-item>" +
+                            "<text:p >Foo</text:p>" +
+                            "<text:list>" +
+                                "<text:list-item>" +
+                                    "<text:p >Foo</text:p>" +
+                                "</text:list-item>" +
+                            "</text:list>" +
+                        "</text:list-item>" +
+                    "</text:list>" +
+                "</text:list-item>" +
+            "</text:list>" +
+            "<text:list text:continue-list='list9107897735011452913' text:style-name='L1'>" +
+                "<text:list-item>" +
+                    "<text:list>" +
+                        "<text:list-item>" +
+                            "<text:list>" +
+                                "<text:list-item>" +
+                                    "<text:p >Foo</text:p>" +
+                                "</text:list-item>" +
+                            "</text:list>" +
+                        "</text:list-item>" +
+                        "<text:list-item>" +
+                            "<text:p >Foo</text:p>" +
+                        "</text:list-item>" +
+                    "</text:list>" +
+                "</text:list-item>" +
+                "<text:list-item>" +
+                    "<text:p >Foo</text:p>" +
+                "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "19");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[10].ruleText", "'text|list[webodfhelper|counter-id=\"Ylist9107897735011452913-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist9107897735011452913-level1-1,decimal) \".\";\\ncounter-increment: Ylist9107897735011452913-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[15].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level1-1\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist9107897735011452913-level1-1,decimal) \".\";\\ncounter-increment: Ylist9107897735011452913-level1-1;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[16].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level2-2\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist9107897735011452913-level1-1,decimal)\".\" counter(Ylist9107897735011452913-level2-2,decimal) \".\";\\ncounter-increment: Ylist9107897735011452913-level2-2;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[17].ruleText", "'text|list[webodfhelper|counter-id=\"X1-level3-3\"] > text|list-item > :not(text|list):first-child:before{\\ncontent: counter(Ylist9107897735011452913-level1-1,decimal)\".\" counter(Ylist9107897735011452913-level2-2,decimal)\".\" counter(Ylist9107897735011452913-level3-3,decimal) \".\";\\ncounter-increment: Ylist9107897735011452913-level3-3;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[18].ruleText", "'office|document{counter-reset: Ylist9107897735011452913-level1-1 1 Ylist9107897735011452913-level2-2 1 Ylist9107897735011452913-level3-3 1 ;}'");
+
+    }
+
+    function multiLevelList_DisplayLevels() {
+        applyListStyles(
+            "",
+            "<text:list-style style:name='L1'>" +
+                "<text:list-level-style-number text:level='1' style:num-suffix='FO O' style:num-format='1'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.27cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='2' style:num-suffix='FO O' style:num-format='1' text:display-levels='2'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='1.905cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='3' style:num-suffix='FO O' style:num-format='1' text:display-levels='3'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='2.54cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+                "<text:list-level-style-number text:level='4' style:num-suffix='FO O' style:num-format='1' text:display-levels='3'>" +
+                    "<style:list-level-properties text:list-level-position-and-space-mode='label-alignment'>" +
+                        "<style:list-level-label-alignment text:label-followed-by='listtab' fo:text-indent='-0.635cm' fo:margin-left='3.175cm'/>" +
+                    "</style:list-level-properties>" +
+                "</text:list-level-style-number>" +
+            "</text:list-style>",
+            "<text:list xml:id='list9107897735011452913' text:style-name='L1'>" +
+            "<text:list-item>" +
+                "<text:p >Foo</text:p>" +
+            "<text:list>" +
+            "<text:list-item>" +
+                "<text:p >Foo</text:p>" +
+                "<text:list>" +
+                    "<text:list-item>" +
+                        "<text:p >Foo</text:p>" +
+                        "<text:list>" +
+                            "<text:list-item>" +
+                                "<text:p >Foo</text:p>" +
+                            "</text:list-item>" +
+                        "</text:list>" +
+                    "</text:list-item>" +
+                "</text:list>" +
+            "</text:list-item>" +
+            "</text:list>" +
+            "</text:list-item>" +
+            "</text:list>");
+
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "21");
+        r.shouldBe(t, "'" + normalizeCSSContent(t.styleSheet.cssRules.rules[13].cssRule.style.content) + "'", "'counter(...) [FO O]'");
+        r.shouldBe(t, "'" + normalizeCSSContent(t.styleSheet.cssRules.rules[15].cssRule.style.content) + "'", "'counter(...) [.] counter(...) [FO O]'");
+        r.shouldBe(t, "'" + normalizeCSSContent(t.styleSheet.cssRules.rules[17].cssRule.style.content) + "'", "'counter(...) [.] counter(...) [.] counter(...) [FO O]'");
+        r.shouldBe(t, "'" + normalizeCSSContent(t.styleSheet.cssRules.rules[19].cssRule.style.content) + "'", "'counter(...) [.] counter(...) [.] counter(...) [FO O]'");
+    }
+
     this.tests = function () {
         return r.name([
             verifyCSSContentNormalization,
@@ -403,8 +789,16 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
             numberedListPrefixes,
             numberedListSuffixes,
             bulletCharacters,
-            style_WithNo_list_level_poperties,
-            style_list_level_properties_WithNo_style_list_level_label_alignment
+            style_WithNo_list_level_properties,
+            style_list_level_properties_WithNo_style_list_level_label_alignment,
+            continueNumberingList_StyleApplied,
+            continueNumberingList_DifferentListStyles,
+            continueNumberingList_AttributeIgnored,
+            continuedListById_StyleApplied,
+            continuedListById_IncorrectId,
+            continuedListById_DifferentListStyles,
+            continuedListById_MultiLevelContinuation,
+            multiLevelList_DisplayLevels
         ]);
     };
     this.asyncTests = function () {
