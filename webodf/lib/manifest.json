@@ -163,10 +163,7 @@
         "ops.Session"
     ],
     "gui.SelectionMover": [
-        "core.Cursor",
-        "core.LoopWatchDog",
-        "core.PositionFilter",
-        "odf.OdfUtils"
+        "core.PositionIterator"
     ],
     "gui.SelectionView": [
         "gui.ShadowCursor"
@@ -209,8 +206,10 @@
     "gui.SvgSelectionView": [
         "core.Async",
         "core.Task",
+        "gui.SelectionMover",
         "gui.SelectionView",
-        "odf.OdfNodeFilter"
+        "odf.OdfNodeFilter",
+        "odf.OdfUtils"
     ],
     "gui.TextController": [
         "gui.CommonConstraints",
@@ -349,11 +348,12 @@
     "ops.Member": [
     ],
     "ops.OdtCursor": [
-        "gui.SelectionMover",
+        "core.Cursor",
         "ops.Document"
     ],
     "ops.OdtDocument": [
         "core.PositionFilterChain",
+        "gui.SelectionMover",
         "odf.OdfCanvas",
         "odf.StepUtils",
         "ops.Member",

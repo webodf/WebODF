@@ -95,7 +95,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.odtDocument = new ops.OdtDocument(new MockOdfCanvas(t.root));
         t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
-        t.counter = t.cursor.getStepCounter();
 
         t.range = t.root.ownerDocument.createRange();
         t.filter = t.odtDocument.getPositionFilter();
@@ -197,132 +196,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         // Ensure there are no other walkable positions in the document
         t.isFirstStep = documentHasStep(step) === false;
         r.shouldBe(t, "t.isFirstStep", "true");
-    }
-    /*jslint regexp:false*/
-    function testCountLinesStepsDown_FromParagraphStart() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(0);
-        t.steps = t.counter.countLinesSteps(1, t.filter);
-        r.shouldBe(t, "t.steps", "5");
-    }
-    function testCountLinesStepsDown_FromParagraphEnd() {
-        createOdtDocument("<text:p>ABCDE</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(4);
-        t.steps = t.counter.countLinesSteps(1, t.filter);
-        r.shouldBe(t, "t.steps", "6");
-    }
-    function testCountLinesStepsDown_FromJaggedParagraphEnd() {
-        createOdtDocument("<text:p>ABCDE1</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(6);
-        t.steps = t.counter.countLinesSteps(1, t.filter);
-        r.shouldBe(t, "t.steps", "6");
-    }
-    function testCountLinesStepsDown_OverWrap() {
-        createOdtDocument("<text:p text:style-name='width4em'>ABCDE FGHIJ</text:p>");
-        appendCssRule("text|p[text|style-name=width4em] { width: 4em; }\n"); // Width calculated to wrap at first space
-        setCursorPosition(4);
-        t.steps = t.counter.countLinesSteps(1, t.filter);
-        r.shouldBe(t, "t.steps", "6");
-    }
-    function testCountLinesStepsUp_FromParagraphStart() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(5);
-        t.steps = t.counter.countLinesSteps(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-5");
-    }
-    function testCountLinesStepsUp_FromParagraphEnd() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(10);
-        t.steps = t.counter.countLinesSteps(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-6");
-    }
-    function testCountLinesStepsUp_FromJaggedParagraphEnd() {
-        createOdtDocument("<text:p>ABCDE1</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(11);
-        t.steps = t.counter.countLinesSteps(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-7");
-    }
-    function testCountStepsToLineBoundary_Forward_FromParagraphStart() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(0);
-        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
-        r.shouldBe(t, "t.steps", "4");
-    }
-    function testCountStepsToLineBoundary_Forward_StartingAtSpace() {
-        createOdtDocument("<text:p> BCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(0);
-        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
-        r.shouldBe(t, "t.steps", "3");
-    }
-    function testCountStepsToLineBoundary_Forward_EndingAtSpace() {
-        createOdtDocument("<text:p>ABC </text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(0);
-        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
-        r.shouldBe(t, "t.steps", "3");
-    }
-    function testCountStepsToLineBoundary_Forward_OverWrapping() {
-        createOdtDocument("<text:p text:style-name='width3em'>ABC DEF</text:p>");
-        appendCssRule("text|p[text|style-name=width3em] { width: 3em; }\n"); // Width calculated to wrap at first space
-        setCursorPosition(0);
-        t.steps = t.counter.countStepsToLineBoundary(1, t.filter);
-        r.shouldBe(t, "t.steps", "3");
-    }
-    function testCountStepsToLineBoundary_Backward_FromParagraphStart() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(0);
-        t.steps = Math.abs(t.counter.countStepsToLineBoundary(-1, t.filter)); // Chrome tells me this is -0. Er wat?
-        r.shouldBe(t, "t.steps", "0");
-    }
-    function testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace() {
-        createOdtDocument("<text:p> BCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(3);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-3");
-    }
-    function testCountStepsToLineBoundary_Backward_FromParagraphEnd() {
-        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
-        setCursorPosition(4);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-4");
-    }
-    function testCountStepsToLineBoundary_Backward_OverWhiteSpace() {
-        createOdtDocument("<text:p>A <text:span> BC</text:span>D</text:p>");
-        setCursorPosition(5);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-5");
-    }
-    function testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode() {
-        createOdtDocument("<text:p>A <text:span>   </text:span>D</text:p>");
-        setCursorPosition(3);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-3");
-    }
-    function testCountStepsToLineBoundary_Backward_OverEmptyTextNodes() {
-        var spans;
-        createOdtDocument("<text:p>A <text:span/><text:span/> D </text:p>");
-        // Add an empty text node to the span element
-        spans = t.root.getElementsByTagNameNS(odf.Namespaces.textns, "span");
-        spans[0].appendChild(t.root.ownerDocument.createTextNode(""));
-        spans[1].parentNode.insertBefore(t.root.ownerDocument.createTextNode(""), spans[0]);
-        spans[1].appendChild(t.root.ownerDocument.createTextNode(""));
-        spans[1].parentNode.insertBefore(t.root.ownerDocument.createTextNode(""), spans[1]);
-        setCursorPosition(3);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-3");
-    }
-    function testCountStepsToLineBoundary_Backward_OverWrapping() {
-        createOdtDocument("<text:p text:style-name='width3em'>ABC DEF</text:p>");
-        appendCssRule("text|p[text|style-name=width3em] { width: 3em; }\n"); // Width calculated to wrap at first space
-        setCursorPosition(6);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-2");
-    }
-    function testCountStepsToLineBoundary_Backward_OverWrapping2() {
-        createOdtDocument("<text:p text:style-name='width3em'>ABC D <text:span>E</text:span>F</text:p>");
-        appendCssRule("text|p[text|style-name=width3em] { width: 3em; }\n"); // Width calculated to wrap at first space
-        setCursorPosition(8);
-        t.steps = t.counter.countStepsToLineBoundary(-1, t.filter);
-        r.shouldBe(t, "t.steps", "-4");
     }
 
     /**
@@ -772,29 +645,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     this.tests = function () {
         return r.name([
-            testCountLinesStepsDown_FromParagraphStart,
-            testCountLinesStepsDown_FromParagraphEnd,
-            testCountLinesStepsDown_FromJaggedParagraphEnd,
-            testCountLinesStepsDown_OverWrap,
-
-            testCountLinesStepsUp_FromParagraphStart,
-            testCountLinesStepsUp_FromParagraphEnd,
-            testCountLinesStepsUp_FromJaggedParagraphEnd,
-
-            testCountStepsToLineBoundary_Forward_FromParagraphStart,
-            testCountStepsToLineBoundary_Forward_StartingAtSpace,
-            testCountStepsToLineBoundary_Forward_EndingAtSpace,
-            testCountStepsToLineBoundary_Forward_OverWrapping,
-
-            testCountStepsToLineBoundary_Backward_FromParagraphStart,
-            testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace,
-            testCountStepsToLineBoundary_Backward_FromParagraphEnd,
-            testCountStepsToLineBoundary_Backward_OverWhiteSpace,
-            testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode,
-            testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
-            testCountStepsToLineBoundary_Backward_OverWrapping,
-            testCountStepsToLineBoundary_Backward_OverWrapping2,
-
             testFixCursorPositions_AnchorInInvalidPlace,
             testFixCursorPositions_Range_CursorInInvalidPlace,
             testFixCursorPositions_Range_AnchorAndCursorInInvalidPlace,

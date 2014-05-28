@@ -54,8 +54,6 @@ ops.OdtCursor = function OdtCursor(memberId, document) {
     var self = this,
         validSelectionTypes = {},
         selectionType,
-        /**@type{!gui.SelectionMover}*/
-        selectionMover,
         /**@type{!core.Cursor}*/
         cursor,
         events = new core.EventNotifier([ops.OdtCursor.signalCursorUpdated]);
@@ -89,12 +87,6 @@ ops.OdtCursor = function OdtCursor(memberId, document) {
         events.unsubscribe(eventid, cb);
     };
 
-    /**
-     * @return {!gui.StepCounter}
-     */
-    this.getStepCounter = function () {
-        return selectionMover.getStepCounter();
-    };
     /**
      * Obtain the memberid the cursor is assigned to.
      * @return {string}
@@ -181,7 +173,6 @@ ops.OdtCursor = function OdtCursor(memberId, document) {
 
     function init() {
         cursor = new core.Cursor(document.getDOMDocument(), memberId);
-        selectionMover = new gui.SelectionMover(cursor, document.getRootNode());
 
         validSelectionTypes[ops.OdtCursor.RangeSelection] = true;
         validSelectionTypes[ops.OdtCursor.RegionSelection] = true;
