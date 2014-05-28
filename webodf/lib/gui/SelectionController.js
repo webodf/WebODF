@@ -35,9 +35,10 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         domUtils = new core.DomUtils(),
         odfUtils = new odf.OdfUtils(),
         baseFilter = odtDocument.getPositionFilter(),
-        keyboardMovementsFilter = new core.PositionFilterChain(),
         guiStepUtils = new gui.GuiStepUtils(),
         rootFilter = odtDocument.createRootFilter(inputMemberId),
+        /**@type{?function():(!number|undefined)}*/
+        caretXPositionLocator = null,
         TRAILING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
         LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING,
         PREVIOUS = core.StepDirection.PREVIOUS,
@@ -348,43 +349,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     this.selectRange = selectRange;
 
     /**
-     * @param {!number} lengthAdjust   length adjustment
-     * @return {undefined}
-     */
-    function extendCursorByAdjustment(lengthAdjust) {
-        var selection = odtDocument.getCursorSelection(inputMemberId),
-            stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter(),
-            newLength;
-        if (lengthAdjust !== 0) {
-            if (lengthAdjust > 0) {
-                lengthAdjust = stepCounter.convertForwardStepsBetweenFilters(lengthAdjust, keyboardMovementsFilter, baseFilter);
-            } else {
-                lengthAdjust = -stepCounter.convertBackwardStepsBetweenFilters(-lengthAdjust, keyboardMovementsFilter, baseFilter);
-            }
-
-            newLength = selection.length + lengthAdjust;
-            session.enqueue([createOpMoveCursor(selection.position, newLength)]);
-        }
-    }
-
-    /**
-     * @param {!number} positionAdjust   position adjustment
-     * @return {undefined}
-     */
-    function moveCursorByAdjustment(positionAdjust) {
-        var position = odtDocument.getCursorPosition(inputMemberId),
-            stepCounter = odtDocument.getCursor(inputMemberId).getStepCounter();
-        if (positionAdjust !== 0) {
-            positionAdjust = (positionAdjust > 0)
-                ? stepCounter.convertForwardStepsBetweenFilters(positionAdjust, keyboardMovementsFilter, baseFilter)
-                : -stepCounter.convertBackwardStepsBetweenFilters(-positionAdjust, keyboardMovementsFilter, baseFilter);
-
-            position = position + positionAdjust;
-            session.enqueue([createOpMoveCursor(position, 0)]);
-        }
-    }
-
-    /**
      * @param {!core.StepDirection} direction
      * @param {!boolean} extend
      * @return {undefined}
@@ -434,21 +398,58 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     this.extendSelectionToRight = extendSelectionToRight;
 
     /**
+     * Sets the position locator function for the local input member's visual caret. If
+     * set to null, cursor movement by line will be disabled.
+     *
+     * @param {?function():(!number|undefined)} locator
+     * @return {undefined}
+     */
+    this.setCaretXPositionLocator = function(locator) {
+        caretXPositionLocator = locator;
+    };
+
+    /**
      * @param {!core.StepDirection} direction PREVIOUS for upwards NEXT for downwards
      * @param {!boolean} extend
      * @return {undefined}
      */
     function moveCursorByLine(direction, extend) {
-        var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-            steps,
-            lineDirection = direction === NEXT ? 1 : -1;
+        var stepIterator,
+            currentX = caretXPositionLocator ? caretXPositionLocator() : undefined,
+            stepScanners = [new gui.LineBoundaryScanner(), new gui.ParagraphBoundaryScanner()];
 
-        runtime.assert(Boolean(paragraphNode), "SelectionController: Cursor outside paragraph");
-        steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lineDirection, keyboardMovementsFilter);
-        if (extend) {
-            extendCursorByAdjustment(steps);
-        } else {
-            moveCursorByAdjustment(steps);
+        // Both a line boundary AND a paragraph boundary scanner are necessary to ensure the caret stops correctly
+        // inside an empty paragraph.
+        // The line boundary scanner requires a visible client rect in order to detect a line break, but for an
+        // empty paragraph, there is no visible leading or trailing rect as there aren't any visible children.
+        // As a result, the line boundary detection can't determine if an empty paragraph is a line-wrap point, but
+        // the paragraph boundary scanner *will* correctly determine that step iterator has moved beyond the
+        // current paragraph.
+
+        if (isNaN(currentX)) {
+            // Return as the current X offset is unknown. Either no locator is set or the locator returned
+            // undefined (e.g., caret not currently visible).
+            return;
+        }
+
+        stepIterator = createKeyboardStepIterator();
+        // Move to the start/end of the current line.
+        if (!guiStepUtils.moveToFilteredStep(stepIterator, direction, stepScanners)) {
+            // No line boundary found
+            return;
+        }
+
+        // Move to the first step on the next line
+        if (!stepIterator.advanceStep(direction)) {
+            // No step available in the specified direction
+            return;
+        }
+
+        stepScanners = [new gui.ClosestXOffsetScanner(/**@type{!number}*/(currentX)),
+                        new gui.LineBoundaryScanner(), new gui.ParagraphBoundaryScanner()];
+        // Finally, move to the closest point to the desired X offset within the current line
+        if (guiStepUtils.moveToFilteredStep(stepIterator, direction, stepScanners)) {
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
 
@@ -732,13 +733,4 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         return true;
     }
     this.extendSelectionToEntireDocument = extendSelectionToEntireDocument;
-    
-    /**
-     * @return {undefined}
-     */
-    function init() {
-        keyboardMovementsFilter.addFilter(baseFilter);
-        keyboardMovementsFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
-    }
-    init();
 };

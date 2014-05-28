@@ -54,6 +54,7 @@
         "xmldom.LSSerializer"
     ],
     "gui.SelectionControllerTests": [
+        "core.DomUtils",
         "core.LoopWatchDog",
         "core.UnitTester",
         "gui.SelectionController",

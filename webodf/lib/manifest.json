@@ -78,6 +78,9 @@
     "gui.Clipboard": [
         "gui.MimeDataExporter"
     ],
+    "gui.ClosestXOffsetScanner": [
+        "gui.VisualStepScanner"
+    ],
     "gui.CommonConstraints": [
     ],
     "gui.DirectFormattingController": [
@@ -151,6 +154,7 @@
         "gui.SessionContext"
     ],
     "gui.SelectionController": [
+        "gui.ClosestXOffsetScanner",
         "gui.GuiStepUtils",
         "gui.LineBoundaryScanner",
         "gui.ParagraphBoundaryScanner",

@@ -123,6 +123,7 @@ module.exports = function (config) {
             'lib/gui/InputMethodEditor.js',
             'lib/gui/MetadataController.js',
             'lib/gui/PasteController.js',
+            'lib/gui/ClosestXOffsetScanner.js',
             'lib/gui/LineBoundaryScanner.js',
             'lib/gui/ParagraphBoundaryScanner.js',
             'lib/odf/WordBoundaryFilter.js',

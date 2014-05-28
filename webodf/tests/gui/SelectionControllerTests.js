@@ -36,6 +36,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         testarea,
         textns = odf.Namespaces.textns,
         officens = odf.Namespaces.officens,
+        domUtils = new core.DomUtils(),
         inputMemberId = "Joe";
 
     /**
@@ -630,6 +631,90 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         r.shouldBe(t, "t.newPosition", "4");
     }
 
+    /**
+     * Attempts to return the X-offset of the cursor from the previous sibling's right side,
+     * or if there is no previous sibling, the next siblings left side;
+     * @return {!number}
+     */
+    function simpleCaretLocator() {
+        var cursorNode = t.cursor.getNode();
+        if (cursorNode.previousSibling) {
+            return domUtils.getBoundingClientRect(t.cursor.getNode().previousSibling).right;
+        }
+        return domUtils.getBoundingClientRect(t.cursor.getNode().nextSibling).left;
+    }
+
+    function testCountLinesStepsDown_FromParagraphStart() {
+        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorDown();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "5");
+    }
+    function testCountLinesStepsDown_FromParagraphEnd() {
+        createOdtDocument("<text:p>ABCDE</text:p><text:p>FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(4);
+
+        t.selectionController.moveCursorDown();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "10");
+    }
+    function testCountLinesStepsDown_FromJaggedParagraphEnd() {
+        createOdtDocument("<text:p>ABCDE1</text:p><text:p>FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(6);
+
+        t.selectionController.moveCursorDown();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "12");
+    }
+    function testCountLinesStepsDown_OverWrap() {
+        createOdtDocument("<text:p paragraph-width='4'>ABCDE FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(4);
+
+        t.selectionController.moveCursorDown();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "10");
+    }
+    function testCountLinesStepsUp_FromParagraphStart() {
+        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(5);
+
+        t.selectionController.moveCursorUp();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
+    }
+    function testCountLinesStepsUp_FromParagraphEnd() {
+        createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(10);
+
+        t.selectionController.moveCursorUp();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "4");
+    }
+    function testCountLinesStepsUp_FromJaggedParagraphEnd() {
+        createOdtDocument("<text:p>ABCDE1</text:p><text:p>FGHIJ</text:p>");
+        t.selectionController.setCaretXPositionLocator(simpleCaretLocator);
+        setCursorPosition(11);
+
+        t.selectionController.moveCursorUp();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "4");
+    }
+
     this.setUp = function () {
         var doc, stylesElement;
         testarea = core.UnitTest.provideTestAreaDiv();
@@ -637,11 +722,15 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         stylesElement = doc.createElement("style");
         stylesElement.setAttribute("type", "text/css");
         stylesElement.appendChild(doc.createTextNode("@namespace text url(urn:oasis:names:tc:opendocument:xmlns:text:1.0);\n"));
+        stylesElement.appendChild(doc.createTextNode("@namespace cursor url(urn:webodf:names:cursor);\n"));
+        stylesElement.appendChild(doc.createTextNode("cursor|anchor { display: none; }\n"));
+        stylesElement.appendChild(doc.createTextNode("cursor|cursor { display: none; }\n"));
         // Make text:p behave as normal paragraphs
         // Ensure font chars are always monospaced so widths are consistent between platforms
         stylesElement.appendChild(doc.createTextNode("text|p { display: block; font-family: monospace; }\n"));
         stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='2.7'] { width: 2.7em; }\n"));
         stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='3'] { width: 3em; }\n"));
+        stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='4'] { width: 4em; }\n"));
         doc.getElementsByTagName("head")[0].appendChild(stylesElement);
         t = {
             doc: testarea.ownerDocument,
@@ -712,7 +801,16 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             testCountStepsToLineBoundary_Backward_OverWhiteSpaceOnlyNode,
             testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
             testCountStepsToLineBoundary_Backward_OverWrapping,
-            testCountStepsToLineBoundary_Backward_OverWrapping2
+            testCountStepsToLineBoundary_Backward_OverWrapping2,
+
+            testCountLinesStepsDown_FromParagraphStart,
+            testCountLinesStepsDown_FromParagraphEnd,
+            testCountLinesStepsDown_FromJaggedParagraphEnd,
+            testCountLinesStepsDown_OverWrap,
+
+            testCountLinesStepsUp_FromParagraphStart,
+            testCountLinesStepsUp_FromParagraphEnd,
+            testCountLinesStepsUp_FromJaggedParagraphEnd
         ]);
     };
     this.asyncTests = function () {
