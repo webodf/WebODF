@@ -713,7 +713,7 @@ core.UnitTester = function UnitTester() {
     /**
      * @return {!number}
      **/
-    this.countFailedTests = function () {
+    this.failedTestsCount = function () {
         return failedTests;
     };
     /**

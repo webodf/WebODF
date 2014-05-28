@@ -246,10 +246,22 @@ if (!runtime.getWindow() || !runtime.getWindow().hasOwnProperty("use_karma")) {
     if (!runSelectedTests(selectedTests)) {
         runNextTest(tests, tester, function (tester) {
             "use strict";
+            var testResults = tester.results();
+
             //runtime.log(JSON.stringify(tester.results()));
-            runtime.log("Number of failed tests: " +
-                    String(tester.countFailedTests()));
-            runtime.exit(tester.countFailedTests());
+            runtime.log("Number of failed asserts: " + tester.failedTestsCount());
+            if (tester.failedTestsCount() !== 0) {
+                runtime.log("Failed tests:");
+                Object.keys(testResults).forEach(function (suiteName) {
+                    var suiteResults = testResults[suiteName];
+                    Object.keys(suiteResults).forEach(function(testName) {
+                        if (!suiteResults[testName]) {
+                            runtime.log(suiteName + "." + testName);
+                        }
+                    });
+                });
+            }
+            runtime.exit(tester.failedTestsCount());
             return;
         });
     }
