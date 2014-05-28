@@ -381,26 +381,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
-     * @param {!function(!core.StepIterator):!boolean} advanceIterator
-     * @return {undefined}
-     */
-    function extendSelection(advanceIterator) {
-        var stepIterator = createKeyboardStepIterator(),
-            anchorNode = odtDocument.getCursor(inputMemberId).getAnchorNode(),
-            newSelection;
-
-        if (advanceIterator(stepIterator)) {
-            newSelection = odtDocument.convertDomToCursorRange({
-                anchorNode: anchorNode,
-                anchorOffset: 0,
-                focusNode: stepIterator.container(),
-                focusOffset: stepIterator.offset()
-            });
-            session.enqueue([createOpMoveCursor(newSelection.position, newSelection.length)]);
-        }
-    }
-
-    /**
      * @param {!number} positionAdjust   position adjustment
      * @return {undefined}
      */
@@ -419,15 +399,14 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
 
     /**
      * @param {!core.StepDirection} direction
+     * @param {!boolean} extend
      * @return {undefined}
      */
-    function moveCursor(direction) {
-        var stepIterator = createKeyboardStepIterator(),
-            position;
+    function moveCursor(direction, extend) {
+        var stepIterator = createKeyboardStepIterator();
 
         if (stepIterator.advanceStep(direction)) {
-            position = odtDocument.convertDomPointToCursorStep(stepIterator.container(), stepIterator.offset());
-            session.enqueue([createOpMoveCursor(position, 0)]);
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
 
@@ -435,7 +414,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToLeft() {
-        moveCursor(PREVIOUS);
+        moveCursor(PREVIOUS, false);
         return true;
     }
     this.moveCursorToLeft = moveCursorToLeft;
@@ -444,7 +423,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToRight() {
-        moveCursor(NEXT);
+        moveCursor(NEXT, false);
         return true;
     }
     this.moveCursorToRight = moveCursorToRight;
@@ -453,7 +432,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToLeft() {
-        extendSelection(function(iterator) { return iterator.previousStep(); });
+        moveCursor(PREVIOUS, true);
         return true;
     }
     this.extendSelectionToLeft = extendSelectionToLeft;
@@ -462,7 +441,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToRight() {
-        extendSelection(function (iterator) { return iterator.nextStep(); });
+        moveCursor(NEXT, true);
         return true;
     }
     this.extendSelectionToRight = extendSelectionToRight;
