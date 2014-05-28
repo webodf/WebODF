@@ -53,16 +53,8 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
         rootFilter = odtDocument.createRootFilter(inputMemberId),
         TRAILING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.TRAILING,
         LEADING_SPACE = odf.WordBoundaryFilter.IncludeWhitespace.LEADING,
-        /**
-         * @const
-         * @type {!number}
-         */
-        PREVIOUS = -1,
-        /**
-         * @const
-         * @type {!number}
-         */
-        NEXT = 1;
+        PREVIOUS = core.StepDirection.PREVIOUS,
+        NEXT = core.StepDirection.NEXT;
 
     /**
      * Create a new step iterator with the base Odt filter, and a root filter for the current input member.
@@ -152,6 +144,33 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             selectionType: selectionType
         });
         return op;
+    }
+
+    /**
+     * Move or extend the local member's selection to the specified focus point.
+     *
+     * @param {!Node} focusNode
+     * @param {!number} focusOffset
+     * @param {!boolean} extend Set to true to extend the selection (i.e., the current selection anchor
+     *                          will remain unchanged)
+     * @return {undefined}
+     */
+    function moveCursorFocusPoint(focusNode, focusOffset, extend) {
+        var cursor,
+            newSelection,
+            newCursorSelection;
+
+        cursor = odtDocument.getCursor(inputMemberId);
+        newSelection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection());
+        newSelection.focusNode = focusNode;
+        newSelection.focusOffset = focusOffset;
+
+        if (!extend) {
+            newSelection.anchorNode = newSelection.focusNode;
+            newSelection.anchorOffset = newSelection.focusOffset;
+        }
+        newCursorSelection = odtDocument.convertDomToCursorRange(newSelection);
+        session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
     }
 
     /**
@@ -362,26 +381,6 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
-     * @param {!function(!core.StepIterator):!boolean} advanceIterator
-     * @return {undefined}
-     */
-    function extendSelection(advanceIterator) {
-        var stepIterator = createKeyboardStepIterator(),
-            anchorNode = odtDocument.getCursor(inputMemberId).getAnchorNode(),
-            newSelection;
-
-        if (advanceIterator(stepIterator)) {
-            newSelection = odtDocument.convertDomToCursorRange({
-                anchorNode: anchorNode,
-                anchorOffset: 0,
-                focusNode: stepIterator.container(),
-                focusOffset: stepIterator.offset()
-            });
-            session.enqueue([createOpMoveCursor(newSelection.position, newSelection.length)]);
-        }
-    }
-
-    /**
      * @param {!number} positionAdjust   position adjustment
      * @return {undefined}
      */
@@ -399,16 +398,15 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
-     * @param {!function(!core.StepIterator):!boolean} advanceIterator
+     * @param {!core.StepDirection} direction
+     * @param {!boolean} extend
      * @return {undefined}
      */
-    function moveCursor(advanceIterator) {
-        var stepIterator = createKeyboardStepIterator(),
-            position;
+    function moveCursor(direction, extend) {
+        var stepIterator = createKeyboardStepIterator();
 
-        if (advanceIterator(stepIterator)) {
-            position = odtDocument.convertDomPointToCursorStep(stepIterator.container(), stepIterator.offset());
-            session.enqueue([createOpMoveCursor(position, 0)]);
+        if (stepIterator.advanceStep(direction)) {
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
 
@@ -416,7 +414,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToLeft() {
-        moveCursor(function(iterator) { return iterator.previousStep(); });
+        moveCursor(PREVIOUS, false);
         return true;
     }
     this.moveCursorToLeft = moveCursorToLeft;
@@ -425,7 +423,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function moveCursorToRight() {
-        moveCursor(function(iterator) { return iterator.nextStep(); });
+        moveCursor(NEXT, false);
         return true;
     }
     this.moveCursorToRight = moveCursorToRight;
@@ -434,7 +432,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToLeft() {
-        extendSelection(function(iterator) { return iterator.previousStep(); });
+        moveCursor(PREVIOUS, true);
         return true;
     }
     this.extendSelectionToLeft = extendSelectionToLeft;
@@ -443,22 +441,23 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     function extendSelectionToRight() {
-        extendSelection(function (iterator) { return iterator.nextStep(); });
+        moveCursor(NEXT, true);
         return true;
     }
     this.extendSelectionToRight = extendSelectionToRight;
 
     /**
-     * @param {!number} direction PREVIOUS for upwards NEXT for downwards
+     * @param {!core.StepDirection} direction PREVIOUS for upwards NEXT for downwards
      * @param {!boolean} extend
      * @return {undefined}
      */
     function moveCursorByLine(direction, extend) {
         var paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode()),
-            steps;
+            steps,
+            lineDirection = direction === NEXT ? 1 : -1;
 
         runtime.assert(Boolean(paragraphNode), "SelectionController: Cursor outside paragraph");
-        steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(direction, keyboardMovementsFilter);
+        steps = odtDocument.getCursor(inputMemberId).getStepCounter().countLinesSteps(lineDirection, keyboardMovementsFilter);
         if (extend) {
             extendCursorByAdjustment(steps);
         } else {
@@ -503,13 +502,14 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     this.extendSelectionDown = extendSelectionDown;
 
     /**
-     * @param {!number} direction PREVIOUS (-1) or NEXT (1)
+     * @param {!core.StepDirection} direction
      * @param {!boolean} extend
      * @return {undefined}
      */
     function moveCursorToLineBoundary(direction, extend) {
-        var steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
-            direction,
+        var lineDirection = direction === core.StepDirection.NEXT ? 1 : -1,
+            steps = odtDocument.getCursor(inputMemberId).getStepCounter().countStepsToLineBoundary(
+            lineDirection,
             keyboardMovementsFilter
         );
         if (extend) {
@@ -520,33 +520,17 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     }
 
     /**
-     * @param {!number} direction PREVIOUS (-1) or NEXT (1)
+     * @param {!core.StepDirection} direction
      * @param {!boolean} extend whether extend the selection instead of moving the cursor
      * @return {undefined}
      */
     function moveCursorByWord(direction, extend) {
         var cursor = odtDocument.getCursor(inputMemberId),
             newSelection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
-            newCursorSelection,
-            selectionUpdated,
             stepIterator = createWordBoundaryStepIterator(newSelection.focusNode, newSelection.focusOffset, TRAILING_SPACE);
 
-        if (direction === PREVIOUS) {
-            selectionUpdated = stepIterator.previousStep();
-        } else {
-            selectionUpdated = stepIterator.nextStep();
-        }
-
-        if (selectionUpdated) {
-            newSelection.focusNode = stepIterator.container();
-            newSelection.focusOffset = stepIterator.offset();
-
-            if (!extend) {
-                newSelection.anchorNode = newSelection.focusNode;
-                newSelection.anchorOffset = newSelection.focusOffset;
-            }
-            newCursorSelection = odtDocument.convertDomToCursorRange(newSelection);
-            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
+        if (stepIterator.advanceStep(direction)) {
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
     
@@ -623,7 +607,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
     this.extendSelectionToLineEnd = extendSelectionToLineEnd;
 
     /**
-     * @param {!number} direction PREVIOUS (-1) or NEXT (1)
+     * @param {!core.StepDirection} direction
      * @param {!boolean} extend True to extend the selection
      * @param {!function(!Node):Node} getContainmentNode Returns a node container for the supplied node.
      *  Usually this will be something like the parent paragraph or root the supplied node is within
@@ -635,40 +619,33 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
             containmentNode,
             selection = rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
             rootElement = odtDocument.getRootElement(selection.focusNode),
-            stepIterator,
-            newCursorSelection;
+            stepIterator;
 
         runtime.assert(Boolean(rootElement), "SelectionController: Cursor outside root");
         stepIterator = odtDocument.createStepIterator(selection.focusNode, selection.focusOffset, [baseFilter, rootFilter], rootElement);
         stepIterator.roundToClosestStep();
-        if (direction === PREVIOUS) {
-            if (stepIterator.previousStep()) {
-                containmentNode = getContainmentNode(stepIterator.container());
-                if (containmentNode) {
-                    stepIterator.setPosition(/**@type{!Node}*/(containmentNode), 0);
-                    // Round up to the first walkable step in the containment node
-                    validStepFound = stepIterator.roundToNextStep();
-                }
-            }
-        } else {
-            if (stepIterator.nextStep()) {
-                containmentNode = getContainmentNode(stepIterator.container());
-                if (containmentNode) {
-                    stepIterator.setPosition(/**@type{!Node}*/(containmentNode), containmentNode.childNodes.length);
-                    // Round down to the last walkable step in the containment node
-                    validStepFound = stepIterator.roundToPreviousStep();
-                }
-            }
+
+        if (!stepIterator.advanceStep(direction)) {
+            return;
         }
+
+        containmentNode = getContainmentNode(stepIterator.container());
+        if (!containmentNode) {
+            return;
+        }
+
+        if (direction === PREVIOUS) {
+            stepIterator.setPosition(/**@type{!Node}*/(containmentNode), 0);
+            // Round up to the first walkable step in the containment node
+            validStepFound = stepIterator.roundToNextStep();
+        } else {
+            stepIterator.setPosition(/**@type{!Node}*/(containmentNode), containmentNode.childNodes.length);
+            // Round down to the last walkable step in the containment node
+            validStepFound = stepIterator.roundToPreviousStep();
+        }
+
         if (validStepFound) {
-            selection.focusNode = stepIterator.container();
-            selection.focusOffset = stepIterator.offset();
-            if (!extend) {
-                selection.anchorNode = selection.focusNode;
-                selection.anchorOffset = selection.focusOffset;
-            }
-            newCursorSelection = odtDocument.convertDomToCursorRange(selection);
-            session.enqueue([createOpMoveCursor(newCursorSelection.position, newCursorSelection.length)]);
+            moveCursorFocusPoint(stepIterator.container(), stepIterator.offset(), extend);
         }
     }
 

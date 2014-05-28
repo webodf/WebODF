@@ -36,6 +36,7 @@ module.exports = function (config) {
             'lib/core/RawDeflate.js',
             'lib/core/RawInflate.js',
             'lib/core/ScheduledTask.js',
+            'lib/core/enums.js',
             'lib/core/StepIterator.js',
             'lib/core/Task.js',
             'lib/core/UnitTester.js',
