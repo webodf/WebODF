@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -24,7 +23,6 @@
  */
 
 /*global ops, runtime*/
-
 
 /**
  * OpAddMember has 3 required properties:

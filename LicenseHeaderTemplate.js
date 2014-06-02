@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2010-2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart

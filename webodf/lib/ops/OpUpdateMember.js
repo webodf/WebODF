@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -24,7 +23,6 @@
  */
 
 /*global ops, xmldom, odf, runtime*/
-
 
 /**
  * OpUpdateMember allows you to set and remove
