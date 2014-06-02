@@ -589,6 +589,7 @@ function main(f) {
         var files = {};
         f.runJSLint(contents);
         // remove files that should not go in the manifest.json files
+        delete contents[pathModule.normalize("lib/HeaderCompiled.js")];
         delete contents[pathModule.normalize("lib/runtime.js")];
         delete contents[pathModule.normalize("lib/core/JSLint.js")];
         delete contents[pathModule.normalize("tests/tests.js")];

@@ -312,6 +312,16 @@ endmacro(COPY_FILES _directory _files)
 ## Define some files and dirs
 #############################
 
+# HEADERCOMPILED_FILE defines the file to use as header for the compiled WebODF library file.
+# Per default that is webodf/lib/HeaderCompiled.js
+# For release builds it can be overwritten by passing -DHEADERCOMPILED_FILE=/path/to/file
+# to cmake.
+if(NOT HEADERCOMPILED_FILE)
+  set(HEADERCOMPILED_FILE "${CMAKE_SOURCE_DIR}/webodf/lib/HeaderCompiled.js")
+elseif(NOT IS_ABSOLUTE ${HEADERCOMPILED_FILE})
+  set(HEADERCOMPILED_FILE ${CMAKE_BINARY_DIR}/${HEADERCOMPILED_FILE})
+endif()
+
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/webodf/tools)
 set(RUNTIMEJS ${CMAKE_CURRENT_SOURCE_DIR}/webodf/lib/runtime.js)
 set(LIBJSLICENSEFILE ${CMAKE_CURRENT_SOURCE_DIR}/AGPL-3.0.txt)
