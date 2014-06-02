@@ -136,7 +136,11 @@ gui.EventManager = function EventManager(odtDocument) {
                 recentEvents.push(e); // Track this event as already processed by these handlers
                 if (self.filters.every(function (filter) { return filter(e); })) {
                     // Yes yes... this is not a spec-compliant event processor... sorry!
-                    subscribers.emit(eventName, e);
+                    try {
+                        subscribers.emit(eventName, e);
+                    } catch(/**@type{!Error}*/err) {
+                        runtime.log("Error occurred while processing " + eventName + ":\n" + err.message + "\n" + err.stack);
+                    }
                 }
                 // Reset the processed events list after this tick is complete. The event won't be
                 // processed by any other sources after this

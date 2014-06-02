@@ -67,13 +67,15 @@ gui.CaretManager = function CaretManager(sessionController) {
     function removeCaret(memberId) {
         var caret = carets[memberId];
         if (caret) {
-            /*jslint emptyblock:true*/
-            caret.destroy(function() {});
+            // Remove the caret before destroying it in case the destroy function causes new window/webodf events to be
+            // triggered. This ensures the caret can't receive any new events once destroy has been invoked
+            delete carets[memberId];
             if (memberId === sessionController.getInputMemberId()) {
                 sessionController.getEventManager().unsubscribe("compositionupdate", caret.handleUpdate);
             }
+            /*jslint emptyblock:true*/
+            caret.destroy(function() {});
             /*jslint emptyblock:false*/
-            delete carets[memberId];
         }
     }
 
