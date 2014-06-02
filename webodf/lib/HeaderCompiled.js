@@ -1,8 +1,11 @@
 /**
- * Copyright (C) 2012 KO GmbH <copyright@kogmbh.com>
+ * @license
+ * This is a generated file. DO NOT EDIT.
+ *
+ * Copyright (C) 2010-2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
- * This file is part of WebODF.
+ * This file is the compiled version of the WebODF library.
  *
  * WebODF is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License (GNU AGPL)
@@ -21,17 +24,3 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-
-/*global xmldom*/
-/*jslint emptyblock: true, unparam: true*/
-
-/**
- * Partial implementation of LSSerializerFilter
- * @interface
- */
-xmldom.LSSerializerFilter = function LSSerializerFilter() {"use strict"; };
-/**
- * @param {!Node} node
- * @return {!number}
- */
-xmldom.LSSerializerFilter.prototype.acceptNode = function (node) { "use strict"; };

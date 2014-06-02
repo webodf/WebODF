@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2010-2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -22,7 +21,6 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
-
 
 /*global odf, core, runtime*/
 

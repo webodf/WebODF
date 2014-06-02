@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright (C) 2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
@@ -22,7 +21,9 @@
  * @source: http://www.webodf.org/
  * @source: https://github.com/kogmbh/WebODF/
  */
+
 /*global runtime, odf*/
+
 /**
  * Object that retrieves properties lazily and caches them.
  * If the element does not define the property it is retrieved from a parent

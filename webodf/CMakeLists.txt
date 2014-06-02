@@ -68,6 +68,8 @@ if (Java_JAVA_EXECUTABLE)
   # option to help keep the length of the compilation command as small as possible.
   file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt "--warning_level VERBOSE --jscomp_error accessControls --jscomp_error ambiguousFunctionDecl --jscomp_error checkEventfulObjectDisposal --jscomp_error checkRegExp --jscomp_error checkStructDictInheritance --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error const --jscomp_error constantProperty --jscomp_error deprecated --jscomp_error duplicateMessage --jscomp_error es3 --jscomp_error es5Strict --jscomp_error externsValidation --jscomp_error fileoverviewTags --jscomp_error globalThis --jscomp_error invalidCasts --jscomp_error misplacedTypeAnnotation --jscomp_error missingProperties --jscomp_error missingProvide --jscomp_error missingRequire --jscomp_error missingReturn --jscomp_off nonStandardJsDocs --jscomp_error suspiciousCode --jscomp_error strictModuleDepCheck --jscomp_error typeInvalidation --jscomp_error undefinedNames --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error uselessCode --jscomp_error visibility --summary_detail_level 3")
 
+  file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt " --js ${HEADERCOMPILED_FILE}")
+
   foreach(JSFILE ${LIBJSFILES})
     if (IS_ABSOLUTE ${JSFILE})
       file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/cc-noTestFiles.txt " --js ${JSFILE}")
@@ -128,12 +130,11 @@ if (Java_JAVA_EXECUTABLE)
          --jscomp_error reportUnknownTypes
          --define IS_COMPILED_CODE=true
          --compilation_level SIMPLE_OPTIMIZATIONS
-         --formatting PRINT_INPUT_DELIMITER
          --externs ${CMAKE_CURRENT_SOURCE_DIR}/tools/externs.js
          --js_output_file webodf.js-
       COMMAND ${CMAKE_COMMAND} ARGS -E rename webodf.js- webodf.js
       DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
-         webodf.css.js-target
+         webodf.css.js-target ${HEADERCOMPILED_FILE}
   )
   add_custom_target(webodf.js-target DEPENDS webodf.js)
 
@@ -151,7 +152,7 @@ if (Java_JAVA_EXECUTABLE)
       # so the value for IS_COMPILED_CODE is set by find and replace in the code
       COMMAND ${CMAKE_COMMAND} -DFILENAME:STRING="${CMAKE_CURRENT_BINARY_DIR}/webodf-debug.js" -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/set_IS_COMPILED_CODE.cmake
       DEPENDS ClosureCompiler ${LIBJSFILES} tools/externs.js
-          webodf.css.js-target
+          webodf.css.js-target ${HEADERCOMPILED_FILE}
   )
   add_custom_target(webodf-debug.js-target DEPENDS webodf-debug.js)
 
