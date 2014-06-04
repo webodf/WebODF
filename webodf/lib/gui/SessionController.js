@@ -103,7 +103,7 @@ gui.SessionControllerOptions = function () {
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getOdfCanvas().getElement,
                                                                     keyDownHandler, keyUpHandler),
-            hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
+            hyperlinkController = new gui.HyperlinkController(session, sessionConstraints, sessionContextCache, inputMemberId),
             selectionController = new gui.SelectionController(session, inputMemberId),
             metadataController = new gui.MetadataController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,
@@ -1110,6 +1110,7 @@ gui.SessionControllerOptions = function () {
                 inputMethodEditor.destroy,
                 eventManager.destroy,
                 hyperlinkClickHandler.destroy,
+                hyperlinkController.destroy,
                 metadataController.destroy,
                 destroy
             ];

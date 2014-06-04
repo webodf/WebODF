@@ -103,7 +103,8 @@
         "xmldom.XPath"
     ],
     "gui.HyperlinkController": [
-        "ops.Session"
+        "gui.SessionConstraints",
+        "gui.SessionContextCache"
     ],
     "gui.HyperlinkTooltipView": [
         "gui.KeyboardHandler",
