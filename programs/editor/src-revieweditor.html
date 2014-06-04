@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html xml:lang="en" lang="en">
+  <head>
+    <!--
+    This HTML page is meant to provide a starting point for testing
+    out of a source-tree. It does not require a dojo-amalgamation
+    but uses dojo directly from Google's CDN (content delivery networks).
+    This page is meant to be served out of a webodf source directory.
+    -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+
+    <title>Review Editor (CDN)</title>
+
+    <!-- dojo setup: start -->
+    <script type="text/javascript">
+      var basedir = window.location.pathname;
+      basedir = basedir.substr(0, basedir.lastIndexOf("/"));
+      dojoConfig = {
+        paths: {
+          "webodf/editor": basedir,
+          "resources": basedir + "/resources"
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/resources/dojo.css"/>
+    <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dijit/themes/claro/claro.css"/>
+    <link rel="stylesheet" type="text/css"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojox/layout/resources/ExpandoPane.css"/>
+    <link rel="stylesheet"
+    href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojox/widget/ColorPicker/ColorPicker.css"/>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"
+      data-dojo-config="async: true"></script>
+    <!-- dojo setup: end -->
+
+    <!-- editor: start -->
+    <link rel="stylesheet" type="text/css" href="editor.css"/>
+    <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="FileSaver.js" type="text/javascript" charset="utf-8"></script>
+    <script src="localeditor.js" type="text/javascript" charset="utf-8"></script>
+    <!-- editor: end -->
+  </head>
+
+  <body onload="webodfEditor.boot({reviewModeEnabled: true});" class="claro">
+    <div id="mainContainer">
+    </div>
+  </body>
+</html>
