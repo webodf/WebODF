@@ -549,10 +549,38 @@ function Main(cmakeListPath) {
         });
     }
 
-    this.runJSLint = function (contents) {
+    /**
+     * @param {!string} path
+     * @param {!string} content
+     * @return {!string}
+     */
+    function getLicense(path, content) {
+        var re = new RegExp("^(/[^]*?)(Copyright.*?>)+([^]*?) \\*/", "m"),
+            lic,
+            match;
+        match = re.exec(content);
+        if (match === null) {
+            console.log("No license was found for " + path);
+            process.exit(1);
+        }
+        lic = match[1] + match[3];
+        return lic;
+    }
+
+    /**
+     * @param {!Object.<!string,!string>} contents
+     * @return {undefined}
+     */
+    this.checkJSFiles = function (contents) {
         var core = {},
             jslint,
-            path;
+            path,
+            license,
+            licenses = {},
+            // files for which the license is not checked
+            licenseExceptions = ["lib/HeaderCompiled.js", "lib/core/JSLint.js",
+                "lib/core/RawDeflate.js", "lib/core/RawInflate.js"],
+            commonLicense;
         // load JSLint
         /*jslint evil: true*/
         eval(contents[pathModule.normalize("lib/core/JSLint.js")]);
@@ -561,7 +589,32 @@ function Main(cmakeListPath) {
         for (path in contents) {
             if (contents.hasOwnProperty(path)
                     && typeof contents[path] === "string") {
+                // run jslint of the content of a file
                 runJSLint(jslint, path, contents[path]);
+                // collect the license from the file
+                if (licenseExceptions.indexOf(path) === -1) {
+                    license = getLicense(path, contents[path]);
+                    if (licenses.hasOwnProperty(license)) {
+                        licenses[license].push(path);
+                    } else {
+                        licenses[license] = [path];
+                    }
+                }
+            }
+        }
+        // determine which license is used most often
+        commonLicense = Object.keys(licenses).reduce(function (prev, current) {
+            var value = licenses[current];
+            if (value.length > prev.count) {
+                prev = {license: current, count: value.length, path: value};
+            }
+            return prev;
+        }, {license: "", count: 0});
+        // report any license that is different from the most common license
+        for (license in licenses) {
+            if (licenses.hasOwnProperty(license) && license !== commonLicense.license) {
+                console.log(licenses[license] + " has an uncommon license.");
+                process.exit(1);
             }
         }
     };
@@ -576,7 +629,7 @@ function main(f) {
         return !isfile || name.indexOf(".js") === name.length - 3;
     }, function (contents) {
         var files = {};
-        f.runJSLint(contents);
+        f.checkJSFiles(contents);
         // remove files that should not go in the manifest.json files
         delete contents[pathModule.normalize("lib/HeaderCompiled.js")];
         delete contents[pathModule.normalize("lib/runtime.js")];
