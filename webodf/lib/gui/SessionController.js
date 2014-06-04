@@ -89,7 +89,7 @@ gui.SessionControllerOptions = function () {
                                                                             args.directTextStylingEnabled, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
             createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),
-            textController = new gui.TextController(session, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
+            textController = new gui.TextController(session, sessionConstraints, sessionContextCache, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
             imageController = new gui.ImageController(session, sessionConstraints, sessionContextCache, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
@@ -1112,6 +1112,7 @@ gui.SessionControllerOptions = function () {
                 hyperlinkClickHandler.destroy,
                 hyperlinkController.destroy,
                 metadataController.destroy,
+                textController.destroy,
                 destroy
             ];
 

@@ -189,7 +189,8 @@
         "odf.OdfNodeFilter"
     ],
     "gui.TextController": [
-        "ops.Session"
+        "gui.SessionConstraints",
+        "gui.SessionContextCache"
     ],
     "gui.TrivialUndoManager": [
         "core.DomUtils",
