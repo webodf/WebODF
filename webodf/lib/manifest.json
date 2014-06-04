@@ -79,8 +79,8 @@
     ],
     "gui.DirectFormattingController": [
         "gui.SessionConstraints",
-        "gui.StyleSummary",
-        "ops.Session"
+        "gui.SessionContextCache",
+        "gui.StyleSummary"
     ],
     "gui.EditInfoHandle": [
         "core.Destroyable"
@@ -152,6 +152,9 @@
     ],
     "gui.SessionConstraints": [
         "core.EventNotifier"
+    ],
+    "gui.SessionContextCache": [
+        "ops.Session"
     ],
     "gui.SessionController": [
         "gui.AnnotationController",

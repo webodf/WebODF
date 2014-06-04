@@ -29,12 +29,21 @@
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
  * @param {!gui.SessionConstraints} sessionConstraints
+ * @param {!gui.SessionContextCache} sessionContextCache
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
  * @param {!boolean} directTextStylingEnabled
  * @param {!boolean} directParagraphStylingEnabled
  */
-gui.DirectFormattingController = function DirectFormattingController(session, sessionConstraints, inputMemberId, objectNameGenerator, directTextStylingEnabled, directParagraphStylingEnabled) {
+gui.DirectFormattingController = function DirectFormattingController(
+    session,
+    sessionConstraints,
+    sessionContextCache,
+    inputMemberId,
+    objectNameGenerator,
+    directTextStylingEnabled,
+    directParagraphStylingEnabled
+    ) {
     "use strict";
 
     var self = this,
@@ -155,20 +164,10 @@ gui.DirectFormattingController = function DirectFormattingController(session, se
      * @return {undefined}
      */
     function updateEnabledState() {
-        var cursor = odtDocument.getCursor(inputMemberId),
-            cursorNode = cursor && cursor.getNode(),
-            newIsEnabled = false,
-            currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName,
-            parentAnnotation;
+        var /**@type{!boolean}*/newIsEnabled = true;
 
         if (sessionConstraints.getState("edit.reviewMode") === true) {
-            parentAnnotation = odfUtils.getParentAnnotation(cursorNode, odtDocument.getRootNode());
-            if (parentAnnotation
-                    && odfUtils.getAnnotationCreator(parentAnnotation) === currentUserName) {
-                newIsEnabled = true;
-            }
-        } else {
-            newIsEnabled = true;
+            newIsEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
         }
 
         if (newIsEnabled !== isEnabled) {

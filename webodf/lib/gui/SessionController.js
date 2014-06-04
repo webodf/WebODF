@@ -65,6 +65,7 @@ gui.SessionControllerOptions = function () {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
             sessionConstraints = new gui.SessionConstraints(),
+            sessionContextCache = new gui.SessionContextCache(session, inputMemberId),
             /**@type{!core.DomUtils}*/
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
@@ -84,7 +85,7 @@ gui.SessionControllerOptions = function () {
             eventManager = new gui.EventManager(odtDocument),
             annotationsEnabled = args.annotationsEnabled,
             annotationController = new gui.AnnotationController(session, sessionConstraints, inputMemberId),
-            directFormattingController = new gui.DirectFormattingController(session, sessionConstraints, inputMemberId, objectNameGenerator,
+            directFormattingController = new gui.DirectFormattingController(session, sessionConstraints, sessionContextCache, inputMemberId, objectNameGenerator,
                                                                             args.directTextStylingEnabled, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
             createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),
