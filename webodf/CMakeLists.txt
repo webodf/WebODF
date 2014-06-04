@@ -32,7 +32,9 @@ set(TESTJSFILES tests/core/ZipTests.js
     tests/odf/LayoutTests.js
     tests/odf/ListStyleToCssTests.js
     tests/odf/ObjectNameGeneratorTests.js
+    tests/odf/MaliciousDocumentTests.js
     tests/odf/OdfContainerTests.js
+    tests/odf/OdfContainerSafetyTests.js
     tests/odf/OdfUtilsTests.js
     tests/odf/StyleInfoTests.js
     tests/odf/TextStyleApplicatorTests.js

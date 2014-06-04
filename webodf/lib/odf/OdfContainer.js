@@ -810,6 +810,77 @@
             }
         }
         /**
+         * @param {!Document} xmldoc
+         * @param {!string} localName
+         * @param {!Object.<!string,!boolean>} allowedNamespaces
+         * @return {undefined}
+         */
+        function removeElements(xmldoc, localName, allowedNamespaces) {
+            var elements = domUtils.getElementsByTagName(xmldoc, localName),
+                element,
+                i;
+            for (i = 0; i < elements.length; i += 1) {
+                element = elements[i];
+                if (!allowedNamespaces.hasOwnProperty(element.namespaceURI)) {
+                    element.parentNode.removeChild(element);
+                }
+            }
+        }
+        /**
+         * Remove any HTML <script/> tags from the DOM.
+         * The tags need to be removed, because otherwise they would be executed
+         * when the dom is inserted into the document.
+         * To be safe, all elements with localName "script" are removed, unless
+         * they are in a known, allowed namespace.
+         * @param {!Document} xmldoc
+         * @return {undefined}
+         */
+        function removeDangerousElements(xmldoc) {
+            removeElements(xmldoc, "script", {
+                "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0": true,
+                "urn:oasis:names:tc:opendocument:xmlns:office:1.0": true,
+                "urn:oasis:names:tc:opendocument:xmlns:table:1.0": true,
+                "urn:oasis:names:tc:opendocument:xmlns:text:1.0": true,
+                "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0": true
+            });
+            removeElements(xmldoc, "style", {
+                "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0": true,
+                "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0": true,
+                "urn:oasis:names:tc:opendocument:xmlns:style:1.0": true
+            });
+        }
+
+        /**
+         * Remove all attributes that have no namespace and that have
+         * localname like 'on....', the event handler attributes.
+         * @param {!Element} element
+         * @return {undefined}
+         */
+        function removeDangerousAttributes(element) {
+            var e = element.firstElementChild, as = [], i, n, a,
+                atts = element.attributes,
+                l = atts.length;
+            // collect all dangerous attributes
+            for (i = 0; i < l; i += 1) {
+                a = atts.item(i);
+                n = a.localName.substr(0, 2).toLowerCase();
+                if (a.namespaceURI === null && n === "on") {
+                    as.push(a);
+                }
+            }
+            // remove the dangerous attributes
+            l = as.length;
+            for (i = 0; i < l; i += 1) {
+                element.removeAttributeNode(as[i]);
+            }
+            // recurse into the child elements
+            while (e) {
+                removeDangerousAttributes(e);
+                e = e.nextElementSibling;
+            }
+        }
+
+        /**
          * @param {!Array.<!{path:string,handler:function(?Document)}>} remainingComponents
          * @return {undefined}
          */
@@ -818,6 +889,10 @@
 
             if (component) {
                 zip.loadAsDOM(component.path, function (err, xmldoc) {
+                    if (xmldoc) {
+                        removeDangerousElements(xmldoc);
+                        removeDangerousAttributes(xmldoc.documentElement);
+                    }
                     component.handler(xmldoc);
                     if (self.state === OdfContainer.INVALID) {
                         if (err) {
@@ -1010,13 +1085,22 @@
          * @return {undefined}
          */
         function loadFromXML(url, callback) {
-            runtime.loadXML(url, function (err, dom) {
+            /**
+             * @param {?string} err
+             * @param {?Document} dom
+             */
+            function handler(err, dom) {
                 if (err) {
                     callback(err);
+                } else if (!dom) {
+                    callback("No DOM was loaded.");
                 } else {
+                    removeDangerousElements(dom);
+                    removeDangerousAttributes(dom.documentElement);
                     handleFlatXml(dom);
                 }
-            });
+            }
+            runtime.loadXML(url, handler);
         }
         // public functions
         this.setRootElement = setRootElement;
