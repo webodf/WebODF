@@ -51,13 +51,13 @@ odf.OdfContainerSafetyTests = function OdfContainerSafetyTests(runner) {
      * @return {!boolean}
      */
     function isDangerousElement(e) {
-         var ns = e.namespaceURI,
-             name = e.localName;
-         if ((ns === htmlns || ns === null)
-                 && (name === "style" || name === "script")) {
-             return true;
-         }
-         return false;
+        var ns = e.namespaceURI,
+            name = e.localName;
+        if ((ns === htmlns || ns === null)
+                && (name === "style" || name === "script")) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -68,12 +68,12 @@ odf.OdfContainerSafetyTests = function OdfContainerSafetyTests(runner) {
      * @return {!boolean}
      */
     function isDangerousAttribute(a) {
-         var ns = a.namespaceURI,
-             name = a.localName;
-         if (ns === null && name.substr(0,2).toLowerCase() === "on") {
-             return true;
-         }
-         return false;
+        var ns = a.namespaceURI,
+            name = a.localName;
+        if (ns === null && name.substr(0, 2).toLowerCase() === "on") {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -84,7 +84,7 @@ odf.OdfContainerSafetyTests = function OdfContainerSafetyTests(runner) {
         var d = [], e = element.firstElementChild;
         while (e) {
             if (isDangerousElement(e)) {
-                 d.push(e);
+                d.push(e);
             }
             d.push.apply(getDangerousElements(e));
             e = e.nextElementSibling;
@@ -100,11 +100,10 @@ odf.OdfContainerSafetyTests = function OdfContainerSafetyTests(runner) {
         var d = [], e = element.firstElementChild, i, a;
         while (e) {
             for (i = 0; i < e.attributes.length; i += 1) {
-                 a = /**@type{!Attr}*/(e.attributes.item(i));
-                 if (isDangerousAttribute(a)) {
-runtime.log(a.localName);
-                     d.push(a);
-                 }
+                a = /**@type{!Attr}*/(e.attributes.item(i));
+                if (isDangerousAttribute(a)) {
+                    d.push(a);
+                }
             }
             d.push.apply(getDangerousAttributes(e));
             e = e.nextElementSibling;
