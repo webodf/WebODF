@@ -34,7 +34,7 @@ odf.MaliciousDocumentTests = function MaliciousDocumentTests(runner) {
 
     var r = runner,
         t,
-        async = new core.Async();
+        async = core.Async;
 
     /*jslint emptyblock:true*/
     function noOp() { }
