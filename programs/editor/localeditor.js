@@ -192,7 +192,7 @@ var webodfEditor = (function () {
             editorOptions.reviewModeEnabled = true;
             editorOptions.directParagraphStylingEnabled = false;
             editorOptions.hyperlinkEditingEnabled = false;
-            editorOptions.imageInsertingEnabled = false;
+            editorOptions.imageEditingEnabled = false;
             editorOptions.paragraphStyleSelectingEnabled = false;
             editorOptions.paragraphStyleEditingEnabled = false;
         }
