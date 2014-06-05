@@ -79,7 +79,7 @@
     ],
     "gui.DirectFormattingController": [
         "gui.SessionConstraints",
-        "gui.SessionContextCache",
+        "gui.SessionContext",
         "gui.StyleSummary"
     ],
     "gui.EditInfoHandle": [
@@ -104,7 +104,7 @@
     ],
     "gui.HyperlinkController": [
         "gui.SessionConstraints",
-        "gui.SessionContextCache"
+        "gui.SessionContext"
     ],
     "gui.HyperlinkTooltipView": [
         "gui.KeyboardHandler",
@@ -154,7 +154,7 @@
     "gui.SessionConstraints": [
         "core.EventNotifier"
     ],
-    "gui.SessionContextCache": [
+    "gui.SessionContext": [
         "ops.Session"
     ],
     "gui.SessionController": [
@@ -190,7 +190,7 @@
     ],
     "gui.TextController": [
         "gui.SessionConstraints",
-        "gui.SessionContextCache"
+        "gui.SessionContext"
     ],
     "gui.TrivialUndoManager": [
         "core.DomUtils",

@@ -29,13 +29,13 @@
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
  * @param {!gui.SessionConstraints} sessionConstraints
- * @param {!gui.SessionContextCache} sessionContextCache
+ * @param {!gui.SessionContext} sessionContext
  * @param {!string} inputMemberId
  */
 gui.HyperlinkController = function HyperlinkController(
     session,
     sessionConstraints,
-    sessionContextCache,
+    sessionContext,
     inputMemberId
     ) {
     "use strict";

@@ -121,8 +121,8 @@ gui.TextControllerTests = function TextControllerTests(runner) {
         t.odtDocument = new ops.OdtDocument(new MockOdfCanvas(node));
         t.session = new MockSession(t.odtDocument);
         t.sessionConstraints = new gui.SessionConstraints();
-        t.sessionContextCache = new gui.SessionContextCache(t.session, inputMemberId);
-        t.textController = new gui.TextController(t.session, t.sessionConstraints, t.sessionContextCache, inputMemberId, directStyleOp, paragraphStyleOps);
+        t.sessionContext = new gui.SessionContext(t.session, inputMemberId);
+        t.textController = new gui.TextController(t.session, t.sessionConstraints, t.sessionContext, inputMemberId, directStyleOp, paragraphStyleOps);
         t.cursor = new ops.OdtCursor(inputMemberId, t.odtDocument);
         t.odtDocument.addCursor(t.cursor);
 

@@ -30,13 +30,11 @@
  * @param {!ops.Session} session
  * @param {!string} inputMemberId
  */
-gui.SessionContextCache = function (session, inputMemberId) {
+gui.SessionContext = function (session, inputMemberId) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        odfUtils = new odf.OdfUtils(),
-        cachedCursorRange = null,
-        isLocalCursorWithinOwnAnnotation = false;
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @return {!boolean}
@@ -51,18 +49,14 @@ gui.SessionContextCache = function (session, inputMemberId) {
             return false;
         }
 
-        if (cachedCursorRange !== cursor.getSelectedRange()) {
-            cursorNode = cursor && cursor.getNode();
-            currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName;
-            parentAnnotation = odfUtils.getParentAnnotation(cursorNode, odtDocument.getRootNode());
+        cursorNode = cursor && cursor.getNode();
+        currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName;
+        parentAnnotation = odfUtils.getParentAnnotation(cursorNode, odtDocument.getRootNode());
 
-            if (parentAnnotation && odfUtils.getAnnotationCreator(parentAnnotation) === currentUserName) {
-                isLocalCursorWithinOwnAnnotation = true;
-            } else {
-                isLocalCursorWithinOwnAnnotation = false;
-            }
+        if (parentAnnotation && odfUtils.getAnnotationCreator(parentAnnotation) === currentUserName) {
+            return true;
         }
 
-        return isLocalCursorWithinOwnAnnotation;
+        return false;
     };
 };

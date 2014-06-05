@@ -63,7 +63,7 @@
         "core.UnitTester",
         "core.Utils",
         "gui.SessionConstraints",
-        "gui.SessionContextCache",
+        "gui.SessionContext",
         "gui.TextController",
         "odf.Namespaces",
         "odf.OdfCanvas",

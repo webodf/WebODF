@@ -29,7 +29,7 @@
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
  * @param {!gui.SessionConstraints} sessionConstraints
- * @param {!gui.SessionContextCache} sessionContextCache
+ * @param {!gui.SessionContext} sessionContext
  * @param {!string} inputMemberId
  * @param {function(!number, !number, !boolean):ops.Operation} directStyleOp
  * @param {function(!number):!Array.<!ops.Operation>} paragraphStyleOps
@@ -37,7 +37,7 @@
 gui.TextController = function TextController(
     session,
     sessionConstraints,
-    sessionContextCache,
+    sessionContext,
     inputMemberId,
     directStyleOp,
     paragraphStyleOps
@@ -63,7 +63,7 @@ gui.TextController = function TextController(
      */
     function updateEnabledState() {
         if (sessionConstraints.getState("edit.reviewMode") === true) {
-            isEnabled = /**@type{!boolean}*/(sessionContextCache.isLocalCursorWithinOwnAnnotation());
+            isEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
         } else {
             isEnabled = true;
         }

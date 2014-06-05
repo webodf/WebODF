@@ -29,7 +29,7 @@
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
  * @param {!gui.SessionConstraints} sessionConstraints
- * @param {!gui.SessionContextCache} sessionContextCache
+ * @param {!gui.SessionContext} sessionContext
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
  * @param {!boolean} directTextStylingEnabled
@@ -38,7 +38,7 @@
 gui.DirectFormattingController = function DirectFormattingController(
     session,
     sessionConstraints,
-    sessionContextCache,
+    sessionContext,
     inputMemberId,
     objectNameGenerator,
     directTextStylingEnabled,

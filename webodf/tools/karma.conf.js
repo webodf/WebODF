@@ -106,7 +106,7 @@ module.exports = function (config) {
             'lib/odf/TextSerializer.js',
             'lib/gui/MimeDataExporter.js',
             'lib/gui/Clipboard.js',
-            'lib/gui/SessionContextCache.js',
+            'lib/gui/SessionContext.js',
             'lib/gui/StyleSummary.js',
             'lib/gui/DirectFormattingController.js',
             'lib/gui/KeyboardHandler.js',
