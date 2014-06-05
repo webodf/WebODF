@@ -36,8 +36,21 @@ define("webodf/editor/widgets/imageInserter", [
                 widget = {},
                 insertImageButton,
                 editorSession,
-                fileLoader;
+                fileLoader,
+                textController,
+                imageController;
 
+            /**
+             *
+             * @param {!string} mimetype
+             * @param {!string} content base64 encoded string
+             * @param {!number} width
+             * @param {!number} height
+             */
+            function insertImage(mimetype, content, width, height) {
+                textController.removeCurrentSelection();
+                imageController.insertImage(mimetype, content, width, height);
+            };
 
             /**
              * @param {!string} content  as datauri
@@ -53,9 +66,7 @@ define("webodf/editor/widgets/imageInserter", [
                 hiddenImage.onload = function () {
                     // remove the data:image/jpg;base64, bit
                     content = content.substring(content.indexOf(",") + 1);
-                    if (editorSession) {
-                        editorSession.insertImage(mimetype, content, hiddenImage.width, hiddenImage.height);
-                    }
+                    insertImage(mimetype, content, hiddenImage.width, hiddenImage.height);
                     // clean up
                     document.body.removeChild(hiddenImage);
                     self.onToolDone();

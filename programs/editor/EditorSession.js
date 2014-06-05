@@ -537,18 +537,6 @@ define("webodf/editor/EditorSession", [
         };
 
         /**
-         *
-         * @param {!string} mimetype
-         * @param {!string} content base64 encoded string
-         * @param {!number} width
-         * @param {!number} height
-         */
-        this.insertImage = function (mimetype, content, width, height) {
-            self.sessionController.getTextController().removeCurrentSelection();
-            self.sessionController.getImageController().insertImage(mimetype, content, width, height);
-        };
-
-        /**
          * @param {!string} memberId
          * @return {?ops.Member}
          */
