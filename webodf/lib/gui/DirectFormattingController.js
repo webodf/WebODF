@@ -57,7 +57,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         selectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles);
 
     /**
-     * Fetch all the text nodes in the specified range, or if the range is collapsed, the node just to
+     * Fetch all the character elements and text nodes in the specified range, or if the range is collapsed, the node just to
      * the left of the cursor.
      * @param {!Range} range
      * @return {!Array.<!Node>}
@@ -78,7 +78,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
             }
             nodes = [container];
         } else {
-            nodes = odfUtils.getTextNodes(range, true);
+            nodes = odfUtils.getTextElements(range, true, false);
         }
 
         return nodes;
