@@ -152,13 +152,6 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 });
             }
 
-            function handleCursorMoved(cursor) {
-                var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
-                widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', disabled);
-                });
-            }
-
             this.setEditorSession = function (session) {
                 if (directFormattingController) {
                     directFormattingController.unsubscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
@@ -177,13 +170,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                     isAlignedJustified: directFormattingController ? directFormattingController.isAlignedJustified() : false
                 });
 
-                if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                }
                 editorSession = session;
-                if (editorSession) {
-                    editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                }
             };
 
             this.onToolDone = function () {};
