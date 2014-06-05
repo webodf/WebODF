@@ -148,6 +148,9 @@
     "gui.SelectionViewManager": [
         "gui.SelectionView"
     ],
+    "gui.SessionConstraints": [
+        "core.EventNotifier"
+    ],
     "gui.SessionController": [
         "gui.AnnotationController",
         "gui.Clipboard",

@@ -130,6 +130,7 @@ module.exports = function (config) {
             'lib/gui/ShadowCursor.js',
             'lib/gui/SelectionView.js',
             'lib/gui/SelectionViewManager.js',
+            'lib/gui/SessionConstraints.js',
             'lib/gui/SessionView.js',
             'lib/gui/SvgSelectionView.js',
             'lib/gui/UndoStateRules.js',
