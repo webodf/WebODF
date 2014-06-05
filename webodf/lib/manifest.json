@@ -114,7 +114,7 @@
         "gui.EventManager"
     ],
     "gui.ImageController": [
-        "ops.Session"
+        "gui.HyperlinkController"
     ],
     "gui.ImageSelector": [
         "odf.OdfCanvas"
@@ -162,7 +162,6 @@
         "gui.Clipboard",
         "gui.DirectFormattingController",
         "gui.HyperlinkClickHandler",
-        "gui.HyperlinkController",
         "gui.IOSSafariSupport",
         "gui.ImageController",
         "gui.ImageSelector",

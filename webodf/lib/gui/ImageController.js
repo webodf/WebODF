@@ -27,10 +27,18 @@
 /**
  * @constructor
  * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
+ * @param {!gui.SessionContextCache} sessionContextCache
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
  */
-gui.ImageController = function ImageController(session, inputMemberId, objectNameGenerator) {
+gui.ImageController = function ImageController(
+    session,
+    sessionConstraints,
+    sessionContextCache,
+    inputMemberId,
+    objectNameGenerator
+    ) {
     "use strict";
 
     var /**@const
@@ -44,7 +52,63 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
            @type{!string}*/
         textns = odf.Namespaces.textns,
         odtDocument = session.getOdtDocument(),
-        formatting = odtDocument.getFormatting();
+        formatting = odtDocument.getFormatting(),
+        eventNotifier = new core.EventNotifier([
+            gui.HyperlinkController.enabledChanged
+        ]),
+        isEnabled = false;
+
+    /**
+     * @return {undefined}
+     */
+    function updateEnabledState() {
+        var /**@type{!boolean}*/newIsEnabled = true;
+
+        if (sessionConstraints.getState("edit.reviewMode") === true) {
+            newIsEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+        }
+
+        if (newIsEnabled !== isEnabled) {
+            isEnabled = newIsEnabled;
+            eventNotifier.emit(gui.ImageController.enabledChanged, isEnabled);
+        }
+    }
+
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
+    function onCursorEvent(cursor) {
+        if (cursor.getMemberId() === inputMemberId) {
+            updateEnabledState();
+        }
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.isEnabled = function () {
+        return isEnabled;
+    };
+
+    /**
+     * @param {!string} eventid
+     * @param {!Function} cb
+     * @return {undefined}
+     */
+    this.subscribe = function (eventid, cb) {
+        eventNotifier.subscribe(eventid, cb);
+    };
+
+    /**
+     * @param {!string} eventid
+     * @param {!Function} cb
+     * @return {undefined}
+     */
+    this.unsubscribe = function (eventid, cb) {
+        eventNotifier.unsubscribe(eventid, cb);
+    };
+
 
     /**
      * @param {!string} name
@@ -216,6 +280,10 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
      * @return {undefined}
      */
     this.insertImage = function (mimetype, content, widthInPx, heightInPx) {
+        if (!isEnabled) {
+            return;
+        }
+
         var paragraphElement,
             styleName,
             pageContentSize,
@@ -237,4 +305,23 @@ gui.ImageController = function ImageController(session, inputMemberId, objectNam
 
         insertImageInternal(mimetype, content, imageSize.width + "px", imageSize.height + "px");
     };
+
+    /**
+     * @param {!function(!Error=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function (callback) {
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.unsubscribe("edit.reviewMode", updateEnabledState);
+        callback();
+    };
+
+    function init() {
+        odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.subscribe("edit.reviewMode", updateEnabledState);
+        updateEnabledState();
+    }
+    init();
 };
+
+/**@const*/gui.ImageController.enabledChanged = "enabled/changed";

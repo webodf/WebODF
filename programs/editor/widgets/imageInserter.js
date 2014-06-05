@@ -134,14 +134,31 @@ define("webodf/editor/widgets/imageInserter", [
                 return widget;
             };
 
+            function enableButtons(isEnabled) {
+                widget.children.forEach(function (element) {
+                    element.setAttribute('disabled', !isEnabled);
+                });
+            }
             function handleCursorMoved(cursor) {
-                var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
-                // LO/AOO pops up the picture/frame option dialog if image is selected when pressing the button
-                // Since we only support inline images, disable the button for now.
-                insertImageButton.setAttribute('disabled', disabled);
+                if (imageController.isEnabled()) {
+                    var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
+                    // LO/AOO pops up the picture/frame option dialog if image is selected when pressing the button
+                    // Since we only support inline images, disable the button for now.
+                    insertImageButton.setAttribute('disabled', disabled);
+                }
             }
 
             this.setEditorSession = function (session) {
+                if (imageController) {
+                    imageController.unsubscribe(gui.ImageController.enabledChanged, enableButtons);
+                }
+                textController = session && session.sessionController.getTextController();
+                imageController = session && session.sessionController.getImageController();
+                if (imageController) {
+                    imageController.subscribe(gui.ImageController.enabledChanged, enableButtons);
+                }
+                enableButtons(Boolean(imageController) && imageController.isEnabled());
+
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                 }
@@ -149,9 +166,6 @@ define("webodf/editor/widgets/imageInserter", [
                 if (editorSession) {
                     editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                 }
-                widget.children.forEach(function (element) {
-                    element.setAttribute("disabled", !session);
-                });
             };
 
             this.onToolDone = function () {};
