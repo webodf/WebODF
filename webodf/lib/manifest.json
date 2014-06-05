@@ -131,9 +131,8 @@
         "odf.OdfNodeFilter",
         "odf.TextSerializer"
     ],
-    "gui.PlainTextPasteboard": [
-        "ops.OpInsertText",
-        "ops.OpSplitParagraph"
+    "gui.PasteController": [
+        "ops.Session"
     ],
     "gui.SelectionController": [
         "odf.WordBoundaryFilter",
@@ -167,7 +166,7 @@
         "gui.ImageSelector",
         "gui.InputMethodEditor",
         "gui.MetadataController",
-        "gui.PlainTextPasteboard",
+        "gui.PasteController",
         "gui.SelectionController",
         "gui.TextController",
         "gui.UndoManager"

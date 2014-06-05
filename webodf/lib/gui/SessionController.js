@@ -97,7 +97,7 @@ gui.SessionControllerOptions = function () {
             drawShadowCursorTask,
             /**@type{!core.ScheduledTask}*/
             redrawRegionSelectionTask,
-            pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
+            pasteController = new gui.PasteController(session, inputMemberId),
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, eventManager),
             /**@type{number}*/
             clickCount = 0,
@@ -277,7 +277,7 @@ gui.SessionControllerOptions = function () {
 
             if (plainText) {
                 textController.removeCurrentSelection();
-                session.enqueue(pasteHandler.createPasteOps(plainText));
+                pasteController.paste(plainText);
             }
             cancelEvent(e);
         }
@@ -754,7 +754,7 @@ gui.SessionControllerOptions = function () {
                 } else {
                     // Multi-line input should be handled as if it was pasted, rather than inserted as one giant
                     // single string.
-                    session.enqueue(pasteHandler.createPasteOps(input));
+                    pasteController.paste(input);
                 }
             }
         }

@@ -25,12 +25,14 @@
 /*global runtime, gui, ops*/
 
 /**
- *
- * @param {!ops.OdtDocument} odtDocument
+ * Provides a method to paste text at the current cursor
+ * position, and processes the input string to understand
+ * special structuring such as paragraph splits.
+ * @param {!ops.Session} session
  * @param {!string} inputMemberId
  * @constructor
  */
-gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberId) {
+gui.PasteController = function PasteController(session, inputMemberId) {
     "use strict";
 
     /**
@@ -45,10 +47,10 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
 
     /**
      * @param {!string} data
-     * @return {!Array.<!ops.Operation>}
+     * @return {undefined}
      */
-    this.createPasteOps = function (data) {
-        var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
+    this.paste = function (data) {
+        var originalCursorPosition = session.getOdtDocument().getCursorPosition(inputMemberId),
             /**@type{number}*/
             cursorPosition = originalCursorPosition,
             operations = [],
@@ -79,6 +81,6 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
         //                      existing paragraph, only a single split should occur.
         operations.pop();
 
-        return operations;
+        session.enqueue(operations);
     };
 };
