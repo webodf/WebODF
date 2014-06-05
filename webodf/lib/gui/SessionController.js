@@ -97,7 +97,7 @@ gui.SessionControllerOptions = function () {
             drawShadowCursorTask,
             /**@type{!core.ScheduledTask}*/
             redrawRegionSelectionTask,
-            pasteController = new gui.PasteController(session, inputMemberId),
+            pasteController = new gui.PasteController(session, sessionConstraints, sessionContext, inputMemberId),
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, eventManager),
             /**@type{number}*/
             clickCount = 0,

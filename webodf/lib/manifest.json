@@ -132,7 +132,8 @@
         "odf.TextSerializer"
     ],
     "gui.PasteController": [
-        "ops.Session"
+        "gui.SessionConstraints",
+        "gui.SessionContext"
     ],
     "gui.SelectionController": [
         "odf.WordBoundaryFilter",
