@@ -28,12 +28,13 @@
  * @constructor
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
  * @param {!string} inputMemberId
  * @param {!odf.ObjectNameGenerator} objectNameGenerator
  * @param {!boolean} directTextStylingEnabled
  * @param {!boolean} directParagraphStylingEnabled
  */
-gui.DirectFormattingController = function DirectFormattingController(session, inputMemberId, objectNameGenerator, directTextStylingEnabled, directParagraphStylingEnabled) {
+gui.DirectFormattingController = function DirectFormattingController(session, sessionConstraints, inputMemberId, objectNameGenerator, directTextStylingEnabled, directParagraphStylingEnabled) {
     "use strict";
 
     var self = this,
@@ -41,6 +42,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         utils = new core.Utils(),
         odfUtils = new odf.OdfUtils(),
         eventNotifier = new core.EventNotifier([
+            gui.DirectFormattingController.enabledChanged,
             gui.DirectFormattingController.textStylingChanged,
             gui.DirectFormattingController.paragraphStylingChanged
         ]),
@@ -54,7 +56,8 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         /**@type{!Array.<Object.<string,Object>>}*/
         selectionAppliedStyles = [],
         /**@type{!gui.StyleSummary}*/
-        selectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles);
+        selectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles),
+        isEnabled = false;
 
     /**
      * Fetch all the character elements and text nodes in the specified range, or if the range is collapsed, the node just to
@@ -149,6 +152,39 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     }
 
     /**
+     * @return {undefined}
+     */
+    function updateEnabledState() {
+        var cursor = odtDocument.getCursor(inputMemberId),
+            cursorNode = cursor && cursor.getNode(),
+            newIsEnabled = false,
+            currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName,
+            parentAnnotation;
+
+        if (sessionConstraints.getState("edit.reviewMode") === true) {
+            parentAnnotation = odfUtils.getParentAnnotation(cursorNode, odtDocument.getRootNode());
+            if (parentAnnotation
+                    && odfUtils.getAnnotationCreator(parentAnnotation) === currentUserName) {
+                newIsEnabled = true;
+            }
+        } else {
+            newIsEnabled = true;
+        }
+
+        if (newIsEnabled !== isEnabled) {
+            isEnabled = newIsEnabled;
+            eventNotifier.emit(gui.DirectFormattingController.enabledChanged, isEnabled);
+        }
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.isEnabled = function () {
+        return isEnabled;
+    };
+
+    /**
      * @param {!ops.OdtCursor|!string} cursorOrId
      * @return {undefined}
      */
@@ -156,7 +192,11 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         var cursorMemberId = (typeof cursorOrId === "string")
                                 ? cursorOrId : cursorOrId.getMemberId();
         if (cursorMemberId === inputMemberId) {
+            // FIXME: Update internal state before firing any signals,
+            // otherwise it may pose a problem when a subscriber tries
+            // to query the intermediate state.
             updateSelectionStylesInfo();
+            updateEnabledState();
         }
     }
 
@@ -198,6 +238,10 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {undefined}
      */
     function formatTextSelection(textProperties) {
+        if (!isEnabled) {
+            return;
+        }
+
         var selection = odtDocument.getCursorSelection(inputMemberId),
             op,
             properties = {'style:text-properties' : textProperties};
@@ -458,6 +502,10 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
+        if (!isEnabled) {
+            return;
+        }
+
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             paragraphs = odfUtils.getParagraphElements(range),
             formatting = odtDocument.getFormatting(),
@@ -662,6 +710,10 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
      * @return {!Array.<!ops.Operation>}
      */
     this.createParagraphStyleOps = function (position) {
+        if (!isEnabled) {
+            return [];
+        }
+
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor.getSelectedRange(),
             operations = [], op,
@@ -754,6 +806,7 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
+        sessionConstraints.unsubscribe("edit.reviewMode", updateEnabledState);
         callback();
     };
 
@@ -778,7 +831,9 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
+        sessionConstraints.subscribe("edit.reviewMode", updateEnabledState);
         updateSelectionStylesInfo();
+        updateEnabledState();
 
         if (!directTextStylingEnabled) {
             self.formatTextSelection = emptyFunction;
@@ -808,5 +863,6 @@ gui.DirectFormattingController = function DirectFormattingController(session, in
     init();
 };
 
+/**@const*/gui.DirectFormattingController.enabledChanged = "enabled/changed";
 /**@const*/gui.DirectFormattingController.textStylingChanged = "textStyling/changed";
 /**@const*/gui.DirectFormattingController.paragraphStylingChanged = "paragraphStyling/changed";

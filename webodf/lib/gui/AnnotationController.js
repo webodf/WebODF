@@ -37,22 +37,7 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
     var odtDocument = session.getOdtDocument(),
         isAnnotatable = false,
         eventNotifier = new core.EventNotifier([gui.AnnotationController.annotatableChanged]),
-        officens = odf.Namespaces.officens;
-
-    /**
-     * @param {?Node} node  Node to start searching with
-     * @param {!Node} container  Root container to stop searching at.
-     * @return {!boolean}
-     */
-    function isWithinAnnotation(node, container) {
-        while (node && node !== container) {
-            if (node.namespaceURI === officens && node.localName === 'annotation') {
-                return true;
-            }
-            node = node.parentNode;
-        }
-        return false;
-    }
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @return {undefined}
@@ -62,7 +47,7 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
             cursorNode = cursor && cursor.getNode(),
             newIsAnnotatable = false;
         if (cursorNode) {
-            newIsAnnotatable = !isWithinAnnotation(cursorNode, odtDocument.getRootNode());
+            newIsAnnotatable = !odfUtils.isWithinAnnotation(cursorNode, odtDocument.getRootNode());
         }
 
         if (newIsAnnotatable !== isAnnotatable) {
@@ -99,16 +84,6 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
         if (cursor.getMemberId() === inputMemberId) {
             updatedCachedValues();
         }
-    }
-
-    /**
-     * Gets the creator of an annotation.
-     * @param {!Element} annotationElement
-     * @return {string}
-     */
-    function getCreator(annotationElement) {
-        var creatorElement = /**@type{!Element}*/(annotationElement.getElementsByTagNameNS(odf.Namespaces.dcns, "creator")[0]);
-        return creatorElement.textContent;
     }
 
     /**

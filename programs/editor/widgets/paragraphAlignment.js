@@ -152,17 +152,24 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 });
             }
 
+            function enableStyleButtons(isEnabled) {
+                widget.children.forEach(function (element) {
+                    element.setAttribute('disabled', !isEnabled);
+                });
+            }
+
             this.setEditorSession = function (session) {
                 if (directFormattingController) {
                     directFormattingController.unsubscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
+                    directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
                 directFormattingController = session && session.sessionController.getDirectFormattingController();
                 if (directFormattingController) {
                     directFormattingController.subscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
+                    directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
-                widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !directFormattingController);
-                });
+                enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
+
                 updateStyleButtons({
                     isAlignedLeft:      directFormattingController ? directFormattingController.isAlignedLeft() :      false,
                     isAlignedCenter:    directFormattingController ? directFormattingController.isAlignedCenter() :    false,

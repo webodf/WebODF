@@ -84,7 +84,7 @@ gui.SessionControllerOptions = function () {
             eventManager = new gui.EventManager(odtDocument),
             annotationsEnabled = args.annotationsEnabled,
             annotationController = new gui.AnnotationController(session, sessionConstraints, inputMemberId),
-            directFormattingController = new gui.DirectFormattingController(session, inputMemberId, objectNameGenerator,
+            directFormattingController = new gui.DirectFormattingController(session, sessionConstraints, inputMemberId, objectNameGenerator,
                                                                             args.directTextStylingEnabled, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
             createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),

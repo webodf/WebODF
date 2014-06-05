@@ -631,6 +631,11 @@ define("webodf/editor/EditorSession", [
 
             sessionConstraints = self.sessionController.getSessionConstraints();
             // Session Constraints can be applied once the controllers are instantiated.
+            if (config.reviewModeEnabled) {
+                // Disallow deleting other authors' annotations.
+                sessionConstraints.setState("edit.annotations.onlyDeleteOwn", true);
+                sessionConstraints.setState("edit.reviewMode", true);
+            }
 
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
             odtDocument.subscribe(ops.Document.signalMemberAdded, onMemberAdded);

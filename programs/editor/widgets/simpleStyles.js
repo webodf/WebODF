@@ -161,25 +161,32 @@ define("webodf/editor/widgets/simpleStyles", [
                 });
             }
 
-            function handleCursorMoved(cursor) {
-                var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
+            function enableStyleButtons(isEnabled) {
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', disabled);
+                    element.setAttribute('disabled', !isEnabled);
                 });
+            }
+
+            function handleCursorMoved(cursor) {
+                if (directFormattingController.isEnabled()) {
+                    var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
+                    enableStyleButtons(!disabled);
+                }
             }
 
             this.setEditorSession = function(session) {
                 if (directFormattingController) {
                     directFormattingController.unsubscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
+                    directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
                 directFormattingController = session && session.sessionController.getDirectFormattingController();
                 fontPicker.setEditorSession(session);
                 if (directFormattingController) {
                     directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
+                    directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
-                widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !directFormattingController);
-                });
+                enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
+
                 updateStyleButtons({
                     isBold: directFormattingController ? directFormattingController.isBold() : false,
                     isItalic: directFormattingController ? directFormattingController.isItalic() : false,

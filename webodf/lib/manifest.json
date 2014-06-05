@@ -78,6 +78,7 @@
         "gui.MimeDataExporter"
     ],
     "gui.DirectFormattingController": [
+        "gui.SessionConstraints",
         "gui.StyleSummary",
         "ops.Session"
     ],

@@ -189,6 +189,41 @@ odf.OdfUtils = function OdfUtils() {
     };
 
     /**
+     * @param {?Node} node  Node to start searching with
+     * @param {!Element} container  Root container to stop searching at.
+     * @return {?Element}
+     */
+    function getParentAnnotation(node, container) {
+         while (node && node !== container) {
+            if (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation') {
+                return /**@type{!Element}*/(node);
+            }
+            node = node.parentElement;
+        }
+        return null;
+    }
+    this.getParentAnnotation = getParentAnnotation;
+
+    /**
+     * @param {?Node} node  Node to start searching with
+     * @param {!Element} container  Root container to stop searching at.
+     * @return {!boolean}
+     */
+    this.isWithinAnnotation = function (node, container) {
+        return Boolean(getParentAnnotation(node, container));
+    };
+
+    /**
+     * Gets the creator of an annotation.
+     * @param {!Element} annotationElement
+     * @return {!string}
+     */
+    this.getAnnotationCreator = function (annotationElement) {
+        var creatorElement = /**@type{!Element}*/(annotationElement.getElementsByTagNameNS(odf.Namespaces.dcns, "creator")[0]);
+        return creatorElement.textContent;
+    };
+
+    /**
      * Determine if the node is a text:list-item element.
      * @param {?Node} e
      * @return {!boolean}
