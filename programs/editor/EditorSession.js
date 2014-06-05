@@ -605,6 +605,8 @@ define("webodf/editor/EditorSession", [
                 directTextStylingEnabled: config.directTextStylingEnabled,
                 directParagraphStylingEnabled: config.directParagraphStylingEnabled
             });
+            sessionConstraints = self.sessionController.getSessionConstraints();
+
             eventManager = self.sessionController.getEventManager();
             hyperlinkTooltipView = new gui.HyperlinkTooltipView(session.getOdtDocument().getOdfCanvas(),
                                                     self.sessionController.getHyperlinkClickHandler().getModifier);
@@ -613,11 +615,10 @@ define("webodf/editor/EditorSession", [
 
             caretManager = new gui.CaretManager(self.sessionController);
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
-            self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, caretManager, selectionViewManager);
+            self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, sessionConstraints, caretManager, selectionViewManager);
             self.availableFonts = getAvailableFonts();
             selectionViewManager.registerCursor(shadowCursor, true);
 
-            sessionConstraints = self.sessionController.getSessionConstraints();
             // Session Constraints can be applied once the controllers are instantiated.
             if (config.reviewModeEnabled) {
                 // Disallow deleting other authors' annotations.
