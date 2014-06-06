@@ -579,7 +579,7 @@ function Main(cmakeListPath) {
             licenses = {},
             // files for which the license is not checked
             licenseExceptions = ["lib/HeaderCompiled.js", "lib/core/JSLint.js",
-                "lib/core/RawDeflate.js", "lib/core/RawInflate.js"],
+                "lib/core/RawDeflate.js", "lib/core/RawInflate.js"].map(pathModule.normalize),
             commonLicense;
         // load JSLint
         /*jslint evil: true*/
