@@ -264,7 +264,7 @@ function Main(cmakeListPath) {
             if (err) {
                 throw err;
             }
-            var re = new RegExp("// MODULES\n[^!]+!");
+            var re = new RegExp("// MODULES\r?\n[^!]+!");
             content = content.replace(re,
                 "// MODULES\n            'lib/" +
                 modules.map(deNormalizePath)
