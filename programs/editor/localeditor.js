@@ -188,13 +188,15 @@ var webodfEditor = (function () {
         if (args.docUrl === undefined) {
             args.docUrl = guessDocUrl();
         }
-        if (args.reviewModeEnabled) {
+        if (args.reviewModeEnabled === true) {
             editorOptions.reviewModeEnabled = true;
             editorOptions.directParagraphStylingEnabled = false;
             editorOptions.hyperlinkEditingEnabled = false;
             editorOptions.imageEditingEnabled = false;
             editorOptions.paragraphStyleSelectingEnabled = false;
             editorOptions.paragraphStyleEditingEnabled = false;
+        } else {
+            editorOptions.reviewModeEnabled = false;
         }
         runtime.assert(args.docUrl, "docUrl needs to be specified");
         runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
