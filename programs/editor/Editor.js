@@ -66,6 +66,7 @@ define("webodf/editor/Editor", [
          * @constructor
          * @param {{unstableFeaturesEnabled:boolean,
          *          allFeaturesEnabled:boolean,
+         *          reviewModeEnabled: boolean,
          *          loadCallback:function(),
          *          saveCallback:function(),
          *          closeCallback:function()}}
@@ -590,15 +591,19 @@ define("webodf/editor/Editor", [
                     directParagraphStylingEnabled = isEnabled(args.directParagraphStylingEnabled, FEATURE.COLLAB_UNSTABLE),
                     paragraphStyleSelectingEnabled = isEnabled(args.paragraphStyleSelectingEnabled),
                     paragraphStyleEditingEnabled = isEnabled(args.paragraphStyleEditingEnabled),
-                    imageInsertingEnabled = isEnabled(args.imageInsertingEnabled, FEATURE.COLLAB_UNSTABLE),
+                    imageEditingEnabled = isEnabled(args.imageEditingEnabled, FEATURE.COLLAB_UNSTABLE),
                     hyperlinkEditingEnabled = isEnabled(args.hyperlinkEditingEnabled, FEATURE.COLLAB_UNSTABLE),
                     // annotations not yet properly supported for OT
-                    annotationsEnabled = isEnabled(args.annotationsEnabled, FEATURE.COLLAB_UNSTABLE),
+                    annotationsEnabled = args.reviewModeEnabled || isEnabled(args.annotationsEnabled, FEATURE.COLLAB_UNSTABLE),
                      // undo manager is not yet integrated with collaboration
                     undoRedoEnabled = isEnabled(args.undoRedoEnabled, FEATURE.COLLAB_MISSING),
                     zoomingEnabled = isEnabled(args.zoomingEnabled),
                     aboutEnabled = (! collabEditing),
+                    reviewModeEnabled = args.reviewModeEnabled,
                     closeCallback;
+
+                // TODO: Handle more gracefully with Editor components
+                runtime.assert(!(collabEditing && args.reviewModeEnabled), "Cannot have review mode enabled in collaborative editing");
 
                 editorInstanceCounter += 1;
 
@@ -667,7 +672,7 @@ define("webodf/editor/Editor", [
                     directParagraphStylingEnabled: directParagraphStylingEnabled,
                     paragraphStyleSelectingEnabled: paragraphStyleSelectingEnabled,
                     paragraphStyleEditingEnabled: paragraphStyleEditingEnabled,
-                    imageInsertingEnabled: imageInsertingEnabled,
+                    imageInsertingEnabled: imageEditingEnabled,
                     hyperlinkEditingEnabled: hyperlinkEditingEnabled,
                     annotationsEnabled: annotationsEnabled,
                     undoRedoEnabled: undoRedoEnabled,
@@ -693,11 +698,12 @@ define("webodf/editor/Editor", [
                         directParagraphStylingEnabled: directParagraphStylingEnabled,
                         paragraphStyleSelectingEnabled: paragraphStyleSelectingEnabled,
                         paragraphStyleEditingEnabled: paragraphStyleEditingEnabled,
-                        imageInsertingEnabled: imageInsertingEnabled,
+                        imageEditingEnabled: imageEditingEnabled,
                         hyperlinkEditingEnabled: hyperlinkEditingEnabled,
                         annotationsEnabled: annotationsEnabled,
                         undoRedoEnabled: undoRedoEnabled,
-                        zoomingEnabled: zoomingEnabled
+                        zoomingEnabled: zoomingEnabled,
+                        reviewModeEnabled: reviewModeEnabled
                     });
                     if (undoRedoEnabled) {
                         editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());

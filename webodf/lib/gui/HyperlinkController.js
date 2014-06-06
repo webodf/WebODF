@@ -26,14 +26,77 @@
 
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
+ * @param {!gui.SessionContext} sessionContext
  * @param {!string} inputMemberId
  */
-gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
+gui.HyperlinkController = function HyperlinkController(
+    session,
+    sessionConstraints,
+    sessionContext,
+    inputMemberId
+    ) {
     "use strict";
 
     var odfUtils = new odf.OdfUtils(),
-        odtDocument = session.getOdtDocument();
+        odtDocument = session.getOdtDocument(),
+        eventNotifier = new core.EventNotifier([
+            gui.HyperlinkController.enabledChanged
+        ]),
+        isEnabled = false;
+
+    /**
+     * @return {undefined}
+     */
+    function updateEnabledState() {
+        var /**@type{!boolean}*/newIsEnabled = true;
+
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
+            newIsEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+        }
+
+        if (newIsEnabled !== isEnabled) {
+            isEnabled = newIsEnabled;
+            eventNotifier.emit(gui.HyperlinkController.enabledChanged, isEnabled);
+        }
+    }
+
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
+    function onCursorEvent(cursor) {
+        if (cursor.getMemberId() === inputMemberId) {
+            updateEnabledState();
+        }
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.isEnabled = function () {
+        return isEnabled;
+    };
+
+    /**
+     * @param {!string} eventid
+     * @param {!Function} cb
+     * @return {undefined}
+     */
+    this.subscribe = function (eventid, cb) {
+        eventNotifier.subscribe(eventid, cb);
+    };
+
+    /**
+     * @param {!string} eventid
+     * @param {!Function} cb
+     * @return {undefined}
+     */
+    this.unsubscribe = function (eventid, cb) {
+        eventNotifier.unsubscribe(eventid, cb);
+    };
 
     /**
      * Convert the current selection into a hyperlink
@@ -42,6 +105,9 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
      *  Note, the insertion text will not replace the existing selection content.
      */
     function addHyperlink(hyperlink, insertionText) {
+        if (!isEnabled) {
+            return;
+        }
         var selection = odtDocument.getCursorSelection(inputMemberId),
             op = new ops.OpApplyHyperlink(),
             operations = [];
@@ -76,6 +142,10 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
      * link, that entire link will be removed.
      */
     function removeHyperlinks() {
+        if (!isEnabled) {
+            return;
+        }
+
         var iterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             selectedRange = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             links = odfUtils.getHyperlinkElements(selectedRange),
@@ -160,4 +230,23 @@ gui.HyperlinkController = function HyperlinkController(session, inputMemberId) {
         domRange.detach();
     }
     this.removeHyperlinks = removeHyperlinks;
+
+    /**
+     * @param {!function(!Error=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function (callback) {
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        callback();
+    };
+
+    function init() {
+        odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        updateEnabledState();
+    }
+    init();
 };
+
+/**@const*/gui.HyperlinkController.enabledChanged = "enabled/changed";

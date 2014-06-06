@@ -64,6 +64,8 @@ gui.SessionControllerOptions = function () {
     gui.SessionController = function SessionController(session, inputMemberId, shadowCursor, args) {
         var /**@type{!Window}*/window = /**@type{!Window}*/(runtime.getWindow()),
             odtDocument = session.getOdtDocument(),
+            sessionConstraints = new gui.SessionConstraints(),
+            sessionContext = new gui.SessionContext(session, inputMemberId),
             /**@type{!core.DomUtils}*/
             domUtils = new core.DomUtils(),
             odfUtils = new odf.OdfUtils(),
@@ -82,26 +84,26 @@ gui.SessionControllerOptions = function () {
             undoManager = null,
             eventManager = new gui.EventManager(odtDocument),
             annotationsEnabled = args.annotationsEnabled,
-            annotationController = new gui.AnnotationController(session, inputMemberId),
-            directFormattingController = new gui.DirectFormattingController(session, inputMemberId, objectNameGenerator,
+            annotationController = new gui.AnnotationController(session, sessionConstraints, inputMemberId),
+            directFormattingController = new gui.DirectFormattingController(session, sessionConstraints, sessionContext, inputMemberId, objectNameGenerator,
                                                                             args.directTextStylingEnabled, args.directParagraphStylingEnabled),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
             createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),
-            textController = new gui.TextController(session, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
-            imageController = new gui.ImageController(session, inputMemberId, objectNameGenerator),
+            textController = new gui.TextController(session, sessionConstraints, sessionContext, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
+            imageController = new gui.ImageController(session, sessionConstraints, sessionContext, inputMemberId, objectNameGenerator),
             imageSelector = new gui.ImageSelector(odtDocument.getOdfCanvas()),
             shadowCursorIterator = gui.SelectionMover.createPositionIterator(odtDocument.getRootNode()),
             /**@type{!core.ScheduledTask}*/
             drawShadowCursorTask,
             /**@type{!core.ScheduledTask}*/
             redrawRegionSelectionTask,
-            pasteHandler = new gui.PlainTextPasteboard(odtDocument, inputMemberId),
+            pasteController = new gui.PasteController(session, sessionConstraints, sessionContext, inputMemberId),
             inputMethodEditor = new gui.InputMethodEditor(inputMemberId, eventManager),
             /**@type{number}*/
             clickCount = 0,
             hyperlinkClickHandler = new gui.HyperlinkClickHandler(odtDocument.getOdfCanvas().getElement,
                                                                     keyDownHandler, keyUpHandler),
-            hyperlinkController = new gui.HyperlinkController(session, inputMemberId),
+            hyperlinkController = new gui.HyperlinkController(session, sessionConstraints, sessionContext, inputMemberId),
             selectionController = new gui.SelectionController(session, inputMemberId),
             metadataController = new gui.MetadataController(session, inputMemberId),
             modifier = gui.KeyboardHandler.Modifier,
@@ -275,7 +277,7 @@ gui.SessionControllerOptions = function () {
 
             if (plainText) {
                 textController.removeCurrentSelection();
-                session.enqueue(pasteHandler.createPasteOps(plainText));
+                pasteController.paste(plainText);
             }
             cancelEvent(e);
         }
@@ -752,7 +754,7 @@ gui.SessionControllerOptions = function () {
                 } else {
                     // Multi-line input should be handled as if it was pasted, rather than inserted as one giant
                     // single string.
-                    session.enqueue(pasteHandler.createPasteOps(input));
+                    pasteController.paste(input);
                 }
             }
         }
@@ -962,6 +964,13 @@ gui.SessionControllerOptions = function () {
         };
 
         /**
+         * @return {!gui.SessionConstraints}
+         */
+        this.getSessionConstraints = function () {
+            return sessionConstraints;
+        };
+
+        /**
          * @param {?gui.UndoManager} manager
          * @return {undefined}
          */
@@ -1101,7 +1110,9 @@ gui.SessionControllerOptions = function () {
                 inputMethodEditor.destroy,
                 eventManager.destroy,
                 hyperlinkClickHandler.destroy,
+                hyperlinkController.destroy,
                 metadataController.destroy,
+                textController.destroy,
                 destroy
             ];
 

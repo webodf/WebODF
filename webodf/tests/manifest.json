@@ -62,6 +62,8 @@
     "gui.TextControllerTests": [
         "core.UnitTester",
         "core.Utils",
+        "gui.SessionConstraints",
+        "gui.SessionContext",
         "gui.TextController",
         "odf.Namespaces",
         "odf.OdfCanvas",

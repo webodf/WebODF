@@ -36,8 +36,21 @@ define("webodf/editor/widgets/imageInserter", [
                 widget = {},
                 insertImageButton,
                 editorSession,
-                fileLoader;
+                fileLoader,
+                textController,
+                imageController;
 
+            /**
+             *
+             * @param {!string} mimetype
+             * @param {!string} content base64 encoded string
+             * @param {!number} width
+             * @param {!number} height
+             */
+            function insertImage(mimetype, content, width, height) {
+                textController.removeCurrentSelection();
+                imageController.insertImage(mimetype, content, width, height);
+            };
 
             /**
              * @param {!string} content  as datauri
@@ -53,9 +66,7 @@ define("webodf/editor/widgets/imageInserter", [
                 hiddenImage.onload = function () {
                     // remove the data:image/jpg;base64, bit
                     content = content.substring(content.indexOf(",") + 1);
-                    if (editorSession) {
-                        editorSession.insertImage(mimetype, content, hiddenImage.width, hiddenImage.height);
-                    }
+                    insertImage(mimetype, content, hiddenImage.width, hiddenImage.height);
                     // clean up
                     document.body.removeChild(hiddenImage);
                     self.onToolDone();
@@ -123,24 +134,35 @@ define("webodf/editor/widgets/imageInserter", [
                 return widget;
             };
 
+            function enableButtons(isEnabled) {
+                widget.children.forEach(function (element) {
+                    element.setAttribute('disabled', !isEnabled);
+                });
+            }
             function handleCursorMoved(cursor) {
-                var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
-                // LO/AOO pops up the picture/frame option dialog if image is selected when pressing the button
-                // Since we only support inline images, disable the button for now.
-                insertImageButton.setAttribute('disabled', disabled);
+                if (imageController.isEnabled()) {
+                    var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
+                    // LO/AOO pops up the picture/frame option dialog if image is selected when pressing the button
+                    // Since we only support inline images, disable the button for now.
+                    insertImageButton.setAttribute('disabled', disabled);
+                }
             }
 
             this.setEditorSession = function (session) {
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
+                    imageController.unsubscribe(gui.ImageController.enabledChanged, enableButtons);
                 }
                 editorSession = session;
                 if (editorSession) {
+                    textController = editorSession.sessionController.getTextController();
+                    imageController = editorSession.sessionController.getImageController();
+
                     editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
+                    imageController.subscribe(gui.ImageController.enabledChanged, enableButtons);
+
+                    enableButtons(imageController.isEnabled());
                 }
-                widget.children.forEach(function (element) {
-                    element.setAttribute("disabled", !session);
-                });
             };
 
             this.onToolDone = function () {};

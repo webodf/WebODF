@@ -24,35 +24,20 @@
 
 /*global runtime, core, gui, odf, ops, Node*/
 
-
 /**
  * @constructor
  * @implements {core.Destroyable}
  * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
  * @param {!string} inputMemberId
  */
-gui.AnnotationController = function AnnotationController(session, inputMemberId) {
+gui.AnnotationController = function AnnotationController(session, sessionConstraints, inputMemberId) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
         isAnnotatable = false,
         eventNotifier = new core.EventNotifier([gui.AnnotationController.annotatableChanged]),
-        officens = odf.Namespaces.officens;
-
-    /**
-     * @param {?Node} node  Node to start searching with
-     * @param {!Node} container  Root container to stop searching at.
-     * @return {!boolean}
-     */
-    function isWithinAnnotation(node, container) {
-        while (node && node !== container) {
-            if (node.namespaceURI === officens && node.localName === 'annotation') {
-                return true;
-            }
-            node = node.parentNode;
-        }
-        return false;
-    }
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @return {undefined}
@@ -62,7 +47,7 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
             cursorNode = cursor && cursor.getNode(),
             newIsAnnotatable = false;
         if (cursorNode) {
-            newIsAnnotatable = !isWithinAnnotation(cursorNode, odtDocument.getRootNode());
+            newIsAnnotatable = !odfUtils.isWithinAnnotation(cursorNode, odtDocument.getRootNode());
         }
 
         if (newIsAnnotatable !== isAnnotatable) {
@@ -136,11 +121,18 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
 
 
     /**
-     * @param {!Node} annotationNode
+     * @param {!Element} annotationNode
      * @return {undefined}
      */
     this.removeAnnotation = function(annotationNode) {
-        var startStep, endStep, op, moveCursor;
+        var startStep, endStep, op, moveCursor,
+            currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName;
+
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN) === true) {
+            if (currentUserName !== odfUtils.getAnnotationCreator(annotationNode)) {
+                return;
+            }
+        }
 
         // (annotationNode, 0) will report as the step just before the first step in the annotation node
         // Add 1 to this to actually get *within* the annotation
@@ -193,6 +185,8 @@ gui.AnnotationController = function AnnotationController(session, inputMemberId)
     };
 
     function init() {
+        sessionConstraints.registerConstraint(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN);
+
         odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
         odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
         odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorMoved);

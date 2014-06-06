@@ -48,6 +48,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("core.EventNotifier");
     runtime.loadClass("gui.ShadowCursor");
+    runtime.loadClass("gui.CommonConstraints");
 
     /**
      * Instantiate a new editor session attached to an existing operation session
@@ -82,7 +83,8 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalCommonStyleDeleted,
                 EditorSession.signalParagraphStyleModified,
                 EditorSession.signalUndoStackChanged]),
-            shadowCursor = new gui.ShadowCursor(odtDocument);
+            shadowCursor = new gui.ShadowCursor(odtDocument),
+            sessionConstraints;
 
         /**
          * @return {Array.<!string>}
@@ -536,18 +538,6 @@ define("webodf/editor/EditorSession", [
         };
 
         /**
-         *
-         * @param {!string} mimetype
-         * @param {!string} content base64 encoded string
-         * @param {!number} width
-         * @param {!number} height
-         */
-        this.insertImage = function (mimetype, content, width, height) {
-            self.sessionController.getTextController().removeCurrentSelection();
-            self.sessionController.getImageController().insertImage(mimetype, content, width, height);
-        };
-
-        /**
          * @param {!string} memberId
          * @return {?ops.Member}
          */
@@ -612,10 +602,12 @@ define("webodf/editor/EditorSession", [
             head.appendChild(fontStyles);
 
             self.sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {
+                annotationsEnabled: config.annotationsEnabled,
                 directTextStylingEnabled: config.directTextStylingEnabled,
-                directParagraphStylingEnabled: config.directParagraphStylingEnabled,
-                annotationsEnabled: config.annotationsEnabled
+                directParagraphStylingEnabled: config.directParagraphStylingEnabled
             });
+            sessionConstraints = self.sessionController.getSessionConstraints();
+
             eventManager = self.sessionController.getEventManager();
             hyperlinkTooltipView = new gui.HyperlinkTooltipView(session.getOdtDocument().getOdfCanvas(),
                                                     self.sessionController.getHyperlinkClickHandler().getModifier);
@@ -624,9 +616,17 @@ define("webodf/editor/EditorSession", [
 
             caretManager = new gui.CaretManager(self.sessionController);
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
-            self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, caretManager, selectionViewManager);
+            self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, sessionConstraints, caretManager, selectionViewManager);
             self.availableFonts = getAvailableFonts();
             selectionViewManager.registerCursor(shadowCursor, true);
+
+            // Session Constraints can be applied once the controllers are instantiated.
+            if (config.reviewModeEnabled) {
+                // Disallow deleting other authors' annotations.
+                sessionConstraints.setState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN, true);
+                sessionConstraints.setState(gui.CommonConstraints.EDIT.REVIEW_MODE, true);
+            }
+
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.
             odtDocument.subscribe(ops.Document.signalMemberAdded, onMemberAdded);
             odtDocument.subscribe(ops.Document.signalMemberUpdated, onMemberUpdated);

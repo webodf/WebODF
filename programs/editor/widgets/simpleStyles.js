@@ -161,25 +161,37 @@ define("webodf/editor/widgets/simpleStyles", [
                 });
             }
 
-            function handleCursorMoved(cursor) {
-                var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
+            function enableStyleButtons(isEnabled) {
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', disabled);
+                    element.setAttribute('disabled', !isEnabled);
                 });
             }
 
+            function handleCursorMoved(cursor) {
+                if (directFormattingController.isEnabled()) {
+                    var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
+                    enableStyleButtons(!disabled);
+                }
+            }
+
             this.setEditorSession = function(session) {
-                if (directFormattingController) {
+                if (editorSession) {
+                    editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
+                    directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
-                directFormattingController = session && session.sessionController.getDirectFormattingController();
-                fontPicker.setEditorSession(session);
-                if (directFormattingController) {
+                editorSession = session;
+                fontPicker.setEditorSession(editorSession);
+                if (editorSession) {
+                    directFormattingController = session && session.sessionController.getDirectFormattingController();
+
+                    editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
+                    directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
+
+                    enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
                 }
-                widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !directFormattingController);
-                });
+
                 updateStyleButtons({
                     isBold: directFormattingController ? directFormattingController.isBold() : false,
                     isItalic: directFormattingController ? directFormattingController.isItalic() : false,
@@ -188,14 +200,6 @@ define("webodf/editor/widgets/simpleStyles", [
                     fontSize: directFormattingController ? directFormattingController.fontSize() : undefined,
                     fontName: directFormattingController ? directFormattingController.fontName() : undefined
                 });
-
-                if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                }
-                editorSession = session;
-                if (editorSession) {
-                    editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                }
             };
 
             this.onToolDone = function () {};

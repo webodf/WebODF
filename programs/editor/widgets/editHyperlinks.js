@@ -139,21 +139,29 @@ define("webodf/editor/widgets/editHyperlinks", [
                 removeHyperlinkButton.set('disabled', linksInSelection.length === 0, false);
             }
 
+            function enableHyperlinkButtons(isEnabled) {
+                widget.children.forEach(function (element) {
+                    element.setAttribute('disabled', !isEnabled);
+                });
+            }
+
             this.setEditorSession = function (session) {
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
                     editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkHyperlinkButtons);
                     editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
+                    hyperlinkController.unsubscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
                 }
                 editorSession = session;
-                hyperlinkController = session && session.sessionController.getHyperlinkController();
-                widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !hyperlinkController);
-                });
                 if (editorSession) {
+                    hyperlinkController = editorSession.sessionController.getHyperlinkController();
+
                     editorSession.subscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
                     editorSession.subscribe(EditorSession.signalParagraphChanged, checkHyperlinkButtons);
                     editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
+                    hyperlinkController.subscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
+
+                    enableHyperlinkButtons(hyperlinkController.isEnabled());
                     checkHyperlinkButtons();
                 }
             };

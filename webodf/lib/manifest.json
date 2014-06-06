@@ -55,6 +55,8 @@
     "core.enums": [
     ],
     "gui.AnnotationController": [
+        "gui.CommonConstraints",
+        "gui.SessionConstraints",
         "ops.Session"
     ],
     "gui.AnnotationViewManager": [
@@ -76,9 +78,13 @@
     "gui.Clipboard": [
         "gui.MimeDataExporter"
     ],
+    "gui.CommonConstraints": [
+    ],
     "gui.DirectFormattingController": [
-        "gui.StyleSummary",
-        "ops.Session"
+        "gui.CommonConstraints",
+        "gui.SessionConstraints",
+        "gui.SessionContext",
+        "gui.StyleSummary"
     ],
     "gui.EditInfoHandle": [
         "core.Destroyable"
@@ -101,7 +107,9 @@
         "xmldom.XPath"
     ],
     "gui.HyperlinkController": [
-        "ops.Session"
+        "gui.CommonConstraints",
+        "gui.SessionConstraints",
+        "gui.SessionContext"
     ],
     "gui.HyperlinkTooltipView": [
         "gui.KeyboardHandler",
@@ -111,7 +119,7 @@
         "gui.EventManager"
     ],
     "gui.ImageController": [
-        "ops.Session"
+        "gui.HyperlinkController"
     ],
     "gui.ImageSelector": [
         "odf.OdfCanvas"
@@ -128,9 +136,10 @@
         "odf.OdfNodeFilter",
         "odf.TextSerializer"
     ],
-    "gui.PlainTextPasteboard": [
-        "ops.OpInsertText",
-        "ops.OpSplitParagraph"
+    "gui.PasteController": [
+        "gui.CommonConstraints",
+        "gui.SessionConstraints",
+        "gui.SessionContext"
     ],
     "gui.SelectionController": [
         "odf.WordBoundaryFilter",
@@ -148,18 +157,23 @@
     "gui.SelectionViewManager": [
         "gui.SelectionView"
     ],
+    "gui.SessionConstraints": [
+        "core.EventNotifier"
+    ],
+    "gui.SessionContext": [
+        "ops.Session"
+    ],
     "gui.SessionController": [
         "gui.AnnotationController",
         "gui.Clipboard",
         "gui.DirectFormattingController",
         "gui.HyperlinkClickHandler",
-        "gui.HyperlinkController",
         "gui.IOSSafariSupport",
         "gui.ImageController",
         "gui.ImageSelector",
         "gui.InputMethodEditor",
         "gui.MetadataController",
-        "gui.PlainTextPasteboard",
+        "gui.PasteController",
         "gui.SelectionController",
         "gui.TextController",
         "gui.UndoManager"
@@ -181,7 +195,9 @@
         "odf.OdfNodeFilter"
     ],
     "gui.TextController": [
-        "ops.Session"
+        "gui.CommonConstraints",
+        "gui.SessionConstraints",
+        "gui.SessionContext"
     ],
     "gui.TrivialUndoManager": [
         "core.DomUtils",

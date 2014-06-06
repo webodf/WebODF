@@ -32,6 +32,7 @@ define("webodf/editor/widgets/annotation", [
 
         var AnnotationControl = function (callback) {
             var self = this,
+                editorSession,
                 widget = {},
                 addAnnotationButton,
                 annotationController;
@@ -69,14 +70,15 @@ define("webodf/editor/widgets/annotation", [
             }
 
             this.setEditorSession = function (session) {
-                if (annotationController) {
+                if (editorSession) {
                     annotationController.unsubscribe(gui.AnnotationController.annotatableChanged, onAnnotatableChanged);
                 }
-                annotationController = session && session.sessionController.getAnnotationController();
-                if (annotationController) {
+                editorSession = session;
+                if (editorSession) {
+                    annotationController = editorSession.sessionController.getAnnotationController();
                     annotationController.subscribe(gui.AnnotationController.annotatableChanged, onAnnotatableChanged);
+                    onAnnotatableChanged(annotationController.isAnnotatable());
                 }
-                onAnnotatableChanged(annotationController && annotationController.isAnnotatable());
             };
 
             this.onToolDone = function () {};

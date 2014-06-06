@@ -74,18 +74,35 @@ gui.SessionViewOptions = function () {
      * @param {!gui.SessionViewOptions} viewOptions
      * @param {string} localMemberId
      * @param {!ops.Session} session
+     * @param {!gui.SessionConstraints} sessionConstraints
      * @param {!gui.CaretManager} caretManager
      * @param {!gui.SelectionViewManager} selectionViewManager
      */
-    gui.SessionView = function SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager) {
+    gui.SessionView = function SessionView(viewOptions, localMemberId, session, sessionConstraints, caretManager, selectionViewManager) {
         var /**@type{!HTMLStyleElement}*/
             avatarInfoStyles,
+            /**@type{!HTMLStyleElement}*/
+            annotationConstraintStyles,
             editInfons = 'urn:webodf:names:editinfo',
             /**@type{!Object.<string,!gui.EditInfoMarker>}*/
             editInfoMap = {},
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
             showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true),
             blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true);
+
+        /**
+         * @return {!HTMLStyleElement}
+         */
+        function newStyleSheet() {
+            var head = document.getElementsByTagName('head').item(0),
+                sheet = /**@type{!HTMLStyleElement}*/(document.createElement('style'));
+
+            sheet.type = 'text/css';
+            sheet.media = 'screen, print, handheld, projection';
+            head.appendChild(sheet);
+
+            return sheet;
+        }
 
         /**
          * @param {!string} nodeName
@@ -368,6 +385,26 @@ gui.SessionViewOptions = function () {
             highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
         }
 
+        function processConstraints() {
+            var localMemberName,
+                cssString,
+                localMember;
+
+            // TODO: Move such handling into AnnotationViewManager
+            if (annotationConstraintStyles.innerHTML !== "") {
+                annotationConstraintStyles.innerHTML = "";
+            }
+
+            if (sessionConstraints.getState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN) === true) {
+                localMember = session.getOdtDocument().getMember(localMemberId);
+                if (localMember) {
+                    localMemberName = localMember.getProperties().fullName;
+                    cssString = ".annotationWrapper:not([creator = '" + localMemberName + "']) .annotationRemoveButton { display: none; }";
+                    annotationConstraintStyles.appendChild(document.createTextNode(cssString));
+                }
+            }
+        }
+
         /**
          * @param {!function(!Error=)} callback, passing an error object in case of error
          * @return {undefined}
@@ -390,7 +427,12 @@ gui.SessionViewOptions = function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalTableAdded, selectionViewManager.rerenderSelectionViews);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, selectionViewManager.rerenderSelectionViews);
 
+            sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN, processConstraints);
+            odtDocument.unsubscribe(ops.Document.signalMemberAdded, processConstraints);
+            odtDocument.unsubscribe(ops.Document.signalMemberUpdated, processConstraints);
+
             avatarInfoStyles.parentNode.removeChild(avatarInfoStyles);
+            annotationConstraintStyles.parentNode.removeChild(annotationConstraintStyles);
 
             (function destroyEditInfo(i, err) {
                 if (err) {
@@ -408,8 +450,7 @@ gui.SessionViewOptions = function () {
         };
 
         function init() {
-            var odtDocument = session.getOdtDocument(),
-                head = document.getElementsByTagName('head').item(0);
+            var odtDocument = session.getOdtDocument();
 
             odtDocument.subscribe(ops.Document.signalMemberAdded, renderMemberData);
             odtDocument.subscribe(ops.Document.signalMemberUpdated, renderMemberData);
@@ -422,13 +463,17 @@ gui.SessionViewOptions = function () {
             odtDocument.subscribe(ops.OdtDocument.signalTableAdded, selectionViewManager.rerenderSelectionViews);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, selectionViewManager.rerenderSelectionViews);
 
+            sessionConstraints.subscribe(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN, processConstraints);
+            odtDocument.subscribe(ops.Document.signalMemberAdded, processConstraints);
+            odtDocument.subscribe(ops.Document.signalMemberUpdated, processConstraints);
+
             // Add a css sheet for user info-edited styling
-            avatarInfoStyles = /**@type{!HTMLStyleElement}*/(document.createElementNS(head.namespaceURI, 'style'));
-            avatarInfoStyles.type = 'text/css';
-            avatarInfoStyles.media = 'screen, print, handheld, projection';
+            avatarInfoStyles = newStyleSheet();
             avatarInfoStyles.appendChild(document.createTextNode('@namespace editinfo url(urn:webodf:names:editinfo);'));
             avatarInfoStyles.appendChild(document.createTextNode('@namespace dc url(http://purl.org/dc/elements/1.1/);'));
-            head.appendChild(avatarInfoStyles);
+            // Add a css sheet for annotation constraint styling
+            annotationConstraintStyles = newStyleSheet();
+            processConstraints();
         }
         init();
     };

@@ -26,12 +26,22 @@
 
 /**
  * @constructor
+ * @implements {core.Destroyable}
  * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
+ * @param {!gui.SessionContext} sessionContext
  * @param {!string} inputMemberId
  * @param {function(!number, !number, !boolean):ops.Operation} directStyleOp
  * @param {function(!number):!Array.<!ops.Operation>} paragraphStyleOps
  */
-gui.TextController = function TextController(session, inputMemberId, directStyleOp, paragraphStyleOps) {
+gui.TextController = function TextController(
+    session,
+    sessionConstraints,
+    sessionContext,
+    inputMemberId,
+    directStyleOp,
+    paragraphStyleOps
+    ) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
@@ -45,7 +55,37 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
          * @const
          * @type {!boolean}
          */
-        FORWARD = true;
+        FORWARD = true,
+        isEnabled = false;
+
+    /**
+     * @return {undefined}
+     */
+    function updateEnabledState() {
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
+            isEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+        } else {
+            isEnabled = true;
+        }
+    }
+
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
+    function onCursorEvent(cursor) {
+        if (cursor.getMemberId() === inputMemberId) {
+            updateEnabledState();
+        }
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.isEnabled = function () {
+        return isEnabled;
+    };
+
 
     /**
      * Creates operations to remove the provided selection and update the destination
@@ -115,6 +155,10 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     this.enqueueParagraphSplittingOps = function() {
+        if (!isEnabled) {
+            return false;
+        }
+
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op, operations = [], styleOps;
@@ -180,6 +224,10 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     function removeTextInDirection(isForward) {
+        if (!isEnabled) {
+            return false;
+        }
+
         var cursorNode,
             // Take a clone of the range as it will be modified if the selection length is 0
             range = /**@type{!Range}*/(odtDocument.getCursor(inputMemberId).getSelectedRange().cloneRange()),
@@ -239,6 +287,10 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {!boolean}
      */
     this.removeCurrentSelection = function () {
+        if (!isEnabled) {
+            return false;
+        }
+
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId));
         if (selection.length !== 0) {
@@ -253,6 +305,10 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
      * @return {undefined}
      */
     function insertText(text) {
+        if (!isEnabled) {
+            return;
+        }
+
         var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
             op, stylingOp, operations = [], useCachedStyle = false;
@@ -279,4 +335,21 @@ gui.TextController = function TextController(session, inputMemberId, directStyle
         session.enqueue(operations);
     }
     this.insertText = insertText;
+
+    /**
+     * @param {!function(!Error=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function (callback) {
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        callback();
+    };
+
+    function init() {
+        odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        updateEnabledState();
+    }
+    init();
 };

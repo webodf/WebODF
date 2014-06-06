@@ -84,6 +84,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
             removeButton;
 
         annotationWrapper.className = 'annotationWrapper';
+        annotationWrapper.setAttribute("creator", odfUtils.getAnnotationCreator(annotation));
         annotation.parentNode.insertBefore(annotationWrapper, annotation);
 
         annotationNote.className = 'annotationNote';

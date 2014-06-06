@@ -11,6 +11,7 @@ COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
     FileSaver.js
     localeditor.js
     localeditor.html
+    revieweditor.html
     images/kogmbh.png
     images/webodf.png
     # only collab editor

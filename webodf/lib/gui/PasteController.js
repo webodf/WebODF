@@ -25,13 +25,50 @@
 /*global runtime, gui, ops*/
 
 /**
- *
- * @param {!ops.OdtDocument} odtDocument
+ * Provides a method to paste text at the current cursor
+ * position, and processes the input string to understand
+ * special structuring such as paragraph splits.
+ * @implements {core.Destroyable}
+ * @param {!ops.Session} session
+ * @param {!gui.SessionConstraints} sessionConstraints
+ * @param {!gui.SessionContext} sessionContext
  * @param {!string} inputMemberId
  * @constructor
  */
-gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberId) {
+gui.PasteController = function PasteController(session, sessionConstraints, sessionContext, inputMemberId) {
     "use strict";
+
+    var odtDocument = session.getOdtDocument(),
+        isEnabled = false;
+
+    /**
+     * @return {undefined}
+     */
+    function updateEnabledState() {
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
+            isEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+        } else {
+            isEnabled = true;
+        }
+    }
+
+    /**
+     * @param {!ops.OdtCursor} cursor
+     * @return {undefined}
+     */
+    function onCursorEvent(cursor) {
+        if (cursor.getMemberId() === inputMemberId) {
+            updateEnabledState();
+        }
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    this.isEnabled = function () {
+        return isEnabled;
+    };
+
 
     /**
      * @param {!ops.Operation} op
@@ -45,9 +82,13 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
 
     /**
      * @param {!string} data
-     * @return {!Array.<!ops.Operation>}
+     * @return {undefined}
      */
-    this.createPasteOps = function (data) {
+    this.paste = function (data) {
+        if (!isEnabled) {
+            return;
+        }
+
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
             /**@type{number}*/
             cursorPosition = originalCursorPosition,
@@ -79,6 +120,23 @@ gui.PlainTextPasteboard = function PlainTextPasteboard(odtDocument, inputMemberI
         //                      existing paragraph, only a single split should occur.
         operations.pop();
 
-        return operations;
+        session.enqueue(operations);
     };
+
+    /**
+     * @param {!function(!Error=)} callback, passing an error object in case of error
+     * @return {undefined}
+     */
+    this.destroy = function (callback) {
+        odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        callback();
+    };
+
+    function init() {
+        odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        updateEnabledState();
+    }
+    init();
 };
