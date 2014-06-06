@@ -146,25 +146,22 @@ define("webodf/editor/widgets/editHyperlinks", [
             }
 
             this.setEditorSession = function (session) {
-                if (hyperlinkController) {
-                    hyperlinkController.unsubscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
-                }
-                hyperlinkController = session && session.sessionController.getHyperlinkController();
-                if (hyperlinkController) {
-                    hyperlinkController.subscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
-                }
-                enableHyperlinkButtons(Boolean(hyperlinkController) && hyperlinkController.isEnabled());
-
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
                     editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkHyperlinkButtons);
                     editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
+                    hyperlinkController.unsubscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
                 }
                 editorSession = session;
                 if (editorSession) {
+                    hyperlinkController = editorSession.sessionController.getHyperlinkController();
+
                     editorSession.subscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
                     editorSession.subscribe(EditorSession.signalParagraphChanged, checkHyperlinkButtons);
                     editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
+                    hyperlinkController.subscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
+
+                    enableHyperlinkButtons(hyperlinkController.isEnabled());
                     checkHyperlinkButtons();
                 }
             };

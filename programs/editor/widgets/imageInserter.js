@@ -149,22 +149,19 @@ define("webodf/editor/widgets/imageInserter", [
             }
 
             this.setEditorSession = function (session) {
-                if (imageController) {
-                    imageController.unsubscribe(gui.ImageController.enabledChanged, enableButtons);
-                }
-                textController = session && session.sessionController.getTextController();
-                imageController = session && session.sessionController.getImageController();
-                if (imageController) {
-                    imageController.subscribe(gui.ImageController.enabledChanged, enableButtons);
-                }
-                enableButtons(Boolean(imageController) && imageController.isEnabled());
-
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
+                    imageController.unsubscribe(gui.ImageController.enabledChanged, enableButtons);
                 }
                 editorSession = session;
                 if (editorSession) {
+                    textController = editorSession.sessionController.getTextController();
+                    imageController = editorSession.sessionController.getImageController();
+
                     editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
+                    imageController.subscribe(gui.ImageController.enabledChanged, enableButtons);
+
+                    enableButtons(imageController.isEnabled());
                 }
             };
 

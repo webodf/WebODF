@@ -175,17 +175,22 @@ define("webodf/editor/widgets/simpleStyles", [
             }
 
             this.setEditorSession = function(session) {
-                if (directFormattingController) {
+                if (editorSession) {
+                    editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
-                directFormattingController = session && session.sessionController.getDirectFormattingController();
-                fontPicker.setEditorSession(session);
-                if (directFormattingController) {
+                editorSession = session;
+                fontPicker.setEditorSession(editorSession);
+                if (editorSession) {
+                    directFormattingController = session && session.sessionController.getDirectFormattingController();
+
+                    editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
+
+                    enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
                 }
-                enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
 
                 updateStyleButtons({
                     isBold: directFormattingController ? directFormattingController.isBold() : false,
@@ -195,14 +200,6 @@ define("webodf/editor/widgets/simpleStyles", [
                     fontSize: directFormattingController ? directFormattingController.fontSize() : undefined,
                     fontName: directFormattingController ? directFormattingController.fontName() : undefined
                 });
-
-                if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                }
-                editorSession = session;
-                if (editorSession) {
-                    editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                }
             };
 
             this.onToolDone = function () {};

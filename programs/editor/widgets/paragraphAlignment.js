@@ -159,25 +159,26 @@ define("webodf/editor/widgets/paragraphAlignment", [
             }
 
             this.setEditorSession = function (session) {
-                if (directFormattingController) {
+                if (editorSession) {
                     directFormattingController.unsubscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
-                directFormattingController = session && session.sessionController.getDirectFormattingController();
-                if (directFormattingController) {
+                editorSession = session;
+                if (editorSession) {
+                    directFormattingController = editorSession.sessionController.getDirectFormattingController();
+
                     directFormattingController.subscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
+
+                    enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
                 }
-                enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
 
                 updateStyleButtons({
-                    isAlignedLeft:      directFormattingController ? directFormattingController.isAlignedLeft() :      false,
-                    isAlignedCenter:    directFormattingController ? directFormattingController.isAlignedCenter() :    false,
-                    isAlignedRight:     directFormattingController ? directFormattingController.isAlignedRight() :     false,
-                    isAlignedJustified: directFormattingController ? directFormattingController.isAlignedJustified() : false
+                    isAlignedLeft:      editorSession ? directFormattingController.isAlignedLeft() :      false,
+                    isAlignedCenter:    editorSession ? directFormattingController.isAlignedCenter() :    false,
+                    isAlignedRight:     editorSession ? directFormattingController.isAlignedRight() :     false,
+                    isAlignedJustified: editorSession ? directFormattingController.isAlignedJustified() : false
                 });
-
-                editorSession = session;
             };
 
             this.onToolDone = function () {};
