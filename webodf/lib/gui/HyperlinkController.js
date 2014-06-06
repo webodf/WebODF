@@ -53,7 +53,7 @@ gui.HyperlinkController = function HyperlinkController(
     function updateEnabledState() {
         var /**@type{!boolean}*/newIsEnabled = true;
 
-        if (sessionConstraints.getState("edit.reviewMode") === true) {
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
             newIsEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
         }
 
@@ -237,13 +237,13 @@ gui.HyperlinkController = function HyperlinkController(
      */
     this.destroy = function (callback) {
         odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
-        sessionConstraints.unsubscribe("edit.reviewMode", updateEnabledState);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         callback();
     };
 
     function init() {
         odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
-        sessionConstraints.subscribe("edit.reviewMode", updateEnabledState);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         updateEnabledState();
     }
     init();

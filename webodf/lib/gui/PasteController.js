@@ -45,7 +45,7 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
      * @return {undefined}
      */
     function updateEnabledState() {
-        if (sessionConstraints.getState("edit.reviewMode") === true) {
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
             isEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
         } else {
             isEnabled = true;
@@ -129,13 +129,13 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
      */
     this.destroy = function (callback) {
         odtDocument.unsubscribe(ops.Document.signalCursorMoved, onCursorEvent);
-        sessionConstraints.unsubscribe("edit.reviewMode", updateEnabledState);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         callback();
     };
 
     function init() {
         odtDocument.subscribe(ops.Document.signalCursorMoved, onCursorEvent);
-        sessionConstraints.subscribe("edit.reviewMode", updateEnabledState);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         updateEnabledState();
     }
     init();

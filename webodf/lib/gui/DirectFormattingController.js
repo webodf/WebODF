@@ -166,7 +166,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     function updateEnabledState() {
         var /**@type{!boolean}*/newIsEnabled = true;
 
-        if (sessionConstraints.getState("edit.reviewMode") === true) {
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
             newIsEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
         }
 
@@ -805,7 +805,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
-        sessionConstraints.unsubscribe("edit.reviewMode", updateEnabledState);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         callback();
     };
 
@@ -830,7 +830,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
-        sessionConstraints.subscribe("edit.reviewMode", updateEnabledState);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         updateSelectionStylesInfo();
         updateEnabledState();
 

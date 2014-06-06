@@ -48,6 +48,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("gui.SelectionViewManager");
     runtime.loadClass("core.EventNotifier");
     runtime.loadClass("gui.ShadowCursor");
+    runtime.loadClass("gui.CommonConstraints");
 
     /**
      * Instantiate a new editor session attached to an existing operation session
@@ -622,8 +623,8 @@ define("webodf/editor/EditorSession", [
             // Session Constraints can be applied once the controllers are instantiated.
             if (config.reviewModeEnabled) {
                 // Disallow deleting other authors' annotations.
-                sessionConstraints.setState("edit.annotations.onlyDeleteOwn", true);
-                sessionConstraints.setState("edit.reviewMode", true);
+                sessionConstraints.setState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN, true);
+                sessionConstraints.setState(gui.CommonConstraints.EDIT.REVIEW_MODE, true);
             }
 
             // Custom signals, that make sense in the Editor context. We do not want to expose webodf's ops signals to random bits of the editor UI.

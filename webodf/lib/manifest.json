@@ -55,6 +55,7 @@
     "core.enums": [
     ],
     "gui.AnnotationController": [
+        "gui.CommonConstraints",
         "gui.SessionConstraints",
         "ops.Session"
     ],
@@ -77,7 +78,10 @@
     "gui.Clipboard": [
         "gui.MimeDataExporter"
     ],
+    "gui.CommonConstraints": [
+    ],
     "gui.DirectFormattingController": [
+        "gui.CommonConstraints",
         "gui.SessionConstraints",
         "gui.SessionContext",
         "gui.StyleSummary"
@@ -103,6 +107,7 @@
         "xmldom.XPath"
     ],
     "gui.HyperlinkController": [
+        "gui.CommonConstraints",
         "gui.SessionConstraints",
         "gui.SessionContext"
     ],
@@ -132,6 +137,7 @@
         "odf.TextSerializer"
     ],
     "gui.PasteController": [
+        "gui.CommonConstraints",
         "gui.SessionConstraints",
         "gui.SessionContext"
     ],
@@ -189,6 +195,7 @@
         "odf.OdfNodeFilter"
     ],
     "gui.TextController": [
+        "gui.CommonConstraints",
         "gui.SessionConstraints",
         "gui.SessionContext"
     ],

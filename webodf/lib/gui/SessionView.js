@@ -395,7 +395,7 @@ gui.SessionViewOptions = function () {
                 annotationConstraintStyles.innerHTML = "";
             }
 
-            if (sessionConstraints.getState("edit.annotations.onlyDeleteOwn") === true) {
+            if (sessionConstraints.getState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN) === true) {
                 localMember = session.getOdtDocument().getMember(localMemberId);
                 if (localMember) {
                     localMemberName = localMember.getProperties().fullName;
@@ -427,7 +427,7 @@ gui.SessionViewOptions = function () {
             odtDocument.unsubscribe(ops.OdtDocument.signalTableAdded, selectionViewManager.rerenderSelectionViews);
             odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, selectionViewManager.rerenderSelectionViews);
 
-            sessionConstraints.unsubscribe("edit.annotations.onlyDeleteOwn", processConstraints);
+            sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN, processConstraints);
             odtDocument.unsubscribe(ops.Document.signalMemberAdded, processConstraints);
             odtDocument.unsubscribe(ops.Document.signalMemberUpdated, processConstraints);
 
@@ -463,7 +463,7 @@ gui.SessionViewOptions = function () {
             odtDocument.subscribe(ops.OdtDocument.signalTableAdded, selectionViewManager.rerenderSelectionViews);
             odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, selectionViewManager.rerenderSelectionViews);
 
-            sessionConstraints.subscribe("edit.annotations.onlyDeleteOwn", processConstraints);
+            sessionConstraints.subscribe(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN, processConstraints);
             odtDocument.subscribe(ops.Document.signalMemberAdded, processConstraints);
             odtDocument.subscribe(ops.Document.signalMemberUpdated, processConstraints);
 

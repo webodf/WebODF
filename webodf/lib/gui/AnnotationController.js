@@ -128,7 +128,7 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
         var startStep, endStep, op, moveCursor,
             currentUserName = odtDocument.getMember(inputMemberId).getProperties().fullName;
 
-        if (sessionConstraints.getState("edit.annotations.onlyDeleteOwn") === true) {
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN) === true) {
             if (currentUserName !== odfUtils.getAnnotationCreator(annotationNode)) {
                 return;
             }
@@ -185,7 +185,7 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
     };
 
     function init() {
-        sessionConstraints.registerConstraint("edit.annotations.onlyDeleteOwn");
+        sessionConstraints.registerConstraint(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN);
 
         odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);
         odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorRemoved);
