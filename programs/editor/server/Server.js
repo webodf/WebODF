@@ -70,10 +70,3 @@ ops.Server.prototype.joinSession = function (userId, sessionId, successCb, failC
  * @return {undefined}
  */
 ops.Server.prototype.leaveSession = function (sessionId, memberId, successCb, failCb) {"use strict"; };
-
-/**
- * TODO: move to SessionModel or elsewhere
- * @param {!string} sessionId
- * @return {!string}
- */
-ops.Server.prototype.getGenesisUrl = function (sessionId) {"use strict"; };

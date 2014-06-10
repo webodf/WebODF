@@ -45,7 +45,6 @@ var webodfEditor = (function () {
 
     var editorInstance = null,
         booting = false,
-        localMemberId = "localuser",
         loadedFilename;
 
     /**
@@ -80,7 +79,7 @@ var webodfEditor = (function () {
             if (reader.readyState === 2) {
                 runtime.registerFile(file.name, reader.result);
                 loadedFilename = file.name;
-                editorInstance.openDocument(loadedFilename, localMemberId, startEditing);
+                editorInstance.openDocument(loadedFilename, startEditing);
             }
         }
         if (files && files.length === 1) {
@@ -215,7 +214,7 @@ var webodfEditor = (function () {
                     t = new Translator(editorBase + translationsDir, locale, function (editorTranslator) {
                         runtime.setTranslator(editorTranslator.translate);
                         editorInstance = new Editor("mainContainer", editorOptions);
-                        editorInstance.openDocument(args.docUrl, localMemberId, startEditing);
+                        editorInstance.openDocument(args.docUrl, startEditing);
                     });
             }
         );

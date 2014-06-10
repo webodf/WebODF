@@ -146,7 +146,6 @@ module.exports = function (config) {
             'lib/odf/StyleCache.js',
             'lib/ops/OperationTransformMatrix.js',
             'lib/ops/OperationTransformer.js',
-            'lib/ops/Server.js',
             'lib/xmldom/RelaxNG.js',
             'lib/xmldom/RelaxNG2.js',
             'lib/xmldom/RelaxNGParser.js', // !
