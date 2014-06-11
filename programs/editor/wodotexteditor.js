@@ -22,6 +22,10 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/**
+ * Namespace of the Wodo.TextEditor
+ * @namespace
+ */
 var Wodo = Wodo || (function () {
     "use strict";
 
@@ -61,11 +65,11 @@ var Wodo = Wodo || (function () {
         };
     }());
 
-    var /** @type{!boolean} */
+    var /** @inner @type{!boolean} */
         isInitalized = false,
-        /** @type{!Array.<!function():undefined>} */
+        /** @inner @type{!Array.<!function():undefined>} */
         pendingInstanceCreationCalls = [],
-        /** @type{!number} */
+        /** @inner @type{!number} */
         instanceCounter = 0,
         // TODO: avatar image url needs base-url setting.
         // so far Wodo itself does not have a setup call,
@@ -75,18 +79,18 @@ var Wodo = Wodo || (function () {
             color:    "black",
             imageUrl: "avatar-joe.png"
         },
-        /** @const
+        /** @inner @const
             @type{!Array.<!string>} */
         userDataFieldNames = ["fullName", "color", "imageUrl"],
-        /** @const
+        /** @inner @const
             @type{!string} */
         memberId = "localuser",
         // constructors
         BorderContainer, ContentPane, FullWindowZoomHelper, EditorSession, Tools,
-        /** @const
+        /** @inner @const
             @type{!string} */
         EVENT_UNKNOWNERROR = "unknownError",
-        /** @const
+        /** @inner @const
             @type {!string} */
         EVENT_METADATACHANGED = "metadataChanged";
 
@@ -168,6 +172,7 @@ var Wodo = Wodo || (function () {
     }
 
     /**
+     * @name TextEditor
      * @constructor
      * @param {!string} mainContainerElementId
      * @param {!Object.<!string,!*>} editorOptions
@@ -194,16 +199,16 @@ var Wodo = Wodo || (function () {
             toolbarElement,
             toolbarContainerElement, // needed because dijit toolbar overwrites direct classList
             editorElement,
-            /** @const
+            /** @inner @const
                 @type{!string} */
             canvasElementId = "webodfeditor-canvas" + instanceCounter,
-            /** @const
+            /** @inner @const
                 @type{!string} */
             canvasContainerElementId = "webodfeditor-canvascontainer" + instanceCounter,
-            /** @const
+            /** @inner @const
                 @type{!string} */
             toolbarElementId = "webodfeditor-toolbar" + instanceCounter,
-            /** @const
+            /** @inner @const
                 @type{!string} */
             editorElementId = "webodfeditor-editor" + instanceCounter,
             //
@@ -310,11 +315,14 @@ var Wodo = Wodo || (function () {
         }
 
         /**
-         * @param {!string} docUrl
-         * @param {!function(!Error=):undefined} callback, passing an error object in case of error
+         * Loads an ODT document into the editor.
+         * @name TextEditor#openDocumentFromUrl
+         * @function
+         * @param {!string} docUrl url from which the ODT document can be loaded
+         * @param {!function(!Error=):undefined} callback Called once the document has been opened, passes an error object in case of error
          * @return {undefined}
          */
-        function openDocumentFromUrl(docUrl, editorReadyCallback) {
+        this.openDocumentFromUrl = function(docUrl, editorReadyCallback) {
             runtime.assert(docUrl, "document should be defined here.");
             runtime.assert(!pendingEditorReadyCallback, "pendingEditorReadyCallback should not exist here.");
             runtime.assert(!editorSession, "editorSession should not exist here.");
@@ -338,11 +346,13 @@ var Wodo = Wodo || (function () {
         }
 
         /**
-         * Closes a single-user document, and does cleanup.
-         * @param {!function(!Error=):undefined} callback, passing an error object in case of error
+         * Closes the document, and does cleanup.
+         * @name TextEditor#closeDocument
+         * @function
+         * @param {!function(!Error=):undefined} callback  Called once the document has been closed, passes an error object in case of error
          * @return {undefined}
          */
-        function closeDocument (callback) {
+        this.closeDocument = function(callback) {
             runtime.assert(session, "session should exist here.");
 
             endEditing();
@@ -378,32 +388,31 @@ var Wodo = Wodo || (function () {
         }
 
         /**
-         * @param {!function(err:?Error, !Uint8Array=):undefined} cb receiving zip as bytearray
+         * @name TextEditor#getDocumentAsByteArray
+         * @function
+         * @param {!function(err:?Error, file:!Uint8Array=):undefined} callback Called with the current document as ODT file as bytearray, passes an error object in case of error
          * @return {undefined}
          */
-        function getDocumentAsByteArray(cb) {
+        this.getDocumentAsByteArray = function(callback) {
             var odfContainer = odfCanvas.odfContainer();
 
             if (odfContainer) {
                 odfContainer.createByteArray(function(ba) {
-                    cb(null, ba);
+                    callback(null, ba);
                 }, function(errorString) {
-                    cb(new Error(errorString ? errorString : "Could not create bytearray from OdfContainer."));
+                    callback(new Error(errorString ? errorString : "Could not create bytearray from OdfContainer."));
                 });
             } else {
-                cb(new Error("No odfContainer set!"));
+                callback(new Error("No odfContainer set!"));
             }
         }
 
         /**
          * Sets the metadata fields from the given properties map.
          * Avoid setting certain fields since they are automatically set:
-         *     dc:creator
-         *     dc:date
-         *     meta:editing-cycles
-         * If you do wish to externally set these fields, try getting
-         * the server backend (if any) to inject operations into the timeline
-         * with the relevant properties.
+         *    dc:creator
+         *    dc:date
+         *    meta:editing-cycles
          *
          * The following properties are never used and will be removed for semantic
          * consistency from the document:
@@ -412,40 +421,54 @@ var Wodo = Wodo || (function () {
          *
          * Setting any of the above mentioned fields using this method will have no effect.
          *
+         * @name TextEditor#setMetadata
+         * @function
          * @param {?Object.<!string, !string>} setProperties A flat object that is a string->string map of field name -> value.
          * @param {?Array.<!string>} removedProperties An array of metadata field names (prefixed).
          * @return {undefined}
          */
-        function setMetadata(setProperties, removedProperties) {
+        this.setMetadata = function(setProperties, removedProperties) {
             runtime.assert(editorSession, "editorSession should exist here.");
 
             editorSession.sessionController.getMetadataController().setMetadata(setProperties, removedProperties);
         };
 
         /**
-         * Returns the value of the requested document metadata field
+         * Returns the value of the requested document metadata field.
+         * @name TextEditor#getMetadata
+         * @function
          * @param {!string} property A namespace-prefixed field name, for example
          * dc:creator
          * @return {?string}
          */
-        function getMetadata(property) {
+        this.getMetadata = function(property) {
             runtime.assert(editorSession, "editorSession should exist here.");
 
             return editorSession.sessionController.getMetadataController().getMetadata(property);
         };
 
         /**
+         * Sets the data for the person that is editing the document.
+         * The supported fields are:
+         *     "fullName": the full name of the editing person
+         *     "color": color to use for the user specific UI elements
+         * @name TextEditor#setUserData
+         * @function
          * @param {?Object.<!string,!string>|undefined} data
          * @return {undefined}
          */
         function setUserData(data) {
             userData = cloneUserData(data);
         }
+        this.setUserData = setUserData;
 
         /**
+         * Returns the data set for the person that is editing the document.
+         * @name TextEditor#getUserData
+         * @function
          * @return {!Object.<!string,!string>}
          */
-        function getUserData() {
+        this.getUserData = function() {
             return cloneUserData(userData);
         }
 
@@ -457,7 +480,7 @@ var Wodo = Wodo || (function () {
         }
 
         /**
-         * @param {!function(!Error=):undefined} callback, passing an error object in case of error
+         * @param {!function(!Error=):undefined} callback passes an error object in case of error
          * @return {undefined}
          */
         function destroyInternal(callback) {
@@ -467,10 +490,13 @@ var Wodo = Wodo || (function () {
         }
 
         /**
-         * @param {!function(!Error=):undefined} callback, passing an error object in case of error
+         * Destructs the editor object completely.
+         * @name TextEditor#destroy
+         * @function
+         * @param {!function(!Error=):undefined} callback Called once the destruction has been completed, passes an error object in case of error
          * @return {undefined}
          */
-        function destroy(callback) {
+        this.destroy = function(callback) {
             var destroyCallbacks = [];
 
             // TODO: decide if some forced close should be done here instead of enforcing proper API usage
@@ -489,29 +515,28 @@ var Wodo = Wodo || (function () {
             core.Async.destroyAll(destroyCallbacks, callback);
         }
 
-        /////////////////////////////////////////////////////////////////////
-        // Exposed API
-        // make sure no data structures are shared, copy as needed
-        //
-
-        this.openDocumentFromUrl = openDocumentFromUrl;
+        // TODO:
         // this.openDocumentFromByteArray = openDocumentFromByteArray; see also https://github.com/kogmbh/WebODF/issues/375
-        this.closeDocument = closeDocument;
-
-        this.getDocumentAsByteArray = getDocumentAsByteArray;
-
         // setReadOnly: setReadOnly,
 
-        this.setMetadata = setMetadata;
-        this.getMetadata = getMetadata;
-
-        this.setUserData = setUserData;
-        this.getUserData = getUserData;
-
+        /**
+         * Registers a callback which should be called if the given event happens.
+         * @name TextEditor#addEventListener
+         * @function
+         * @param {!string} eventId
+         * @param {!Function} callback
+         * @return {undefined}
+         */
         this.addEventListener = eventNotifier.subscribe;
+        /**
+         * Unregisters a callback for the given event.
+         * @name TextEditor#removeEventListener
+         * @function
+         * @param {!string} eventId
+         * @param {!Function} callback
+         * @return {undefined}
+         */
         this.removeEventListener = eventNotifier.unsubscribe;
-
-        this.destroy = destroy;
 
 
         /**
@@ -519,7 +544,7 @@ var Wodo = Wodo || (function () {
          */
         function init() {
             var editorPane,
-                /** @const
+                /** @inner @const
                     @type{!string} */
                 documentns = document.documentElement.namespaceURI;
 
@@ -640,6 +665,9 @@ var Wodo = Wodo || (function () {
     }
 
     /**
+     * Creates a text editor object and returns it on success in the passed callback.
+     * @name Wodo#createTextEditor
+     * @function
      * @param {!string} mainContainerElementId
      * @param {!Object.<!string,!*>} editorOptions
      * @param {!function(err:?Error, editor:!TextEditor=):undefined} onEditorCreated
@@ -669,11 +697,16 @@ var Wodo = Wodo || (function () {
         }
     }
 
-    // exposed API
+
+    /**
+     * @lends Wodo#
+     */
     return {
         createTextEditor: createTextEditor,
         // flags
+        /** Id of event for an unkown error */
         EVENT_UNKNOWNERROR: EVENT_UNKNOWNERROR,
+        /** Id of event if metadata changes */
         EVENT_METADATACHANGED: EVENT_METADATACHANGED
     };
 }());
