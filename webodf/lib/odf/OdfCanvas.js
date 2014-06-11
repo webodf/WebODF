@@ -1298,7 +1298,9 @@
                 handleAnnotations(odfnode);
 
                 if (!suppressEvent) {
-                    fireEvent("statereadychange", [odfcontainer]);
+                    loadingQueue.addToQueue(function () {
+                        fireEvent("statereadychange", [odfcontainer]);
+                    });
                 }
             }
 
