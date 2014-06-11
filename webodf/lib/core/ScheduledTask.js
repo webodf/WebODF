@@ -40,7 +40,8 @@ core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
     "use strict";
     var timeoutId,
         scheduled = false,
-        args = [];
+        args = [],
+        destroyed = false;
 
     function cancel() {
         if (scheduled) {
@@ -60,6 +61,7 @@ core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
      * this call will have no impact
      */
     this.trigger = function () {
+        runtime.assert(destroyed === false, "Can't trigger destroyed ScheduledTask instance");
         args = Array.prototype.slice.call(arguments);
         if (!scheduled) {
             scheduled = true;
@@ -71,6 +73,7 @@ core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
      * Immediately trigger this task and clear any pending requests.
      */
     this.triggerImmediate = function () {
+        runtime.assert(destroyed === false, "Can't trigger destroyed ScheduledTask instance");
         args = Array.prototype.slice.call(arguments);
         execute();
     };
@@ -97,6 +100,7 @@ core.ScheduledTask = function ScheduledTask(fn, scheduleTask, cancelTask) {
      */
     this.destroy = function (callback) {
         cancel();
+        destroyed = true;
         callback();
     };
 
