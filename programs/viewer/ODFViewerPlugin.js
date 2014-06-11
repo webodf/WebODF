@@ -114,7 +114,7 @@ function ODFViewerPlugin() {
                     selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
                     sessionView = new gui.SessionView({
                         caretAvatarsInitiallyVisible: false
-                    }, localMemberId, session, caretManager, selectionViewManager);
+                    }, localMemberId, session, sessionController.getSessionConstraints(), caretManager, selectionViewManager);
                     selectionViewManager.registerCursor(shadowCursor);
                     hyperlinkTooltipView = new gui.HyperlinkTooltipView(odfCanvas,
                         sessionController.getHyperlinkClickHandler().getModifier);
