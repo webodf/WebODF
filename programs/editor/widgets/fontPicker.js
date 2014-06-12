@@ -35,9 +35,7 @@ define("webodf/editor/widgets/fontPicker", [
             var self = this,
                 editorSession,
                 select,
-                editorFonts = [],
-                documentFonts = [],
-                selectionList = [];
+                documentFonts = [];
 
             select = new Select({
                 name: 'FontPicker',
@@ -79,8 +77,12 @@ define("webodf/editor/widgets/fontPicker", [
             this.onRemove = null;
 
             function populateFonts() {
-                var i, name, family;
-                editorFonts = editorSession ? editorSession.availableFonts : [];
+                var i,
+                    name,
+                    family,
+                    editorFonts = editorSession ? editorSession.availableFonts : [],
+                    selectionList = [];
+
                 documentFonts = editorSession ? editorSession.getDeclaredFonts() : [];
 
                 // First populate the fonts used in the document
