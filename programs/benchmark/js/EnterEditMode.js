@@ -61,6 +61,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
          */
         this.start = function(context) {
             var session,
+                sessionConstraints,
                 sessionController,
                 shadowCursor,
                 selectionViewManager,
@@ -72,10 +73,11 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             session = new ops.Session(context.odfCanvas);
             shadowCursor = new gui.ShadowCursor(session.getOdtDocument());
             sessionController = new gui.SessionController(session, localMemberId, shadowCursor, sessionControllerOptions);
+            sessionConstraints = sessionController.getSessionConstraints();
             sessionController.setUndoManager(undoManager);
             caretManager = new gui.CaretManager(sessionController);
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
-            new gui.SessionView(viewOptions, localMemberId, session, caretManager, selectionViewManager);
+            new gui.SessionView(viewOptions, localMemberId, session, sessionConstraints, caretManager, selectionViewManager);
             selectionViewManager.registerCursor(shadowCursor, true);
 
             addMember.init({
