@@ -44,7 +44,8 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             action = new BenchmarkAction(state),
             localMemberId = "localmember",
             sessionControllerOptions = {
-                directParagraphStylingEnabled: true
+                directParagraphStylingEnabled: true,
+                directTextStylingEnabled: true
             },
             viewOptions = {
                 editInfoMarkersInitiallyVisible: false,
