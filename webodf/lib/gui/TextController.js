@@ -86,6 +86,13 @@ gui.TextController = function TextController(
         return isEnabled;
     };
 
+    /**
+     * @param {!number} step
+     * @return {!boolean}
+     */
+    function roundUp(step) {
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
+    }
 
     /**
      * Creates operations to remove the provided selection and update the destination
@@ -128,7 +135,7 @@ gui.TextController = function TextController(
             styleOp = new ops.OpSetParagraphStyle();
             styleOp.init({
                 memberid: inputMemberId,
-                position: selection.position,
+                position: odtDocument.convertDomPointToCursorStep(firstParagraph, 0, roundUp),
                 styleName: mergedParagraphStyleName
             });
             operations.push(styleOp);

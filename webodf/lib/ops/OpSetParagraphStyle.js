@@ -22,9 +22,13 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops*/
+/*global ops, runtime*/
 
 /**
+ * Sets the paragraph style name of the specified paragraph.
+ * The supplied position argument is expected to be the first
+ * step within the paragraph.
+ *
  * @constructor
  * @implements ops.Operation
  */
@@ -48,6 +52,23 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     this.group = undefined;
 
     /**
+     * Returns true if the iterator is set to the first step within the paragraph
+     *
+     * @param {!ops.OdtDocument} odtDocument
+     * @param {!Node} paragraphNode
+     * @param {!core.PositionIterator} iterator
+     * @return {!boolean}
+     */
+    function isFirstStep(odtDocument, paragraphNode, iterator) {
+        var filters = [odtDocument.getPositionFilter()],
+            container = iterator.container(),
+            offset = iterator.unfilteredDomOffset(),
+            stepIterator = odtDocument.createStepIterator(container, offset, filters, paragraphNode);
+
+        return stepIterator.previousStep() === false;
+    }
+
+    /**
      * @param {!ops.Document} document
      */
     this.execute = function (document) {
@@ -58,6 +79,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         iterator = odtDocument.getIteratorAtPosition(position);
         paragraphNode = odtDocument.getParagraphElement(iterator.container());
         if (paragraphNode) {
+            runtime.assert(isFirstStep(odtDocument, paragraphNode, iterator),
+                "SetParagraphStyle position should be the first position in the paragraph");
             if (styleName !== "") {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleName);
             } else {
