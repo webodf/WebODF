@@ -18,6 +18,8 @@
     ],
     "core.EventNotifier": [
     ],
+    "core.LazyProperty": [
+    ],
     "core.LoopWatchDog": [
     ],
     "core.PositionFilter": [
@@ -81,6 +83,7 @@
     "gui.CommonConstraints": [
     ],
     "gui.DirectFormattingController": [
+        "core.LazyProperty",
         "gui.CommonConstraints",
         "gui.SessionConstraints",
         "gui.SessionContext",

@@ -29,6 +29,7 @@ module.exports = function (config) {
             'lib/core/Cursor.js',
             'lib/core/Destroyable.js',
             'lib/core/EventNotifier.js',
+            'lib/core/LazyProperty.js',
             'lib/core/LoopWatchDog.js',
             'lib/core/PositionIterator.js',
             'lib/core/PositionFilter.js',
