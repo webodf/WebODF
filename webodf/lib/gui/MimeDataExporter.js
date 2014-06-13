@@ -33,8 +33,7 @@ gui.MimeDataExporter = function MimeDataExporter() {
     "use strict";
 
     var /**@type{!odf.TextSerializer}*/
-        textSerializer,
-        filter;
+        textSerializer;
 
     /**
      * Copy the contents of the supplied range into the passed dataTransfer.
@@ -65,8 +64,7 @@ gui.MimeDataExporter = function MimeDataExporter() {
 
     function init() {
         textSerializer = new odf.TextSerializer();
-        filter = new odf.OdfNodeFilter();
-        textSerializer.filter = filter;
+        textSerializer.filter = new odf.OdfNodeFilter();
     }
 
     init();
