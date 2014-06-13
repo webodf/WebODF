@@ -43,6 +43,8 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
 
     var memberid, timestamp,
         /**@type{number}*/
+        sourceParagraphPosition,
+        /**@type{number}*/
         position,
         /**@type{boolean}*/
         moveCursor,
@@ -60,6 +62,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
+        sourceParagraphPosition = data.sourceParagraphPosition;
         paragraphStyleName = data.paragraphStyleName;
         moveCursor = data.moveCursor === 'true' || data.moveCursor === true;
         odfUtils = new odf.OdfUtils();
@@ -201,6 +204,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
+            sourceParagraphPosition: sourceParagraphPosition,
             paragraphStyleName: paragraphStyleName,
             moveCursor: moveCursor
         };
@@ -211,6 +215,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
     memberid:string,
     timestamp:number,
     position:number,
+    sourceParagraphPosition:number,
     paragraphStyleName:string,
     moveCursor:boolean
 }}*/
@@ -219,6 +224,7 @@ ops.OpSplitParagraph.Spec;
     memberid:string,
     timestamp:(number|undefined),
     position:number,
+    sourceParagraphPosition:number,
     paragraphStyleName:string,
     moveCursor:(string|boolean|undefined)
 }}*/

@@ -89,6 +89,7 @@ gui.TextController = function TextController(
     };
 
     /**
+     * Rounds to the first step within the paragraph
      * @param {!number} step
      * @return {!boolean}
      */
@@ -174,7 +175,7 @@ gui.TextController = function TextController(
             op,
             operations = [],
             styleOps,
-            originalParagraph = odtDocument.getParagraphElement(cursor.getNode()),
+            originalParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(cursor.getNode())),
             paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "";
 
         if (selection.length > 0) {
@@ -186,6 +187,7 @@ gui.TextController = function TextController(
             memberid: inputMemberId,
             position: selection.position,
             paragraphStyleName: paragraphStyle,
+            sourceParagraphPosition: odtDocument.convertDomPointToCursorStep(originalParagraph, 0, roundUp),
             moveCursor: true
         });
         operations.push(op);

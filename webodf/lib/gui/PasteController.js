@@ -72,6 +72,15 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
     };
 
     /**
+     * Rounds to the first step within the paragraph
+     * @param {!number} step
+     * @return {!boolean}
+     */
+    function roundUp(step) {
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
+    }
+
+    /**
      * @param {!string} data
      * @return {undefined}
      */
@@ -82,11 +91,12 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
 
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
             cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
-            originalParagraph = odtDocument.getParagraphElement(cursorNode),
+            originalParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(cursorNode)),
             paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "",
             /**@type{number}*/
             cursorPosition = originalCursorPosition,
             operations = [],
+            currentParagraphStartPosition = odtDocument.convertDomPointToCursorStep(originalParagraph, 0, roundUp),
             paragraphs;
 
         paragraphs = data.replace(/\r/g, "").split("\n");
@@ -107,10 +117,12 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
                 memberid: inputMemberId,
                 position: cursorPosition,
                 paragraphStyleName: paragraphStyle,
+                sourceParagraphPosition: currentParagraphStartPosition,
                 moveCursor: true
             });
             operations.push(splitParagraphOp);
             cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
+            currentParagraphStartPosition = cursorPosition; // Reset the source paragraph to the newly created one
         });
 
         // Discard the last split paragraph op as unnecessary.

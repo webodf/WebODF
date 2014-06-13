@@ -600,6 +600,10 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformInsertTextSplitParagraph(insertTextSpec, splitParagraphSpec) {
+        if (insertTextSpec.position < splitParagraphSpec.sourceParagraphPosition) {
+            splitParagraphSpec.sourceParagraphPosition += insertTextSpec.text.length;
+        }
+
         if (insertTextSpec.position <= splitParagraphSpec.position) {
             splitParagraphSpec.position += insertTextSpec.text.length;
         } else {
@@ -716,21 +720,74 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformSetParagraphStyleSplitParagraph(setParagraphStyleSpec, splitParagraphSpec) {
+        var opSpecsA = [setParagraphStyleSpec],
+            opSpecsB = [splitParagraphSpec],
+            setParagraphClone;
+
+        if (setParagraphStyleSpec.position > splitParagraphSpec.position) {
+            setParagraphStyleSpec.position += 1;
+        } else if (setParagraphStyleSpec.position === splitParagraphSpec.sourceParagraphPosition) {
+            // When a set paragraph style & split conflict, the set paragraph style always wins
+
+            splitParagraphSpec.paragraphStyleName = setParagraphStyleSpec.styleName;
+            // The new paragraph that resulted from the already executed split op should be styled with
+            // the original paragraph style.
+            setParagraphClone = cloneOpspec(setParagraphStyleSpec);
+            // A split paragraph op introduces a new paragraph boundary just passed the point where the split occurs
+            setParagraphClone.position = splitParagraphSpec.position + 1;
+            opSpecsA.push(setParagraphClone);
+        }
+
+        return {
+            opSpecsA:  opSpecsA,
+            opSpecsB:  opSpecsB
+        };
+    }
+
+    /**
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpecA
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpecB
      * @param {!boolean} hasAPriority
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
     function transformSplitParagraphSplitParagraph(splitParagraphSpecA, splitParagraphSpecB, hasAPriority) {
+        var specABeforeB,
+            specBBeforeA;
+
         if (splitParagraphSpecA.position < splitParagraphSpecB.position) {
-            splitParagraphSpecB.position += 1;
-        } else if (splitParagraphSpecA.position > splitParagraphSpecB.position) {
-            splitParagraphSpecA.position += 1;
+            specABeforeB =  true;
+        } else if (splitParagraphSpecB.position < splitParagraphSpecA.position) {
+            specBBeforeA = true;
         } else if (splitParagraphSpecA.position === splitParagraphSpecB.position) {
             if (hasAPriority) {
-                splitParagraphSpecB.position += 1;
+                specABeforeB =  true;
             } else {
-                splitParagraphSpecA.position += 1;
+                specBBeforeA = true;
+            }
+        }
+
+        if (specABeforeB) {
+            splitParagraphSpecB.position += 1;
+            if (splitParagraphSpecA.position < splitParagraphSpecB.sourceParagraphPosition) {
+                splitParagraphSpecB.sourceParagraphPosition += 1;
+            } else {
+                // Split occurs between specB's split position & it's source paragraph position
+                // This means specA introduces a NEW paragraph boundary
+                splitParagraphSpecB.sourceParagraphPosition = splitParagraphSpecA.position + 1;
+            }
+        } else if (specBBeforeA) {
+            splitParagraphSpecA.position += 1;
+            if (splitParagraphSpecB.position < splitParagraphSpecB.sourceParagraphPosition) {
+                splitParagraphSpecA.sourceParagraphPosition += 1;
+            } else {
+                // Split occurs between specA's split position & it's source paragraph position
+                // This means specB introduces a NEW paragraph boundary
+                splitParagraphSpecA.sourceParagraphPosition = splitParagraphSpecB.position + 1;
             }
         }
 
@@ -1035,6 +1092,15 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             splitParagraphSpec.position = removeTextSpec.position;
         }
 
+        if (removeTextSpec.position + removeTextSpec.length < splitParagraphSpec.sourceParagraphPosition) {
+            // Removed text is before the source paragraph
+            splitParagraphSpec.sourceParagraphPosition -= removeTextSpec.length;
+        } else if (removeTextSpec.position < splitParagraphSpec.sourceParagraphPosition) {
+            // The remove op crosses the paragraph boundary
+            // TODO this case can't be handled until OpMergeParagraph is introduced
+            return null;
+        }
+
         return {
             opSpecsA:  removeTextSpecResult,
             opSpecsB:  splitParagraphSpecResult
@@ -1211,7 +1277,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "SetParagraphStyle": {
             // TODO:"SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
-            // TODO:"SetParagraphStyle":    transformSetParagraphStyleSplitParagraph,
+            "SplitParagraph":       transformSetParagraphStyleSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
