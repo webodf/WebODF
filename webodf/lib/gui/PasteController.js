@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, ops*/
+/*global runtime, gui, ops, odf*/
 
 /**
  * Provides a method to paste text at the current cursor
@@ -39,7 +39,9 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        isEnabled = false;
+        isEnabled = false,
+        /**@const*/
+        textns = odf.Namespaces.textns;
 
     /**
      * @return {undefined}
@@ -90,6 +92,9 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         }
 
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
+            cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+            originalParagraph = odtDocument.getParagraphElement(cursorNode),
+            paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "",
             /**@type{number}*/
             cursorPosition = originalCursorPosition,
             operations = [],
@@ -108,6 +113,7 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
             operations.push(createOp(new ops.OpSplitParagraph(), {
                 memberid: inputMemberId,
                 position: cursorPosition,
+                paragraphStyleName: paragraphStyle,
                 moveCursor: true
             }));
             cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward

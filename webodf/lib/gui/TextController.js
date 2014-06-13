@@ -56,7 +56,9 @@ gui.TextController = function TextController(
          * @type {!boolean}
          */
         FORWARD = true,
-        isEnabled = false;
+        isEnabled = false,
+        /** @const */
+        textns = odf.Namespaces.textns;
 
     /**
      * @return {undefined}
@@ -166,9 +168,14 @@ gui.TextController = function TextController(
             return false;
         }
 
-        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+        var cursor = odtDocument.getCursor(inputMemberId),
+            range = cursor.getSelectedRange(),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
-            op, operations = [], styleOps;
+            op,
+            operations = [],
+            styleOps,
+            originalParagraph = odtDocument.getParagraphElement(cursor.getNode()),
+            paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "";
 
         if (selection.length > 0) {
             operations = operations.concat(createOpRemoveSelection(range, selection));
@@ -178,6 +185,7 @@ gui.TextController = function TextController(
         op.init({
             memberid: inputMemberId,
             position: selection.position,
+            paragraphStyleName: paragraphStyle,
             moveCursor: true
         });
         operations.push(op);

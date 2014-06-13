@@ -31,6 +31,10 @@
  * and is set as true, the cursor is moved to the
  * beginning of the next paragraph. Otherwise, it
  * remains in it's original position.
+ * The paragraph style for the new paragraph is specified by the
+ * paragraphStyleName. If blank or empty, the new paragraph will
+ * have no specified style.
+ *
  * @constructor
  * @implements ops.Operation
  */
@@ -42,8 +46,12 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         position,
         /**@type{boolean}*/
         moveCursor,
+        /**@type{!string}*/
+        paragraphStyleName,
         /**@type{!odf.OdfUtils}*/
-        odfUtils;
+        odfUtils,
+        /**@const*/
+        textns = odf.Namespaces.textns;
 
     /**
      * @param {!ops.OpSplitParagraph.InitSpec} data
@@ -52,6 +60,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         memberid = data.memberid;
         timestamp = data.timestamp;
         position = data.position;
+        paragraphStyleName = data.paragraphStyleName;
         moveCursor = data.moveCursor === 'true' || data.moveCursor === true;
         odfUtils = new odf.OdfUtils();
     };
@@ -148,6 +157,12 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             splitChildNode = splitChildNode.childNodes.item(0);
         }
 
+        if (paragraphStyleName) {
+            /**@type{!Element}*/(splitChildNode).setAttributeNS(textns, "text:style-name", paragraphStyleName);
+        } else {
+            /**@type{!Element}*/(splitChildNode).removeAttributeNS(textns, "style-name");
+        }
+
         // clean up any empty text node which was created by odtDocument.getTextNodeAtStep
         if (domPosition.textNode.length === 0) {
             domPosition.textNode.parentNode.removeChild(domPosition.textNode);
@@ -186,6 +201,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             memberid: memberid,
             timestamp: timestamp,
             position: position,
+            paragraphStyleName: paragraphStyleName,
             moveCursor: moveCursor
         };
     };
@@ -195,6 +211,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
     memberid:string,
     timestamp:number,
     position:number,
+    paragraphStyleName:string,
     moveCursor:boolean
 }}*/
 ops.OpSplitParagraph.Spec;
@@ -202,6 +219,7 @@ ops.OpSplitParagraph.Spec;
     memberid:string,
     timestamp:(number|undefined),
     position:number,
+    paragraphStyleName:string,
     moveCursor:(string|boolean|undefined)
 }}*/
 ops.OpSplitParagraph.InitSpec;

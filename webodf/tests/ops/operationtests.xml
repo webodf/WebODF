@@ -838,7 +838,20 @@
    <office:text><text:p><text:span text:style-name="a">ABC123<c:cursor c:memberId="Alice"/></text:span>D</text:p><text:p/></office:text>
   </after>
  </test>
-
+ <test name="SplitParagraph_SetParagraphStyle">
+  <before><office:text><text:p text:style-name="currentStyle"/></office:text></before>
+   <ops>
+    <op optype="SplitParagraph" memberid="Bob" position="0" paragraphStyleName="newStyle"/>
+   </ops>
+  <after><office:text><text:p text:style-name="currentStyle"/><text:p text:style-name="newStyle"/></office:text></after>
+ </test>
+ <test name="SplitParagraph_ClearParagraphStyle">
+  <before><office:text><text:p text:style-name="currentStyle"/></office:text></before>
+   <ops>
+    <op optype="SplitParagraph" memberid="Bob" position="0" paragraphStyleName=""/>
+   </ops>
+  <after><office:text><text:p text:style-name="currentStyle"/><text:p/></office:text></after>
+ </test>
  <test name="SplitListParagraph_singleCursor">
   <before><office:text><text:list><text:list-item><text:p>helloworld</text:p></text:list-item></text:list></office:text></before>
    <ops>
