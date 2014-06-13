@@ -71,17 +71,6 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         return isEnabled;
     };
 
-
-    /**
-     * @param {!ops.Operation} op
-     * @param {!Object} data
-     * @return {!ops.Operation}
-     */
-    function createOp(op, data) {
-        op.init(data);
-        return op;
-    }
-
     /**
      * @param {!string} data
      * @return {undefined}
@@ -102,20 +91,25 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
 
         paragraphs = data.replace(/\r/g, "").split("\n");
         paragraphs.forEach(function (text) {
-            operations.push(createOp(new ops.OpInsertText(), {
+            var insertTextOp = new ops.OpInsertText(),
+                splitParagraphOp = new ops.OpSplitParagraph();
+
+            insertTextOp.init({
                 memberid: inputMemberId,
                 position: cursorPosition,
                 text: text,
                 moveCursor: true
-            }));
+            });
+            operations.push(insertTextOp);
             cursorPosition += text.length;
 
-            operations.push(createOp(new ops.OpSplitParagraph(), {
+            splitParagraphOp.init({
                 memberid: inputMemberId,
                 position: cursorPosition,
                 paragraphStyleName: paragraphStyle,
                 moveCursor: true
-            }));
+            });
+            operations.push(splitParagraphOp);
             cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
         });
 
