@@ -62,12 +62,20 @@ gui.DirectFormattingController = function DirectFormattingController(
         /**@type{Object}*/
         directCursorStyleProperties,
         // cached text settings
-        /**@type{!Array.<Object.<string,Object>>}*/
-        selectionAppliedStyles = [],
         /**@type{!gui.StyleSummary}*/
-        selectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles),
+        lastSignalledStyleSummary,
+        /**@type {!core.LazyProperty.<!{appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}>} */
+        selectionInfoCache,
         isEnabled = false;
 
+    /**
+     * Gets the current selection information style summary
+     * @return {!gui.StyleSummary}
+     */
+    function getCachedStyleSummary() {
+        return selectionInfoCache.value().styleSummary;
+    }
+    
     /**
      * Fetch all the character elements and text nodes in the specified range, or if the range is collapsed, the node just to
      * the left of the cursor.
@@ -99,9 +107,9 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * Get all styles currently applied to the selected range. If the range is collapsed,
      * this will return the style the next inserted character will have
-     * @return {!Array.<Object>}
+     * @return {!{appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}}
      */
-    function getSelectionAppliedStyles() {
+    function getSelectionInfo() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
             nodes = range ? getNodes(range) : [],
@@ -112,7 +120,11 @@ gui.DirectFormattingController = function DirectFormattingController(
             selectionStyles[0] = utils.mergeObjects(selectionStyles[0],
                 /**@type {!Object}*/(directCursorStyleProperties));
         }
-        return selectionStyles;
+
+        return {
+            appliedStyles: selectionStyles,
+            styleSummary: new gui.StyleSummary(selectionStyles)
+        };
     }
 
     /**
@@ -138,18 +150,15 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * @return {undefined}
      */
-    function updateSelectionStylesInfo() {
+    function emitStylingChanges() {
         var textStyleDiff,
             paragraphStyleDiff,
-            newSelectionStylesSummary;
+            newSelectionStylesSummary = getCachedStyleSummary();
 
-        selectionAppliedStyles = getSelectionAppliedStyles();
-        newSelectionStylesSummary = new gui.StyleSummary(selectionAppliedStyles);
+        textStyleDiff = createDiff(lastSignalledStyleSummary.text, newSelectionStylesSummary.text);
+        paragraphStyleDiff = createDiff(lastSignalledStyleSummary.paragraph, newSelectionStylesSummary.paragraph);
 
-        textStyleDiff = createDiff(selectionStylesSummary.text, newSelectionStylesSummary.text);
-        paragraphStyleDiff = createDiff(selectionStylesSummary.paragraph, newSelectionStylesSummary.paragraph);
-
-        selectionStylesSummary = newSelectionStylesSummary;
+        lastSignalledStyleSummary = newSelectionStylesSummary;
 
         if (Object.keys(textStyleDiff).length > 0) {
             eventNotifier.emit(gui.DirectFormattingController.textStylingChanged, textStyleDiff);
@@ -191,10 +200,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         var cursorMemberId = (typeof cursorOrId === "string")
                                 ? cursorOrId : cursorOrId.getMemberId();
         if (cursorMemberId === inputMemberId) {
-            // FIXME: Update internal state before firing any signals,
-            // otherwise it may pose a problem when a subscriber tries
-            // to query the intermediate state.
-            updateSelectionStylesInfo();
+            selectionInfoCache.reset();
             updateEnabledState();
         }
     }
@@ -204,7 +210,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      */
     function onParagraphStyleModified() {
         // TODO: check if the cursor (selection) is actually affected
-        updateSelectionStylesInfo();
+        selectionInfoCache.reset();
     }
 
     /**
@@ -216,7 +222,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             p = args.paragraphElement;
 
         if (cursor && odtDocument.getParagraphElement(cursor.getNode()) === p) {
-            updateSelectionStylesInfo();
+            selectionInfoCache.reset();
         }
     }
 
@@ -258,7 +264,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             // Direct styling is additive. E.g., if the user selects bold and then italic, the intent is to produce
             // bold & italic text
             directCursorStyleProperties = utils.mergeObjects(directCursorStyleProperties || {}, properties);
-            updateSelectionStylesInfo();
+            selectionInfoCache.reset();
         }
     }
     this.formatTextSelection = formatTextSelection;
@@ -284,8 +290,8 @@ gui.DirectFormattingController = function DirectFormattingController(
      */
     this.createCursorStyleOp = function (position, length, useCachedStyle) {
         var styleOp = null,
-            /**@type{Object.<string,Object>}*/
-            properties = useCachedStyle ? selectionAppliedStyles[0] : directCursorStyleProperties;
+            /**@type{Object.<!string,!Object>}*/
+            properties = useCachedStyle ? selectionInfoCache.value().appliedStyles[0] : directCursorStyleProperties;
 
         if (properties && properties['style:text-properties']) {
             styleOp = new ops.OpApplyDirectStyling();
@@ -296,7 +302,7 @@ gui.DirectFormattingController = function DirectFormattingController(
                 setProperties: {'style:text-properties': properties['style:text-properties']}
             });
             directCursorStyleProperties = null;
-            updateSelectionStylesInfo();
+            selectionInfoCache.reset();
         }
         return styleOp;
     };
@@ -314,7 +320,7 @@ gui.DirectFormattingController = function DirectFormattingController(
                 // added to apply the style to. Even after a split, the cursor should still style the next inserted
                 // character
                 directCursorStyleProperties = null;
-                updateSelectionStylesInfo();
+                selectionInfoCache.reset();
             }
         }
     }
@@ -385,97 +391,97 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {!Array.<!Object>}
      */
     this.getAppliedStyles = function () {
-        return selectionAppliedStyles;
+        return selectionInfoCache.value().appliedStyles;
     };
 
     /**
      * @return {!boolean}
      */
-    this.toggleBold = toggle.bind(self, function () { return selectionStylesSummary.isBold(); }, setBold);
+    this.toggleBold = toggle.bind(self, function () { return getCachedStyleSummary().isBold(); }, setBold);
 
     /**
      * @return {!boolean}
      */
-    this.toggleItalic = toggle.bind(self, function () { return selectionStylesSummary.isItalic(); }, setItalic);
+    this.toggleItalic = toggle.bind(self, function () { return getCachedStyleSummary().isItalic(); }, setItalic);
 
     /**
      * @return {!boolean}
      */
-    this.toggleUnderline = toggle.bind(self, function () { return selectionStylesSummary.hasUnderline(); }, setHasUnderline);
+    this.toggleUnderline = toggle.bind(self, function () { return getCachedStyleSummary().hasUnderline(); }, setHasUnderline);
 
     /**
      * @return {!boolean}
      */
-    this.toggleStrikethrough = toggle.bind(self, function () { return selectionStylesSummary.hasStrikeThrough(); }, setHasStrikethrough);
+    this.toggleStrikethrough = toggle.bind(self, function () { return getCachedStyleSummary().hasStrikeThrough(); }, setHasStrikethrough);
 
     /**
      * @return {!boolean}
      */
     this.isBold = function () {
-        return selectionStylesSummary.isBold();
+        return getCachedStyleSummary().isBold();
     };
 
     /**
      * @return {!boolean}
      */
     this.isItalic = function () {
-        return selectionStylesSummary.isItalic();
+        return getCachedStyleSummary().isItalic();
     };
 
     /**
      * @return {!boolean}
      */
     this.hasUnderline = function () {
-        return selectionStylesSummary.hasUnderline();
+        return getCachedStyleSummary().hasUnderline();
     };
 
     /**
      * @return {!boolean}
      */
     this.hasStrikeThrough = function () {
-        return selectionStylesSummary.hasStrikeThrough();
+        return getCachedStyleSummary().hasStrikeThrough();
     };
 
     /**
      * @return {number|undefined}
      */
     this.fontSize = function () {
-        return selectionStylesSummary.fontSize();
+        return getCachedStyleSummary().fontSize();
     };
 
     /**
      * @return {string|undefined}
      */
     this.fontName = function () {
-        return selectionStylesSummary.fontName();
+        return getCachedStyleSummary().fontName();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedLeft = function () {
-        return selectionStylesSummary.isAlignedLeft();
+        return getCachedStyleSummary().isAlignedLeft();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedCenter = function () {
-        return selectionStylesSummary.isAlignedCenter();
+        return getCachedStyleSummary().isAlignedCenter();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedRight = function () {
-        return selectionStylesSummary.isAlignedRight();
+        return getCachedStyleSummary().isAlignedRight();
     };
 
     /**
      * @return {!boolean}
      */
     this.isAlignedJustified = function () {
-        return selectionStylesSummary.isAlignedJustified();
+        return getCachedStyleSummary().isAlignedJustified();
     };
 
     /**
@@ -741,7 +747,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             return operations;
         }
 
-        properties = selectionAppliedStyles[0];
+        properties = selectionInfoCache.value().appliedStyles[0];
         if (!properties) {
             return operations;
         }
@@ -795,7 +801,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     };
 
     /**
-     * @param {!function(!Error=)} callback, passing an error object in case of error
+     * @param {!function(!Error=)} callback passing an error object in case of error
      * @return {undefined}
      */
     this.destroy = function (callback) {
@@ -805,6 +811,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
+        odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, emitStylingChanges);
         sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
         callback();
     };
@@ -830,8 +837,11 @@ gui.DirectFormattingController = function DirectFormattingController(
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
+        odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchEnd, emitStylingChanges);
+
         sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
-        updateSelectionStylesInfo();
+        selectionInfoCache = new core.LazyProperty(getSelectionInfo);
+        lastSignalledStyleSummary = getCachedStyleSummary();
         updateEnabledState();
 
         if (!directTextStylingEnabled) {
