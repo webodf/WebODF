@@ -45,7 +45,10 @@ define("webodf/editor/widgets/editHyperlinks", [
                 editHyperlinkButton,
                 removeHyperlinkButton,
                 odfUtils = new odf.OdfUtils(),
+                textSerializer = new odf.TextSerializer(),
                 dialog;
+
+            textSerializer.filter = new odf.OdfNodeFilter();
 
             linkEditorContent = new EditHyperlinkPane();
             dialog = new TooltipDialog({
@@ -102,6 +105,17 @@ define("webodf/editor/widgets/editHyperlinks", [
                 return widget;
             };
 
+            /**
+             * @param {!Range} selection
+             * @return {!string}
+             */
+            function getTextContent(selection) {
+                var document = selection.startContainer.ownerDocument,
+                    fragmentContainer = document.createElement('span');
+                fragmentContainer.appendChild(selection.cloneContents());
+                return textSerializer.writeToString(fragmentContainer);
+            }
+
             function checkHyperlinkButtons() {
                 var selection = editorSession.getSelectedRange(),
                     textContent,
@@ -113,7 +127,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                     textContent = selection.cloneRange();
                     textContent.selectNodeContents(linksInSelection[0]);
                     linkEditorContent.set({
-                        linkDisplayText: textContent.toString(),
+                        linkDisplayText: getTextContent(textContent),
                         linkUrl: linkTarget,
                         isReadOnlyText: true
                     });
@@ -122,7 +136,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                     // User has selected part of a hyperlink or a block of text. Assume user is attempting to modify the
                     // existing hyperlink, or wants to convert the selection into a hyperlink
                     linkEditorContent.set({
-                        linkDisplayText: selection.toString(),
+                        linkDisplayText: getTextContent(selection),
                         linkUrl: linkTarget,
                         isReadOnlyText: true
                     });
