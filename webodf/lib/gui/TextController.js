@@ -56,7 +56,9 @@ gui.TextController = function TextController(
          * @type {!boolean}
          */
         FORWARD = true,
-        isEnabled = false;
+        isEnabled = false,
+        /** @const */
+        textns = odf.Namespaces.textns;
 
     /**
      * @return {undefined}
@@ -86,6 +88,14 @@ gui.TextController = function TextController(
         return isEnabled;
     };
 
+    /**
+     * Rounds to the first step within the paragraph
+     * @param {!number} step
+     * @return {!boolean}
+     */
+    function roundUp(step) {
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
+    }
 
     /**
      * Creates operations to remove the provided selection and update the destination
@@ -128,7 +138,7 @@ gui.TextController = function TextController(
             styleOp = new ops.OpSetParagraphStyle();
             styleOp.init({
                 memberid: inputMemberId,
-                position: selection.position,
+                position: odtDocument.convertDomPointToCursorStep(firstParagraph, 0, roundUp),
                 styleName: mergedParagraphStyleName
             });
             operations.push(styleOp);
@@ -159,9 +169,14 @@ gui.TextController = function TextController(
             return false;
         }
 
-        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
+        var cursor = odtDocument.getCursor(inputMemberId),
+            range = cursor.getSelectedRange(),
             selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId)),
-            op, operations = [], styleOps;
+            op,
+            operations = [],
+            styleOps,
+            originalParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(cursor.getNode())),
+            paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "";
 
         if (selection.length > 0) {
             operations = operations.concat(createOpRemoveSelection(range, selection));
@@ -171,6 +186,8 @@ gui.TextController = function TextController(
         op.init({
             memberid: inputMemberId,
             position: selection.position,
+            paragraphStyleName: paragraphStyle,
+            sourceParagraphPosition: odtDocument.convertDomPointToCursorStep(originalParagraph, 0, roundUp),
             moveCursor: true
         });
         operations.push(op);

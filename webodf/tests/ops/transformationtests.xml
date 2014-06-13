@@ -285,7 +285,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -303,7 +303,7 @@
    </op>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after>
    <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
@@ -476,12 +476,12 @@
   <before><office:text><text:p>a</text:p></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="SplitParagraph" memberid="Alice" position="0" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Alice" position="0" moveCursor="true" sourceParagraphPosition="0"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p/><text:p><c:cursor c:memberId="Alice"/>a</text:p><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
@@ -490,12 +490,12 @@
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Alice" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Alice" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p>a</text:p><text:p><c:cursor c:memberId="Bob"/></text:p><text:p><c:cursor c:memberId="Alice"/>b</text:p></office:text></after>
  </test>
@@ -509,7 +509,7 @@
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p>Ta<c:cursor c:memberId="Alice"/></text:p><text:p><c:cursor c:memberId="Bob"/>T</text:p></office:text></after>
  </test>
@@ -523,7 +523,7 @@
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p>Ta<c:cursor c:memberId="Alice"/>T</text:p><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
@@ -537,9 +537,39 @@
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p>T</text:p><text:p><c:cursor c:memberId="Bob"/>Ta<c:cursor c:memberId="Alice"/></text:p></office:text></after>
+ </test>
+ <test name="InsertTextSplitParagraph_InsertBeforeSplit">
+  <comment>Insert text between split position and paragraph start position</comment>
+  <before><office:text><text:p>TT</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="a" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
+  </opsB>
+  <after><office:text><text:p>a<c:cursor c:memberId="Alice"/>T</text:p><text:p><c:cursor c:memberId="Bob"/>T</text:p></office:text></after>
+ </test>
+ <test name="InsertTextSplitParagraph_InsertInParagraphBeforeSplit">
+  <comment>Insert text in paragraph before split the paragraph to be split</comment>
+  <before><office:text><text:p>A</text:p><text:p>B</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
+   <op optype="InsertText" memberid="Alice" position="0" text="a" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+   <op optype="SplitParagraph" memberid="Bob" position="3" moveCursor="true" sourceParagraphPosition="2"/>
+  </opsB>
+  <after><office:text><text:p>a<c:cursor c:memberId="Alice"/>A</text:p><text:p>B</text:p><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
 
  <test name="RemoveTextRemoveText_{B}[CDE]">
@@ -740,7 +770,7 @@
   <before><office:text><text:p>T</text:p></office:text></before>
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
-   <op optype="SplitParagraph" memberid="Alice" position="0" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Alice" position="0" moveCursor="true" sourceParagraphPosition="0"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
@@ -753,7 +783,7 @@
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Alice" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Alice" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
@@ -766,7 +796,7 @@
   <opsA>
    <op optype="AddCursor" memberid="Alice"/>
    <op optype="MoveCursor" memberid="Alice" position="1" length="0"/>
-   <op optype="SplitParagraph" memberid="Alice" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Alice" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsA>
   <opsB>
    <op optype="AddCursor" memberid="Bob"/>
@@ -938,7 +968,51 @@
    <office:text><text:p/></office:text>
   </after>
  </test>
-
+ <test name="SetParagraphStyleSplitParagraph_[a]_A|B">
+  <comment>SetParagraphStyle occurs before paragraph impacted by split</comment>
+  <before>
+   <office:text><text:p/><text:p>AB</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" memberid="Alice" position="0" styleName="setPStyle"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="2" sourceParagraphPosition="1" paragraphStyleName="splitPStyle"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="setPStyle"/><text:p>A</text:p><text:p text:style-name="splitPStyle">B</text:p></office:text>
+  </after>
+ </test>
+ <test name="SetParagraphStyleSplitParagraph_A|B_[]">
+  <comment>SetParagraphStyle occurs after paragraph impacted by split</comment>
+  <before>
+   <office:text><text:p>AB</text:p><text:p/></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" memberid="Alice" position="3" styleName="setPStyle"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="1" sourceParagraphPosition="0" paragraphStyleName="splitPStyle"/>
+  </opsB>
+  <after>
+   <office:text><text:p>A</text:p><text:p text:style-name="splitPStyle">B</text:p><text:p text:style-name="setPStyle"/></office:text>
+  </after>
+ </test>
+ <test name="SetParagraphStyleSplitParagraph_[A|B]">
+  <comment>SetParagraphStyle encompasses a paragraph that is being split</comment>
+  <before>
+   <office:text><text:p>AB</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" memberid="Alice" position="0" styleName="setPStyle"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="1" sourceParagraphPosition="0" paragraphStyleName="splitPStyle"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="setPStyle">A</text:p><text:p text:style-name="setPStyle">B</text:p></office:text>
+  </after>
+ </test>
  <test name="MoveCursorRemoveText_XA__C">
   <before>
    <office:text><text:p>ABCD</text:p></office:text>
@@ -1158,7 +1232,7 @@
    <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/></text:p><text:p></text:p></office:text></after>
  </test>
@@ -1169,7 +1243,7 @@
    <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="0" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="0" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:anchor c:memberId="Alice"/></text:p><text:p>ab<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -1180,7 +1254,7 @@
    <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:anchor c:memberId="Alice"/>a</text:p><text:p>b<c:cursor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -1191,7 +1265,7 @@
    <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>ab<c:anchor c:memberId="Alice"/></text:p><text:p></text:p><text:p/></office:text></after>
  </test>
@@ -1202,7 +1276,7 @@
    <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="0" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="0" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/></text:p><text:p>ab<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>
@@ -1213,7 +1287,7 @@
    <op optype="MoveCursor" memberid="Alice" position="2" length="-2"/>
   </opsA>
   <opsB>
-   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>a</text:p><text:p>b<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
  </test>

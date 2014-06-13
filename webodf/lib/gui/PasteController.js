@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, ops*/
+/*global runtime, gui, ops, odf*/
 
 /**
  * Provides a method to paste text at the current cursor
@@ -39,7 +39,9 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        isEnabled = false;
+        isEnabled = false,
+        /**@const*/
+        textns = odf.Namespaces.textns;
 
     /**
      * @return {undefined}
@@ -69,15 +71,13 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         return isEnabled;
     };
 
-
     /**
-     * @param {!ops.Operation} op
-     * @param {!Object} data
-     * @return {!ops.Operation}
+     * Rounds to the first step within the paragraph
+     * @param {!number} step
+     * @return {!boolean}
      */
-    function createOp(op, data) {
-        op.init(data);
-        return op;
+    function roundUp(step) {
+        return step === ops.OdtStepsTranslator.NEXT_STEP;
     }
 
     /**
@@ -90,27 +90,39 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         }
 
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
+            cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
+            originalParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(cursorNode)),
+            paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "",
             /**@type{number}*/
             cursorPosition = originalCursorPosition,
             operations = [],
+            currentParagraphStartPosition = odtDocument.convertDomPointToCursorStep(originalParagraph, 0, roundUp),
             paragraphs;
 
         paragraphs = data.replace(/\r/g, "").split("\n");
         paragraphs.forEach(function (text) {
-            operations.push(createOp(new ops.OpInsertText(), {
+            var insertTextOp = new ops.OpInsertText(),
+                splitParagraphOp = new ops.OpSplitParagraph();
+
+            insertTextOp.init({
                 memberid: inputMemberId,
                 position: cursorPosition,
                 text: text,
                 moveCursor: true
-            }));
+            });
+            operations.push(insertTextOp);
             cursorPosition += text.length;
 
-            operations.push(createOp(new ops.OpSplitParagraph(), {
+            splitParagraphOp.init({
                 memberid: inputMemberId,
                 position: cursorPosition,
+                paragraphStyleName: paragraphStyle,
+                sourceParagraphPosition: currentParagraphStartPosition,
                 moveCursor: true
-            }));
+            });
+            operations.push(splitParagraphOp);
             cursorPosition += 1; // Splitting a paragraph introduces 1 walkable position, bumping the cursor forward
+            currentParagraphStartPosition = cursorPosition; // Reset the source paragraph to the newly created one
         });
 
         // Discard the last split paragraph op as unnecessary.

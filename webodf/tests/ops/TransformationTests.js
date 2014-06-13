@@ -238,8 +238,18 @@ ops.TransformationTests = function TransformationTests(runner) {
         for (i = 0; i < n; i += 1) {
             att = atts.item(i);
             value = att.value;
-            if (/^(length|number|position|fontSize|topMargin|bottomMargin|leftMargin|rightMargin)$/.test(att.localName)) {
-                value = parseInt(value, 10);
+            switch(att.localName) {
+                case "length":
+                case "number":
+                case "position":
+                case "fontSize":
+                case "topMargin":
+                case "bottomMargin":
+                case "leftMargin":
+                case "rightMargin":
+                case "sourceParagraphPosition":
+                    value = parseInt(value, 10);
+                    break;
             }
             op[att.nodeName] = value;
         }
@@ -298,15 +308,16 @@ ops.TransformationTests = function TransformationTests(runner) {
      * @return {!{before, opspecsA, opspecsB, after}}
      */
     function parseTest(name, element) {
-        var before = element.firstElementChild,
-            opsAElement = before.nextElementSibling,
-            opsBElement = opsAElement.nextElementSibling,
-            after = opsBElement.nextElementSibling;
-        runtime.assert(before.localName === "before", "Expected <before/> in " + name + ".");
+        var before = element.getElementsByTagName("before")[0],
+            opsAElement = element.getElementsByTagName("opsA")[0],
+            opsBElement = element.getElementsByTagName("opsB")[0],
+            after = element.getElementsByTagName("after")[0];
+
+        runtime.assert(Boolean(before), "Expected <before/> in " + name + ".");
         runtime.assert(checkWhitespace(before), "Unexpanded test:s element or text:c attribute found in " + name + ".");
-        runtime.assert(opsAElement.localName === "opsA", "Expected <ops/> in " + name + ".");
-        runtime.assert(opsBElement.localName === "opsB", "Expected <ops/> in " + name + ".");
-        runtime.assert(after.localName === "after", "Expected <after/> in " + name + ".");
+        runtime.assert(Boolean(opsAElement), "Expected <ops/> in " + name + ".");
+        runtime.assert(Boolean(opsBElement), "Expected <ops/> in " + name + ".");
+        runtime.assert(Boolean(after), "Expected <after/> in " + name + ".");
         runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
         return {
             before: before,
