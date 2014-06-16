@@ -311,7 +311,8 @@ ops.TransformationTests = function TransformationTests(runner) {
         var before = element.getElementsByTagName("before")[0],
             opsAElement = element.getElementsByTagName("opsA")[0],
             opsBElement = element.getElementsByTagName("opsB")[0],
-            after = element.getElementsByTagName("after")[0];
+            after = element.getElementsByTagName("after")[0],
+            isFailing = element.getAttribute("isFailing") === "true";
 
         runtime.assert(Boolean(before), "Expected <before/> in " + name + ".");
         runtime.assert(checkWhitespace(before), "Unexpanded test:s element or text:c attribute found in " + name + ".");
@@ -320,6 +321,7 @@ ops.TransformationTests = function TransformationTests(runner) {
         runtime.assert(Boolean(after), "Expected <after/> in " + name + ".");
         runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
         return {
+            isFailing: isFailing,
             before: before,
             opspecsA:   parseOpspecs(name, opsAElement),
             opspecsB:   parseOpspecs(name, opsBElement),
@@ -500,7 +502,7 @@ ops.TransformationTests = function TransformationTests(runner) {
         var f = function () {
             runTest(test);
         };
-        return {f: f, name: name};
+        return {f: f, name: name, expectFail: test.isFailing};
     }
 
     function makeTestsIntoFunction(tests) {
