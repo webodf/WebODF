@@ -438,6 +438,31 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingMergeParagraph(applyDirectStylingSpec, mergeParagraphSpec) {
+        var pointA = applyDirectStylingSpec.position,
+            pointB = applyDirectStylingSpec.position + applyDirectStylingSpec.length;
+
+        // adapt applyDirectStyling spec to merged paragraph
+        if (pointA >= mergeParagraphSpec.sourceStartPosition) {
+            pointA -= 1;
+        }
+        if (pointB >= mergeParagraphSpec.sourceStartPosition) {
+            pointB -= 1;
+        }
+        applyDirectStylingSpec.position = pointA;
+        applyDirectStylingSpec.length = pointB - pointA;
+
+        return {
+            opSpecsA:  [applyDirectStylingSpec],
+            opSpecsB:  [mergeParagraphSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -530,6 +555,29 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformInsertTextMergeParagraph(insertTextSpec, mergeParagraphSpec) {
+        if (insertTextSpec.position >= mergeParagraphSpec.sourceStartPosition) {
+            insertTextSpec.position -= 1;
+        } else {
+            if (insertTextSpec.position < mergeParagraphSpec.sourceStartPosition) {
+                mergeParagraphSpec.sourceStartPosition += insertTextSpec.text.length;
+            }
+            if (insertTextSpec.position < mergeParagraphSpec.destinationStartPosition) {
+                mergeParagraphSpec.destinationStartPosition += insertTextSpec.text.length;
+            }
+        }
+
+        return {
+            opSpecsA:  [insertTextSpec],
+            opSpecsB:  [mergeParagraphSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -613,6 +661,222 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  [insertTextSpec],
             opSpecsB:  [splitParagraphSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpecA
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpecB
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphMergeParagraph(mergeParagraphSpecA, mergeParagraphSpecB, hasAPriority) {
+        var specsForB = [mergeParagraphSpecA],
+            specsForA = [mergeParagraphSpecB],
+            priorityOp,
+            styleParagraphFixup,
+            moveCursorA,
+            moveCursorB;
+
+        if (mergeParagraphSpecA.destinationStartPosition === mergeParagraphSpecB.destinationStartPosition) {
+            // Two merge commands for the same paragraph result in a noop to both sides, as the same
+            // paragraph can only be merged once.
+            specsForB = [];
+            specsForA = [];
+            // If the moveCursor flag is set, the cursor will still need to be adjusted to the right location
+            if (mergeParagraphSpecA.moveCursor) {
+                moveCursorA = /**@type{!ops.OpMoveCursor.Spec}*/({
+                    optype: "MoveCursor",
+                    memberid: mergeParagraphSpecA.memberid,
+                    timestamp: mergeParagraphSpecA.timestamp,
+                    position: mergeParagraphSpecA.sourceStartPosition - 1
+                });
+                specsForB.push(moveCursorA);
+            }
+            if (mergeParagraphSpecB.moveCursor) {
+                moveCursorB = /**@type{!ops.OpMoveCursor.Spec}*/({
+                    optype: "MoveCursor",
+                    memberid: mergeParagraphSpecB.memberid,
+                    timestamp: mergeParagraphSpecB.timestamp,
+                    position: mergeParagraphSpecB.sourceStartPosition - 1
+                });
+                specsForA.push(moveCursorB);
+            }
+
+            // Determine which merge style wins
+            priorityOp = hasAPriority ? mergeParagraphSpecA : mergeParagraphSpecB;
+            styleParagraphFixup = /**@type{!ops.OpSetParagraphStyle.Spec}*/({
+                optype: "SetParagraphStyle",
+                memberid: priorityOp.memberid,
+                timestamp: priorityOp.timestamp,
+                position: priorityOp.destinationStartPosition,
+                styleName: priorityOp.paragraphStyleName
+            });
+            if (hasAPriority) {
+                specsForB.push(styleParagraphFixup);
+            } else {
+                specsForA.push(styleParagraphFixup);
+            }
+        } else if (mergeParagraphSpecA.destinationStartPosition < mergeParagraphSpecB.destinationStartPosition) {
+            mergeParagraphSpecB.destinationStartPosition -= 1;
+            mergeParagraphSpecB.sourceStartPosition -= 1;
+        } else { // mergeParagraphSpecB.destinationStartPosition < mergeParagraphSpecA.destinationStartPosition
+            mergeParagraphSpecA.destinationStartPosition -= 1;
+            mergeParagraphSpecA.sourceStartPosition -= 1;
+        }
+
+        return {
+            opSpecsA:  specsForB,
+            opSpecsB:  specsForA
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphMoveCursor(mergeParagraphSpec, moveCursorSpec) {
+        var pointA = moveCursorSpec.position,
+            pointB = moveCursorSpec.position + moveCursorSpec.length,
+            start = Math.min(pointA, pointB),
+            end = Math.max(pointA, pointB);
+
+        if (start >= mergeParagraphSpec.sourceStartPosition) {
+            start -= 1;
+        }
+        if (end >= mergeParagraphSpec.sourceStartPosition) {
+            end -= 1;
+        }
+
+        // When updating the cursor spec, ensure the selection direction is preserved.
+        // If the length was previously positive, it should remain positive.
+        if (moveCursorSpec.length >= 0) {
+            moveCursorSpec.position = start;
+            moveCursorSpec.length = end - start;
+        } else {
+            moveCursorSpec.position = end;
+            moveCursorSpec.length = start - end;
+        }
+
+        return {
+            opSpecsA:  [mergeParagraphSpec],
+            opSpecsB:  [moveCursorSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphRemoveText(mergeParagraphSpec, removeTextSpec) {
+        // RemoveText ops can't cross paragraph boundaries, so only the position needs to be checked
+        if (removeTextSpec.position >= mergeParagraphSpec.sourceStartPosition) {
+            removeTextSpec.position -= 1;
+        } else {
+            if (removeTextSpec.position < mergeParagraphSpec.destinationStartPosition) {
+                mergeParagraphSpec.destinationStartPosition -= removeTextSpec.length;
+            }
+            if (removeTextSpec.position < mergeParagraphSpec.sourceStartPosition) {
+                mergeParagraphSpec.sourceStartPosition -= removeTextSpec.length;
+            }
+        }
+
+        return {
+            opSpecsA:  [mergeParagraphSpec],
+            opSpecsB:  [removeTextSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphSetParagraphStyle(mergeParagraphSpec, setParagraphStyleSpec) {
+        var opSpecsA = [mergeParagraphSpec],
+            opSpecsB = [setParagraphStyleSpec];
+
+        // SetParagraphStyle ops can't cross paragraph boundaries
+        if (setParagraphStyleSpec.position > mergeParagraphSpec.sourceStartPosition) {
+            // Paragraph beyond the ones region affected by the merge
+            setParagraphStyleSpec.position -= 1;
+        } else if (setParagraphStyleSpec.position === mergeParagraphSpec.destinationStartPosition
+                    || setParagraphStyleSpec.position === mergeParagraphSpec.sourceStartPosition) {
+            // Attempting to style a merging paragraph
+            setParagraphStyleSpec.position = mergeParagraphSpec.destinationStartPosition;
+            mergeParagraphSpec.paragraphStyleName = setParagraphStyleSpec.styleName;
+        }
+
+        return {
+            opSpecsA:  opSpecsA,
+            opSpecsB:  opSpecsB
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphSplitParagraph(mergeParagraphSpec, splitParagraphSpec) {
+        var styleSplitParagraph,
+            moveCursorOp,
+            opSpecsA = [mergeParagraphSpec],
+            opSpecsB = [splitParagraphSpec];
+
+        if (splitParagraphSpec.position < mergeParagraphSpec.destinationStartPosition) {
+            // Split occurs before the merge destination
+            // Splitting a paragraph inserts one step, moving the merge along
+            mergeParagraphSpec.destinationStartPosition += 1;
+            mergeParagraphSpec.sourceStartPosition += 1;
+        } else if (splitParagraphSpec.position >= mergeParagraphSpec.destinationStartPosition
+            && splitParagraphSpec.position < mergeParagraphSpec.sourceStartPosition) {
+            // split occurs within the paragraphs being merged
+            splitParagraphSpec.paragraphStyleName = mergeParagraphSpec.paragraphStyleName;
+            styleSplitParagraph = /**@type{!ops.OpSetParagraphStyle.Spec}*/({
+                optype: "SetParagraphStyle",
+                memberid: mergeParagraphSpec.memberid,
+                timestamp: mergeParagraphSpec.timestamp,
+                position: mergeParagraphSpec.destinationStartPosition,
+                styleName: mergeParagraphSpec.paragraphStyleName
+            });
+            opSpecsA.push(styleSplitParagraph);
+            if (splitParagraphSpec.position === mergeParagraphSpec.sourceStartPosition - 1
+                    && mergeParagraphSpec.moveCursor) {
+                // OdtDocument.getTextNodeAtStep + Spec.moveCursor make it very difficult to control cursor placement
+                // When a split + merge combines, there is a tricky situation because the split will leave other cursors
+                // on the last step in the new paragraph.
+                // When the merge is relocated to attach to the front of the newly inserted paragraph below, the cursor
+                // will end up at the start of the new paragraph. Workaround this by manually setting the cursor back
+                // to the appropriate location after the merge completes
+                moveCursorOp = /**@type{!ops.OpMoveCursor.Spec}*/({
+                    optype: "MoveCursor",
+                    memberid: mergeParagraphSpec.memberid,
+                    timestamp: mergeParagraphSpec.timestamp,
+                    position: splitParagraphSpec.position,
+                    length: 0
+                });
+                opSpecsA.push(moveCursorOp);
+            }
+
+            // SplitParagraph ops effectively create new paragraph boundaries. The user intent
+            // is for the source paragraph to be joined to the END of the dest paragraph. If the
+            // split occurs in the dest paragraph, the source should be joined to the newly created
+            // paragraph instead
+            mergeParagraphSpec.destinationStartPosition = splitParagraphSpec.position + 1;
+            mergeParagraphSpec.sourceStartPosition += 1;
+        } else if (splitParagraphSpec.position >= mergeParagraphSpec.sourceStartPosition) {
+            // Split occurs after the merge source
+            // Merging paragraphs remove one step
+            splitParagraphSpec.position -= 1;
+            splitParagraphSpec.sourceParagraphPosition -= 1;
+        }
+
+        return {
+            opSpecsA:  opSpecsA,
+            opSpecsB:  opSpecsB
         };
     }
 
@@ -1085,6 +1349,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             };
             removeTextSpecResult.unshift(helperOpspec); // helperOp first, so its position is not affected by the real op
         }
+
         // adapt splitParagraphSpec
         if (removeTextSpec.position + removeTextSpec.length <= splitParagraphSpec.position) {
             splitParagraphSpec.position -= removeTextSpec.length;
@@ -1095,11 +1360,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         if (removeTextSpec.position + removeTextSpec.length < splitParagraphSpec.sourceParagraphPosition) {
             // Removed text is before the source paragraph
             splitParagraphSpec.sourceParagraphPosition -= removeTextSpec.length;
-        } else if (removeTextSpec.position < splitParagraphSpec.sourceParagraphPosition) {
-            // The remove op crosses the paragraph boundary
-            // TODO this case can't be handled until OpMergeParagraph is introduced
-            return null;
         }
+        // removeText ops can't cross over paragraph boundaries, so don't check this case
 
         return {
             opSpecsA:  removeTextSpecResult,
@@ -1164,6 +1426,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "AddStyle":             passUnchanged,
             "ApplyDirectStyling":   passUnchanged,
             "InsertText":           passUnchanged,
+            "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
@@ -1178,6 +1441,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         "AddMember": {
             "AddStyle":             passUnchanged,
             "InsertText":           passUnchanged,
+            "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveStyle":          passUnchanged,
@@ -1191,6 +1455,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "AddStyle":             passUnchanged,
             "ApplyDirectStyling":   passUnchanged,
             "InsertText":           passUnchanged,
+            "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
@@ -1205,6 +1470,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         "ApplyDirectStyling": {
             "ApplyDirectStyling":   transformApplyDirectStylingApplyDirectStyling,
             "InsertText":           transformApplyDirectStylingInsertText,
+            "MergeParagraph":       transformApplyDirectStylingMergeParagraph,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveStyle":          passUnchanged,
@@ -1216,6 +1482,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "InsertText": {
             "InsertText":           transformInsertTextInsertText,
+            "MergeParagraph":       transformInsertTextMergeParagraph,
             "MoveCursor":           transformInsertTextMoveCursor,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
@@ -1223,6 +1490,19 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveText":           transformInsertTextRemoveText,
             // TODO:"SetParagraphStyle":    transformInsertTextSetParagraphStyle,
             "SplitParagraph":       transformInsertTextSplitParagraph,
+            "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
+        "MergeParagraph": {
+            "MergeParagraph":       transformMergeParagraphMergeParagraph,
+            "MoveCursor":           transformMergeParagraphMoveCursor,
+            "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
+            "RemoveStyle":          passUnchanged,
+            "RemoveText":           transformMergeParagraphRemoveText,
+            "SetParagraphStyle":    transformMergeParagraphSetParagraphStyle,
+            "SplitParagraph":       transformMergeParagraphSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged

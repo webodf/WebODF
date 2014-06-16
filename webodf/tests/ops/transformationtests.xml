@@ -144,7 +144,97 @@
    <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>DV</text:p></office:text>
   </after>
  </test>
-
+ <test name="ApplyDirectStylingMergeParagraph_MergeBeforeStylingStart">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p/><text:p>ABCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="1"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingMergeParagraph_MergeOnStylingStart">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>A</text:p><text:p>BCD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="2" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingMergeParagraph_MergeWithinStyling" isFailing="true">
+  <comment>Due to #551, the DOMs do not converge even though they will visually render ok</comment>
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>AB</text:p><text:p>CD</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="3">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingMergeParagraph_MergeOnStylingEnd">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABC</text:p><text:p>D</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="3">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
+ <test name="ApplyDirectStylingMergeParagraph_MergeAfterStylingEnd">
+  <before>
+   <office:automatic-styles/>
+   <office:text><text:p>ABC</text:p><text:p>D</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="1" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto63350368_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text><text:p>A<text:span text:style-name="auto63350368_0">BC</text:span>D</text:p></office:text>
+  </after>
+ </test>
  <test name="ApplyDirectStylingRemoveText_X[__]">
   <before>
    <office:automatic-styles/>
@@ -380,6 +470,36 @@
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>ab<c:cursor c:memberId="Bob"/></text:p><text:p/></office:text></after>
  </test>
 
+ <test name="InsertTextMergeParagraph_[ab]_[V]">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="InsertText" memberid="Alice" position="3" text="V"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3" />
+  </opsB>
+  <after><office:text><text:p>abV</text:p></office:text></after>
+ </test>
+ <test name="InsertTextMergeParagraph_[aVb]_[]">
+  <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
+  <opsA>
+   <op optype="InsertText" memberid="Alice" position="1" text="V"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3" />
+  </opsB>
+  <after><office:text><text:p>aVb</text:p></office:text></after>
+ </test>
+ <test name="InsertTextMergeParagraph_[ab]_[]_[V]">
+  <before><office:text><text:p>ab</text:p><text:p/><text:p/></office:text></before>
+  <opsA>
+   <op optype="InsertText" memberid="Alice" position="4" text="V"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3" />
+  </opsB>
+  <after><office:text><text:p>ab</text:p><text:p>V</text:p></office:text></after>
+ </test>
  <test name="InsertTextMoveCursor_A__CV">
   <before><office:text><text:p>ab</text:p><text:p/></office:text></before>
   <opsA>
@@ -726,6 +846,18 @@
   </opsB>
   <after><office:text><text:p>A<c:cursor c:memberId="Bob"/><c:cursor c:memberId="Alice"/>FG</text:p></office:text></after>
  </test>
+ <test name="RemoveTextSplitParagraph_[AB|CD]">
+  <before><office:text><text:p>ABCD</text:p></office:text></before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="RemoveText" memberid="Alice" position="0" length="4"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="SplitParagraph" memberid="Bob" position="2" sourceParagraphPosition="0" moveCursor="true"/>
+  </opsB>
+  <after><office:text><text:p><c:cursor c:memberId="Alice"/></text:p><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
+ </test>
 
  <test name="InsertTextRemoveText_VT">
   <before><office:text><text:p>T</text:p></office:text></before>
@@ -831,6 +963,17 @@
    <op optype="RemoveStyle" memberid="Bob" styleName="S" styleFamily="paragraph"/>
   </opsB>
   <after><office:styles></office:styles><office:text><text:p/></office:text></after>
+ </test>
+ <test name="RemoveParagraphStyleSplitParagraph">
+  <before><office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles><office:text><text:p text:style-name="S"/></office:text></before>
+  <opsA>
+   <op optype="SetParagraphStyle" memberid="Alice" position="0" sourceParagraphPosition="0" styleName=""/>
+   <op optype="RemoveStyle" memberid="Alice" styleName="S" styleFamily="paragraph"/>
+  </opsA>
+  <opsB>
+   <op optype="SplitParagraph" memberid="Bob" position="0" sourceParagraphPosition="0" paragraphStyleName="S"/>
+  </opsB>
+  <after><office:styles/><office:text><text:p/><text:p/></office:text></after>
  </test>
 
  <test name="AddParagraphStyleRemoveParagraphStyle_nextStyleName">
@@ -966,6 +1109,373 @@
   <after>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
    <office:text><text:p/></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMergeParagraph_AthenB_[abc]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="2" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMergeParagraph_BthenA_[abc]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="2" sourceStartPosition="4"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_sameSourcePos">
+  <before>
+   <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SplitParagraph" memberid="Alice" sourceParagraphPosition="3" position="3"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMergeParagraph_[ab]_c">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="2" paragraphStyleName="Alice" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2" paragraphStyleName="Bob" moveCursor="true"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="Bob">a<c:cursor c:memberId="Alice"/><c:cursor c:memberId="Bob"/>b</text:p><text:p>c</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_[a_b]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="3"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_[a_]b">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>a<c:cursor c:memberId="Alice"/>b</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_a[_b]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a<c:anchor c:memberId="Alice"/>b<c:cursor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_ab_[c]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="4" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>ab</text:p><text:p><c:anchor c:memberId="Alice"/>c<c:cursor c:memberId="Alice"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_[a]_bc">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="2" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>a<c:cursor c:memberId="Alice"/></text:p><text:p>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_[ab]c">
+  <before>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="3"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/>c</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMoveCursor_[ab]cd">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>d</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="0" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text><text:p><c:anchor c:memberId="Alice"/>ab<c:cursor c:memberId="Alice"/>cd</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphRemoveText_X_b">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" memberid="Alice" position="0" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>b</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphRemoveText_a_X">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" memberid="Alice" position="2" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphRemoveText_a_Xc">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" memberid="Alice" position="2" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="2" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a</text:p><text:p>c</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphRemoveText_X_bc">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" memberid="Alice" position="0" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="2" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text><text:p/><text:p>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSetParagraphStyle_[a]_b">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" styleName="Alice" memberid="Alice" position="0" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="Alice">ab</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSetParagraphStyle_a_[b]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" styleName="Alice" memberid="Alice" position="2" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="Alice">ab</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSetParagraphStyle_ab_[c]">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" styleName="Alice" memberid="Alice" position="4" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>ab</text:p><text:p text:style-name="Alice">c</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSetParagraphStyle_[a]_bc">
+  <before>
+   <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" styleName="Alice" memberid="Alice" position="0" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="2" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="Alice">a</text:p><text:p>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_a_bc">
+  <before>
+   <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SplitParagraph" memberid="Alice" position="1" sourceParagraphPosition="0"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_ab_c">
+  <before>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SplitParagraph" memberid="Alice" position="3"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_abc">
+  <before>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SplitParagraph" memberid="Alice" position="1" sourceParagraphPosition="0"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_abc_2">
+  <before>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MoveCursor" memberid="Alice" position="2" length="0"/>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="2" moveCursor="true"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="0"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" sourceParagraphPosition="0" moveCursor="true"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a<c:cursor c:memberId="Alice"/></text:p><text:p><c:cursor c:memberId="Bob"/>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_EmptyParagraph">
+  <comment>Merge into an empty paragraph that is being split. Ensure consistent styles result</comment>
+  <before>
+   <office:text><text:p text:style-name="A"/><text:p text:style-name="B">a</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SplitParagraph" memberid="Alice" position="0" sourceParagraphPosition="0" paragraphStyleName="SplitParagraph"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="1" paragraphStyleName="MergeParagraph"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="MergeParagraph"/><text:p text:style-name="MergeParagraph">a</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphSplitParagraph_MergeSplit">
+  <comment>Merge then split the same paragraph on two clients</comment>
+  <before>
+   <office:text><text:p>a</text:p><text:p>bc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="2"/>
+   <op optype="SplitParagraph" memberid="Alice" position="1" sourceParagraphPosition="0"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+   <op optype="SplitParagraph" memberid="Bob" position="1" sourceParagraphPosition="0"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a</text:p><text:p/><text:p>bc</text:p></office:text>
   </after>
  </test>
  <test name="SetParagraphStyleSplitParagraph_[a]_A|B">

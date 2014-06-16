@@ -460,6 +460,7 @@
         "ops.OpAddStyle",
         "ops.OpApplyDirectStyling",
         "ops.OpInsertText",
+        "ops.OpMergeParagraph",
         "ops.OpMoveCursor",
         "ops.OpRemoveCursor",
         "ops.OpRemoveStyle",

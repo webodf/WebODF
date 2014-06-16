@@ -248,6 +248,8 @@ ops.TransformationTests = function TransformationTests(runner) {
                 case "leftMargin":
                 case "rightMargin":
                 case "sourceParagraphPosition":
+                case "destinationStartPosition":
+                case "sourceStartPosition":
                     value = parseInt(value, 10);
                     break;
             }
