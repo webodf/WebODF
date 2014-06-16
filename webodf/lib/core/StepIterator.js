@@ -149,10 +149,12 @@ core.StepIterator = function StepIterator(filter, iterator) {
      * @return {!boolean} Returns true if the iterator ends on a valid step
      */
     this.roundToClosestStep = function() {
-        var currentContainer = container(),
-            currentOffset = offset(),
+        var currentContainer,
+            currentOffset,
             isAtStep = isStep();
         if (!isAtStep) {
+            currentContainer = container();
+            currentOffset = offset();
             // Default rule is to always round a position DOWN to the closest step equal or prior
             // This produces the easiest behaviour to understand (e.g., put the cursor just AFTER the step it represents)
             isAtStep = previousStep();
