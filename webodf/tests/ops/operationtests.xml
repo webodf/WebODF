@@ -1227,7 +1227,7 @@
   </ops>
   <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
  </test>
- <test name="RemoveAndMerge_paragraphWithTrailingSpace" isFailing="true">
+ <test name="RemoveAndMerge_paragraphWithTrailingSpace">
   <before><office:text><text:p>ab </text:p><text:p>cd</text:p></office:text></before>
    <ops>
     <op optype="AddCursor" memberid="Bob"/>
@@ -1238,7 +1238,7 @@
    </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
  </test>
- <test name="RemoveAndMerge_paragraphWithLeadingSpace" isFailing="true">
+ <test name="RemoveAndMerge_paragraphWithLeadingSpace">
   <before><office:text><text:p>ab</text:p><text:p> cd</text:p></office:text></before>
    <ops>
     <op optype="AddCursor" memberid="Bob"/>

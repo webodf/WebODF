@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops, runtime, odf, core*/
+/*global ops, runtime, odf, core, Node*/
 
 /**
  * Merges two adjacent paragraphs together into the first paragraph. The destination paragraph
@@ -89,6 +89,70 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
     }
 
     /**
+     * Remove all the text nodes within the supplied range. These are expected to be insignificant whitespace only.
+     * Assertions will be thrown if this is not the case.
+     *
+     * @param {!Range} range
+     * @return {undefined}
+     */
+    function removeTextNodes(range) {
+        var textNodes;
+
+        if (range.collapsed) {
+            return;
+        }
+
+        domUtils.splitBoundaries(range);
+        textNodes = odfUtils.getTextElements(range, false, true);
+        textNodes.forEach(function(node) {
+            var textNode = /**@type{!Text}*/(node);
+
+            runtime.assert(textNode.nodeType === Node.TEXT_NODE, "Expected node type 3 (Node.TEXT_NODE), found node type " + textNode.nodeType);
+            if (textNode.length > 0) {
+                runtime.assert(odfUtils.isODFWhitespace(textNode.data),
+                    "Non-whitespace node found between paragraph boundary and first or last step");
+
+                // Significant whitespace is only ever the first space char in a series of space.
+                // Therefore, only need to check the first character to ensure complete string is insignificant whitespace.
+                runtime.assert(odfUtils.isSignificantWhitespace(textNode, 0) === false,
+                    "Significant whitespace node found between paragraph boundary and first or last step");
+            } else {
+                // This is not a critical issue, but indicates an operation somewhere isn't correctly normalizing text nodes
+                // after manipulation of the DOM.
+                runtime.log("WARN: Empty text node found during merge operation");
+            }
+            textNode.parentNode.removeChild(textNode);
+        });
+    }
+
+    /**
+     * Remove all insignificant whitespace between the paragraph node boundaries and the first and last step within the
+     * paragraph. This prevents this insignificant whitespace accidentally becoming significant whitespace during the
+     * merge.
+     *
+     * @param {!core.StepIterator} stepIterator
+     * @param {!Element} paragraphElement
+     * @return {undefined}
+     */
+    function trimInsignificantWhitespace(stepIterator, paragraphElement) {
+        var range = paragraphElement.ownerDocument.createRange();
+
+        // Discard insignificant whitespace between the start of the paragraph node and the first step in the paragraph
+        stepIterator.setPosition(paragraphElement, 0);
+        stepIterator.roundToNextStep();
+        range.setStart(paragraphElement, 0);
+        range.setEnd(stepIterator.container(), stepIterator.offset());
+        removeTextNodes(range);
+
+        // Discard insignificant whitespace between the last step in the paragraph and the end of the paragraph node
+        stepIterator.setPosition(paragraphElement, paragraphElement.childNodes.length);
+        stepIterator.roundToPreviousStep();
+        range.setStart(stepIterator.container(), stepIterator.offset());
+        range.setEnd(paragraphElement, paragraphElement.childNodes.length);
+        removeTextNodes(range);
+    }
+
+    /**
      * @param {!ops.OdtDocument} odtDocument
      * @param {!number} steps
      * @returns {!Element}
@@ -128,7 +192,9 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
         runtime.assert(domUtils.containsNode(destinationParagraph, stepIterator.container()),
                         "Destination paragraph must be adjacent to the source paragraph");
 
+        trimInsignificantWhitespace(stepIterator, destinationParagraph);
         downgradeOffset = destinationParagraph.childNodes.length;
+        trimInsignificantWhitespace(stepIterator, sourceParagraph);
 
         mergeParagraphs(destinationParagraph, sourceParagraph);
         // All children have been migrated, now consume up the source parent chain
