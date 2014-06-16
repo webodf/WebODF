@@ -81,7 +81,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
         if (paragraphNode) {
             runtime.assert(isFirstStep(odtDocument, paragraphNode, iterator),
                 "SetParagraphStyle position should be the first position in the paragraph");
-            if (styleName !== "") {
+            if (styleName) {
                 paragraphNode.setAttributeNS(textns, 'text:style-name', styleName);
             } else {
                 paragraphNode.removeAttributeNS(textns, 'style-name');
