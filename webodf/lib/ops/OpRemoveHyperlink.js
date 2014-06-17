@@ -61,13 +61,14 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
         node = domUtils.mergeIntoParent(/**@type{!Node}*/(links[0]));
         range.detach();
 
+        odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();
+        odtDocument.getOdfCanvas().rerenderAnnotations();
         odtDocument.emit(ops.OdtDocument.signalParagraphChanged, {
             paragraphElement: odfUtils.getParagraphElement(node),
             memberId: memberid,
             timeStamp: timestamp
         });
-        odtDocument.getOdfCanvas().rerenderAnnotations();
         return true;
     };
 
