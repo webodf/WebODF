@@ -324,6 +324,33 @@
         this.rangesIntersect = rangesIntersect;
 
         /**
+         * Returns the intersection of two ranges. If there is no intersection, this
+         * will return undefined.
+         *
+         * @param {!Range} range1
+         * @param {!Range} range2
+         * @return {!Range|undefined}
+         */
+        function rangeIntersection(range1, range2) {
+            var newRange;
+
+            if (rangesIntersect(range1, range2)) {
+                newRange = /**@type{!Range}*/(range1.cloneRange());
+                if (range1.compareBoundaryPoints(Range.START_TO_START, range2) === -1) {
+                    // If range1's start is before range2's start, use range2's start
+                    newRange.setStart(range2.startContainer, range2.startOffset);
+                }
+
+                if (range1.compareBoundaryPoints(Range.END_TO_END, range2) === 1) {
+                    // if range1's end is after range2's end, use range2's end
+                    newRange.setEnd(range2.endContainer, range2.endOffset);
+                }
+            }
+            return newRange;
+        }
+        this.rangeIntersection = rangeIntersection;
+
+        /**
          * Returns the maximum available offset for the node. If this is a text
          * node, this will be node.length, or for an element node, childNodes.length
          * @param {!Node} node

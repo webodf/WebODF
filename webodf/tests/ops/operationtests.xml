@@ -377,7 +377,7 @@
    <op optype="InsertText" position="1" text="&#x9;  " moveCursor="true"/>
    <op optype="SplitParagraph" position="4" moveCursor="true"/>
    <op optype="InsertText" position="5" text="U" moveCursor="true"/>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1"/>
   </ops>
   <after><office:text><text:p><text:tab>&#x9;</text:tab> <text:s> </text:s></text:p><text:p>U</text:p></office:text></after>
  </test>
@@ -521,53 +521,59 @@
   </ops>
   <after><office:text><text:p text:style-name="A">a<c:cursor c:memberId="Bob"/><text:span>d</text:span></text:p></office:text></after>
  </test>
- <test name="Remove_deleteMerge1">
+ <test name="MergeParagraph_1">
   <before><office:text><text:p text:style-name="A">abcd</text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="4" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5" paragraphStyleName="A"/>
   </ops>
   <after><office:text><text:p text:style-name="A">abcdefgh</text:p></office:text></after>
  </test>
- <test name="Remove_deleteMerge2">
+ <test name="RemoveAndMerge">
   <before><office:text><text:p text:style-name="A">abc<text:span text:style-name="B">d</text:span></text:p><text:p text:style-name="C"><text:span text:style-name="D">efgh</text:span></text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="2" length="5"/>
+   <op optype="RemoveText" position="5" length="2"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5" paragraphStyleName="A"/>
+   <op optype="RemoveText" position="2" length="2"/>
   </ops>
   <after><office:text><text:p text:style-name="A">ab<text:span text:style-name="D">gh</text:span></text:p></office:text></after>
  </test>
- <test name="Remove_deleteMerge_withCursor">
+ <test name="RemoveAndMerge_withCursor">
   <before><office:text><text:p text:style-name="A"><text:span>a</text:span>bcd</text:p><text:p text:style-name="B"><text:span>e</text:span>fgh</text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="2" length="5"/>
-   <op optype="RemoveText" position="2" length="5"/>
+   <op optype="RemoveText" position="5" length="2"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5" paragraphStyleName="A"/>
+   <op optype="RemoveText" position="2" length="2"/>
   </ops>
   <after><office:text><text:p text:style-name="A"><text:span>a</text:span>b<c:cursor c:memberId="Bob"/>gh</text:p></office:text></after>
  </test>
- <test name="Remove_deleteOntoFirstLine">
+ <test name="RemoveAndMerge_OntoFirstLine">
   <before><office:text><text:p text:style-name="A"><text:span>ab</text:span></text:p><text:p text:style-name="B"><text:span>cde</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="RemoveText" position="0" length="1"/>
    <op optype="RemoveText" position="0" length="1"/>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1" paragraphStyleName="A"/>
   </ops>
   <after><office:text><text:p text:style-name="A"><text:span><c:cursor c:memberId="Bob"/>cde</text:span></text:p></office:text></after>
  </test>
- <test name="Remove_MergeEmptyParagraph">
+ <test name="RemoveAndMerge_EmptyParagraph">
   <before><office:text><text:p text:style-name="A"><draw:frame text:anchor-type="as-char"/></text:p><text:p text:style-name="B"/><text:p text:style-name="C"></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="RemoveText" position="0" length="2"/>
+   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1" paragraphStyleName="A"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
   </ops>
   <after><office:text><text:p text:style-name="A"/><text:p text:style-name="C"><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
- <test name="Remove_MergeEmptyParagraph_naturalStyling">
+ <test name="RemoveAndMerge_EmptyParagraph_naturalStyling">
   <before><office:text><text:p text:style-name="A"><draw:frame text:anchor-type="as-char"/></text:p><text:p text:style-name="B"/><text:p text:style-name="C"></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="RemoveText" position="0" length="2"/>
+   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1"/>
    <op optype="SetParagraphStyle" position="0" styleName="B"/>
    <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
   </ops>
@@ -631,50 +637,65 @@
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
- <test name="Remove_deleteMergeListItem1">
+ <test name="Merge_ListItem1">
   <before><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item><text:list-item><text:p><text:span>world</text:span></text:p></text:list-item></text:list></office:text></before>
    <ops>
-    <op optype="RemoveText" position="5" length="1"/>
+    <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="6"/>
    </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span><text:span>world</text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
- <test name="Remove_deleteMergeListItem2">
+ <test name="Merge_ListItem2">
   <before><office:text><text:list><text:list-item><text:p></text:p><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></text:list-item></text:list></office:text></before>
    <ops>
-    <op optype="RemoveText" position="0" length="1"/>
+    <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1"/>
    </ops>
   <after><office:text><text:list><text:list-item><text:p><text:span>hello</text:span></text:p></text:list-item></text:list></office:text></after>
  </test>
- <test name="Remove_deleteMergeEmpty1">
+ <test name="Merge_EmptyParagraph1">
   <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1" paragraphStyleName="A"/>
   </ops>
   <after><office:text><text:p text:style-name="A">efgh</text:p></office:text></after>
  </test>
- <test name="Remove_deleteMergeEmpty1_naturalStyling">
+ <test name="Merge_Empty1_naturalStyling">
   <before><office:text><text:p text:style-name="A"></text:p><text:p text:style-name="B">efgh</text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1"/>
    <op optype="SetParagraphStyle" position="0" styleName="B"/>
   </ops>
   <after><office:text><text:p text:style-name="B">efgh</text:p></office:text></after>
  </test>
- <test name="Remove_deleteMergeEmpty1_naturalStyling_unspecifiedName">
+ <test name="Merge_Empty1_naturalStyling_unspecifiedName">
   <before><office:text><text:p text:style-name="A"></text:p><text:p>efgh</text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1"/>
    <op optype="SetParagraphStyle" position="0" styleName=""/>
   </ops>
   <after><office:text><text:p>efgh</text:p></office:text></after>
  </test>
- <test name="Remove_deleteMergeEmpty_WithNonOdfChildren">
+ <test name="Merge_Empty_WithNonOdfChildren">
   <before><office:text><text:p text:style-name="A"><foreign:test foreign:id="1"/><foreign:test foreign:id="2"/></text:p><text:p text:style-name="B"><foreign:test foreign:id="3"/>efgh<foreign:test foreign:id="4"/></text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="1"/>
    <op optype="SetParagraphStyle" position="0" styleName="B"/>
   </ops>
   <after><office:text><text:p text:style-name="B"><foreign:test foreign:id="1"/><foreign:test foreign:id="2"/><foreign:test foreign:id="3"/>efgh<foreign:test foreign:id="4"/></text:p></office:text></after>
+ </test>
+ <test name="Merge_MovesCursor">
+  <before><office:text><text:p/><text:p/><text:p>B</text:p></office:text></before>
+  <ops>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="1" sourceStartPosition="2" moveCursor="true"/>
+  </ops>
+  <after><office:text><text:p/><text:p><c:cursor c:memberId="Alice"/>B</text:p></office:text></after>
+ </test>
+ <test name="Merge_CleansUpEmptySpans">
+  <before><office:text><text:p/><text:p><text:span/>B</text:p></office:text></before>
+  <ops>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="1"/>
+  </ops>
+  <after><office:text><text:p>B</text:p></office:text></after>
  </test>
  <test name="Remove_deleteLink1">
   <before><office:text><text:p><text:a xlink:type="simple" xlink:href="http://www.hello.com"><text:span>Hello</text:span></text:a></text:p></office:text></before>
@@ -968,7 +989,10 @@
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
    <op optype="MoveCursor" memberid="Bob" position="5"/>
-   <op optype="RemoveText" position="0" length="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="2"/>
+   <op optype="RemoveText" position="1" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="2"/>
+   <op optype="RemoveText" position="0" length="2"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
@@ -976,7 +1000,10 @@
   <before><office:text><text:p>A</text:p><text:p><text:span><text:s> </text:s></text:span></text:p><text:p><text:span>B</text:span></text:p></office:text></before>
   <ops>
    <op optype="AddCursor" memberid="Bob"/>
-   <op optype="RemoveText" position="0" length="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="2"/>
+   <op optype="RemoveText" position="1" length="1"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="2"/>
+   <op optype="RemoveText" position="0" length="2"/>
   </ops>
   <after><office:text><text:p><c:cursor c:memberId="Bob"/></text:p></office:text></after>
  </test>
@@ -1189,19 +1216,36 @@
    <office:text><text:p/></office:text>
   </after>
  </test>
-  <test name="Remove_deleteMergeBig">
+  <test name="Merge_Big">
   <before><office:text><text:p>zer<text:span>o</text:span></text:p><text:p></text:p><text:p></text:p><text:list><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p></text:p></text:list-item><text:list-item><text:p><text:span>one</text:span></text:p></text:list-item></text:list></office:text></before>
   <ops>
-   <op optype="RemoveText" position="4" length="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5"/>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="5"/>
   </ops>
   <after><office:text><text:p>zer<text:span>o</text:span><text:span>one</text:span></text:p></office:text></after>
  </test>
- <test name="Remove_deleteMerge_paragraphWithTrailingSpace">
+ <test name="RemoveAndMerge_paragraphWithTrailingSpace">
   <before><office:text><text:p>ab </text:p><text:p>cd</text:p></office:text></before>
    <ops>
     <op optype="AddCursor" memberid="Bob"/>
     <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
-    <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
+    <op optype="RemoveText" memberid="Bob" position="3" length="1"/>
+    <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+    <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="2"/>
+   </ops>
+  <after><office:text><text:p>a<c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
+ </test>
+ <test name="RemoveAndMerge_paragraphWithLeadingSpace">
+  <before><office:text><text:p>ab</text:p><text:p> cd</text:p></office:text></before>
+   <ops>
+    <op optype="AddCursor" memberid="Bob"/>
+    <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
+    <op optype="RemoveText" memberid="Bob" position="3" length="1"/>
+    <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+    <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="2"/>
    </ops>
   <after><office:text><text:p>a<c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
  </test>

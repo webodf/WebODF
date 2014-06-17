@@ -46,6 +46,7 @@ gui.TextController = function TextController(
 
     var odtDocument = session.getOdtDocument(),
         odfUtils = new odf.OdfUtils(),
+        domUtils = new core.DomUtils(),
         /**
          * @const
          * @type {!boolean}
@@ -98,51 +99,125 @@ gui.TextController = function TextController(
     }
 
     /**
+     * Return the equivalent cursor range of the specified DOM range.
+     * This is found by rounding the range's start and end DOM points to the closest step as defined by the document's
+     * position filter (and optionally the root filter as well).
+     *
+     * @param {!Range} range Range to convert to an equivalent cursor selection
+     * @param {!Element} subTree Subtree to limit step searches within. E.g., limit to steps within a certain paragraph.
+     * @param {!boolean} withRootFilter Specify true to restrict steps to be within the same root as the range's
+     *      start container.
+     * @return {!{position: !number, length: !number}}
+     */
+    function domToCursorRange(range, subTree, withRootFilter) {
+        var filters = [odtDocument.getPositionFilter()],
+            startStep,
+            endStep,
+            stepIterator;
+
+        if (withRootFilter) {
+            filters.push(odtDocument.createRootFilter(/**@type{!Node}*/(range.startContainer)));
+        }
+
+        stepIterator = odtDocument.createStepIterator(/**@type{!Node}*/(range.startContainer), range.startOffset,
+                                                            filters, subTree);
+        if (!stepIterator.roundToClosestStep()) {
+            runtime.assert(false, "No walkable step found in paragraph element at range start");
+        }
+        startStep = odtDocument.convertDomPointToCursorStep(stepIterator.container(), stepIterator.offset());
+
+        if (range.collapsed) {
+            endStep = startStep;
+        } else {
+            stepIterator.setPosition(/**@type{!Node}*/(range.endContainer), range.endOffset);
+            if (!stepIterator.roundToClosestStep()) {
+                runtime.assert(false, "No walkable step found in paragraph element at range end");
+            }
+            endStep = odtDocument.convertDomPointToCursorStep(stepIterator.container(), stepIterator.offset());
+        }
+        return {
+            position: /**@type{!number}*/(startStep),
+            length: /**@type{!number}*/(endStep - startStep)
+        };
+    }
+
+    /**
      * Creates operations to remove the provided selection and update the destination
      * paragraph's style if necessary.
      * @param {!Range} range
-     * @param {!{position: number, length: number}} selection
      * @return {!Array.<!ops.Operation>}
      */
-    function createOpRemoveSelection(range, selection) {
+    function createRemoveSelectionOps(range) {
         var firstParagraph,
             lastParagraph,
             mergedParagraphStyleName,
-            removeOp = new ops.OpRemoveText(),
-            operations = [removeOp],
-            styleOp;
+            previousParagraphStart,
+            paragraphs = odfUtils.getParagraphElements(range),
+            paragraphRange = /**@type{!Range}*/(range.cloneRange()),
+            operations = [];
 
-        removeOp.init({
-            memberid: inputMemberId,
-            position: selection.position,
-            length: selection.length
-        });
-
-        firstParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(range.startContainer));
-        lastParagraph = odtDocument.getParagraphElement(range.endContainer);
-        // If the removal range spans several paragraphs,
-        // decide the final paragraph's style name.
-        if (firstParagraph !== lastParagraph) {
-            // If the first paragraph is empty, the last paragraph's style wins,
-            // otherwise the first wins.
-
-            // According to https://developer.mozilla.org/en-US/docs/Web/API/element.getAttributeNS, if there is no
-            // explicitly defined style, getAttributeNS might return either "" or null or undefined depending on the
-            // implementation. Simplify the operation by combining all these cases to be ""
+        // If the removal range spans several paragraphs, decide the final paragraph's style name.
+        firstParagraph = paragraphs[0];
+        if (paragraphs.length > 1) {
             if (odfUtils.hasNoODFContent(firstParagraph)) {
+                // If the first paragraph is empty, the last paragraph's style wins, otherwise the first wins.
+                lastParagraph = paragraphs[paragraphs.length - 1];
                 mergedParagraphStyleName = lastParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name') || "";
+
+                // Side note:
+                // According to https://developer.mozilla.org/en-US/docs/Web/API/element.getAttributeNS, if there is no
+                // explicitly defined style, getAttributeNS might return either "" or null or undefined depending on the
+                // implementation. Simplify the operation by combining all these cases to be ""
             } else {
                 mergedParagraphStyleName = firstParagraph.getAttributeNS(odf.Namespaces.textns, 'style-name') || "";
             }
-
-            styleOp = new ops.OpSetParagraphStyle();
-            styleOp.init({
-                memberid: inputMemberId,
-                position: odtDocument.convertDomPointToCursorStep(firstParagraph, 0, roundUp),
-                styleName: mergedParagraphStyleName
-            });
-            operations.push(styleOp);
         }
+
+        // Note, the operations are built up in reverse order to the paragraph DOM order. This prevents the need for
+        // any translation of paragraph start limits as the last paragraph will be removed and merged first
+        paragraphs.forEach(function(paragraph, index) {
+            var paragraphStart,
+                removeLimits,
+                intersectionRange,
+                removeOp,
+                mergeOp;
+
+            paragraphRange.setStart(paragraph, 0);
+            paragraphRange.collapse(true);
+            paragraphStart = domToCursorRange(paragraphRange, paragraph, false).position;
+            if (index > 0) {
+                mergeOp = new ops.OpMergeParagraph();
+                mergeOp.init({
+                    memberid: inputMemberId,
+                    paragraphStyleName: mergedParagraphStyleName,
+                    destinationStartPosition: previousParagraphStart,
+                    sourceStartPosition: paragraphStart,
+                    // For perf reasons, only the very last merge paragraph op should move the cursor
+                    moveCursor: index === 1
+                });
+                operations.unshift(mergeOp);
+            }
+            previousParagraphStart = paragraphStart;
+
+            paragraphRange.selectNodeContents(paragraph);
+            // The paragraph limits will differ from the text remove limits if either
+            // 1. the remove range starts within an different inline root such as within an annotation
+            // 2. the remove range doesn't cover the entire paragraph (i.e., it starts or ends within the paragraph)
+            intersectionRange = domUtils.rangeIntersection(paragraphRange, range);
+            if (intersectionRange) {
+                removeLimits = domToCursorRange(intersectionRange, paragraph, true);
+
+                if (removeLimits.length > 0) {
+                    removeOp = new ops.OpRemoveText();
+                    removeOp.init({
+                        memberid: inputMemberId,
+                        position: removeLimits.position,
+                        length: removeLimits.length
+                    });
+                    operations.unshift(removeOp);
+                }
+            }
+        });
 
         return operations;
     }
@@ -179,7 +254,7 @@ gui.TextController = function TextController(
             paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "";
 
         if (selection.length > 0) {
-            operations = operations.concat(createOpRemoveSelection(range, selection));
+            operations = operations.concat(createRemoveSelectionOps(range));
         }
 
         op = new ops.OpSplitParagraph();
@@ -276,7 +351,7 @@ gui.TextController = function TextController(
             }
         }
         if (selection) {
-            session.enqueue(createOpRemoveSelection(range, selection));
+            session.enqueue(createRemoveSelectionOps(range));
         }
         return selection !== undefined;
     }
@@ -308,11 +383,8 @@ gui.TextController = function TextController(
             return false;
         }
 
-        var range = odtDocument.getCursor(inputMemberId).getSelectedRange(),
-            selection = toForwardSelection(odtDocument.getCursorSelection(inputMemberId));
-        if (selection.length !== 0) {
-            session.enqueue(createOpRemoveSelection(range, selection));
-        }
+        var range = odtDocument.getCursor(inputMemberId).getSelectedRange();
+        session.enqueue(createRemoveSelectionOps(range));
         return true; // The function is always considered handled, even if nothing is removed
     };
 
@@ -331,7 +403,7 @@ gui.TextController = function TextController(
             op, stylingOp, operations = [], useCachedStyle = false;
 
         if (selection.length > 0) {
-            operations = operations.concat(createOpRemoveSelection(range, selection));
+            operations = operations.concat(createRemoveSelectionOps(range));
             useCachedStyle = true;
         }
 

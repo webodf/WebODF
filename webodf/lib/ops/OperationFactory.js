@@ -88,6 +88,7 @@ ops.OperationFactory = function OperationFactory() {
             InsertTable: construct(ops.OpInsertTable),
             InsertText: construct(ops.OpInsertText),
             RemoveText: construct(ops.OpRemoveText),
+            MergeParagraph: construct(ops.OpMergeParagraph),
             SplitParagraph: construct(ops.OpSplitParagraph),
             SetParagraphStyle: construct(ops.OpSetParagraphStyle),
             UpdateParagraphStyle: construct(ops.OpUpdateParagraphStyle),

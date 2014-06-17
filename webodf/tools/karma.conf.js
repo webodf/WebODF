@@ -83,6 +83,8 @@ module.exports = function (config) {
             'lib/ops/OpInsertImage.js',
             'lib/ops/OpInsertTable.js',
             'lib/ops/OpInsertText.js',
+            'lib/odf/CollapsingRules.js',
+            'lib/ops/OpMergeParagraph.js',
             'lib/ops/OpMoveCursor.js',
             'lib/ops/OpRemoveAnnotation.js',
             'lib/ops/OpRemoveBlob.js',

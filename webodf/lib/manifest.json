@@ -217,6 +217,9 @@
         "core.Destroyable",
         "core.EventNotifier"
     ],
+    "odf.CollapsingRules": [
+        "odf.OdfUtils"
+    ],
     "odf.CommandLineTools": [
         "odf.OdfCanvas"
     ],
@@ -374,6 +377,10 @@
     "ops.OpInsertText": [
         "ops.OdtDocument"
     ],
+    "ops.OpMergeParagraph": [
+        "odf.CollapsingRules",
+        "ops.OdtDocument"
+    ],
     "ops.OpMoveCursor": [
         "ops.OdtDocument"
     ],
@@ -396,6 +403,7 @@
         "ops.OdtDocument"
     ],
     "ops.OpRemoveText": [
+        "odf.CollapsingRules",
         "ops.OdtDocument"
     ],
     "ops.OpSetBlob": [
@@ -429,6 +437,7 @@
         "ops.OpInsertImage",
         "ops.OpInsertTable",
         "ops.OpInsertText",
+        "ops.OpMergeParagraph",
         "ops.OpMoveCursor",
         "ops.OpRemoveAnnotation",
         "ops.OpRemoveBlob",
@@ -451,6 +460,7 @@
         "ops.OpAddStyle",
         "ops.OpApplyDirectStyling",
         "ops.OpInsertText",
+        "ops.OpMergeParagraph",
         "ops.OpMoveCursor",
         "ops.OpRemoveCursor",
         "ops.OpRemoveStyle",
