@@ -104,6 +104,7 @@ define("webodf/editor/widgets/editHyperlinks", [
 
             function updateSelectedLink(hyperlinkData) {
                 var selection = editorSession.getSelectedRange(),
+                    selectionController = editorSession.sessionController.getSelectionController(),
                     selectedLinkRange,
                     linksInSelection = editorSession.getSelectedHyperlinks();
 
@@ -112,12 +113,16 @@ define("webodf/editor/widgets/editHyperlinks", [
                         // Editing the single link the cursor is currently within
                         selectedLinkRange = selection.cloneRange();
                         selectedLinkRange.selectNode(linksInSelection[0]);
-                        editorSession.sessionController.getSelectionController().selectRange(selectedLinkRange, true)
+                        selectionController.selectRange(selectedLinkRange, true)
                     }
                     hyperlinkController.removeHyperlinks();
                     hyperlinkController.addHyperlink(hyperlinkData.linkUrl);
                 } else {
                     hyperlinkController.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
+                    linksInSelection = editorSession.getSelectedHyperlinks();
+                    selectedLinkRange = selection.cloneRange();
+                    selectedLinkRange.selectNode(linksInSelection[0]);
+                    selectionController.selectRange(selectedLinkRange, true)
                 }
             }
 
