@@ -59,7 +59,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 return textSerializer.writeToString(fragmentContainer);
             }
 
-            function checkHyperlinkButtons() {
+            function updateLinkEditorContent() {
                 var selection = editorSession.getSelectedRange(),
                     linksInSelection = editorSession.getSelectedHyperlinks(),
                     linkTarget = linksInSelection[0] ? odfUtils.getHyperlinkTarget(linksInSelection[0]) : "http://";
@@ -87,6 +87,10 @@ define("webodf/editor/widgets/editHyperlinks", [
                         isReadOnlyText: false
                     });
                 }
+            }
+
+            function checkHyperlinkButtons() {
+                var linksInSelection = editorSession.getSelectedHyperlinks();
 
                 // The 3rd parameter is false to avoid firing onChange when setting the value programmatically.
                 removeHyperlinkButton.set('disabled', linksInSelection.length === 0, false);
@@ -127,7 +131,8 @@ define("webodf/editor/widgets/editHyperlinks", [
                 linkEditorContent = new EditHyperlinkPane();
                 dialog = new TooltipDialog({
                     title: runtime.tr("Edit link"),
-                    content: linkEditorContent.widget()
+                    content: linkEditorContent.widget(),
+                    onShow: updateLinkEditorContent
                 });
 
                 editHyperlinkButton = new DropDownButton({
