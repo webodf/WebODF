@@ -118,20 +118,16 @@ define("webodf/editor/widgets/editHyperlinks", [
 
             function checkHyperlinkButtons() {
                 var selection = editorSession.getSelectedRange(),
-                    textContent,
                     linksInSelection = editorSession.getSelectedHyperlinks(),
                     linkTarget = linksInSelection[0] ? odfUtils.getHyperlinkTarget(linksInSelection[0]) : "http://";
 
                 if (selection && selection.collapsed && linksInSelection.length === 1) {
                     // Selection is collapsed within a single hyperlink. Assume user is modifying the hyperlink
-                    textContent = selection.cloneRange();
-                    textContent.selectNodeContents(linksInSelection[0]);
                     linkEditorContent.set({
-                        linkDisplayText: getTextContent(textContent),
+                        linkDisplayText: textSerializer.writeToString(linksInSelection[0]),
                         linkUrl: linkTarget,
                         isReadOnlyText: true
                     });
-                    textContent.detach();
                 } else if (selection && !selection.collapsed) {
                     // User has selected part of a hyperlink or a block of text. Assume user is attempting to modify the
                     // existing hyperlink, or wants to convert the selection into a hyperlink
