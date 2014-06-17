@@ -24,16 +24,27 @@ SET(ALONE_EDITOR_FILES
     ${ALONE_EDITOR_ONLY_FILES}
 )
 
-SET(COLLAB_EDITOR_ONLY_FILES
+SET(COMMON_COLLAB_FILES
     SessionListView.js
     MemberListView.js
-    collabeditor.html
     document-save.png
     network-disconnect.png
     vcs-locally-modified.png
     wodocollabpane.css
     wodocollabtexteditor.js
+)
+
+SET(COLLAB_EDITOR_ONLY_FILES
+    collabeditor.html
     pullboxeditor.js
+)
+
+SET(SPLIT_SCREEN_EDITOR_ONLY_FILES
+    splitscreeneditor.css
+    splitscreeneditor.js
+    splitscreeneditor.html
+    welcome.odt
+    avatar-peggy.png
 )
 
 # creates a copy of the compiled webodf.js in the editor build dir
@@ -212,6 +223,7 @@ add_custom_target(product-wodotexteditor DEPENDS ${WODOTEXTEDITOR_ZIP})
 COPY_FILES(COLLAB_EDITOR_DEPS ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${COMMON_EDITOR_FILES}
+    ${COMMON_COLLAB_FILES}
     ${COLLAB_EDITOR_ONLY_FILES}
 )
 
@@ -220,3 +232,12 @@ add_custom_target(server-collab-editorfiles-target
 )
 
 add_custom_target(collabeditor DEPENDS dojo-amalgamation.js editor-webodf.js-target ${COLLAB_EDITOR_DEPS} more-common-editorfiles-target server-collab-editorfiles-target)
+
+COPY_FILES(SPLIT_SCREEN_EDITOR_DEPS ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${COMMON_EDITOR_FILES}
+    ${COMMON_COLLAB_FILES}
+    ${SPLIT_SCREEN_EDITOR_ONLY_FILES}
+)
+
+add_custom_target(splitscreeneditor DEPENDS dojo-amalgamation.js editor-webodf.js-target ${SPLIT_SCREEN_EDITOR_DEPS} more-common-editorfiles-target server-collab-editorfiles-target)

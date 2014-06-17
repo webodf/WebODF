@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Split screen editor</title>
+
+    <!-- dojo setup: start -->
+    <script type="text/javascript">
+        var basedir = window.location.pathname;
+        basedir = basedir.substr(0, basedir.lastIndexOf("/"));
+        dojoConfig = {
+            paths: {
+                "webodf/editor": basedir,
+                "resources": basedir + "/resources"
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" type="text/css"
+          href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/resources/dojo.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dijit/themes/claro/claro.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojox/layout/resources/ExpandoPane.css"/>
+    <link rel="stylesheet"
+          href="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojox/widget/ColorPicker/ColorPicker.css"/>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.3/dojo/dojo.js"
+            data-dojo-config="async: true"></script>
+    <!-- dojo setup: end -->
+
+    <!-- editor: start -->
+    <link rel="stylesheet" type="text/css" href="wodotexteditor.css"/>
+    <link rel="stylesheet" type="text/css" href="wodocollabpane.css"/>
+    <link href="splitscreeneditor.css" rel="stylesheet"/>
+    <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
+    <script src="wodocollabtexteditor.js" type="text/javascript" charset="utf-8"></script>
+    <script src="splitscreeneditor.js" type="text/javascript" charset="utf-8"></script>
+    <!-- editor: end -->
+    <script type="text/javascript">
+        function initializeEditors() {
+            createEditor({
+                sessionId: "splitScreenSession",
+                username: "joe",
+                backend: "jsglobal",
+                sessionListElementId: "leftSessionList",
+                editorContainerElementId: "leftEditorPane"
+            });
+
+            createEditor({
+                sessionId: "splitScreenSession",
+                username: "peggy",
+                backend: "jsglobal",
+                sessionListElementId: "rightSessionList",
+                editorContainerElementId: "rightEditorPane"
+            });
+        }
+    </script>
+</head>
+<body onload="initializeEditors();">
+<div id="wrapper">
+    <div id="controlPanel">
+        <button id="connectionControl" onclick="toggleConnection()"></button>
+        <input id="latencyValueMs" />
+        <button onclick="updateLatency()">Update Latency</button>
+    </div>
+    <div class="left webodfeditor-editorContainer">
+        <div style="display: none; text-align: center">
+            <h1>Sessions</h1>
+            <div id="leftSessionList" class="webodfeditor-sessionList"></div>
+        </div>
+        <div id="leftEditorPane" class="webodfeditor-editorPane" style="display: none"></div>
+    </div>
+    <div class="right webodfeditor-editorContainer">
+        <div style="display: none; text-align: center">
+            <h1>Sessions</h1>
+            <div id="rightSessionList" class="webodfeditor-sessionList"></div>
+        </div>
+        <div id="rightEditorPane" class="webodfeditor-editorPane" style="display: none"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    /**
+     * UI controls
+     */
+    var connectionState = { "connected": "Disconnect", "disconnected": "Reconnect" },
+        connectionButton = document.getElementById("connectionControl"),
+        state = "connected",
+        latencyField = document.getElementById("latencyValueMs"),
+        webOdfServer = new JsGlobalServer();
+
+    function toggleConnection() {
+        switch (state) {
+            case "connected":
+                state = "disconnected";
+                webOdfServer.pause();
+                break;
+            default:
+                state = "connected";
+                webOdfServer.resume();
+                break;
+        }
+        connectionButton.textContent = connectionState[state];
+    }
+
+    function updateLatency() {
+        var newValue = parseInt(latencyField.value, 10);
+        if (isFinite(newValue) && newValue >= 0) {
+            webOdfServer.setLatency(newValue);
+        }
+        latencyField.value = webOdfServer.getLatency() + "ms";
+    }
+
+    connectionButton.textContent = connectionState[state];
+    latencyField.value = webOdfServer.getLatency() + "ms";
+    window.jsGlobalInstance = webOdfServer;
+</script>
+</body>
+</html>

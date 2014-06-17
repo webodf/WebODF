@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * This file is part of WebODF.
@@ -70,7 +70,7 @@ define("webodf/editor/widgets/dialogWidgets/idMangler", ["dojo", "dijit"], funct
         /**
          * Replacement for document.getElementById
          * @param {!string} id
-         * @returns {HTMLElement|*}
+         * @return {HTMLElement|*}
          */
         this.getElementById = function(id) {
             return document.getElementById(id + suffix);
