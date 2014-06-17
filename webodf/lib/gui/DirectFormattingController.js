@@ -112,8 +112,16 @@ gui.DirectFormattingController = function DirectFormattingController(
     function getSelectionInfo() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
-            nodes = range ? getNodes(range) : [],
+            nodes = [],
+            selectionStyles = [];
+
+        if (range) {
+            nodes = getNodes(range);
+            if (nodes.length === 0) {
+                nodes = [range.startContainer, range.endContainer];
+            }
             selectionStyles = odtDocument.getFormatting().getAppliedStyles(nodes);
+        }
 
         if (selectionStyles[0] && directCursorStyleProperties) {
             // direct cursor styles add to the style of the existing range, overriding where defined
