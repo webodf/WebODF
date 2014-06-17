@@ -102,6 +102,25 @@ define("webodf/editor/widgets/editHyperlinks", [
                 });
             }
 
+            function updateSelectedLink(hyperlinkData) {
+                var selection = editorSession.getSelectedRange(),
+                    selectedLinkRange,
+                    linksInSelection = editorSession.getSelectedHyperlinks();
+
+                if (hyperlinkData.isReadOnlyText == "true") {
+                    if (selection && selection.collapsed && linksInSelection.length === 1) {
+                        // Editing the single link the cursor is currently within
+                        selectedLinkRange = selection.cloneRange();
+                        selectedLinkRange.selectNode(linksInSelection[0]);
+                        editorSession.sessionController.getSelectionController().selectRange(selectedLinkRange, true)
+                    }
+                    hyperlinkController.removeHyperlinks();
+                    hyperlinkController.addHyperlink(hyperlinkData.linkUrl);
+                } else {
+                    hyperlinkController.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
+                }
+            }
+
             this.setEditorSession = function (session) {
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
@@ -156,12 +175,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 linkEditorContent.onSave = function () {
                     var hyperlinkData = linkEditorContent.value();
                     editHyperlinkButton.closeDropDown(false);
-                    if (hyperlinkData.isReadOnlyText == "true") {
-                        hyperlinkController.removeHyperlinks();
-                        hyperlinkController.addHyperlink(hyperlinkData.linkUrl);
-                    } else {
-                        hyperlinkController.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
-                    }
+                    updateSelectedLink(hyperlinkData);
                     self.onToolDone();
                 };
 
