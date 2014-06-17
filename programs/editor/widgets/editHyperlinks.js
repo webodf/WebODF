@@ -48,63 +48,6 @@ define("webodf/editor/widgets/editHyperlinks", [
                 textSerializer = new odf.TextSerializer(),
                 dialog;
 
-            textSerializer.filter = new odf.OdfNodeFilter();
-
-            linkEditorContent = new EditHyperlinkPane();
-            dialog = new TooltipDialog({
-                title: runtime.tr("Edit link"),
-                content: linkEditorContent.widget()
-            });
-
-            editHyperlinkButton = new DropDownButton({
-                label: runtime.tr('Edit link'),
-                showLabel: false,
-                iconClass: 'dijitEditorIcon dijitEditorIconCreateLink',
-                dropDown: dialog
-            });
-
-            removeHyperlinkButton = new Button({
-                label: runtime.tr('Remove link'),
-                showLabel: false,
-                disabled: true,
-                iconClass: 'dijitEditorIcon dijitEditorIconUnlink',
-                onClick: function () {
-                    hyperlinkController.removeHyperlinks();
-                    self.onToolDone();
-                }
-            });
-
-            linkEditorContent.onSave = function () {
-                var hyperlinkData = linkEditorContent.value();
-                editHyperlinkButton.closeDropDown(false);
-                if (hyperlinkData.isReadOnlyText == "true") {
-                    hyperlinkController.removeHyperlinks();
-                    hyperlinkController.addHyperlink(hyperlinkData.linkUrl);
-                } else {
-                    hyperlinkController.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
-                }
-                self.onToolDone();
-            };
-
-            linkEditorContent.onCancel = function () {
-                editHyperlinkButton.closeDropDown(false);
-                self.onToolDone();
-            };
-
-            widget.children = [editHyperlinkButton, removeHyperlinkButton];
-            widget.startup = function () {
-                widget.children.forEach(function (element) {
-                    element.startup();
-                });
-            };
-
-            widget.placeAt = function (container) {
-                widget.children.forEach(function (element) {
-                    element.placeAt(container);
-                });
-                return widget;
-            };
-
             /**
              * @param {!Range} selection
              * @return {!string}
@@ -178,7 +121,66 @@ define("webodf/editor/widgets/editHyperlinks", [
 
             this.onToolDone = function () {};
 
-            callback(widget);
+            function init() {
+                textSerializer.filter = new odf.OdfNodeFilter();
+
+                linkEditorContent = new EditHyperlinkPane();
+                dialog = new TooltipDialog({
+                    title: runtime.tr("Edit link"),
+                    content: linkEditorContent.widget()
+                });
+
+                editHyperlinkButton = new DropDownButton({
+                    label: runtime.tr('Edit link'),
+                    showLabel: false,
+                    iconClass: 'dijitEditorIcon dijitEditorIconCreateLink',
+                    dropDown: dialog
+                });
+
+                removeHyperlinkButton = new Button({
+                    label: runtime.tr('Remove link'),
+                    showLabel: false,
+                    disabled: true,
+                    iconClass: 'dijitEditorIcon dijitEditorIconUnlink',
+                    onClick: function () {
+                        hyperlinkController.removeHyperlinks();
+                        self.onToolDone();
+                    }
+                });
+
+                linkEditorContent.onSave = function () {
+                    var hyperlinkData = linkEditorContent.value();
+                    editHyperlinkButton.closeDropDown(false);
+                    if (hyperlinkData.isReadOnlyText == "true") {
+                        hyperlinkController.removeHyperlinks();
+                        hyperlinkController.addHyperlink(hyperlinkData.linkUrl);
+                    } else {
+                        hyperlinkController.addHyperlink(hyperlinkData.linkUrl, hyperlinkData.linkDisplayText);
+                    }
+                    self.onToolDone();
+                };
+
+                linkEditorContent.onCancel = function () {
+                    editHyperlinkButton.closeDropDown(false);
+                    self.onToolDone();
+                };
+
+                widget.children = [editHyperlinkButton, removeHyperlinkButton];
+                widget.startup = function () {
+                    widget.children.forEach(function (element) {
+                        element.startup();
+                    });
+                };
+
+                widget.placeAt = function (container) {
+                    widget.children.forEach(function (element) {
+                        element.placeAt(container);
+                    });
+                    return widget;
+                };
+                callback(widget);
+            }
+            init();
         };
 
         return EditHyperlinks;
