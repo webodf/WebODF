@@ -46,8 +46,8 @@
             runtime.setTimeout(function () {
                 try {
                     task();
-                } catch (/**@type{*}*/e) {
-                    runtime.log(String(e));
+                } catch (/**@type{Error}*/e) {
+                    runtime.log(String(e) + "\n" + e.stack);
                 }
                 taskRunning = false;
                 if (queue.length > 0) {
