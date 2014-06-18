@@ -152,9 +152,9 @@ define("webodf/editor/widgets/paragraphAlignment", [
                 });
             }
 
-            function enableStyleButtons(isEnabled) {
+            function enableStyleButtons(enabledFeatures) {
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !isEnabled.directParagraphStyling);
+                    element.setAttribute('disabled', !enabledFeatures.directParagraphStyling);
                 });
             }
 
@@ -171,7 +171,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
 
                     if(directFormattingController) {
-                        enableStyleButtons(directFormattingController.isEnabled());
+                        enableStyleButtons(directFormattingController.enabledFeatures());
                     }
                 }
 

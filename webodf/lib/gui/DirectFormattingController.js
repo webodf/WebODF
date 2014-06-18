@@ -67,7 +67,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         /**@type {!core.LazyProperty.<!{containsText: !boolean, appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}>} */
         selectionInfoCache,
         /**@type {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}*/
-        isEnabled = {
+        enabledFeatures = {
             directTextStyling: false,
             directParagraphStyling: false
         };
@@ -188,30 +188,31 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function updateEnabledState() {
-        var newIsEnabled = {
+        var newEnabledFeatures = {
             directTextStyling: true,
             directParagraphStyling: true
         };
 
         if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
-            newIsEnabled.directTextStyling = newIsEnabled.directParagraphStyling = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+            newEnabledFeatures.directTextStyling = newEnabledFeatures.directParagraphStyling = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
         }
 
-        if (newIsEnabled.directTextStyling) {
-            newIsEnabled.directTextStyling = selectionInfoCache.value().containsText;
+        if (newEnabledFeatures.directTextStyling) {
+            newEnabledFeatures.directTextStyling = selectionInfoCache.value().containsText;
         }
 
-        if (newIsEnabled !== isEnabled) {
-            isEnabled = newIsEnabled;
-            eventNotifier.emit(gui.DirectFormattingController.enabledChanged, isEnabled);
+        if (!(newEnabledFeatures.directTextStyling === enabledFeatures.directTextStyling
+                && newEnabledFeatures.directParagraphStyling === enabledFeatures.directParagraphStyling)) {
+            enabledFeatures = newEnabledFeatures;
+            eventNotifier.emit(gui.DirectFormattingController.enabledChanged, enabledFeatures);
         }
     }
 
     /**
      * @return {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}
      */
-    this.isEnabled = function () {
-        return isEnabled;
+    this.enabledFeatures = function () {
+        return enabledFeatures;
     };
 
     /**
@@ -265,7 +266,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function formatTextSelection(textProperties) {
-        if (!isEnabled.directTextStyling) {
+        if (!enabledFeatures.directTextStyling) {
             return;
         }
 
@@ -529,7 +530,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
-        if (!isEnabled.directParagraphStyling) {
+        if (!enabledFeatures.directParagraphStyling) {
             return;
         }
 
@@ -737,7 +738,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {!Array.<!ops.Operation>}
      */
     this.createParagraphStyleOps = function (position) {
-        if (!isEnabled.directParagraphStyling) {
+        if (!enabledFeatures.directParagraphStyling) {
             return [];
         }
 
