@@ -289,6 +289,19 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     this.rerenderAnnotations = rerenderAnnotations;
 
     /**
+     * Re-highlights the annotations' spans. To be used when a span is broken by, say,
+     * splitting a paragraph.
+     * @return {undefined}
+     */
+    function rehighlightAnnotations() {
+        annotations.forEach(function (annotation) {
+            unhighlightAnnotation(annotation);
+            highlightAnnotation(annotation);
+        });
+    }
+    this.rehighlightAnnotations = rehighlightAnnotations;
+
+    /**
      * Reports the minimum height in pixels needed to display all
      * annotation notes in the annotation pane.
      * If there is no pane shown or are no annotations, null is returned.
