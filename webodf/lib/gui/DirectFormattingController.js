@@ -64,9 +64,13 @@ gui.DirectFormattingController = function DirectFormattingController(
         // cached text settings
         /**@type{!gui.StyleSummary}*/
         lastSignalledStyleSummary,
-        /**@type {!core.LazyProperty.<!{appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}>} */
+        /**@type {!core.LazyProperty.<!{containsText: !boolean, appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}>} */
         selectionInfoCache,
-        isEnabled = false;
+        /**@type {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}*/
+        isEnabled = {
+            directTextStyling: false,
+            directParagraphStyling: false
+        };
 
     /**
      * Gets the current selection information style summary
@@ -107,29 +111,32 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * Get all styles currently applied to the selected range. If the range is collapsed,
      * this will return the style the next inserted character will have
-     * @return {!{appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}}
+     * @return {!{containsText: !boolean, appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}}
      */
     function getSelectionInfo() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
             nodes = [],
-            selectionStyles = [];
+            selectionStyles = [],
+            selectionContainsText = true;
 
         if (range) {
             nodes = getNodes(range);
             if (nodes.length === 0) {
                 nodes = [range.startContainer, range.endContainer];
+                selectionContainsText = false;
             }
             selectionStyles = odtDocument.getFormatting().getAppliedStyles(nodes);
         }
 
-        if (selectionStyles[0] && directCursorStyleProperties) {
+        if (selectionStyles[0] !== undefined && directCursorStyleProperties) {
             // direct cursor styles add to the style of the existing range, overriding where defined
             selectionStyles[0] = utils.mergeObjects(selectionStyles[0],
                 /**@type {!Object}*/(directCursorStyleProperties));
         }
 
         return {
+            containsText: selectionContainsText,
             appliedStyles: selectionStyles,
             styleSummary: new gui.StyleSummary(selectionStyles)
         };
@@ -181,10 +188,17 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function updateEnabledState() {
-        var /**@type{!boolean}*/newIsEnabled = true;
+        var newIsEnabled = {
+            directTextStyling: true,
+            directParagraphStyling: true
+        };
 
         if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
-            newIsEnabled = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+            newIsEnabled.directTextStyling = newIsEnabled.directParagraphStyling = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+        }
+
+        if (newIsEnabled.directTextStyling) {
+            newIsEnabled.directTextStyling = selectionInfoCache.value().containsText;
         }
 
         if (newIsEnabled !== isEnabled) {
@@ -194,7 +208,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     }
 
     /**
-     * @return {!boolean}
+     * @return {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}
      */
     this.isEnabled = function () {
         return isEnabled;
@@ -251,7 +265,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function formatTextSelection(textProperties) {
-        if (!isEnabled) {
+        if (!isEnabled.directTextStyling) {
             return;
         }
 
@@ -515,7 +529,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
-        if (!isEnabled) {
+        if (!isEnabled.directParagraphStyling) {
             return;
         }
 
@@ -723,7 +737,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {!Array.<!ops.Operation>}
      */
     this.createParagraphStyleOps = function (position) {
-        if (!isEnabled) {
+        if (!isEnabled.directParagraphStyling) {
             return [];
         }
 
