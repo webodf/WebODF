@@ -161,16 +161,16 @@ define("webodf/editor/widgets/simpleStyles", [
                 });
             }
 
-            function enableStyleButtons(isEnabled) {
+            function enableStyleButtons(enabledFeatures) {
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !isEnabled);
+                    element.setAttribute('disabled', !enabledFeatures.directTextStyling);
                 });
             }
 
             function handleCursorMoved(cursor) {
-                if (directFormattingController.isEnabled()) {
+                if (directFormattingController.enabledFeatures().directTextStyling) {
                     var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
-                    enableStyleButtons(!disabled);
+                    enableStyleButtons({ directTextStyling: !disabled });
                 }
             }
 
@@ -189,7 +189,9 @@ define("webodf/editor/widgets/simpleStyles", [
                     directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
 
-                    enableStyleButtons(Boolean(directFormattingController) && directFormattingController.isEnabled());
+                    if (directFormattingController) {
+                        enableStyleButtons(directFormattingController.enabledFeatures());
+                    }
                 }
 
                 updateStyleButtons({
