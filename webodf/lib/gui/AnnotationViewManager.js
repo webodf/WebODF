@@ -67,7 +67,8 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
         CONNECTOR_MARGIN = 30,
         /**@const*/
         NOTE_MARGIN = 20,
-        window = runtime.getWindow();
+        window = runtime.getWindow(),
+        htmlns = "http://www.w3.org/1999/xhtml";
 
     runtime.assert(Boolean(window),
                    "Expected to be run in an environment which has a global window, like a browser.");
@@ -118,7 +119,30 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     }
 
     /**
+     * Returns true if the given node is within the highlighted range of
+     * the given annotation, else returns false.
+     * @param {!Node} node
+     * @param {!string} annotationName
+     * @return {!boolean}
+     */
+    function isNodeWithinAnnotationHighlight(node, annotationName) {
+        var iteratingNode = node.parentElement;
+
+        while (!(iteratingNode.namespaceURI === odf.Namespaces.officens
+                && iteratingNode.localName === "body")) {
+            if (iteratingNode.namespaceURI === htmlns
+                    && /**@type{!HTMLElement}*/(iteratingNode).className === "webodf-annotationHighlight"
+                    && /**@type{!HTMLElement}*/(iteratingNode).getAttribute("annotation") === annotationName) {
+                return true;
+            }
+            iteratingNode = iteratingNode.parentNode;
+        }
+        return false;
+    }
+
+    /**
      * Highlights the text between the annotation node and it's end
+     * Only highlights text that has not already been highlighted
      * @param {!odf.AnnotationElement} annotation
      * @return {undefined}
      */
@@ -135,12 +159,14 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
             textNodes = odfUtils.getTextNodes(range, false);
 
             textNodes.forEach(function (n) {
-                var container = doc.createElement('span');
-                container.className = 'webodf-annotationHighlight';
-                container.setAttribute('annotation', annotationName);
+                if (!isNodeWithinAnnotationHighlight(n, annotationName)) {
+                    var container = doc.createElement('span');
+                    container.className = 'webodf-annotationHighlight';
+                    container.setAttribute('annotation', annotationName);
 
-                n.parentNode.insertBefore(container, n);
-                container.appendChild(n);
+                    n.parentNode.replaceChild(container, n);
+                    container.appendChild(n);
+                }
             });
         }
 
@@ -295,7 +321,6 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
      */
     function rehighlightAnnotations() {
         annotations.forEach(function (annotation) {
-            unhighlightAnnotation(annotation);
             highlightAnnotation(annotation);
         });
     }
