@@ -350,7 +350,7 @@ odf.OdfUtils = function OdfUtils() {
         if (isCharacterElement(node)) {
             return false;
         }
-        if (isODFNode(/**@type{!Node}*/(node.parentNode)) && node.nodeType === Node.TEXT_NODE) {
+        if (isGroupingElement(/**@type{!Node}*/(node.parentNode)) && node.nodeType === Node.TEXT_NODE) {
             return node.textContent.length === 0;
         }
         childNode = node.firstChild;

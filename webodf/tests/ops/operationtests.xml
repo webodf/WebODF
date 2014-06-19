@@ -682,6 +682,13 @@
   </ops>
   <after><office:text><text:p text:style-name="B"><foreign:test foreign:id="1"/><foreign:test foreign:id="2"/><foreign:test foreign:id="3"/>efgh<foreign:test foreign:id="4"/></text:p></office:text></after>
  </test>
+ <test name="Merge_HighlightedAnnotation_bug666">
+  <before><office:text><text:p>A</text:p><text:p><html:span class="webodf-annotationHighlight">B</html:span></text:p></office:text></before>
+  <ops>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="2"/>
+  </ops>
+  <after><office:text><text:p>A<html:span class="webodf-annotationHighlight">B</html:span></text:p></office:text></after>
+ </test>
  <test name="Merge_MovesCursor">
   <before><office:text><text:p/><text:p/><text:p>B</text:p></office:text></before>
   <ops>
