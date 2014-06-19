@@ -396,7 +396,7 @@
          * @param {!Range} range
          * @param {!function(!Node) : number} nodeFilter
          * @param {!number} whatToShow
-         * @return {!Array.<Node>}
+         * @return {!Array.<!Node>}
          */
         /*jslint bitwise:true*/
         function getNodesInRange(range, nodeFilter, whatToShow) {

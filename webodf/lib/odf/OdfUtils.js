@@ -799,7 +799,7 @@ odf.OdfUtils = function OdfUtils() {
      * @param {!Range} range    Range to search for nodes within
      * @param {boolean} includePartial Include partially intersecting text nodes
      *                                 in the result.
-     * @return {!Array.<Node>}
+     * @return {!Array.<!Node>}
      */
     function getTextNodes(range, includePartial) {
         var textNodes;
