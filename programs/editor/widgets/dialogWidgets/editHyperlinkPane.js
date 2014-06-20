@@ -39,6 +39,7 @@ define("webodf/editor/widgets/dialogWidgets/editHyperlinkPane", [
                 contentPane,
                 form,
                 displayTextField,
+                linkField,
                 initialValue;
 
             runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
@@ -66,12 +67,18 @@ define("webodf/editor/widgets/dialogWidgets/editHyperlinkPane", [
                     form.onSubmit = onSave;
                     dijit.byId('cancelHyperlinkChangeButton').onClick = onCancel;
                     displayTextField = dijit.byId('linkDisplayText');
+                    linkField = dijit.byId('linkUrl');
+                    linkField.on("change", function(value) {
+                        displayTextField.set('placeHolder', value);
+                    });
+
                     runtime.translateContent(form.domNode);
                     if (initialValue) {
                         form.set('value', initialValue);
                         displayTextField.set('disabled', initialValue.isReadOnlyText);
                         initialValue = undefined;
                     }
+                    displayTextField.set('placeHolder', linkField.value);
                 }
             });
 
