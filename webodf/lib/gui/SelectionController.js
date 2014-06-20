@@ -63,7 +63,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      */
     function createWordBoundaryStepIterator(node, offset, includeWhitespace) {
         var wordBoundaryFilter = new odf.WordBoundaryFilter(odtDocument, includeWhitespace),
-            nodeRoot = odtDocument.getRootElement(node),
+            nodeRoot = odtDocument.getRootElement(node) || odtDocument.getRootNode(),
             nodeRootFilter = odtDocument.createRootFilter(nodeRoot);
         return odtDocument.createStepIterator(node, offset, [baseFilter, nodeRootFilter, wordBoundaryFilter], nodeRoot);
     }
