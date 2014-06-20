@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * This file is part of WebODF.
