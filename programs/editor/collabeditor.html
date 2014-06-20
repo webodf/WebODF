@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xml:lang="en" lang="en">
+<html style="width:100%; height:100%; margin:0px; padding:0px" xml:lang="en" lang="en">
   <head>
     <!--
     This HTML page is meant to host the client side of a collaborative
@@ -11,7 +11,6 @@
     This page is meant to be served out of a webodf build directory.
     -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
 
     <title>Collaborative Editor</title>
 
@@ -39,13 +38,15 @@
     <!-- dojo setup: end -->
 
     <!-- editor: start -->
-    <link rel="stylesheet" type="text/css" href="editor.css"/>
+    <link rel="stylesheet" type="text/css" href="wodotexteditor.css"/>
+    <link rel="stylesheet" type="text/css" href="wodocollabpane.css"/>
     <script src="webodf.js" type="text/javascript" charset="utf-8"></script>
-    <script src="collabeditor.js" type="text/javascript" charset="utf-8"></script>
+    <script src="wodocollabtexteditor.js" type="text/javascript" charset="utf-8"></script>
+    <script src="pullboxeditor.js" type="text/javascript" charset="utf-8"></script>
     <!-- editor: end -->
   </head>
 
-  <body onload="webodfEditor.boot({backend: 'pullbox'});" class = "claro">
+  <body style="width:100%; height:100%; margin:0px; padding:0px" onload="createEditor({backend:'pullbox'});">
     <!-- 3 pages, switching between them is controlled by setting the style's display value -->
 
     <!-- Login page: start -->
@@ -66,7 +67,7 @@
     <!-- Session list page: end -->
 
     <!-- Editor page: start -->
-    <div id="mainContainer" style="display: none;">
+    <div id="editorContainer" style="display: none; width:100%; height:100%; margin:0px; padding:0px">
     </div>
     <!-- Editor page: end -->
   </body>

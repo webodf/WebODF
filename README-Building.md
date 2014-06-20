@@ -101,6 +101,15 @@ After you have prepared the buildsystem as described above, you execute this com
 
 This creates a file "firefox-extension-odfviewer-x.y.z.xpi", which can be directly installed as add-on in Firefox browsers, so ODF files can be viewed directly in Firefox.
 
+### Wodo.TextEditor component
+
+After you have prepared the buildsystem as described above, you execute this command:
+
+    make product-wodotexteditor
+
+It creates a file "wodotexteditor-x.y.z.zip", which can be copied and used on a system where you want to develop using the component.
+Unzip it there and read the included HOWTO.md file.
+
 ### ViewerJS Plugin
 
 This is currently only called automatically during the build of [ViewerJS](http://viewerjs.org), you will not do this yourself.

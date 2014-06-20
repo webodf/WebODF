@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2014 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * This file is part of WebODF.
@@ -22,29 +22,10 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*
- * bootstrap the editor for server-based collaborative editing
- * this file is meant to be included from HTML and used
- * by users who do not want to know much about the inner
- * complexity.
- * so we need to make it really easy.
- *
- * including this file will result in the namespace/object
- * "webodfEditor" to be available from the HTML side.
- * calling webodfEditor.boot() will start the editor.
- * the method can also take some parameters to specify
- * behaviour. see documentation of that method.
- *
- */
-
-/*global runtime, require, document, alert, gui, window */
-
-// define the namespace/object we want to provide
-// this is the first line of API, the user gets.
-var webodfEditor = (function () {
+function createEditor(args) {
     "use strict";
 
-    var editorInstance = null,
+    var editor = null,
         serverFactory = null,
         server = null,
         editorOptions = {
@@ -56,7 +37,7 @@ var webodfEditor = (function () {
         sessionList,
         userId, token,
         currentSessionId, currentMemberId,
-        booting = false;
+        backend = args.backend;
 
     // TODO: just some quick hack done for testing, make nice (e.g. the position calculation is fragile)
     function addStatusOverlay(parentElement, symbolFileName, position) {
@@ -109,8 +90,8 @@ var webodfEditor = (function () {
     /**
      * @return {undefined}
      */
-    function startEditing() {
-        editorInstance.startEditing();
+    function onEditingStarted() {
+        // nothing to do right now
     }
 
     /**
@@ -118,8 +99,7 @@ var webodfEditor = (function () {
      * @return {undefined}
      */
     function closeEditing(ignoreError) {
-        editorInstance.endEditing();
-        editorInstance.closeSession(function() {
+        editor.leaveSession(function() {
             server.leaveSession(currentSessionId, currentMemberId, function() {
                 showSessions();
             }, function() {
@@ -154,8 +134,8 @@ var webodfEditor = (function () {
      * @param {!string} sessionId
      * @return {undefined}
      */
-    function enterSession(sessionId) {
-        switchToPage("mainContainer");
+    function joinSession(sessionId) {
+        switchToPage("editorContainer");
 
         sessionList.setUpdatesEnabled(false);
 
@@ -165,53 +145,38 @@ var webodfEditor = (function () {
         server.joinSession(userId, sessionId, function(memberId) {
             currentMemberId = memberId;
 
-            if (!editorInstance) {
-                require({ }, [
-                "webodf/editor/Translator",
-                "webodf/editor/Editor"],
-                    function (Translator, Editor) {
-                        var locale = navigator.language || "en-US",
-                            editorBase = dojo.config && dojo.config.paths && dojo.config.paths["webodf/editor"],
-                            translationsDir = '/translations',
-                            t;
+            if (!editor) {
+                editorOptions.networkSecurityToken = token;
+                editorOptions.closeCallback = closeEditing;
+                Wodo.createCollabTextEditor('editorContainer', editorOptions, function(err, e) {
+                    var canvasContainerElement;
 
-                        runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
+                    editor = e;
 
-                        t = new Translator(editorBase + translationsDir, locale, function (editorTranslator) {
-                            var canvasContainerElement;
+                    canvasContainerElement = editor.getCanvasContainerElement();
+                    savingOverlay = addStatusOverlay(canvasContainerElement, "document-save.png", 0);
+                    hasLocalUnsyncedOpsOverlay = addStatusOverlay(canvasContainerElement, "vcs-locally-modified.png", 0);
+                    disconnectedOverlay = addStatusOverlay(canvasContainerElement, "network-disconnect.png", 1);
 
-                            runtime.setTranslator(editorTranslator.translate);
+                    editor.addEventListener(Wodo.EVENT_BEFORESAVETOFILE, function() {
+                        savingOverlay.style.display = "";
+                    });
+                    editor.addEventListener(Wodo.EVENT_SAVEDTOFILE, function() {
+                        savingOverlay.style.display = "none";
+                    });
+                    editor.addEventListener(Wodo.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function(has) {
+                        hasLocalUnsyncedOpsOverlay.style.display = has ? "" : "none";
+                    });
+                    editor.addEventListener(Wodo.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function(has) {
+                        disconnectedOverlay.style.display = has ? "none" : "";
+                    });
+                    editor.addEventListener(Wodo.EVENT_UNKNOWNERROR, handleEditingError);
 
-                            editorOptions.networkSecurityToken = token;
-                            editorOptions.closeCallback = closeEditing;
-
-                            editorInstance = new Editor("mainContainer", editorOptions);
-                            canvasContainerElement = editorInstance.getCanvasContainerElement();
-                            savingOverlay = addStatusOverlay(canvasContainerElement, "document-save.png", 0);
-                            hasLocalUnsyncedOpsOverlay = addStatusOverlay(canvasContainerElement, "vcs-locally-modified.png", 0);
-                            disconnectedOverlay = addStatusOverlay(canvasContainerElement, "network-disconnect.png", 1);
-
-                            editorInstance.addEventListener(Editor.EVENT_BEFORESAVETOFILE, function() {
-                                savingOverlay.style.display = "";
-                            });
-                            editorInstance.addEventListener(Editor.EVENT_SAVEDTOFILE, function() {
-                                savingOverlay.style.display = "none";
-                            });
-                            editorInstance.addEventListener(Editor.EVENT_HASLOCALUNSYNCEDOPERATIONSCHANGED, function(has) {
-                                hasLocalUnsyncedOpsOverlay.style.display = has ? "" : "none";
-                            });
-                            editorInstance.addEventListener(Editor.EVENT_HASSESSIONHOSTCONNECTIONCHANGED, function(has) {
-                                disconnectedOverlay.style.display = has ? "none" : "";
-                            });
-                            editorInstance.addEventListener(Editor.EVENT_ERROR, handleEditingError);
-
-                            // load the document and get called back when it's live
-                            editorInstance.openSession(serverFactory.createSessionBackend(sessionId, memberId, server), startEditing);
-                        });
-                    }
-                );
+                    // load the document and get called back when it's live
+                    editor.joinSession(serverFactory.createSessionBackend(sessionId, memberId, server), onEditingStarted);
+                });
             } else {
-                editorInstance.openSession(serverFactory.createSessionBackend(sessionId, memberId, server), startEditing);
+                editor.joinSession(serverFactory.createSessionBackend(sessionId, memberId, server), onEditingStarted);
             }
         }, function() {
             // TODO: handle error
@@ -239,12 +204,10 @@ var webodfEditor = (function () {
      * @return {undefined}
      */
     function startLoginProcess(callback) {
-        booting = true;
-
-        runtime.assert(editorInstance === null, "cannot boot with instanciated editor");
+        runtime.assert(editor === null, "cannot boot with instantiated editor");
 
         function loginSuccess(userData) {
-            require({ }, ["webodf/editor/SessionListView"],
+            require(["webodf/editor/SessionListView"],
                 function (SessionListView) {
                     var sessionListDiv = document.getElementById("sessionList"),
                         sessionId = extractSessionId(),
@@ -256,11 +219,11 @@ var webodfEditor = (function () {
 
                     // add session listing
                     sessionList = new serverFactory.createSessionList(server);
-                    sessionListView = new SessionListView(sessionList, sessionListDiv, enterSession);
+                    sessionListView = new SessionListView(sessionList, sessionListDiv, joinSession);
 
                     if (sessionId) {
                         // TODO: check if session exists
-                        enterSession(sessionId);
+                        joinSession(sessionId);
                     } else {
                         switchToPage("sessionListContainer");
                     }
@@ -288,43 +251,20 @@ var webodfEditor = (function () {
         document.loginForm.login.focus();
     }
 
-    /**
-     * @param {!Object} args
-     *
-     * args:
-     *
-     * backend:   name of the server to use
-     *
-     * callback:  callback to be called as soon as the document is loaded
-     *
-     * @return {undefined}
-     */
-    function boot(args) {
-        runtime.assert(!booting, "editor creation already in progress");
-
-        if (args.saveCallback) {
-            editorOptions.saveCallback = args.saveCallback;
-        }
-
-        // start the editor with network
-        runtime.log("starting collaborative editor for ["+args.backend+"].");
-        require({ }, ["webodf/editor/server/"+args.backend+"/ServerFactory"], function (ServerFactory) {
-            serverFactory = new ServerFactory();
-            server = serverFactory.createServer();
-            // wait for a network connection to establish.
-            // call the callback when done, when finally failed, or
-            // when a timeout reached.
-            // the parameter to the callback is a string with the possible
-            // values: "unavailable", "timeout", "ready"
-            server.connect(8000, function (state) {
-                if (state === "ready") {
-                    startLoginProcess();
-                }
-            });
+    // start the editor with network
+    runtime.log("starting collaborative editor for ["+backend+"].");
+    require(["webodf/editor/server/"+backend+"/ServerFactory"], function (ServerFactory) {
+        serverFactory = new ServerFactory();
+        server = serverFactory.createServer();
+        // wait for a network connection to establish.
+        // call the callback when done, when finally failed, or
+        // when a timeout reached.
+        // the parameter to the callback is a string with the possible
+        // values: "unavailable", "timeout", "ready"
+        server.connect(8000, function (state) {
+            if (state === "ready") {
+                startLoginProcess();
+            }
         });
-    }
-
-    // exposed API
-    return { boot: boot };
-}());
-
+    });
+}
