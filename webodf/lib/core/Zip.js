@@ -41,8 +41,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
         filesize,
         /**@type{number}*/
         nEntries,
-        /**@type{function(!Uint8Array,number):!Uint8Array}*/
-        inflate = new core.RawInflate().inflate,
+        /**@type{!function(!Uint8Array,number):!Uint8Array}*/
+        inflate = core.RawInflate.inflate,
         /**@type{!core.Zip}*/
         zip = this,
         base64 = new core.Base64();

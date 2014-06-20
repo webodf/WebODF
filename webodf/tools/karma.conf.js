@@ -34,7 +34,6 @@ module.exports = function (config) {
             'lib/core/PositionIterator.js',
             'lib/core/PositionFilter.js',
             'lib/core/PositionFilterChain.js',
-            'lib/core/RawDeflate.js',
             'lib/core/RawInflate.js',
             'lib/core/ScheduledTask.js',
             'lib/core/enums.js',
