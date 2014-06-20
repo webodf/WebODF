@@ -86,6 +86,12 @@ gui.SessionViewOptions = function () {
             editInfons = 'urn:webodf:names:editinfo',
             /**@type{!Object.<string,!gui.EditInfoMarker>}*/
             editInfoMap = {},
+            /**@type{!ops.OdtDocument}*/
+            odtDocument,
+            /**@type{!odf.OdfCanvas}*/
+            odfCanvas,
+            /**@type{!core.ScheduledTask}*/
+            highlightRefreshTask,
             showEditInfoMarkers = configOption(viewOptions.editInfoMarkersInitiallyVisible, true),
             showCaretAvatars = configOption(viewOptions.caretAvatarsInitiallyVisible, true),
             blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true);
@@ -383,6 +389,18 @@ gui.SessionViewOptions = function () {
          */
         function onParagraphChanged(info) {
             highlightEdit(info.paragraphElement, info.memberId, info.timeStamp);
+            highlightRefreshTask.trigger();
+        }
+
+        /**
+         * @return {undefined}
+         */
+        function refreshHighlights() {
+            var annotationViewManager = odfCanvas.getAnnotationViewManager();
+            if (annotationViewManager) {
+                annotationViewManager.rehighlightAnnotations();
+                odtDocument.fixCursorPositions();
+            }
         }
 
         function processConstraints() {
@@ -406,12 +424,11 @@ gui.SessionViewOptions = function () {
         }
 
         /**
-         * @param {!function(!Error=)} callback, passing an error object in case of error
+         * @param {!function(!Error=)} callback
          * @return {undefined}
          */
-        this.destroy = function (callback) {
-            var odtDocument = session.getOdtDocument(),
-                /**@type{!Array.<!gui.EditInfoMarker>}*/
+        function destroy(callback) {
+            var /**@type{!Array.<!gui.EditInfoMarker>}*/
                 editInfoArray = Object.keys(editInfoMap).map(function (keyname) {
                     return editInfoMap[keyname];
                 });
@@ -447,10 +464,20 @@ gui.SessionViewOptions = function () {
                     }
                 }
             }(0, undefined));
+        }
+
+        /**
+         * @param {!function(!Error=)} callback, passing an error object in case of error
+         * @return {undefined}
+         */
+        this.destroy = function (callback) {
+            var cleanup = [highlightRefreshTask.destroy, destroy];
+            core.Async.destroyAll(cleanup, callback);
         };
 
         function init() {
-            var odtDocument = session.getOdtDocument();
+            odtDocument = session.getOdtDocument();
+            odfCanvas = odtDocument.getOdfCanvas();
 
             odtDocument.subscribe(ops.Document.signalMemberAdded, renderMemberData);
             odtDocument.subscribe(ops.Document.signalMemberUpdated, renderMemberData);
@@ -474,6 +501,8 @@ gui.SessionViewOptions = function () {
             // Add a css sheet for annotation constraint styling
             annotationConstraintStyles = newStyleSheet();
             processConstraints();
+
+            highlightRefreshTask = core.Task.createRedrawTask(refreshHighlights);
         }
         init();
     };
