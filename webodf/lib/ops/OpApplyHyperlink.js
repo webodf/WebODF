@@ -110,6 +110,7 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
         boundaryNodes.forEach(domUtils.normalizeTextNodes);
         range.detach();
 
+        odtDocument.fixCursorPositions();
         odtDocument.getOdfCanvas().refreshSize();
         odtDocument.getOdfCanvas().rerenderAnnotations();
         modifiedParagraphs.forEach(function (paragraph) {
