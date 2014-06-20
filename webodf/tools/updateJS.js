@@ -577,6 +577,8 @@ function Main(cmakeListPath) {
             path,
             license,
             licenses = {},
+            // files for which jslint is not run
+            jslintExceptions = ["lib/core/RawInflate.js"].map(pathModule.normalize),
             // files for which the license is not checked
             licenseExceptions = ["lib/HeaderCompiled.js", "lib/core/JSLint.js",
                 "lib/core/RawDeflate.js", "lib/core/RawInflate.js"].map(pathModule.normalize),
@@ -590,7 +592,9 @@ function Main(cmakeListPath) {
             if (contents.hasOwnProperty(path)
                     && typeof contents[path] === "string") {
                 // run jslint of the content of a file
-                runJSLint(jslint, path, contents[path]);
+                if (jslintExceptions.indexOf(path) === -1) {
+                    runJSLint(jslint, path, contents[path]);
+                }
                 // collect the license from the file
                 if (licenseExceptions.indexOf(path) === -1) {
                     license = getLicense(path, contents[path]);
