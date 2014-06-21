@@ -1198,6 +1198,36 @@
   </after>
  </test>
 
+  <test name="SetParagraphStyleSetParagraphStyle_samePos">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" position="4" styleName="S1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S2">def</text:p></office:text>
+  </after>
+ </test>
+
+  <test name="SetParagraphStyleSetParagraphStyle_differentPos">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" position="0" styleName="S1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S2"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="S1">abc</text:p><text:p text:style-name="S2">def</text:p></office:text>
+  </after>
+ </test>
+
  <test name="MergeParagraphMergeParagraph_AthenB_[abc]">
   <before>
    <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>

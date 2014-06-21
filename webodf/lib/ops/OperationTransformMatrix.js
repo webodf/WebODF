@@ -1000,6 +1000,27 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpecA
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpecB
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformSetParagraphStyleSetParagraphStyle(setParagraphStyleSpecA, setParagraphStyleSpecB, hasAPriority) {
+        if (setParagraphStyleSpecA.position === setParagraphStyleSpecB.position) {
+            if (hasAPriority) {
+                setParagraphStyleSpecB.styleName = setParagraphStyleSpecA.styleName;
+            } else {
+                setParagraphStyleSpecA.styleName = setParagraphStyleSpecB.styleName;
+            }
+        }
+
+        return {
+            opSpecsA:  [setParagraphStyleSpecA],
+            opSpecsB:  [setParagraphStyleSpecB]
+        };
+    }
+
+    /**
      * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -1589,7 +1610,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "UpdateParagraphStyle": passUnchanged
         },
         "SetParagraphStyle": {
-            // TODO:"SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
+            "SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
             "SplitParagraph":       transformSetParagraphStyleSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
