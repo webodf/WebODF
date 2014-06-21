@@ -1155,6 +1155,48 @@
   </after>
  </test>
 
+ <test name="RemoveTextSetParagraphStyle_before">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" position="1" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>ac</text:p><text:p text:style-name="S">def</text:p></office:text>
+  </after>
+ </test>
+ <test name="RemoveTextSetParagraphStyle_samePos">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" position="4" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S">ef</text:p></office:text>
+  </after>
+ </test>
+ <test name="RemoveTextSetParagraphStyle_after">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" position="5" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S">df</text:p></office:text>
+  </after>
+ </test>
 
  <test name="MergeParagraphMergeParagraph_AthenB_[abc]">
   <before>

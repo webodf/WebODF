@@ -1341,6 +1341,23 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveTextSetParagraphStyle(removeTextSpec, setParagraphStyleSpec) {
+        // Removal is done entirely in some preceding paragraph
+        if (removeTextSpec.position < setParagraphStyleSpec.position) {
+            setParagraphStyleSpec.position -= removeTextSpec.length;
+        }
+
+        return {
+            opSpecsA:  [removeTextSpec],
+            opSpecsB:  [setParagraphStyleSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1565,7 +1582,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "RemoveText": {
             "RemoveText":           transformRemoveTextRemoveText,
-            // TODO:"SetParagraphStyle":    transformRemoveTextSetParagraphStyle,
+            "SetParagraphStyle":    transformRemoveTextSetParagraphStyle,
             "SplitParagraph":       transformRemoveTextSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
