@@ -644,6 +644,22 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformInsertTextSetParagraphStyle(insertTextSpec, setParagraphStyleSpec) {
+        if (setParagraphStyleSpec.position > insertTextSpec.position) {
+            setParagraphStyleSpec.position += insertTextSpec.text.length;
+        }
+
+        return {
+            opSpecsA:  [insertTextSpec],
+            opSpecsB:  [setParagraphStyleSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1488,7 +1504,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           transformInsertTextRemoveText,
-            // TODO:"SetParagraphStyle":    transformInsertTextSetParagraphStyle,
+            "SetParagraphStyle":    transformInsertTextSetParagraphStyle,
             "SplitParagraph":       transformInsertTextSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
