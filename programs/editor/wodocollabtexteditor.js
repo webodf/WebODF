@@ -506,7 +506,9 @@ var Wodo = Wodo || (function () {
             function createElement(tagLocalName, id, className) {
                 var element;
                 element = document.createElementNS(documentns, tagLocalName);
-                element.id = id;
+                if (id) {
+                    element.id = id;
+                }
                 element.classList.add(className);
                 return element;
             }
