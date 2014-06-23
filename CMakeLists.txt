@@ -71,7 +71,7 @@ else ()
 endif ()
 
 # java runtime is needed for Closure Compiler
-find_package(Java COMPONENTS Runtime)
+find_package(Java COMPONENTS Runtime REQUIRED)
 
 # Node.js will be downloaded on Windows systems, so check for installed version is below
 SET(REQUIRED_NODEJS_VERSION 0.10.5)
@@ -92,33 +92,29 @@ else ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
 endif ( IS_DIRECTORY $ENV{WEBODF_DOWNLOAD_DIR} )
 MESSAGE ( STATUS "external downloads will be stored/expected in: ${EXTERNALS_DOWNLOAD_DIR}" )
 
-if(Java_JAVA_EXECUTABLE)
-    # Closure Compiler
-    ExternalProject_Add(
-        ClosureCompiler
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://dl.google.com/closure-compiler/compiler-20130823.tar.gz"
-        URL_MD5 105db24c4676e23f2495adfdea3159bc
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
-    set(CLOSURE_JAR ${CMAKE_BINARY_DIR}/ClosureCompiler-prefix/src/ClosureCompiler/compiler.jar)
-endif(Java_JAVA_EXECUTABLE)
+# Closure Compiler
+ExternalProject_Add(
+    ClosureCompiler
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    URL "http://dl.google.com/closure-compiler/compiler-20130823.tar.gz"
+    URL_MD5 105db24c4676e23f2495adfdea3159bc
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+)
+set(CLOSURE_JAR ${CMAKE_BINARY_DIR}/ClosureCompiler-prefix/src/ClosureCompiler/compiler.jar)
 
 # Rhino
-if(Java_JAVA_EXECUTABLE)
-    ExternalProject_Add(
-        Rhino
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://ftp.mozilla.org/pub/js/rhino1_7R3.zip"
-        URL_MD5 99d94103662a8d0b571e247a77432ac5
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
-    set(RHINO ${CMAKE_BINARY_DIR}/Rhino-prefix/src/Rhino/js.jar)
-endif(Java_JAVA_EXECUTABLE)
+ExternalProject_Add(
+    Rhino
+    DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
+    URL "http://ftp.mozilla.org/pub/js/rhino1_7R3.zip"
+    URL_MD5 99d94103662a8d0b571e247a77432ac5
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+)
+set(RHINO ${CMAKE_BINARY_DIR}/Rhino-prefix/src/Rhino/js.jar)
 
 # JSDoc
 ExternalProject_Add(

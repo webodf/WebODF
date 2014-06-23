@@ -149,24 +149,18 @@ endforeach(AE_FILE)
 
 add_custom_target(wodotexteditorbuilddir-target DEPENDS ${WODOTEXTEDITORBUILDDIR} ${WODOTEXTEDITOR_BUILDFILES})
 
-if (Java_JAVA_EXECUTABLE)
-  set(WODOTEXTEDITORDOC_BUILDDIR ${WODOTEXTEDITORBUILDDIR}/docs)
-  add_custom_command(
-       OUTPUT ${WODOTEXTEDITORDOC_BUILDDIR}/index.html
-       COMMAND ${Java_JAVA_EXECUTABLE} ARGS -jar ${JSDOCDIR}/jsrun.jar
-          ${JSDOCDIR}/app/run.js
-          -d=${WODOTEXTEDITORDOC_BUILDDIR}
-          -t=${JSDOCDIR}/templates/jsdoc
-          ${WODOTEXTEDITORBUILDDIR}/wodotexteditor.js
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DEPENDS wodotexteditorbuilddir-target JsDoc
-  )
-  add_custom_target(wodotexteditor-doc DEPENDS ${WODOTEXTEDITORDOC_BUILDDIR}/index.html)
-else (Java_JAVA_EXECUTABLE)
-    # TODO: create a proper dummy target, though ideally this would be a warning that the docs will be missing, perhaps should even fail
-#   add_custom_target(doc DEPENDS ${WODOTEXTEDITORBUILDDIR}/docs/index.html)
-endif (Java_JAVA_EXECUTABLE)
-
+set(WODOTEXTEDITORDOC_BUILDDIR ${WODOTEXTEDITORBUILDDIR}/docs)
+add_custom_command(
+    OUTPUT ${WODOTEXTEDITORDOC_BUILDDIR}/index.html
+    COMMAND ${Java_JAVA_EXECUTABLE} ARGS -jar ${JSDOCDIR}/jsrun.jar
+        ${JSDOCDIR}/app/run.js
+        -d=${WODOTEXTEDITORDOC_BUILDDIR}
+        -t=${JSDOCDIR}/templates/jsdoc
+        ${WODOTEXTEDITORBUILDDIR}/wodotexteditor.js
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS wodotexteditorbuilddir-target JsDoc
+)
+add_custom_target(wodotexteditor-doc DEPENDS ${WODOTEXTEDITORDOC_BUILDDIR}/index.html)
 
 # package wodotexteditor
 set(WODOTEXTEDITOR_ZIP wodotexteditor-${WEBODF_VERSION}.zip)
