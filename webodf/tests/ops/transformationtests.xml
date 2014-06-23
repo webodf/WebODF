@@ -619,6 +619,50 @@
   </opsB>
   <after><office:text><text:p>a</text:p><text:p><c:cursor c:memberId="Bob"/></text:p><text:p><c:cursor c:memberId="Alice"/>b</text:p></office:text></after>
  </test>
+
+ <test name="InsertTextSetParagraphStyle_before">
+  <before>
+   <office:text><text:p/><text:p/></office:text>
+  </before>
+  <opsA>
+   <op optype="InsertText" position="0" text="abc"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="1" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S"/></office:text>
+  </after>
+ </test>
+ <test name="InsertTextSetParagraphStyle_samePos">
+  <before>
+   <office:text><text:p/><text:p/></office:text>
+  </before>
+  <opsA>
+   <op optype="InsertText" position="1" text="abc"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="1" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p/><text:p text:style-name="S">abc</text:p></office:text>
+  </after>
+ </test>
+ <test name="InsertTextSetParagraphStyle_after">
+  <before>
+   <office:text><text:p/><text:p>123</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="InsertText" position="4" text="abc"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="1" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p/><text:p text:style-name="S">123abc</text:p></office:text>
+  </after>
+ </test>
+
  <test name="InsertTextSplitParagraph_TaVT">
   <before><office:text><text:p>TT</text:p></office:text></before>
   <opsA>
@@ -898,6 +942,49 @@
   <after><office:text><text:p><c:cursor c:memberId="Bob"/>V<c:cursor c:memberId="Alice"/></text:p></office:text></after>
  </test>
 
+ <test name="RemoveTextSetParagraphStyle_before">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" position="1" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>ac</text:p><text:p text:style-name="S">def</text:p></office:text>
+  </after>
+ </test>
+ <test name="RemoveTextSetParagraphStyle_samePos">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" position="4" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S">ef</text:p></office:text>
+  </after>
+ </test>
+ <test name="RemoveTextSetParagraphStyle_after">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveText" position="5" length="1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S">df</text:p></office:text>
+  </after>
+ </test>
+
  <test name="SplitParagraphRemoveText_VT">
   <before><office:text><text:p>T</text:p></office:text></before>
   <opsA>
@@ -1111,6 +1198,7 @@
    <office:text><text:p/></office:text>
   </after>
  </test>
+
  <test name="MergeParagraphMergeParagraph_AthenB_[abc]">
   <before>
    <office:text><text:p>a</text:p><text:p>b</text:p><text:p>c</text:p></office:text>
@@ -1800,6 +1888,35 @@
    <op optype="SplitParagraph" memberid="Bob" position="1" moveCursor="true" sourceParagraphPosition="0"/>
   </opsB>
   <after><office:text><text:p><c:cursor c:memberId="Alice"/>a</text:p><text:p>b<c:anchor c:memberId="Alice"/></text:p><text:p/></office:text></after>
+ </test>
+
+ <test name="SetParagraphStyleSetParagraphStyle_samePos">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" position="4" styleName="S1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S2"/>
+  </opsB>
+  <after>
+   <office:text><text:p>abc</text:p><text:p text:style-name="S2">def</text:p></office:text>
+  </after>
+ </test>
+ <test name="SetParagraphStyleSetParagraphStyle_differentPos">
+  <before>
+   <office:text><text:p>abc</text:p><text:p>def</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="SetParagraphStyle" position="0" styleName="S1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S2"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="S1">abc</text:p><text:p text:style-name="S2">def</text:p></office:text>
+  </after>
  </test>
 
  <test name="UpdateMetadataUpdateMetadata_setPriorityOverSet">

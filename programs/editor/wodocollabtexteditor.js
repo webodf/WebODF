@@ -172,7 +172,7 @@ var Wodo = Wodo || (function () {
             close =       editorOptions.closeCallback,
             //
             directTextStylingEnabled = isEnabled(editorOptions.directTextStylingEnabled),
-            directParagraphStylingEnabled = isEnabled(editorOptions.directParagraphStylingEnabled, true),
+            directParagraphStylingEnabled = isEnabled(editorOptions.directParagraphStylingEnabled),
             paragraphStyleSelectingEnabled = isEnabled(editorOptions.paragraphStyleSelectingEnabled),
             paragraphStyleEditingEnabled = isEnabled(editorOptions.paragraphStyleEditingEnabled),
             imageEditingEnabled = isEnabled(editorOptions.imageEditingEnabled, true),

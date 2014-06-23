@@ -644,6 +644,22 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformInsertTextSetParagraphStyle(insertTextSpec, setParagraphStyleSpec) {
+        if (setParagraphStyleSpec.position > insertTextSpec.position) {
+            setParagraphStyleSpec.position += insertTextSpec.text.length;
+        }
+
+        return {
+            opSpecsA:  [insertTextSpec],
+            opSpecsB:  [setParagraphStyleSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -980,6 +996,27 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  updateMetadataSpecAResult,
             opSpecsB:  updateMetadataSpecBResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpecA
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpecB
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformSetParagraphStyleSetParagraphStyle(setParagraphStyleSpecA, setParagraphStyleSpecB, hasAPriority) {
+        if (setParagraphStyleSpecA.position === setParagraphStyleSpecB.position) {
+            if (hasAPriority) {
+                setParagraphStyleSpecB.styleName = setParagraphStyleSpecA.styleName;
+            } else {
+                setParagraphStyleSpecA.styleName = setParagraphStyleSpecB.styleName;
+            }
+        }
+
+        return {
+            opSpecsA:  [setParagraphStyleSpecA],
+            opSpecsB:  [setParagraphStyleSpecB]
         };
     }
 
@@ -1325,6 +1362,23 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveTextSetParagraphStyle(removeTextSpec, setParagraphStyleSpec) {
+        // Removal is done entirely in some preceding paragraph
+        if (removeTextSpec.position < setParagraphStyleSpec.position) {
+            setParagraphStyleSpec.position -= removeTextSpec.length;
+        }
+
+        return {
+            opSpecsA:  [removeTextSpec],
+            opSpecsB:  [setParagraphStyleSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1488,7 +1542,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           transformInsertTextRemoveText,
-            // TODO:"SetParagraphStyle":    transformInsertTextSetParagraphStyle,
+            "SetParagraphStyle":    transformInsertTextSetParagraphStyle,
             "SplitParagraph":       transformInsertTextSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
@@ -1549,14 +1603,14 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "RemoveText": {
             "RemoveText":           transformRemoveTextRemoveText,
-            // TODO:"SetParagraphStyle":    transformRemoveTextSetParagraphStyle,
+            "SetParagraphStyle":    transformRemoveTextSetParagraphStyle,
             "SplitParagraph":       transformRemoveTextSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
         "SetParagraphStyle": {
-            // TODO:"SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
+            "SetParagraphStyle":    transformSetParagraphStyleSetParagraphStyle,
             "SplitParagraph":       transformSetParagraphStyleSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
