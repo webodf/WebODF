@@ -148,7 +148,9 @@ gui.DirectFormattingController = function DirectFormattingController(
         }
 
         if (enabledFeatures.directTextStyling) {
-            enabledFeatures.directTextStyling = selectionContainsText;
+            enabledFeatures.directTextStyling = selectionContainsText
+                                                && cursor !== undefined // cursor might not be registered
+                                                && cursor.getSelectionType() === ops.OdtCursor.RangeSelection;
         }
 
         return /**@type{!gui.DirectFormattingController.SelectionInfo}*/({
