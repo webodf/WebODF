@@ -243,7 +243,7 @@ odf.Formatting = function Formatting() {
     /**
      * Returns a JSON representation of the style attributes of a given style element
      * @param {!Element} styleNode
-     * @return {!Object}
+     * @return {!odf.Formatting.StyleData}
      */
     function getStyleAttributes(styleNode) {
         var i, a, map, ai,
@@ -276,7 +276,7 @@ odf.Formatting = function Formatting() {
      * inherited from it's ancestry - up to and including the document's default style for the family.
      * @param {!Element} styleNode
      * @param {!boolean=} includeSystemDefault True by default. Specify false to suppress inclusion of system defaults
-     * @return {!Object.<string,!Object.<string,string>>}
+     * @return {!odf.Formatting.StyleData}
      */
     function getInheritedStyleAttributes(styleNode, includeSystemDefault) {
         var styleListElement = odfContainer.rootElement.styles,
@@ -422,10 +422,10 @@ odf.Formatting = function Formatting() {
      * Takes a provided style chain and calculates the resulting inherited style, starting from the outer-most to the
      * inner-most style
      * @param {!Array.<!Object>} styleChain Ordered list starting from inner-most style to outer-most style
-     * @return {!Object}
+     * @return {!odf.Formatting.AppliedStyle}
      */
     function calculateAppliedStyle(styleChain) {
-        var mergedChildStyle = { orderedStyles: [] };
+        var mergedChildStyle = { orderedStyles: [], styleProperties: {} };
 
         // The complete style is built up by starting at the base known style and merging each new entry
         // on top of it, so the inner-most style properties override the outer-most
@@ -445,7 +445,7 @@ odf.Formatting = function Formatting() {
                 styleElement = getStyleElement(styleName, styleFamily);
                 if (styleElement) {
                     parentStyle = getInheritedStyleAttributes(/**@type{!Element}*/(styleElement));
-                    mergedChildStyle = utils.mergeObjects(parentStyle, mergedChildStyle);
+                    mergedChildStyle.styleProperties = utils.mergeObjects(parentStyle, mergedChildStyle.styleProperties);
                     styleSummary.displayName = styleElement.getAttributeNS(stylens, 'display-name') || undefined;
                     styleSummary.isCommonStyle = isCommonStyleElement(styleElement);
                 } else {
@@ -463,7 +463,7 @@ odf.Formatting = function Formatting() {
      * @param {Object.<!string, !Object>=} calculatedStylesCache Short-lived cache of calculated styles.
      *      Useful if a function is looking up the style information for multiple nodes without updating
      *      any style definitions.
-     * @return {!Array.<!Object>}
+     * @return {!Array.<!odf.Formatting.AppliedStyle>}
      */
     function getAppliedStyles(nodes, calculatedStylesCache) {
         var styleChains = {},
@@ -492,7 +492,7 @@ odf.Formatting = function Formatting() {
      * @param {Object.<!string, !Object>=} calculatedStylesCache Short-lived cache of calculated styles.
      *      Useful if a function is looking up the style information for multiple nodes without updating
      *      any style definitions.
-     * @return {Object|undefined}
+     * @return {!odf.Formatting.AppliedStyle|undefined}
      */
     this.getAppliedStylesForElement = function (node, calculatedStylesCache) {
         return getAppliedStyles([node], calculatedStylesCache)[0];
@@ -733,3 +733,20 @@ odf.Formatting = function Formatting() {
         };
     };
 };
+
+/**@typedef{{
+    name:!string,
+    family:!string,
+    displayName:(!string|undefined),
+    isCommonStyle:!boolean
+}}*/
+odf.Formatting.StyleMetadata;
+
+/**@typedef{!Object.<!string,(!string|!Object.<!string,!string>)>}*/
+odf.Formatting.StyleData;
+
+/**@typedef{{
+    orderedStyles:!Array.<!odf.Formatting.StyleMetadata>,
+    styleProperties:!odf.Formatting.StyleData
+}}*/
+odf.Formatting.AppliedStyle;

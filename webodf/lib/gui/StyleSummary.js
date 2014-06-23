@@ -26,8 +26,7 @@
 
 /**
  * @constructor
- * @param {!Array.<!Object.<!string, !Object.<!string, !Object>>>} styles Array of style
- *  objects as returned from Formatting.getAppliedStyles
+ * @param {!Array.<!odf.Formatting.AppliedStyle>} styles
  */
 gui.StyleSummary = function StyleSummary(styles) {
     "use strict";
@@ -49,7 +48,7 @@ gui.StyleSummary = function StyleSummary(styles) {
         if (!propertyValues.hasOwnProperty(cacheKey)) {
             values = [];
             styles.forEach(function (style) {
-                var styleSection = style[section],
+                var styleSection = /**@type{!Object.<!string, !string>}*/(style.styleProperties[section]),
                     value = styleSection && styleSection[propertyName];
                 if (values.indexOf(value) === -1) {
                     values.push(value);

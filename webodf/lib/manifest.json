@@ -188,6 +188,7 @@
         "ops.OdtCursor"
     ],
     "gui.StyleSummary": [
+        "odf.Formatting"
     ],
     "gui.SvgSelectionView": [
         "core.Async",

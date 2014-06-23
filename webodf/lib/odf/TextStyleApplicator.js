@@ -70,7 +70,7 @@ odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, form
          */
         this.isStyleApplied = function (textNode) {
             // TODO can direct style to element just be removed somewhere to end up with desired style?
-            var appliedStyle = formatting.getAppliedStylesForElement(textNode, cachedAppliedStyles);
+            var appliedStyle = formatting.getAppliedStylesForElement(textNode, cachedAppliedStyles).styleProperties;
             return compare(info, appliedStyle);
         };
     }
