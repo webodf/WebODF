@@ -62,15 +62,10 @@ gui.DirectFormattingController = function DirectFormattingController(
         /**@type{?odf.Formatting.StyleData}*/
         directCursorStyleProperties = null,
         // cached text settings
-        /**@type{!gui.StyleSummary}*/
-        lastSignalledStyleSummary,
+        /**@type{!gui.DirectFormattingController.SelectionInfo}*/
+        lastSignalledSelectionInfo,
         /**@type {!core.LazyProperty.<!gui.DirectFormattingController.SelectionInfo>} */
-        selectionInfoCache,
-        /**@type {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}*/
-        enabledFeatures = {
-            directTextStyling: false,
-            directParagraphStyling: false
-        };
+        selectionInfoCache;
 
     /**
      * Gets the current selection information style summary
@@ -79,6 +74,14 @@ gui.DirectFormattingController = function DirectFormattingController(
     function getCachedStyleSummary() {
         return selectionInfoCache.value().styleSummary;
     }
+
+    /**
+     * @return {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}
+     */
+    function getCachedEnabledFeatures() {
+        return selectionInfoCache.value().enabledFeatures;
+    }
+    this.enabledFeatures = getCachedEnabledFeatures;
     
     /**
      * Fetch all the character elements and text nodes in the specified range, or if the range is collapsed, the node just to
@@ -119,7 +122,11 @@ gui.DirectFormattingController = function DirectFormattingController(
             nodes = [],
             /**@type{!Array.<!odf.Formatting.AppliedStyle>}*/
             selectionStyles = [],
-            selectionContainsText = true;
+            selectionContainsText = true,
+            enabledFeatures = {
+                directTextStyling: true,
+                directParagraphStyling: true
+            };
 
         if (range) {
             nodes = getNodes(range);
@@ -136,8 +143,16 @@ gui.DirectFormattingController = function DirectFormattingController(
                                                                     directCursorStyleProperties);
         }
 
+        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
+            enabledFeatures.directTextStyling = enabledFeatures.directParagraphStyling = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
+        }
+
+        if (enabledFeatures.directTextStyling) {
+            enabledFeatures.directTextStyling = selectionContainsText;
+        }
+
         return /**@type{!gui.DirectFormattingController.SelectionInfo}*/({
-            containsText: selectionContainsText,
+            enabledFeatures: enabledFeatures,
             appliedStyles: selectionStyles,
             styleSummary: new gui.StyleSummary(selectionStyles)
         });
@@ -166,15 +181,27 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * @return {undefined}
      */
-    function emitStylingChanges() {
+    function emitSelectionChanges() {
         var textStyleDiff,
             paragraphStyleDiff,
-            newSelectionStylesSummary = getCachedStyleSummary();
+            lastStyleSummary = lastSignalledSelectionInfo.styleSummary,
+            newSelectionInfo = selectionInfoCache.value(),
+            newSelectionStylesSummary = newSelectionInfo.styleSummary,
+            lastEnabledFeatures = lastSignalledSelectionInfo.enabledFeatures,
+            newEnabledFeatures = newSelectionInfo.enabledFeatures,
+            enabledFeaturesChanged;
 
-        textStyleDiff = createDiff(lastSignalledStyleSummary.text, newSelectionStylesSummary.text);
-        paragraphStyleDiff = createDiff(lastSignalledStyleSummary.paragraph, newSelectionStylesSummary.paragraph);
+        textStyleDiff = createDiff(lastStyleSummary.text, newSelectionStylesSummary.text);
+        paragraphStyleDiff = createDiff(lastStyleSummary.paragraph, newSelectionStylesSummary.paragraph);
 
-        lastSignalledStyleSummary = newSelectionStylesSummary;
+        enabledFeaturesChanged = !(newEnabledFeatures.directTextStyling === lastEnabledFeatures.directTextStyling
+            && newEnabledFeatures.directParagraphStyling === lastEnabledFeatures.directParagraphStyling);
+
+        lastSignalledSelectionInfo = newSelectionInfo;
+
+        if (enabledFeaturesChanged) {
+            eventNotifier.emit(gui.DirectFormattingController.enabledChanged, newEnabledFeatures);
+        }
 
         if (Object.keys(textStyleDiff).length > 0) {
             eventNotifier.emit(gui.DirectFormattingController.textStylingChanged, textStyleDiff);
@@ -186,35 +213,13 @@ gui.DirectFormattingController = function DirectFormattingController(
     }
 
     /**
+     * Resets and immediately updates the current selection info. VERY SLOW... please use sparingly.
      * @return {undefined}
      */
-    function updateEnabledState() {
-        var newEnabledFeatures = {
-            directTextStyling: true,
-            directParagraphStyling: true
-        };
-
-        if (sessionConstraints.getState(gui.CommonConstraints.EDIT.REVIEW_MODE) === true) {
-            newEnabledFeatures.directTextStyling = newEnabledFeatures.directParagraphStyling = /**@type{!boolean}*/(sessionContext.isLocalCursorWithinOwnAnnotation());
-        }
-
-        if (newEnabledFeatures.directTextStyling) {
-            newEnabledFeatures.directTextStyling = selectionInfoCache.value().containsText;
-        }
-
-        if (!(newEnabledFeatures.directTextStyling === enabledFeatures.directTextStyling
-                && newEnabledFeatures.directParagraphStyling === enabledFeatures.directParagraphStyling)) {
-            enabledFeatures = newEnabledFeatures;
-            eventNotifier.emit(gui.DirectFormattingController.enabledChanged, enabledFeatures);
-        }
+    function forceSelectionInfoRefresh() {
+        selectionInfoCache.reset();
+        emitSelectionChanges();
     }
-
-    /**
-     * @return {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}
-     */
-    this.enabledFeatures = function () {
-        return enabledFeatures;
-    };
 
     /**
      * @param {!ops.OdtCursor|!string} cursorOrId
@@ -225,7 +230,6 @@ gui.DirectFormattingController = function DirectFormattingController(
                                 ? cursorOrId : cursorOrId.getMemberId();
         if (cursorMemberId === inputMemberId) {
             selectionInfoCache.reset();
-            updateEnabledState();
         }
     }
 
@@ -267,7 +271,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function formatTextSelection(textProperties) {
-        if (!enabledFeatures.directTextStyling) {
+        if (!getCachedEnabledFeatures().directTextStyling) {
             return;
         }
 
@@ -529,7 +533,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
-        if (!enabledFeatures.directParagraphStyling) {
+        if (!getCachedEnabledFeatures().directParagraphStyling) {
             return;
         }
 
@@ -737,7 +741,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * @return {!Array.<!ops.Operation>}
      */
     this.createParagraphStyleOps = function (position) {
-        if (!enabledFeatures.directParagraphStyling) {
+        if (!getCachedEnabledFeatures().directParagraphStyling) {
             return [];
         }
 
@@ -835,8 +839,8 @@ gui.DirectFormattingController = function DirectFormattingController(
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.unsubscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
-        odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, emitStylingChanges);
-        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, emitSelectionChanges);
+        sessionConstraints.unsubscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, forceSelectionInfoRefresh);
         callback();
     };
 
@@ -854,6 +858,13 @@ gui.DirectFormattingController = function DirectFormattingController(
         return false;
     }
 
+    /**
+     * @return {!gui.DirectFormattingController.SelectionInfo}
+     */
+    function getCachedSelectionInfo() {
+        return selectionInfoCache.value();
+    }
+
     function init() {
         odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorEvent);
         odtDocument.subscribe(ops.Document.signalCursorRemoved, onCursorEvent);
@@ -861,12 +872,13 @@ gui.DirectFormattingController = function DirectFormattingController(
         odtDocument.subscribe(ops.OdtDocument.signalParagraphStyleModified, onParagraphStyleModified);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, onParagraphChanged);
         odtDocument.subscribe(ops.OdtDocument.signalOperationEnd, clearCursorStyle);
-        odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchEnd, emitStylingChanges);
-
-        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, updateEnabledState);
+        odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchEnd, emitSelectionChanges);
+        sessionConstraints.subscribe(gui.CommonConstraints.EDIT.REVIEW_MODE, forceSelectionInfoRefresh);
         selectionInfoCache = new core.LazyProperty(getSelectionInfo);
-        lastSignalledStyleSummary = getCachedStyleSummary();
-        updateEnabledState();
+        // Using a function rather than calling selectionInfoCache.value() directly because Closure Compiler's generics
+        // inference is quite limited and does not seem to recognise the core.LazyProperty type interface correctly
+        // within the function that creates the instance. Everywhere else in this file has no issues with it though...
+        lastSignalledSelectionInfo = getCachedSelectionInfo();
 
         if (!directTextStylingEnabled) {
             self.formatTextSelection = emptyFunction;
@@ -908,10 +920,10 @@ gui.DirectFormattingController.SelectionInfo = function() {
     "use strict";
 
     /**
-     * True if the selection contains text content
-     * @type {!boolean}
+     * Specifies which forms of styling options are enabled for the current selection.
+     * @type {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}
      */
-    this.containsText = false;
+    this.enabledFeatures;
 
     /**
      * Applied styles in the selection
