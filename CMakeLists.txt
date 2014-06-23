@@ -343,40 +343,4 @@ add_subdirectory(webodf)
 # the programs/components
 add_subdirectory(programs)
 
-# old target used by the CI, with no user for the actual content
-# to be removed after CI switched to build products directly
-set(WEBODFZIP webodf-${WEBODF_VERSION}.zip)
-set(WEBODFZIPDIR ${CMAKE_CURRENT_BINARY_DIR}/webodf-${WEBODF_VERSION})
-add_custom_command(
-    OUTPUT ${WEBODFZIP}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBODFZIPDIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${WEBODFZIPDIR}
-    # viewer
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${VIEWERBUILDDIR} ${WEBODFZIPDIR}/viewer
-    # editor
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/editor ${WEBODFZIPDIR}/editor
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${WEBODFZIPDIR}/editor/dojo-deps
-    # benchmark
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/programs/benchmark ${WEBODFZIPDIR}/benchmark
-
-    # firefox
-    COMMAND ${CMAKE_COMMAND} -E copy ${FIREFOX_EXTENSION_ODFVIEWER} ${WEBODFZIPDIR}
-
-    # zip using javascript code running in Node.js
-    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
-        ${WEBODFZIPDIR}
-        ${CMAKE_CURRENT_BINARY_DIR}/${WEBODFZIP}
-    DEPENDS
-        ${TOOLS_DIR}/zipdir.js
-        webodf-debug.js-target
-        webodf.js-target
-        editor-compiled.js-target
-        html-benchmark
-        viewer-minimized.js-target
-        product-firefoxextension
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-add_custom_target(zip DEPENDS ${WEBODFZIP})
-
 # vim:expandtab
