@@ -64,7 +64,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         // cached text settings
         /**@type{!gui.StyleSummary}*/
         lastSignalledStyleSummary,
-        /**@type {!core.LazyProperty.<!{containsText: !boolean, appliedStyles: !Array.<!odf.Formatting.AppliedStyle>, styleSummary: !gui.StyleSummary}>} */
+        /**@type {!core.LazyProperty.<!gui.DirectFormattingController.SelectionInfo>} */
         selectionInfoCache,
         /**@type {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}*/
         enabledFeatures = {
@@ -111,7 +111,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * Get all styles currently applied to the selected range. If the range is collapsed,
      * this will return the style the next inserted character will have
-     * @return {!{containsText: !boolean, appliedStyles: !Array.<!odf.Formatting.AppliedStyle>, styleSummary: !gui.StyleSummary}}
+     * @return {!gui.DirectFormattingController.SelectionInfo}
      */
     function getSelectionInfo() {
         var cursor = odtDocument.getCursor(inputMemberId),
@@ -136,11 +136,11 @@ gui.DirectFormattingController = function DirectFormattingController(
                                                                     directCursorStyleProperties);
         }
 
-        return {
+        return /**@type{!gui.DirectFormattingController.SelectionInfo}*/({
             containsText: selectionContainsText,
             appliedStyles: selectionStyles,
             styleSummary: new gui.StyleSummary(selectionStyles)
-        };
+        });
     }
 
     /**
@@ -899,3 +899,29 @@ gui.DirectFormattingController = function DirectFormattingController(
 /**@const*/gui.DirectFormattingController.enabledChanged = "enabled/changed";
 /**@const*/gui.DirectFormattingController.textStylingChanged = "textStyling/changed";
 /**@const*/gui.DirectFormattingController.paragraphStylingChanged = "paragraphStyling/changed";
+
+/**
+ * @constructor
+ * @struct
+ */
+gui.DirectFormattingController.SelectionInfo = function() {
+    "use strict";
+
+    /**
+     * True if the selection contains text content
+     * @type {!boolean}
+     */
+    this.containsText = false;
+
+    /**
+     * Applied styles in the selection
+     * @type {!Array.<!odf.Formatting.AppliedStyle>}
+     */
+    this.appliedStyles;
+
+    /**
+     * Style summary for the selection
+     * @type {!gui.StyleSummary}
+     */
+    this.styleSummary;
+};
