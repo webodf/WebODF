@@ -668,17 +668,33 @@ var Wodo = Wodo || (function () {
      * Creates a text editor object and returns it on success in the passed callback.
      * @name Wodo#createTextEditor
      * @function
-     * @param {!string} mainContainerElementId
-     * @param {!Object.<!string,!*>} editorOptions
+     * @param {!string} editorContainerElementId id of the existing div element which will contain the editor (should be empty before)
+     * @param editorOptions options to configure the features of the editor. All entries are optional
+     * @param [editorOptions.loadCallback] parameter-less callback method, adds a "Load" button to the toolbar which triggers this method
+     * @param [editorOptions.saveCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
+     * @param [editorOptions.closeCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
+     * @param [editorOptions.allFeaturesEnabled=false] if set to 'true', switches the default for all features from 'false' to 'true'
+     * @param [editorOptions.directTextStylingEnabled=false] if set to 'true', enables the direct styling of text (e.g. bold/italic or font)
+     * @param [editorOptions.directParagraphStylingEnabled=false] if set to 'true', enables the direct styling of paragraphs (e.g. indentation or alignement)
+     * @param [editorOptions.paragraphStyleSelectingEnabled=false] if set to 'true', enables setting of defined paragraph styles to paragraphs
+     * @param [editorOptions.paragraphStyleEditingEnabled=false] if set to 'true', enables the editing of defined paragraph styles
+     * @param [editorOptions.imageEditingEnabled=false] if set to 'true', enables the insertion of images
+     * @param [editorOptions.hyperlinkEditingEnabled=false] if set to 'true', enables the editing of hyperlinks
+     * @param [editorOptions.annotationsEnabled=false] if set to 'true', enables the display and the editing of annotations
+     * @param [editorOptions.undoRedoEnabled=false] if set to 'true', enables the Undo and Redo of editing actions
+     * @param [editorOptions.zoomingEnabled=false] if set to 'true', enables the zooming tool
+     * @param [editorOptions.userData] data about the user editing the document
+     * @param [editorOptions.userData.fullName] full name of the user, used for annotations and in the metadata of the document
+     * @param [editorOptions.userData.color="black"] color to use for any user related indicators like cursor or annotations
      * @param {!function(err:?Error, editor:!TextEditor=):undefined} onEditorCreated
      * @return {undefined}
      */
-    function createTextEditor(mainContainerElementId, editorOptions, onEditorCreated) {
+    function createTextEditor(editorContainerElementId, editorOptions, onEditorCreated) {
         /**
          * @return {undefined}
          */
         function create() {
-            var editor = new TextEditor(mainContainerElementId, editorOptions);
+            var editor = new TextEditor(editorContainerElementId, editorOptions);
             onEditorCreated(null, editor);
         }
 
