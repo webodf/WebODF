@@ -17,6 +17,5 @@
         "128": "/img/icon-128.png"
     },
     "default_locale": "en",
-    "type": "privileged",
-    "pkgName": "org.webodf"
+    "type": "privileged"
 }
