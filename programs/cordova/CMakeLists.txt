@@ -42,6 +42,10 @@ add_custom_command(
 add_custom_command(
     OUTPUT WebODF/platforms/firefoxos/build/package.zip
     COMMAND ${CORDOVA} build firefoxos
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
+        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/www/
+        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/build/package.zip
+        notopdir
     DEPENDS WebODF/config.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
