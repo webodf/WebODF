@@ -190,6 +190,8 @@ add_custom_command(
     COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
         ${WODOTEXTEDITORBUILDDIR}
         ${CMAKE_BINARY_DIR}/${WODOTEXTEDITOR_ZIP}
+        notopdir
+        wodotexteditor-${WEBODF_VERSION}
     DEPENDS
         wodotexteditorbuilddir-target
         wodotexteditor-doc
