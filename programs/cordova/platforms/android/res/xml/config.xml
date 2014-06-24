@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="org.webodf" version="1.3.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <preference name="loglevel" value="DEBUG" />
+    <preference name="AndroidLaunchMode" value="singleTop" />
+    <feature name="App">
+        <param name="android-package" value="org.apache.cordova.App" />
+    </feature>
+    <feature name="File">
+        <param name="android-package" value="org.apache.cordova.file.FileUtils" />
+        <param name="onload" value="true" />
+    </feature>
+    <feature name="StartURL">
+        <param name="android-package" value="org.webodf.starturl.StartURL" />
+        <param name="onload" value="true" />
+    </feature>
+    <name>WebODF</name>
+    <description>
+        A viewer for OpenDocument Format files.
+    </description>
+    <author email="jos.van.den.oever@kogmbh.com" href="http://webodf.org">
+        Jos van den Oever
+    </author>
+    <content src="index.html" />
+    <access origin="" />
+</widget>

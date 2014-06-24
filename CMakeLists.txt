@@ -140,6 +140,7 @@ if(WIN32)
         EXPECTED_MD5 ${NODE_BIN_MD5}
     )
     set(NODE ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/node.exe)
+    set(NPM ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin/npm.exe)
     execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/NodeJS-prefix/bin
       COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNALS_DOWNLOAD_DIR}/node-download.exe "${NODE}"
@@ -169,6 +170,12 @@ else(WIN32)
         message(STATUS "good Node.js found: " ${NODEJS_VERSION} " (" ${REQUIRED_NODEJS_VERSION} " required.)")
     endif()
     set(NODE ${NODEJS_EXECUTABLE})
+    FIND_PROGRAM(NPM
+        NAMES npm
+        PATHS ""
+        DOC "Path to NPM executable"
+    )
+    MESSAGE (STATUS "npm found: " ${NPM})
     add_custom_target(NodeJS DEPENDS "${NODEJS_EXECUTABLE}")
 endif(WIN32)
 
