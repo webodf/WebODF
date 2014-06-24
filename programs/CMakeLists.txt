@@ -4,10 +4,6 @@ if(BUILD_QTJSRUNTIME)
   add_subdirectory(qtjsruntime)
 endif(BUILD_QTJSRUNTIME)
 
-if(ANDROID AND ANT)
-  add_subdirectory(android)
-endif(ANDROID AND ANT)
-
 add_subdirectory(docnosis)
 
 add_subdirectory(firefoxextension)

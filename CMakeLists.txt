@@ -243,36 +243,6 @@ if(WIN32)
     )
 endif(WIN32)
 
-# Ant
-# Required for building Android applications
-if(WIN32)
-    # Ant is not generally installed on Windows systems
-    ExternalProject_Add(
-        AntBin
-        DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-        URL "http://archive.apache.org/dist/ant/binaries/apache-ant-1.8.4-bin.zip"
-        URL_MD5 ca632528c35b8a335edd4e2064f7129e
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ""
-    )
-    set(ANT ${CMAKE_BINARY_DIR}/AntBin-prefix/src/AntBin/bin/ant.bat)
-endif()
-if (NOT ANT)
-  find_file(ANT NAMES ant ant.exe /usr/bin /usr/local/bin)
-endif(NOT ANT)
-
-# Android
-# If android sdk is properly installed, cmake only needs to know where to find
-# the executable 'android'.
-# The variable ANDROID_SDK_DIR can be provided if a specific android sdk version
-# is desired or if the android executable is not in the path.
-if (ANDROID_SDK_DIR)
-  set(ANDROID ${ANDROID_SDK_DIR}/tools/android)
-else (ANDROID_SDK_DIR)
-  find_program(ANDROID android)
-endif(ANDROID_SDK_DIR)
-
 ##############################
 ## Define custom macros
 ##############################
