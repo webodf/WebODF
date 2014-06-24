@@ -16,7 +16,6 @@ SET(ALONE_EDITOR_EXAMPLE_FILES
     FileSaver.js
     localfileeditor.js
     localeditor.html
-    revieweditor.html
     texteditor.html
     welcome.odt
 )
