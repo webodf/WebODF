@@ -6,16 +6,25 @@ SET(COMMON_EDITOR_FILES
     FullWindowZoomHelper.js
     wodotexteditor.css
 )
+
 SET(ALONE_EDITOR_ONLY_FILES
     wodotexteditor.js
+    images/kogmbh.png
+    images/webodf.png
+)
+SET(ALONE_EDITOR_EXAMPLE_FILES
     FileSaver.js
     localfileeditor.js
     localeditor.html
     revieweditor.html
-    images/kogmbh.png
-    images/webodf.png
     texteditor.html
+    welcome.odt
 )
+SET(ALONE_EDITOR_FILES
+    ${COMMON_EDITOR_FILES}
+    ${ALONE_EDITOR_ONLY_FILES}
+)
+
 SET(COLLAB_EDITOR_ONLY_FILES
     SessionListView.js
     MemberListView.js
@@ -27,30 +36,6 @@ SET(COLLAB_EDITOR_ONLY_FILES
     wodocollabtexteditor.js
     pullboxeditor.js
 )
-SET(ALONE_EDITOR_EXAMPLE_FILES
-    welcome.odt
-)
-SET(ALONE_EDITOR_FILES
-    ${COMMON_EDITOR_FILES}
-    ${ALONE_EDITOR_ONLY_FILES}
-    ${ALONE_EDITOR_EXAMPLE_FILES}
-)
-COPY_FILES(EDITORDEPS ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${COMMON_EDITOR_FILES}
-    ${ALONE_EDITOR_ONLY_FILES}
-    ${COLLAB_EDITOR_ONLY_FILES}
-    ${ALONE_EDITOR_EXAMPLE_FILES}
-    # demo-only
-    index.html
-)
-
-add_custom_target(more-editor-deps-target
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/translations/ translations/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/
-)
 
 # creates a copy of the compiled webodf.js in the editor build dir
 add_custom_target(editor-webodf.js-target
@@ -58,6 +43,10 @@ add_custom_target(editor-webodf.js-target
 )
 add_dependencies(editor-webodf.js-target webodf.js-target)
 
+
+####################
+## Dojo amalgamation
+####################
 
 SET(DOJO_DEPS ${CMAKE_CURRENT_BINARY_DIR}/dojo-deps)
 
@@ -105,58 +94,89 @@ add_custom_command(
     DEPENDS ${NODE} Dojo
 )
 
-add_custom_target(editor-compiled.js-target DEPENDS dojo-amalgamation.js editor-webodf.js-target ${EDITORDEPS} more-editor-deps-target)
+####################
+## Dojo amalgamation
+####################
+
+add_custom_target(more-common-editorfiles-target
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources/ resources/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/translations/ translations/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/widgets/ widgets/
+)
+
+##################
+## Wodo.TextEditor
+##################
+
+set(WODOTEXTEDITORDOC_BUILDDIR  ${WODOTEXTEDITORBUILDDIR}/docs)
+set(WODOTEXTEDITORCODE_BUILDDIR ${WODOTEXTEDITORBUILDDIR}/wodotexteditor)
 
 add_custom_command(
     OUTPUT ${WODOTEXTEDITORBUILDDIR}
     # clean up output dir
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${WODOTEXTEDITORBUILDDIR}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${WODOTEXTEDITORBUILDDIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${WODOTEXTEDITORCODE_BUILDDIR}
 
-    COMMAND ${CMAKE_COMMAND} -E copy webodf.js ${WODOTEXTEDITORBUILDDIR}
+    COMMAND ${CMAKE_COMMAND} -E copy webodf.js ${WODOTEXTEDITORCODE_BUILDDIR}
 
-    COMMAND ${CMAKE_COMMAND} -E copy_directory resources/ ${WODOTEXTEDITORBUILDDIR}/resources/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory translations/ ${WODOTEXTEDITORBUILDDIR}/translations/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory widgets/ ${WODOTEXTEDITORBUILDDIR}/widgets/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory resources/ ${WODOTEXTEDITORCODE_BUILDDIR}/resources/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory translations/ ${WODOTEXTEDITORCODE_BUILDDIR}/translations/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory widgets/ ${WODOTEXTEDITORCODE_BUILDDIR}/widgets/
 
     # dojo compiled
-    COMMAND ${CMAKE_COMMAND} -E copy dojo-amalgamation.js ${WODOTEXTEDITORBUILDDIR}
+    COMMAND ${CMAKE_COMMAND} -E copy dojo-amalgamation.js ${WODOTEXTEDITORCODE_BUILDDIR}
 
     # more dojo (data) files
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${WODOTEXTEDITORBUILDDIR}/dojo
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo/resources ${WODOTEXTEDITORBUILDDIR}/dojo/resources
-    COMMAND ${CMAKE_COMMAND} -E copy_directory app/ ${WODOTEXTEDITORBUILDDIR}/app/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dijit/ ${WODOTEXTEDITORBUILDDIR}/dijit/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory dojox/ ${WODOTEXTEDITORBUILDDIR}/dojox/
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${WODOTEXTEDITORCODE_BUILDDIR}/dojo
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojo/resources ${WODOTEXTEDITORCODE_BUILDDIR}/dojo/resources
+    COMMAND ${CMAKE_COMMAND} -E copy_directory app/ ${WODOTEXTEDITORCODE_BUILDDIR}/app/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dijit/ ${WODOTEXTEDITORCODE_BUILDDIR}/dijit/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory dojox/ ${WODOTEXTEDITORCODE_BUILDDIR}/dojox/
 
     COMMAND ${CMAKE_COMMAND} -E copy ${LIBJSLICENSEFILE} ${WODOTEXTEDITORBUILDDIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/HOWTO-wodotexteditor.md  ${WODOTEXTEDITORBUILDDIR}/HOWTO.md
 
-    DEPENDS editor-compiled.js-target
+    DEPENDS dojo-amalgamation.js editor-webodf.js-target more-common-editorfiles-target
 )
 
 foreach(AE_FILE ${ALONE_EDITOR_FILES})
+    set(AE_BUILDFILE ${WODOTEXTEDITORCODE_BUILDDIR}/${AE_FILE})
+    set(AE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${AE_FILE})
     add_custom_command(
-      OUTPUT ${WODOTEXTEDITORBUILDDIR}/${AE_FILE}
+      OUTPUT ${AE_BUILDFILE}
       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
         ${AE_FILE}
-        ${WODOTEXTEDITORBUILDDIR}/${AE_FILE}
+        ${AE_BUILDFILE}
       DEPENDS
         ${AE_FILE} ${WODOTEXTEDITORBUILDDIR}
     )
-    set(WODOTEXTEDITOR_BUILDFILES ${WODOTEXTEDITOR_BUILDFILES} ${WODOTEXTEDITORBUILDDIR}/${AE_FILE})
+    list(APPEND WODOTEXTEDITOR_BUILDFILES ${AE_BUILDFILE})
+endforeach(AE_FILE)
+
+foreach(AE_FILE ${ALONE_EDITOR_EXAMPLE_FILES})
+    set(AE_BUILDFILE ${WODOTEXTEDITORBUILDDIR}/${AE_FILE})
+    set(AE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${AE_FILE})
+    add_custom_command(
+      OUTPUT ${AE_BUILDFILE}
+      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+        ${AE_FILE}
+        ${AE_BUILDFILE}
+      DEPENDS
+        ${AE_FILE} ${WODOTEXTEDITORBUILDDIR}
+    )
+    list(APPEND WODOTEXTEDITOR_BUILDFILES ${AE_BUILDFILE})
 endforeach(AE_FILE)
 
 add_custom_target(wodotexteditorbuilddir-target DEPENDS ${WODOTEXTEDITORBUILDDIR} ${WODOTEXTEDITOR_BUILDFILES})
 
-set(WODOTEXTEDITORDOC_BUILDDIR ${WODOTEXTEDITORBUILDDIR}/docs)
 add_custom_command(
     OUTPUT ${WODOTEXTEDITORDOC_BUILDDIR}/index.html
     COMMAND ${Java_JAVA_EXECUTABLE} ARGS -jar ${JSDOCDIR}/jsrun.jar
         ${JSDOCDIR}/app/run.js
         -d=${WODOTEXTEDITORDOC_BUILDDIR}
         -t=${JSDOCDIR}/templates/jsdoc
-        ${WODOTEXTEDITORBUILDDIR}/wodotexteditor.js
+        ${WODOTEXTEDITORCODE_BUILDDIR}/wodotexteditor.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS wodotexteditorbuilddir-target JsDoc
 )
@@ -170,9 +190,30 @@ add_custom_command(
     COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
         ${WODOTEXTEDITORBUILDDIR}
         ${CMAKE_BINARY_DIR}/${WODOTEXTEDITOR_ZIP}
+        notopdir
+        wodotexteditor-${WEBODF_VERSION}
     DEPENDS
         wodotexteditorbuilddir-target
         wodotexteditor-doc
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_target(product-wodotexteditor DEPENDS ${WODOTEXTEDITOR_ZIP})
+
+
+################
+## Collab editor
+################
+
+# intermediate solution until session-based editor component and backends are sorted out
+
+COPY_FILES(COLLAB_EDITOR_DEPS ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${COMMON_EDITOR_FILES}
+    ${COLLAB_EDITOR_ONLY_FILES}
+)
+
+add_custom_target(server-collab-editorfiles-target
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
+)
+
+add_custom_target(collabeditor DEPENDS dojo-amalgamation.js editor-webodf.js-target ${COLLAB_EDITOR_DEPS} more-common-editorfiles-target server-collab-editorfiles-target)
