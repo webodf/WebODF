@@ -175,7 +175,7 @@ add_custom_command(
         ${JSDOCDIR}/app/run.js
         -d=${WODOTEXTEDITORDOC_BUILDDIR}
         -t=${JSDOCDIR}/templates/jsdoc
-        ${WODOTEXTEDITORCODE_BUILDDIR}/wodotexteditor.js
+        wodotexteditor.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS wodotexteditorbuilddir-target JsDoc
 )
