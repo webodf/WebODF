@@ -41,3 +41,4 @@ function deviceready() {
 }
 
 document.addEventListener("deviceready", deviceready, false);
+document.addEventListener("load", onload, false);
