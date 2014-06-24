@@ -26,11 +26,12 @@
 
 runtime.loadClass("core.Zip");
 
-var directory = process.argv[3],
-    zipfile = process.argv[4],
-    notopdir = process.argv[5];
+var directory = process.argv[3], // path of the directory to zip
+    zipfile = process.argv[4], // path of the zip file to create
+    notopdir = (process.argv[5] === "notopdir"), // flag if the toplevel dir should be dropped in the path in the zip entries
+    prefixpath = process.argv[6] || ""; // prefix path to add to the path in the zip entries
 
-function zipdirectory(zipfile, directory, notopdir) {
+function zipdirectory(zipfile, directory, notopdir, prefixpath) {
     "use strict";
     var fs = require('fs'),
         path = require('path'),
@@ -63,7 +64,7 @@ function zipdirectory(zipfile, directory, notopdir) {
         var zip = new core.Zip(zipfilepath, null),
             i;
         for (i = 0; i < list.length; i += 1) {
-            zipFile(zip, path.join(base, list[i]), list[i]);
+            zipFile(zip, path.join(base, list[i]), path.join(prefixpath, list[i]));
         }
         zip.write(function (err) {
             if (err) {
@@ -100,4 +101,4 @@ function zipdirectory(zipfile, directory, notopdir) {
     }
     runtime.log("Created " + zipfile);
 }
-zipdirectory(zipfile, directory, notopdir);
+zipdirectory(zipfile, directory, notopdir, prefixpath);
