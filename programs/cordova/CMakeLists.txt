@@ -52,5 +52,5 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
 
-add_custom_target(cordova-android ALL DEPENDS WebODF/platforms/android/ant-build/WebODF-debug.apk)
-add_custom_target(cordova-firefoxos ALL DEPENDS WebODF/platforms/firefoxos/build/package.zip)
+add_custom_target(product-androidviewer DEPENDS WebODF/platforms/android/ant-build/WebODF-debug.apk)
+add_custom_target(product-firefoxosviewer DEPENDS WebODF/platforms/firefoxos/build/package.zip)
