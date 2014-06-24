@@ -30,6 +30,8 @@ add_custom_command(
     OUTPUT WebODF/config.xml
     COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/www ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www
+    COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/merges ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/config.xml ${CMAKE_CURRENT_BINARY_DIR}/WebODF/config.xml
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_BINARY_DIR}/webodf/webodf.js ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www/webodf.js
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
@@ -39,9 +41,6 @@ add_custom_command(
 )
 add_custom_command(
     OUTPUT WebODF/platforms/firefoxos/build/package.zip
-    COMMAND ${CORDOVA} prepare firefoxos
-    # copy back the handwritten manifest.webapp
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/www/manifest.webapp ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/www/manifest.webapp
     COMMAND ${CORDOVA} build firefoxos
     DEPENDS WebODF/config.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
