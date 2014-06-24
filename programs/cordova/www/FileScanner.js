@@ -77,7 +77,7 @@ function scanFirefoxOS(extensions, callback) {
     cursor.onsuccess = function () {
         var file;
         if (cursor.done) {
-console.log("scanning done");
+            console.log("scanning done");
             callback(root);
         } else {
             if (cursor.result) {

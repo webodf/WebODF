@@ -52,15 +52,18 @@ function claimEvent(evt) {
         request.onsuccess = function () {
             var file = /**@type{!File}*/(request.result),
                 reader = new FileReader();
-            function onLoadEnd() {
+            reader.onload = function () {
                 var d = new Uint8Array(/**@type{!ArrayBuffer}*/(reader.result), offset, length);
                 callback(null, d);
-            }
-            reader.onloadend = onLoadEnd;
+            };
             reader.onerror = function () {
                 callback("error", null);
             };
-            reader.readAsArrayBuffer(file);
+            try {
+                reader.readAsArrayBuffer(file);
+            } catch (/**@type{*}*/e) {
+                callback("error " + e, null);
+            }
         };
         request.onerror = function () {
             callback(request.error.name, null);
@@ -438,11 +441,12 @@ function Browser(document, dialogFactory, handleClick) {
         var urls = [], i,
             fileList;
         if (root) {
-            fileList = getMergedFileList(root);
+            fileList = getFileList(root);
             for (i = 0; i < fileList.length; i += 1) {
                 urls.push(fileList[i].url);
             }
         }
+        startList = urls;
         window.localStorage.odfUrls = JSON.stringify(urls);
     }
     /**
