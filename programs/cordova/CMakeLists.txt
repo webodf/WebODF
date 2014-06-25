@@ -6,6 +6,7 @@ set(CORDOVA ${CMAKE_BINARY_DIR}/node_modules/cordova/bin/cordova)
 add_custom_command(
     OUTPUT ${CORDOVA}
     COMMAND ${NPM} ARGS install cordova@3.5
+    DEPENDS copy_node_modules
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 # create a project folder for WebODF cordova
@@ -16,14 +17,26 @@ add_custom_command(
     DEPENDS ${CORDOVA}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
-# add the desired platforms and plugins to the WebODF cordova folder
+# add the desired plugins
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
-    COMMAND ${CORDOVA} platform add android
-    COMMAND ${CORDOVA} platform add firefoxos
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/org.apache.cordova.file/plugin.xml
     COMMAND ${CORDOVA} plugins add org.apache.cordova.file
     COMMAND ${CORDOVA} plugins add ${CMAKE_CURRENT_SOURCE_DIR}/plugins/org.webodf.starturl
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/hooks/README.md
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
+)
+# add the android platforms to the WebODF cordova folder
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
+    COMMAND ${CORDOVA} platform add android
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/org.apache.cordova.file/plugin.xml
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
+)
+# add the firefoxos platforms to the WebODF cordova folder
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/firefoxos.json
+    COMMAND ${CORDOVA} platform add firefoxos
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/org.apache.cordova.file/plugin.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
 add_custom_command(
@@ -34,21 +47,12 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/merges ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/config.xml ${CMAKE_CURRENT_BINARY_DIR}/WebODF/config.xml
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_BINARY_DIR}/webodf/webodf.js ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www/webodf.js
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/hooks/README.md
             ${CMAKE_CURRENT_SOURCE_DIR}/config.xml
             webodf.js-target
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
-add_custom_command(
-    OUTPUT WebODF/platforms/firefoxos/build/package.zip
-    COMMAND ${CORDOVA} build firefoxos
-    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
-        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/www/
-        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/build/package.zip
-        notopdir
-    DEPENDS WebODF/config.xml
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
-)
+# build the android apk
 add_custom_command(
     OUTPUT WebODF/platforms/android/ant-build/WebODF-debug.apk
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
@@ -60,6 +64,19 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/src/org/webodf/ ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
     COMMAND ${CORDOVA} build android
     DEPENDS WebODF/config.xml
+            ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
+)
+# build the firefoxos package
+add_custom_command(
+    OUTPUT WebODF/platforms/firefoxos/build/package.zip
+    COMMAND ${CORDOVA} build firefoxos
+    COMMAND ${NODE} ARGS ${RUNTIMEJS} ${TOOLS_DIR}/zipdir.js
+        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/www/
+        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/build/package.zip
+        notopdir
+    DEPENDS WebODF/config.xml
+            ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/firefoxos.json
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
 
