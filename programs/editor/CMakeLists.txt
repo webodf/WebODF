@@ -16,7 +16,6 @@ SET(ALONE_EDITOR_EXAMPLE_FILES
     FileSaver.js
     localfileeditor.js
     localeditor.html
-    revieweditor.html
     texteditor.html
     welcome.odt
 )
@@ -176,7 +175,7 @@ add_custom_command(
         ${JSDOCDIR}/app/run.js
         -d=${WODOTEXTEDITORDOC_BUILDDIR}
         -t=${JSDOCDIR}/templates/jsdoc
-        ${WODOTEXTEDITORCODE_BUILDDIR}/wodotexteditor.js
+        wodotexteditor.js
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS wodotexteditorbuilddir-target JsDoc
 )
