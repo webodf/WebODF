@@ -330,7 +330,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_NestedHierarchy() {
         t.doc = createDocument("<text:p text:style-name='P1'><text:span text:style-name='S1'><text:span text:style-name='SBold'>A</text:span></text:span></text:p>");
@@ -342,7 +342,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'SBold', displayName: 'SBold Display', family: 'text', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font', 'fo:font-weight': 'bold'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'S1 Font', 'fo:font-weight': 'bold'})");
     }
     function getAppliedStyles_CompleteContent_OnlyReportsUniqueStyles() {
         t.doc = createDocument("<text:p text:style-name='P1'>A<text:span text:style-name='S1'>B</text:span>C</text:p>");
@@ -353,14 +353,14 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
 
         t.appliedStyles.shift();
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_EmptyArray() {
         t.appliedStyles = t.formatting.getAppliedStyles([]);
@@ -376,7 +376,7 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
     }
     function getAppliedStyles_StartsAndEnds_InDifferentTextNodes() {
         t.doc = createDocument("<text:p text:style-name='P1'>A<text:span text:style-name='S1'>B</text:span>C</text:p>");
@@ -387,14 +387,14 @@ odf.FormattingTests = function FormattingTests(runner) {
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "1");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'P1 Font'})");
 
         t.appliedStyles.shift();
 
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.length", "2");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_SimpleList() {
         var xml = "<text:list text:style-name='L2'><text:list-item>" +
@@ -409,7 +409,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'S1', displayName: 'S1 Display', family: 'text', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style', isCommonStyle: false})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_NestedList() {
         var xml = "<text:list text:style-name='L1'><text:list-item>" +
@@ -427,7 +427,7 @@ odf.FormattingTests = function FormattingTests(runner) {
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'P1', displayName: 'P1 Display', family: 'paragraph', isCommonStyle: true})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L2', displayName: 'L2 Display', family: 'list-style', isCommonStyle: false})");
         r.shouldBe(t, "t.appliedStyles[0].orderedStyles.shift()", "({name: 'L1', displayName: 'L1 Display', family: 'list-style', isCommonStyle: false})");
-        r.shouldBe(t, "t.appliedStyles[0]['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
+        r.shouldBe(t, "t.appliedStyles[0].styleProperties['style:text-properties']", "({'fo:font-name': 'S1 Font'})");
     }
     function getAppliedStyles_InvalidNodes() {
         var i, node,

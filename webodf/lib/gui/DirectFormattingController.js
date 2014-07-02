@@ -714,8 +714,8 @@ gui.DirectFormattingController = function DirectFormattingController(
      */
     function isTextStyleDifferentFromFirstParagraph(range, paragraphNode) {
         var textNodes = getNodes(range),
-            textStyle = odtDocument.getFormatting().getAppliedStyles(textNodes)[0],
-            paragraphStyle = odtDocument.getFormatting().getAppliedStylesForElement(paragraphNode);
+            textStyle = odtDocument.getFormatting().getAppliedStyles(textNodes)[0].styleProperties,
+            paragraphStyle = odtDocument.getFormatting().getAppliedStylesForElement(paragraphNode).styleProperties;
         if (!textStyle || textStyle['style:family'] !== 'text' || !textStyle['style:text-properties']) {
             return false;
         }

@@ -432,7 +432,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * @param {!string} styleName
-     * @return {?Object}
+     * @return {?odf.Formatting.StyleData}
      */
     function getParagraphStyleAttributes(styleName) {
         var node = getParagraphStyleElement(styleName);
