@@ -157,8 +157,10 @@ else(WIN32)
     IF(NODEJS_EXECUTABLE)
         EXEC_PROGRAM(${NODEJS_EXECUTABLE} ARGS --version OUTPUT_VARIABLE NODEJS_VERSION)
         string(SUBSTRING ${NODEJS_VERSION} 1 -1 NODEJS_VERSION)
+        MESSAGE (STATUS "Installed Node.js found: ${NODEJS_EXECUTABLE} - ${NODEJS_VERSION}")
+    ELSE(NODEJS_EXECUTABLE)
+        MESSAGE (STATUS "No installed Node.js found. On platforms other than Windows, Node.js is not downloaded, but expected to be installed.")
     ENDIF(NODEJS_EXECUTABLE)
-    MESSAGE (STATUS "Node.js found: " ${NODEJS_EXECUTABLE} / ${NODEJS_VERSION})
 
     # fail if NodeJS version requirement is not satisfied
     if (${NODEJS_VERSION} VERSION_LESS ${REQUIRED_NODEJS_VERSION})
