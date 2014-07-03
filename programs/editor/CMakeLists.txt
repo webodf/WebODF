@@ -75,11 +75,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory app/resources/
     COMMAND ${CMAKE_COMMAND} -E copy dojo-deps/dist/app/resources/app.css app/resources/
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dijit/
+    COMMAND ${CMAKE_COMMAND} -E make_directory dijit/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/themes/ dijit/themes/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dijit/icons/ dijit/icons/
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory dojo-deps/dist/dojox/
+    COMMAND ${CMAKE_COMMAND} -E make_directory dojox/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/layout/resources/ dojox/layout/resources/
     COMMAND ${CMAKE_COMMAND} -E copy_directory dojo-deps/dist/dojox/widget/ColorPicker/ dojox/widget/ColorPicker/
 
