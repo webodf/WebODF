@@ -14,10 +14,10 @@ WebODF is a Free Software project. All code is available under the AGPL.
 
 If you are interested in using WebODF in your commercial product
 (and do not want to disclose your sources / obey AGPL),
-contact [KO GmbH](http://kogmbh.com) for a commercial license.
+contact [KO GmbH](http://kogmbh.com) for a license suited to your needs.
 
 
-### Creating webodf.js
+### Creating webodf.js...
 
 webodf.js is compiled by using the Closure Compiler. This compiler concatenates and compacts all JavaScript files, so that they are smaller and execute faster. CMake is used to setup the buildsystem, so webodf.js can be created:
 
@@ -29,4 +29,20 @@ webodf.js is compiled by using the Closure Compiler. This compiler concatenates 
 
 A successful run will yield the file "webodf.js" in the subfolder "build/webodf/" (among other things), from where you can then copy it and use for your website.
 
-For more details about building webodf.js, e.g. on Windows or OSX, please study "README-Building.md".
+For more details about preparing the build of webodf.js , e.g. on Windows or OSX, please study ["README-Building.md"](README-Building.md).
+
+### ... and more
+
+This repository not only contains code for the library webodf.js, but also a few products based on it. Here is the complete list:
+
+build target             | output location (in build/)           | description | official download
+-------------------------|---------------------------------------|---------------|-----
+webodf.js-target         | webodf/webodf.js                      | the library                        | (see product-library)
+product-library          | webodf.js-x.y.z.zip                   | zip file with library and API docs | [WebODF homepage](http://webodf.org/download)
+product-wodotexteditor   | wodotexteditor-x.y.z.zip              | simple to use editor component     | [WebODF homepage](http://webodf.org/download)
+product-firefoxextension | firefox-extension-odfviewer-x.y.z.xpi | ODF viewer Firefox add-on          | [Mozilla's Add-on website](https://addons.mozilla.org/firefox/addon/webodf/)
+product-viewerjsdir      | viewer/                               | plugin for [ViewerJS](http://viewerjs.org) | [ViewerJS](http://viewerjs.org) (built-in)
+
+("x.y.z" is a placeholder for the actual version number)
+
+For more details about the different products, please study ["README-Products.md"](README-Products.md).
