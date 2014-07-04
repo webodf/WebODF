@@ -33,6 +33,24 @@ var Wodo = Wodo || (function () {
         "use strict";
 
         /**
+         * Sees to get the url of this script on top of the stack trace.
+         * @param {!string|undefined} stack
+         * @return {!string|undefined}
+         */
+        function getScriptUrlFromStack(stack) {
+            var url, matches;
+
+            if (typeof stack === "string" && stack) {
+                matches = stack.match(/((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+                url = matches && matches[1];
+            }
+            if (typeof url === "string" && url) {
+                return url;
+            }
+            return undefined;
+        }
+
+        /**
          * Tries by various tricks to get the url of this script.
          * To be called if document.currentScript is not supported
          * @return {!string|undefined}
@@ -42,35 +60,17 @@ var Wodo = Wodo || (function () {
                 pageUrl = window.location.href,
                 scriptElements = document.getElementsByTagName("script");
 
+            // if there is only one script, it must be this
             if (scriptElements.length === 1) {
                 return scriptElements[0].src;
             }
 
-            if ("readyState" in scriptElements[0]) {
-                for (i = scriptElements.length; i--; ) {
-                    if (scriptElements[i].readyState === "interactive") {
-                        return scriptElements[i].src;
-                    }
-                }
+            // otherwise get it from the stacktrace
+            try {
+                throw new Error();
             }
-
-            if (document.readyState === "loading") {
-                return scriptElements[scriptElements.length - 1].src;
-            } else {
-                // from the stacktrace
-                try {
-                    throw new Error();
-                }
-                catch (err) {
-                    var url, matches;
-                    if (typeof err.stack === "string" && err.stack) {
-                        matches = err.stack.match(/((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
-                        url = matches && matches[1];
-                    }
-                    if (typeof url === "string" && url) {
-                        return url;
-                    }
-                }
+            catch (err) {
+                return getScriptUrlFromStack(err.stack);
             }
         }
 
