@@ -30,18 +30,70 @@ var Wodo = Wodo || (function () {
     "use strict";
 
     var installationPath = (function() {
-        var path = ".",
+        "use strict";
+
+        /**
+         * Tries by various tricks to get the url of this script.
+         * To be called if document.currentScript is not supported
+         * @return {!string|undefined}
+         */
+        function getCurrentScriptElementSrcByTricks() {
+            var i,
+                pageUrl = window.location.href,
+                scriptElements = document.getElementsByTagName("script");
+
+            if (scriptElements.length === 1) {
+                return scriptElements[0].src;
+            }
+
+            if ("readyState" in scriptElements[0]) {
+                for (i = scriptElements.length; i--; ) {
+                    if (scriptElements[i].readyState === "interactive") {
+                        return scriptElements[i].src;
+                    }
+                }
+            }
+
+            if (document.readyState === "loading") {
+                return scriptElements[scriptElements.length - 1].src;
+            } else {
+                // from the stacktrace
+                try {
+                    throw new Error();
+                }
+                catch (err) {
+                    var url, matches;
+                    if (typeof err.stack === "string" && err.stack) {
+                        matches = err.stack.match(/((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+                        url = matches && matches[1];
+                    }
+                    if (typeof url === "string" && url) {
+                        return url;
+                    }
+                }
+            }
+        }
+
+        var path = ".", scriptElementSrc,
             a, pathname, pos;
 
         if (document.currentScript && document.currentScript.src) {
+            scriptElementSrc = document.currentScript.src;
+        } else {
+            scriptElementSrc = getCurrentScriptElementSrcByTricks();
+        }
+
+        if (scriptElementSrc) {
             a = document.createElement('a');
-            a.href = document.currentScript.src;
+            a.href = scriptElementSrc;
             pathname = a.pathname;
 
             pos = pathname.lastIndexOf("/");
             if (pos !== -1) {
                 path = pathname.substr(0, pos);
             }
+        } else {
+            alert("Could not estimate installation path of the Wodo.TextEditor.");
         }
         return path;
     }());
