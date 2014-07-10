@@ -99,6 +99,7 @@ define("webodf/editor/Tools", [
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                 }
+
                 editorSession = session;
                 if (editorSession) {
                     editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
@@ -107,6 +108,9 @@ define("webodf/editor/Tools", [
                 sessionSubscribers.forEach(function (subscriber) {
                     subscriber.setEditorSession(editorSession);
                 });
+                if (formatMenuButton) {
+                    formatMenuButton.setAttribute('disabled', !editorSession);
+                }
             }
 
             this.setEditorSession = setEditorSession;
@@ -227,6 +231,7 @@ define("webodf/editor/Tools", [
 
                     formatMenuButton = new DropDownButton({
                         dropDown: formatDropDownMenu,
+                        disabled: true,
                         label: tr('Format'),
                         iconClass: "dijitIconEditTask",
                         style: {
