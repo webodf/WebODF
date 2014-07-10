@@ -331,16 +331,13 @@ cursor|cursor {
 /** Input Method Editor input pane & behaviours */
 /* not within a cursor */
 #eventTrap {
-    height: auto;
     display: block;
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 1px;
     outline: none;
     opacity: 0;
     color: rgba(255, 255, 255, 0); /* hide the blinking caret by setting the colour to fully transparent */
-    overflow: hidden; /* The overflow visibility is used to hide and show characters being entered */
     pointer-events: none;
 }
 
