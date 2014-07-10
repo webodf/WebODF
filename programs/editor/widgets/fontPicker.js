@@ -39,6 +39,7 @@ define("webodf/editor/widgets/fontPicker", [
 
             select = new Select({
                 name: 'FontPicker',
+                disabled: true,
                 maxHeight: 200,
                 style: {
                     width: '150px'
@@ -115,9 +116,10 @@ define("webodf/editor/widgets/fontPicker", [
             this.setEditorSession = function(session) {
                 editorSession = session;
                 populateFonts();
+                select.setAttribute('disabled', !editorSession);
             };
-
             populateFonts();
+
             callback(self);
         };
 

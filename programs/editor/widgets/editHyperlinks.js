@@ -133,6 +133,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                     editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
                     hyperlinkController.unsubscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
                 }
+
                 editorSession = session;
                 if (editorSession) {
                     hyperlinkController = editorSession.sessionController.getHyperlinkController();
@@ -144,6 +145,8 @@ define("webodf/editor/widgets/editHyperlinks", [
 
                     enableHyperlinkButtons(hyperlinkController.isEnabled());
                     checkHyperlinkButtons();
+                } else {
+                    enableHyperlinkButtons( false );
                 }
             };
 
@@ -162,6 +165,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 editHyperlinkButton = new DropDownButton({
                     label: runtime.tr('Edit link'),
                     showLabel: false,
+                    disabled: true,
                     iconClass: 'dijitEditorIcon dijitEditorIconCreateLink',
                     dropDown: dialog
                 });

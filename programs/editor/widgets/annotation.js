@@ -73,11 +73,14 @@ define("webodf/editor/widgets/annotation", [
                 if (editorSession) {
                     annotationController.unsubscribe(gui.AnnotationController.annotatableChanged, onAnnotatableChanged);
                 }
+
                 editorSession = session;
                 if (editorSession) {
                     annotationController = editorSession.sessionController.getAnnotationController();
                     annotationController.subscribe(gui.AnnotationController.annotatableChanged, onAnnotatableChanged);
                     onAnnotatableChanged(annotationController.isAnnotatable());
+                } else {
+                    addAnnotationButton.setAttribute('disabled', true);
                 }
             };
 

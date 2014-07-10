@@ -153,6 +153,7 @@ define("webodf/editor/widgets/imageInserter", [
                     editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     imageController.unsubscribe(gui.ImageController.enabledChanged, enableButtons);
                 }
+
                 editorSession = session;
                 if (editorSession) {
                     textController = editorSession.sessionController.getTextController();
@@ -162,6 +163,8 @@ define("webodf/editor/widgets/imageInserter", [
                     imageController.subscribe(gui.ImageController.enabledChanged, enableButtons);
 
                     enableButtons(imageController.isEnabled());
+                } else {
+                    enableButtons(false);
                 }
             };
 

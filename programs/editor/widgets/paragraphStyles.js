@@ -24,11 +24,13 @@
 
 /*global define,require */
 
-define("webodf/editor/widgets/paragraphStyles",
-       ["webodf/editor/EditorSession"],
+define("webodf/editor/widgets/paragraphStyles", [
+    "dijit/form/Select",
+    "webodf/editor/EditorSession"],
 
-    function (EditorSession) {
-    "use strict";
+    function (Select, EditorSession) {
+    "use strict"
+
     /**
      * @constructor
      */
@@ -72,10 +74,6 @@ define("webodf/editor/widgets/paragraphStyles",
         function populateStyles() {
             var i, selectionList, availableStyles;
 
-            if (! select) {
-                return;
-            }
-
             // Populate the Default Style always 
             selectionList = [{
                 label: runtime.tr("Default Style"),
@@ -103,12 +101,10 @@ define("webodf/editor/widgets/paragraphStyles",
             }
 
             newStyleElement = editorSession.getParagraphStyleElement(styleInfo.name);
-            if (select) {
-                select.addOption({
-                    value: styleInfo.name,
-                    label: newStyleElement.getAttributeNS(stylens, 'display-name')
-                });
-            }
+            select.addOption({
+                value: styleInfo.name,
+                label: newStyleElement.getAttributeNS(stylens, 'display-name')
+            });
 
             if (self.onAdd) {
                 self.onAdd(styleInfo.name);
@@ -120,45 +116,16 @@ define("webodf/editor/widgets/paragraphStyles",
                 return;
             }
 
-            if (select) {
-                select.removeOption(styleInfo.name);
-            }
+            select.removeOption(styleInfo.name);
 
             if (self.onRemove) {
                 self.onRemove(styleInfo.name);
             }
         }
 
-        function init(cb) {
-            require(["dijit/form/Select"], function (Select) {
-                select = new Select({
-                    name: 'ParagraphStyles',
-                    maxHeight: 200,
-                    style: {
-                        width: '100px'
-                    }
-                });
-
-                populateStyles();
-
-                // Call ParagraphStyles's onChange handler every time
-                // the select's onchange is called, and pass the value
-                // as reported by ParagraphStyles.value(), because we do not
-                // want to expose the internal naming like ":default" outside this
-                // class.
-                select.onChange = function () {
-                    self.onChange(self.value());
-                };
-
-                return cb();
-            });
-        }
-
         function handleCursorMoved(cursor) {
             var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
-            if (select) {
-                select.setAttribute('disabled', disabled);
-            }
+            select.setAttribute('disabled', disabled);
         }
 
         this.setEditorSession = function(session) {
@@ -167,19 +134,43 @@ define("webodf/editor/widgets/paragraphStyles",
                 editorSession.unsubscribe(EditorSession.signalCommonStyleDeleted, removeStyle);
                 editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
             }
+
             editorSession = session;
             if (editorSession) {
                 editorSession.subscribe(EditorSession.signalCommonStyleCreated, addStyle);
                 editorSession.subscribe(EditorSession.signalCommonStyleDeleted, removeStyle);
                 editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
-                populateStyles();
             }
+            select.setAttribute('disabled', !editorSession);
+
+            populateStyles();
         };
 
         // init
-        init(function () {
+        function init() {
+            select = new Select({
+                name: 'ParagraphStyles',
+                maxHeight: 200,
+                style: {
+                    width: '100px'
+                }
+            });
+
+            populateStyles();
+
+            // Call ParagraphStyles's onChange handler every time
+            // the select's onchange is called, and pass the value
+            // as reported by ParagraphStyles.value(), because we do not
+            // want to expose the internal naming like ":default" outside this
+            // class.
+            select.onChange = function () {
+                self.onChange(self.value());
+            };
+
             return callback(self);
-        });
+        }
+
+        init();
     };
 
     return ParagraphStyles;

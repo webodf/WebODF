@@ -90,10 +90,15 @@ define("webodf/editor/widgets/undoRedoMenu",
                 if (editorSession) {
                     editorSession.unsubscribe(EditorSession.signalUndoStackChanged, checkUndoButtons);
                 }
+
                 editorSession = session;
                 if (editorSession) {
                     editorSession.subscribe(EditorSession.signalUndoStackChanged, checkUndoButtons);
                     // TODO: checkUndoButtons(editorSession.getundoredoavailablalalo());
+                } else {
+                    widget.children.forEach(function (element) {
+                        element.setAttribute('disabled', true);
+                    });
                 }
             };
 

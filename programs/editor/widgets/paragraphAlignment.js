@@ -163,6 +163,7 @@ define("webodf/editor/widgets/paragraphAlignment", [
                     directFormattingController.unsubscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
+
                 editorSession = session;
                 if (editorSession) {
                     directFormattingController = editorSession.sessionController.getDirectFormattingController();
@@ -170,9 +171,9 @@ define("webodf/editor/widgets/paragraphAlignment", [
                     directFormattingController.subscribe(gui.DirectFormattingController.paragraphStylingChanged, updateStyleButtons);
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
 
-                    if(directFormattingController) {
-                        enableStyleButtons(directFormattingController.enabledFeatures());
-                    }
+                    enableStyleButtons(directFormattingController.enabledFeatures());
+                } else {
+                    enableStyleButtons({directParagraphStyling: false});
                 }
 
                 updateStyleButtons({

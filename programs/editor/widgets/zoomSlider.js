@@ -25,51 +25,23 @@
 /*global define,require*/
 
 define("webodf/editor/widgets/zoomSlider", [
+    "dijit/form/HorizontalSlider",
+    "dijit/form/NumberTextBox",
     "webodf/editor/EditorSession"],
-    function (EditorSession) {
+
+    function (HorizontalSlider, NumberTextBox, EditorSession) {
     "use strict";
 
+    // The slider zooms from -1 to +1, which corresponds
+    // to zoom levels of 1/extremeZoomFactor to extremeZoomFactor.
     return function ZoomSlider(callback) {
         var self = this,
             editorSession,
             slider,
             extremeZoomFactor = 4;
 
-        // The slider zooms from -1 to +1, which corresponds
-        // to zoom levels of 1/extremeZoomFactor to extremeZoomFactor.
-        function makeWidget(callback) {
-            require(["dijit/form/HorizontalSlider", "dijit/form/NumberTextBox", "dojo"], function (HorizontalSlider, NumberTextBox, dojo) {
-                var widget = {};
-
-                slider = new HorizontalSlider({
-                    name: 'zoomSlider',
-                    value: 0,
-                    minimum: -1,
-                    maximum: 1,
-                    discreteValues: 0.01,
-                    intermediateChanges: true,
-                    style: {
-                        width: '150px',
-                        height: '25px',
-                        float: 'right'
-                    }
-                });
-
-                slider.onChange = function (value) {
-                    if (editorSession) {
-                        editorSession.getOdfCanvas().getZoomHelper().setZoomLevel(Math.pow(extremeZoomFactor, value));
-                    }
-                    self.onToolDone();
-                };
- 
-                return callback(slider);
-            });
-        }
-
         function updateSlider(zoomLevel) {
-            if (slider) {
-                slider.set('value', Math.log(zoomLevel) / Math.log(extremeZoomFactor), false);
-            }
+            slider.set('value', Math.log(zoomLevel) / Math.log(extremeZoomFactor), false);
         }
 
         this.setEditorSession = function(session) {
@@ -77,19 +49,45 @@ define("webodf/editor/widgets/zoomSlider", [
             if (editorSession) {
                 editorSession.getOdfCanvas().getZoomHelper().unsubscribe(gui.ZoomHelper.signalZoomChanged, updateSlider);
             }
+
             editorSession = session;
             if (editorSession) {
                 zoomHelper = editorSession.getOdfCanvas().getZoomHelper();
                 zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, updateSlider);
                 updateSlider(zoomHelper.getZoomLevel());
             }
+            slider.setAttribute('disabled', !editorSession);
         };
 
         this.onToolDone = function () {};
 
         // init
-        makeWidget(function (widget) {
-            return callback(widget);
-        });
+        function init() {
+            slider = new HorizontalSlider({
+                name: 'zoomSlider',
+                disabled: true,
+                value: 0,
+                minimum: -1,
+                maximum: 1,
+                discreteValues: 0.01,
+                intermediateChanges: true,
+                style: {
+                    width: '150px',
+                    height: '25px',
+                    float: 'right'
+                }
+            });
+
+            slider.onChange = function (value) {
+                if (editorSession) {
+                    editorSession.getOdfCanvas().getZoomHelper().setZoomLevel(Math.pow(extremeZoomFactor, value));
+                }
+                self.onToolDone();
+            };
+
+            return callback(slider);
+        }
+
+        init();
     };
 });

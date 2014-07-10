@@ -180,27 +180,28 @@ define("webodf/editor/widgets/simpleStyles", [
                     directFormattingController.unsubscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
+
                 editorSession = session;
                 fontPicker.setEditorSession(editorSession);
                 if (editorSession) {
-                    directFormattingController = session && session.sessionController.getDirectFormattingController();
+                    directFormattingController = editorSession.sessionController.getDirectFormattingController();
 
                     editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
 
-                    if (directFormattingController) {
-                        enableStyleButtons(directFormattingController.enabledFeatures());
-                    }
+                    enableStyleButtons(directFormattingController.enabledFeatures());
+                } else {
+                    enableStyleButtons({ directTextStyling: false});
                 }
 
                 updateStyleButtons({
-                    isBold: directFormattingController ? directFormattingController.isBold() : false,
-                    isItalic: directFormattingController ? directFormattingController.isItalic() : false,
-                    hasUnderline: directFormattingController ? directFormattingController.hasUnderline() : false,
-                    hasStrikeThrough: directFormattingController ? directFormattingController.hasStrikeThrough() : false,
-                    fontSize: directFormattingController ? directFormattingController.fontSize() : undefined,
-                    fontName: directFormattingController ? directFormattingController.fontName() : undefined
+                    isBold: editorSession ? directFormattingController.isBold() : false,
+                    isItalic: editorSession ? directFormattingController.isItalic() : false,
+                    hasUnderline: editorSession ? directFormattingController.hasUnderline() : false,
+                    hasStrikeThrough: editorSession ? directFormattingController.hasStrikeThrough() : false,
+                    fontSize: editorSession ? directFormattingController.fontSize() : undefined,
+                    fontName: editorSession ? directFormattingController.fontName() : undefined
                 });
             };
 
