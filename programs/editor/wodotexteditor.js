@@ -677,43 +677,38 @@ var Wodo = Wodo || (function () {
 
     function loadDojoAndStuff(callback) {
         var head = document.getElementsByTagName("head")[0],
-            link;
+            frag = document.createDocumentFragment(),
+            link,
+            script;
 
+        // append two link and two script elements to the header
         link = document.createElement("link");
         link.rel = "stylesheet";
         link.href = installationPath + "/app/resources/app.css";
         link.type = "text/css";
         link.async = false;
-        link.onload = function() {
-            var link;
-            link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = installationPath + "/wodotexteditor.css";
-            link.type = "text/css";
-            link.async = false;
-            link.onload = function() {
-                var script;
-                script = document.createElement("script");
-                script.src = installationPath + "/dojo-amalgamation.js";
-                script["data-dojo-config"] = "async: true";
-                script.charset = "utf-8";
-                script.type = "text/javascript";
-                script.async = false;
-                script.onload = function() {
-                    var script;
-                    script = document.createElement("script");
-                    script.src = installationPath + "/webodf.js";
-                    script.charset = "utf-8";
-                    script.type = "text/javascript";
-                    script.async = false;
-                    script.onload = callback;
-                    head.appendChild(script);
-                };
-                head.appendChild(script);
-            };
-            head.appendChild(link);
-        };
-        head.appendChild(link);
+        frag.appendChild(link);
+        link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = installationPath + "/wodotexteditor.css";
+        link.type = "text/css";
+        link.async = false;
+        frag.appendChild(link);
+        script = document.createElement("script");
+        script.src = installationPath + "/dojo-amalgamation.js";
+        script["data-dojo-config"] = "async: true";
+        script.charset = "utf-8";
+        script.type = "text/javascript";
+        script.async = false;
+        frag.appendChild(script);
+        script = document.createElement("script");
+        script.src = installationPath + "/webodf.js";
+        script.charset = "utf-8";
+        script.type = "text/javascript";
+        script.async = false;
+        script.onload = callback;
+        frag.appendChild(script);
+        head.appendChild(frag);
     }
 
     /**
