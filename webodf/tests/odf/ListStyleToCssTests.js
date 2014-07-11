@@ -130,6 +130,34 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
 
     }
 
+    function style_WithNo_list_level_poperties() {
+        applyListStyles(
+            '<text:list-style style:name="lijst">' +
+              '<text:list-level-style-bullet text:bullet-char="-" text:level="1">' +
+              '</text:list-level-style-bullet>' +
+            '</text:list-style>',
+            "");
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "3");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > *:not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;min-width: 0px;margin-left: 0px;padding-right: 0px;\\ncontent: \"-\";\\n}'");
+    }
+
+    function style_list_level_properties_WithNo_style_list_level_label_alignment() {
+        applyListStyles(
+            '<text:list-style style:name="lijst">' +
+              '<text:list-level-style-bullet text:bullet-char="-" text:level="1">' +
+                '<style:list-level-properties text:list-level-position-and-space-mode="label-alignment">' +
+                '</style:list-level-properties>' +
+              '</text:list-level-style-bullet>' +
+            '</text:list-style>',
+            "");
+        r.shouldBe(t, "t.styleSheet.cssRules.length", "3");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[0].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item{margin-left: 0px;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[1].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > text|list{margin-left: 0px;}'");
+        r.shouldBe(t, "t.styleSheet.cssRules.rules[2].ruleText", "'text|list[text|style-name=\"lijst\"] > text|list-item > *:not(text|list):first-child:before{text-align: left;counter-increment:list;display: inline-block;margin-left: 0px;\\ncontent: \"-\";\\n}'");
+    }
+
     /**
      * WebKit, Chrome + FF all have radically different ways of joining & quoting CSS content.
      * The tests being created depend on a predictable string being parsed out for comparison, hence
@@ -357,7 +385,9 @@ odf.ListStyleToCssTests = function ListStyleToCssTests(runner) {
             style_list_level_label_alignment_WithNo_fo_margin_left,
             numberedListPrefixes,
             numberedListSuffixes,
-            bulletCharacters
+            bulletCharacters,
+            style_WithNo_list_level_poperties,
+            style_list_level_properties_WithNo_style_list_level_label_alignment
         ]);
     };
     this.asyncTests = function () {

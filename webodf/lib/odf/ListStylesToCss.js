@@ -170,9 +170,9 @@
             var selector = 'text|list[text|style-name="' + name + '"]',
                 level = node.getAttributeNS(textns, "level"),
                 listItemRule,
-                listLevelProps = /**@type{!Element}*/(node.getElementsByTagNameNS(stylens, "list-level-properties")[0]),
-                listLevelPositionSpaceMode = listLevelProps.getAttributeNS(textns, "list-level-position-and-space-mode"),
-                listLevelLabelAlign = /**@type{!Element}*/(listLevelProps.getElementsByTagNameNS(stylens, "list-level-label-alignment")[0]),
+                listLevelProps,
+                listLevelPositionSpaceMode,
+                listLevelLabelAlign,
                 listIndent,
                 textAlign,
                 bulletWidth,
@@ -180,6 +180,13 @@
                 bulletIndent,
                 followedBy,
                 leftOffset;
+
+            // style:list-level-properties is an optional element. Since the rest of this function
+            // depends on its existence, return from it if it is not found.
+            listLevelProps = /**@type{!Element|undefined}*/(node.getElementsByTagNameNS(stylens, "list-level-properties")[0]);
+            listLevelPositionSpaceMode = listLevelProps && listLevelProps.getAttributeNS(textns, "list-level-position-and-space-mode");
+            listLevelLabelAlign = /**@type{!Element|undefined}*/(listLevelProps) &&
+                                  /**@type{!Element|undefined}*/(listLevelProps.getElementsByTagNameNS(stylens, "list-level-label-alignment")[0]);
 
             // calculate CSS selector based on list level
             level = level && parseInt(level, 10);
@@ -190,7 +197,7 @@
 
             // TODO: fo:text-align is only an optional attribute with <style:list-level-properties>,
             // needs to be found what should be done if not present. For now falling back to "left"
-            textAlign = listLevelProps.getAttributeNS(fons, "text-align") || "left";
+            textAlign = (listLevelProps && listLevelProps.getAttributeNS(fons, "text-align")) || "left";
             // convert the start and end text alignments to left and right as
             // IE does not support the start and end values for text alignment
             switch (textAlign) {
@@ -207,18 +214,18 @@
                 // TODO: fetch the margin and indent from the paragraph style if it is defined there
                 // http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#element-style_list-level-label-alignment
                 // for now just fallback to "0px" if not defined on <style:list-level-label-alignment>
-                listIndent = listLevelLabelAlign.getAttributeNS(fons, "margin-left") || "0px";
-                bulletIndent = listLevelLabelAlign.getAttributeNS(fons, "text-indent") || "0px";
-                followedBy = listLevelLabelAlign.getAttributeNS(textns, "label-followed-by");
+                listIndent = (listLevelLabelAlign && listLevelLabelAlign.getAttributeNS(fons, "margin-left")) || "0px";
+                bulletIndent = (listLevelLabelAlign && listLevelLabelAlign.getAttributeNS(fons, "text-indent")) || "0px";
+                followedBy = listLevelLabelAlign && listLevelLabelAlign.getAttributeNS(textns, "label-followed-by");
                 leftOffset = convertToPxValue(listIndent);
 
             } else {
                 // this block is entered if list-level-position-and-space-mode
                 // has the value label-width-and-position or is not present
                 // TODO: fallback values should be read from parent styles or (system) defaults
-                listIndent = listLevelProps.getAttributeNS(textns, "space-before") || "0px";
-                bulletWidth = listLevelProps.getAttributeNS(textns, "min-label-width") || "0px";
-                labelDistance = listLevelProps.getAttributeNS(textns, "min-label-distance") || "0px";
+                listIndent = (listLevelProps && listLevelProps.getAttributeNS(textns, "space-before")) || "0px";
+                bulletWidth = (listLevelProps && listLevelProps.getAttributeNS(textns, "min-label-width")) || "0px";
+                labelDistance = (listLevelProps && listLevelProps.getAttributeNS(textns, "min-label-distance")) || "0px";
                 leftOffset = convertToPxValue(listIndent) + convertToPxValue(bulletWidth);
             }
 
@@ -252,7 +259,7 @@
                 }
             } else {
                 listItemRule += 'min-width: ' + bulletWidth + ';';
-                listItemRule += 'margin-left: -' + bulletWidth + ';';
+                listItemRule += 'margin-left: ' + (parseFloat(bulletWidth) === 0 ? '' : '-') + bulletWidth + ';';
                 listItemRule += 'padding-right: ' + labelDistance + ';';
             }
             // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
@@ -312,3 +319,4 @@
         };
     };
 }());
+
