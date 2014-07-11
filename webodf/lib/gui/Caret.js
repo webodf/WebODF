@@ -212,7 +212,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      */
     function updateOverlayHeightAndPosition() {
         var selectionRect = getSelectionRect(),
-            caretStyle;
+            cursorStyle;
 
         if (selectionRect.height < MIN_OVERLAY_HEIGHT_PX) {
             // ClientRect's are read-only, so a whole new object is necessary to modify these values
@@ -228,18 +228,18 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
 
         // Update the overlay element
         if (overlayElement) {
-            caretStyle = runtime.getWindow().getComputedStyle(caretElement, null);
-            if (caretStyle.font) {
-                overlayElement.style.font = caretStyle.font;
+            cursorStyle = runtime.getWindow().getComputedStyle(cursor.getNode(), null);
+            if (cursorStyle.font) {
+                overlayElement.style.font = cursorStyle.font;
             } else {
                 // On IE, window.getComputedStyle(element).font returns "".
                 // Therefore we need to individually set the font properties.
-                overlayElement.style.fontStyle = caretStyle.fontStyle;
-                overlayElement.style.fontVariant = caretStyle.fontVariant;
-                overlayElement.style.fontWeight = caretStyle.fontWeight;
-                overlayElement.style.fontSize = caretStyle.fontSize;
-                overlayElement.style.lineHeight = caretStyle.lineHeight;
-                overlayElement.style.fontFamily = caretStyle.fontFamily;
+                overlayElement.style.fontStyle = cursorStyle.fontStyle;
+                overlayElement.style.fontVariant = cursorStyle.fontVariant;
+                overlayElement.style.fontWeight = cursorStyle.fontWeight;
+                overlayElement.style.fontSize = cursorStyle.fontSize;
+                overlayElement.style.lineHeight = cursorStyle.lineHeight;
+                overlayElement.style.fontFamily = cursorStyle.fontFamily;
             }
         }
     }
