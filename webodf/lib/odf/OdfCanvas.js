@@ -171,12 +171,9 @@
         /**@const@type {!string}*/tablens = odf.Namespaces.tablens,
         /**@const@type {!string}*/textns  = odf.Namespaces.textns,
         /**@const@type {!string}*/xlinkns = odf.Namespaces.xlinkns,
-        /**@const@type {!string}*/xmlns = odf.Namespaces.xmlns,
         /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@const@type {!string}*/webodfhelperns = "urn:webodf:names:helper",
-        /**@type{?Window}*/window = runtime.getWindow(),
         xpath = xmldom.XPath,
-        odfUtils = new odf.OdfUtils(),
         domUtils = new core.DomUtils();
 
     /**
@@ -200,6 +197,7 @@
             stylesheet.deleteRule(cssRules.length - 1);
         }
     }
+
     /**
      * A new styles.xml has been loaded. Update the live document with it.
      * @param {!odf.OdfContainer} odfcontainer
@@ -224,7 +222,11 @@
             styleTree
         );
 
-        list2css.applyListStyles(styleSheet, styleTree);
+        list2css.applyListStyles(
+            styleSheet,
+            styleTree,
+            odfcontainer.rootElement.body);
+
     }
 
     /**
@@ -702,196 +704,6 @@
     }
 
     /**
-     * COPIED FROM ListStylesToCss - Will be removed when this logic is deduped
-     * Appends the rule into the stylesheets and logs any errors that occur
-     * @param {!CSSStyleSheet} styleSheet
-     * @param {!string} rule
-     */
-    function appendRule(styleSheet, rule) {
-        try {
-            styleSheet.insertRule(rule, styleSheet.cssRules.length);
-        } catch (/**@type{!DOMException}*/e) {
-            runtime.log("cannot load rule: " + rule + " - " + e);
-        }
-    }
-
-    /**
-     * COPIED FROM ListStylesToCss - Will be removed when this logic is deduped
-     * Return the supplied value with any backslashes escaped, and double-quotes escaped
-     * @param {!string} value
-     * @return {!string}
-     */
-    function escapeCSSString(value) {
-        return value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
-    }
-
-    /**
-     * @param {!Element} node
-     * @return {!string}
-     */
-    function getNumberRule(node) {
-        var style = node.getAttributeNS(stylens, "num-format"),
-            suffix = node.getAttributeNS(stylens, "num-suffix") || "",
-            prefix = node.getAttributeNS(stylens, "num-prefix") || "",
-            rule = "",
-            /**@type{!Object.<string,string>}*/
-            stylemap = {
-                '1': 'decimal',
-                'a': 'lower-latin',
-                'A': 'upper-latin',
-                'i': 'lower-roman',
-                'I': 'upper-roman'
-            },
-            content;
-
-        if (prefix) {
-            // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
-            // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
-            content = '"' + escapeCSSString(prefix) + '"\n';
-        }
-
-        if (stylemap.hasOwnProperty(style)) {
-            content += " counter(list, " + stylemap[style] + ")";
-        } else if (style) {
-            content += "'" + style + "';";
-        } else {
-            content += ' ""';
-        }
-        if (suffix) {
-            content += ' "' + escapeCSSString(suffix) + '"';
-        }
-        rule = 'content:' + content + ';';
-        return rule;
-    }
-    /**
-     * @return {!string}
-     */
-    function getImageRule() {
-        var rule = "content: none;";
-        return rule;
-    }
-    /**
-     * @param {!Element} node
-     * @return {!string}
-     */
-    function getBulletRule(node) {
-        var bulletChar = node.getAttributeNS(textns, "bullet-char");
-        // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
-        // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
-        return 'content: "' + escapeCSSString(bulletChar) + '"\n;';
-    }
-
-    /**
-     * @param {Element|undefined} node
-     * @return {string|undefined}
-     */
-    function getBulletsRule(node) {
-        var itemrule;
-
-        if (node) {
-            if (node.localName === "list-level-style-number") {
-                itemrule = getNumberRule(node);
-            } else if (node.localName === "list-level-style-image") {
-                itemrule = getImageRule();
-            } else if (node.localName === "list-level-style-bullet") {
-                itemrule = getBulletRule(node);
-            }
-        }
-
-        return itemrule;
-    }
-    /**
-     * Load all the lists that are inside an odf element, and correct numbering.
-     * @param {!Element} odffragment
-     * @param {!CSSStyleSheet} stylesheet
-     * @param {!string} documentns
-     * @return {undefined}
-     */
-    function loadLists(odffragment, stylesheet, documentns) {
-        var i,
-            lists,
-            node,
-            id,
-            continueList,
-            styleName,
-            rule,
-            /**@type{!Object.<string,string>}*/
-            listMap = {},
-            parentList,
-            listStyles,
-            /**@type{!Object.<string,!Element>}*/
-            listStyleMap = {},
-            bulletRule;
-
-        listStyles = window.document.getElementsByTagNameNS(textns, "list-style");
-        for (i = 0; i < listStyles.length; i += 1) {
-            node = /**@type{!Element}*/(listStyles.item(i));
-            styleName = node.getAttributeNS(stylens, "name");
-
-            if (styleName) {
-                listStyleMap[styleName] = node;
-            }
-        }
-
-        lists = odffragment.getElementsByTagNameNS(textns, 'list');
-
-        for (i = 0; i < lists.length; i += 1) {
-            node = /**@type{!Element}*/(lists.item(i));
-
-            id = node.getAttributeNS(xmlns, "id");
-
-            if (id) {
-                continueList = node.getAttributeNS(textns, "continue-list");
-                node.setAttributeNS(documentns, "id", id);
-                rule = 'text|list#' + id + ' > text|list-item > *:first-child:before {';
-
-                styleName = node.getAttributeNS(textns, 'style-name');
-                if (styleName) {
-                    node = listStyleMap[styleName];
-                    // TODO: getFirstNonWhitespaceChild() could also return a comment. Ensure the result is proper!
-                    bulletRule = getBulletsRule(/**@type{Element|undefined}*/(odfUtils.getFirstNonWhitespaceChild(node)));
-                    // Content needs to be on a new line if it contains slashes due to a bug in older versions of webkit
-                    // E.g., the one used in the qt runtime tests - https://bugs.webkit.org/show_bug.cgi?id=35010
-                    bulletRule = "\n" + bulletRule + "\n";
-                }
-
-                if (continueList) {
-                    parentList = listMap[continueList];
-                    while (parentList) {
-                        parentList = listMap[parentList];
-                    }
-                    rule += 'counter-increment:' + continueList + ';';
-
-                    if (bulletRule) {
-                        bulletRule = bulletRule.replace('list', continueList);
-                        rule += bulletRule;
-                    } else {
-                        rule += 'content:counter(' + continueList + ');';
-                    }
-                } else {
-                    continueList = "";
-                    if (bulletRule) {
-                        bulletRule = bulletRule.replace('list', id);
-                        rule += bulletRule;
-                    } else {
-                        rule += 'content: counter(' + id + ');';
-                    }
-                    rule += 'counter-increment:' + id + ';';
-                    appendRule(stylesheet, 'text|list#' + id + ' {counter-reset:' + id + '}');
-                }
-                rule += '}';
-
-                listMap[id] = continueList;
-
-                if (rule) {
-                    // Add this stylesheet
-                    appendRule(stylesheet, rule);
-                }
-            }
-        }
-    }
-
-    /**
      * @param {!HTMLHeadElement} head
      * @return {?HTMLStyleElement}
      */
@@ -1225,10 +1037,8 @@
             expandTabElements(odfnode.body);
             loadImages(container, odfnode.body, css);
             loadVideos(container, odfnode.body);
-            loadLists(odfnode.body, css, element.namespaceURI);
 
             sizer.insertBefore(shadowContent, sizer.firstChild);
-
             zoomHelper.setZoomableElement(sizer);
         }
 

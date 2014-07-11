@@ -39,9 +39,6 @@ odf.OdfUtils = function OdfUtils() {
         /**@const
            @type{!string}*/
         xlinkns = odf.Namespaces.xlinkns,
-        /**@const
-           @type{!RegExp}*/
-        whitespaceOnly = /^\s*$/,
         domUtils = new core.DomUtils(),
         // only add odf element namespaces here.
         // Namespaces solely used for attributes are excluded. eg. fo, xlink & xml
@@ -627,20 +624,6 @@ odf.OdfUtils = function OdfUtils() {
         }
         return false;
     };
-
-    /**
-     * Returns the first non-whitespace-only child of a given node
-     * @param {Node|undefined} node
-     * @return {Node|undefined}
-     */
-    function getFirstNonWhitespaceChild(node) {
-        var child = node && node.firstChild;
-        while (child && child.nodeType === Node.TEXT_NODE && whitespaceOnly.test(child.nodeValue)) {
-            child = child.nextSibling;
-        }
-        return child;
-    }
-    this.getFirstNonWhitespaceChild = getFirstNonWhitespaceChild;
 
     /**
      * Returns the length split as value and unit, from an ODF attribute
