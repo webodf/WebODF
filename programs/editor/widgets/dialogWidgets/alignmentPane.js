@@ -24,13 +24,16 @@
 
 /*global runtime,core,define,require,dijit */
 
-define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
+define("webodf/editor/widgets/dialogWidgets/alignmentPane", [
+    "webodf/editor/widgets/dialogWidgets/idMangler"],
+function (IdMangler) {
     "use strict";
 
     runtime.loadClass("core.CSSUnits");
 
     var AlignmentPane = function (callback) {
         var self = this,
+            idMangler = new IdMangler(),
             editorSession,
             contentPane,
             form;
@@ -95,10 +98,11 @@ define("webodf/editor/widgets/dialogWidgets/alignmentPane", [], function () {
                     contentPane = new ContentPane({
                         title: runtime.tr("Alignment"),
                         href: editorBase+"/widgets/dialogWidgets/alignmentPane.html",
-                        preload: true
+                        preload: true,
+                        ioMethod: idMangler.ioMethod
                     });
                     contentPane.onLoad = function () {
-                        form = dijit.byId('alignmentPaneForm');
+                        form = idMangler.byId('alignmentPaneForm');
                         runtime.translateContent(form.domNode);
                     };
                     return cb();
