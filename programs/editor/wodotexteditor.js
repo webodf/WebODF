@@ -101,7 +101,7 @@ var Wodo = Wodo || (function () {
     window.dojoConfig = (function() {
         var WebODFEditorDojoLocale = "C";
 
-        if (navigator && navigator.language.match(/^(de)/)) {
+        if (navigator && navigator.language && navigator.language.match(/^(de)/)) {
             WebODFEditorDojoLocale = navigator.language.substr(0, 2);
         }
 
