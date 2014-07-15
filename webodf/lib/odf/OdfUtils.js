@@ -202,7 +202,7 @@ odf.OdfUtils = function OdfUtils() {
             if (node.namespaceURI === odf.Namespaces.officens && node.localName === 'annotation') {
                 return /**@type{!Element}*/(node);
             }
-            node = node.parentElement;
+            node = node.parentNode;
         }
         return null;
     }

@@ -126,7 +126,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
      * @return {!boolean}
      */
     function isNodeWithinAnnotationHighlight(node, annotationName) {
-        var iteratingNode = node.parentElement;
+        var iteratingNode = node.parentNode;
 
         while (!(iteratingNode.namespaceURI === odf.Namespaces.officens
                 && iteratingNode.localName === "body")) {
