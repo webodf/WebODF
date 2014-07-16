@@ -84,7 +84,7 @@ select {
     color: #ccc;
 }
 
-#documentName, #basedOn {
+#documentName {
     margin-right: 10px;
     margin-left: 10px;
     margin-top: 8px;
@@ -94,9 +94,6 @@ select {
 }
 #documentName {
     font-size: 14px;
-}
-#basedOn {
-    font-size: 11px;
 }
 
 #toolbarContainer {
@@ -711,9 +708,9 @@ html[dir='rtl'] .dropdownToolbarButton {
 }
 
 #aboutDialog {
-    width: 200px;
-    top: calc(50% - 100px);
-    left: calc(50% - 100px);
+    width: 280px;
+    top: calc(50% - 180px);
+    left: calc(50% - 140px);
     position: absolute;
     z-index: 4;
     margin-left: auto;
