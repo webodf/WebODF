@@ -505,7 +505,7 @@
             unregisterGestureListeners();
             zoomableElement = element;
             offsetParent = /**@type{!HTMLElement}*/(zoomableElement.offsetParent);
-            parentElement = /**@type{!HTMLElement}*/(zoomableElement.parentElement);
+            parentElement = /**@type{!HTMLElement}*/(zoomableElement.parentNode);
             // Write out the current transform to the new element.
             applyDetailedTransform();
             registerGestureListeners();

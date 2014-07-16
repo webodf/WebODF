@@ -937,6 +937,29 @@
         }
         this.mapObjOntoNode = mapObjOntoNode;
 
+        /**
+         * Clones an event object.
+         * IE10 destructs event objects once the event handler is done:
+         * "The event object is only available during an event; that is, you can use it in event handlers but not in other code"
+         * (from http://msdn.microsoft.com/en-us/library/ie/aa703876(v=vs.85).aspx)
+         * This method can be used to create a copy of the event object, to work around that.
+         * @param {!Event} event
+         * @return {!Event}
+         */
+        function cloneEvent(event) {
+            var e = Object.create(null);
+
+            // copy over all direct properties
+            Object.keys(/**@type{!Object}*/(event)).forEach(function (x) {
+                e[x] = event[x];
+            });
+            // only now set the prototype (might set properties read-only)
+            e.prototype = event.constructor.prototype;
+
+            return /**@type{!Event}*/(e);
+        }
+        this.cloneEvent = cloneEvent;
+
         this.getDirectChild = getDirectChild;
 
         /**

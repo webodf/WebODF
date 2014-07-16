@@ -537,7 +537,7 @@ odf.StyleCache = function (odfroot) {
      */
     function getTextStyleChain(element, chain) {
         var stylename = styleInfo.getStyleName("text", element),
-            parent = element.parentElement;
+            parent = /**@type{!Element}*/(element.parentNode);
         if (stylename !== undefined) {
             chain.push("text");
             chain.push(stylename);

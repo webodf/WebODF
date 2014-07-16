@@ -623,6 +623,7 @@ gui.SessionControllerOptions = function () {
          */
         function handleMouseClickEvent(event) {
             var target = getTarget(event),
+                clickEvent,
                 range,
                 wasCollapsed,
                 frameNode,
@@ -672,8 +673,15 @@ gui.SessionControllerOptions = function () {
                     if (isIOS) {
                         moveByMouseClickEvent(event);
                     } else {
+                        // IE10 destructs event objects once the event handler is done, so create a copy of the data.
+                        // "The event object is only available during an event; that is, you can use it in event handlers but not in other code"
+                        // (from http://msdn.microsoft.com/en-us/library/ie/aa703876(v=vs.85).aspx)
+                        // TODO: IE10 on a test machine does not have the "detail" property set on "mouseup" events here,
+                        // even if the docs claim it should exist, cmp. http://msdn.microsoft.com/en-au/library/ie/ff974344(v=vs.85).aspx
+                        // So doubleclicks will not be detected on (some?) IE currently.
+                        clickEvent = domUtils.cloneEvent(event);
                         handleMouseClickTimeoutId = runtime.setTimeout(function () {
-                            moveByMouseClickEvent(event);
+                            moveByMouseClickEvent(clickEvent);
                         }, 0);
                     }
                 }
