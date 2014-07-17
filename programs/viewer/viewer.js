@@ -66,7 +66,7 @@ function Viewer(viewerPlugin) {
         pageSwitcher = document.getElementById('toolbarLeft'),
         zoomWidget = document.getElementById('toolbarMiddleContainer'),
         scaleSelector = document.getElementById('scaleSelect'),
-        overlay = document.getElementById('overlay'),
+        dialogOverlay = document.getElementById('dialogOverlay'),
         toolbarRight = document.getElementById('toolbarRight'),
         aboutDialog,
         filename,
@@ -79,7 +79,7 @@ function Viewer(viewerPlugin) {
         UI_FADE_DURATION = 5000;
 
     function initializeAboutInformation() {
-        var aboutButton, pluginName, pluginVersion, pluginURL;
+        var aboutDialogCentererTable, aboutDialogCentererCell, aboutButton, pluginName, pluginVersion, pluginURL;
 
         if (viewerPlugin) {
             pluginName = viewerPlugin.getPluginName();
@@ -88,6 +88,10 @@ function Viewer(viewerPlugin) {
         }
 
         // Create dialog
+        aboutDialogCentererTable = document.createElement('div');
+        aboutDialogCentererTable.id = "aboutDialogCentererTable";
+        aboutDialogCentererCell = document.createElement('div');
+        aboutDialogCentererCell.id = "aboutDialogCentererCell";
         aboutDialog = document.createElement('div');
         aboutDialog.id = "aboutDialog";
         aboutDialog.innerHTML =
@@ -101,7 +105,9 @@ function Viewer(viewerPlugin) {
             "<p>Supported by <a href=\"http://nlnet.nl\" target=\"_blank\"><br><img src=\"images\/nlnet.png\" width=\"160\" height=\"60\" alt=\"NLnet Foundation\"></a></p>" +
             "<p>Made by <a href=\"http://kogmbh.com\" target=\"_blank\"><br><img src=\"images\/kogmbh.png\" width=\"172\" height=\"40\" alt=\"KO GmbH\"></a></p>" +
             "<button id = \"aboutDialogCloseButton\" class = \"toolbarButton textButton\">Close</button>";
-        viewerElement.appendChild(aboutDialog);
+        dialogOverlay.appendChild(aboutDialogCentererTable);
+        aboutDialogCentererTable.appendChild(aboutDialogCentererCell);
+        aboutDialogCentererCell.appendChild(aboutDialog);
 
         // Create button to open dialog that says "ViewerJS"
         aboutButton = document.createElement('button');
@@ -122,13 +128,11 @@ function Viewer(viewerPlugin) {
     }
 
     function showAboutDialog() {
-        aboutDialog.style.display = 'block';
-        overlay.style.visibility = "visible";
+        dialogOverlay.style.display = "block";
     }
 
     function hideAboutDialog() {
-        aboutDialog.style.display = "none";
-        overlay.style.visibility = "hidden";
+        dialogOverlay.style.display = "none";
     }
 
     function selectScaleOption(value) {

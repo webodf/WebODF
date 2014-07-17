@@ -707,14 +707,20 @@ html[dir='rtl'] .dropdownToolbarButton {
     background-color: red;
 }
 
+#aboutDialogCentererTable {
+    display: table;
+    width:100%;
+    height:100%;
+}
+
+#aboutDialogCentererCell {
+    vertical-align: middle;
+    text-align:center;
+    display: table-cell;
+}
+
 #aboutDialog {
     width: 280px;
-    top: calc(50% - 180px);
-    left: calc(50% - 140px);
-    position: absolute;
-    z-index: 4;
-    margin-left: auto;
-    margin-right: auto;
     background-color: #666;
     color: white;
     text-align: center;
@@ -722,7 +728,7 @@ html[dir='rtl'] .dropdownToolbarButton {
     box-shadow: 0px 1px 6px black;
     padding: 5px;
     font-style: sans-serif;
-    display: none;
+    display: inline-block;
 }
 
 #aboutDialog h1 {
@@ -737,17 +743,16 @@ html[dir='rtl'] .dropdownToolbarButton {
     margin: 10px;
 }
 
-#overlay {
-    visibility: hidden;
+#dialogOverlay {
     position: absolute;
     left: 0px;
     top: 0px;
     width:100%;
     height:100%;
-    text-align:center;
     z-index: 3;
-    background-color: black;
-    opacity: 0.5;
+    background-color: rgba(0,0,0,.5);
+    overflow: auto;
+    display: none;
 }
 
 @media only screen and (max-device-width: 800px) and (max-device-height: 800px) {
