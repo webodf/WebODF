@@ -244,6 +244,16 @@ odf.Style2CSS = function Style2CSS() {
             'stroke-width': true
         },
 
+        /**@const
+           @type{!Object.<!boolean>}*/
+        marginPropertyMap = {
+            'margin': true,
+            'margin-left': true,
+            'margin-right': true,
+            'margin-top': true,
+            'margin-bottom': true
+        },
+
         // A font-face declaration map, to be populated once style2css is called.
         /**@type{!Object.<string,string>}*/
         fontFaceDeclsMap = {},
@@ -334,6 +344,81 @@ odf.Style2CSS = function Style2CSS() {
         }
         return value;
     }
+
+    /**
+     * Returns the parent style node of a given style node
+     * @param {!Element} styleNode
+     * @return {Element}
+     */
+    function getParentStyleNode(styleNode) {
+        var parentStyleName = '',
+            parentStyleFamily = '',
+            parentStyleNode = null,
+            xp;
+
+        if (styleNode.localName === 'default-style') {
+            return null;
+        }
+
+        parentStyleName = styleNode.getAttributeNS(stylens, 'parent-style-name');
+        parentStyleFamily = styleNode.getAttributeNS(stylens, 'family');
+
+        if (parentStyleName) {
+            xp = "//style:*[@style:name='" + parentStyleName + "'][@style:family='" + parentStyleFamily + "']";
+        } else {
+            xp = "//style:default-style[@style:family='" + parentStyleFamily + "']";
+        }
+        parentStyleNode = xpath.getODFElementsWithXPath(/**@type{!Element}*/(odfRoot), xp, odf.Namespaces.lookupNamespaceURI)[0];
+        return parentStyleNode;
+    }
+
+    /**
+     * Margins can be a percentage of the parent style. Resolve to
+     * absolute value.
+     *
+     * See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1419838_253892949
+     * for further information.
+     *
+     * @param {!Element} props
+     * @param {!string} namespace to use when looking up attributes in parents
+     * @param {!string} name of attribute to lookup in parents
+     * @param {!string} value a string contains margin attributes eg. 1px
+     * @return {!string}
+     */
+    function fixMargin(props, namespace, name, value) {
+        var length = utils.parseLength(value),
+            multiplier,
+            parentStyle,
+            parentLength,
+            result,
+            properties;
+        if (!length || length.unit !== '%') {
+            return value;
+        }
+
+        // margin is defined as percentage, traverse up until we find a
+        // non-percentage value. If no parent has a non-percentage value,
+        // no margin will be used.
+        multiplier = (length.value / 100);
+        parentStyle = getParentStyleNode(/**@type{!Element}*/(props.parentNode));
+        result = "0";
+        while (parentStyle) {
+            properties = domUtils.getDirectChild(parentStyle, stylens, 'paragraph-properties');
+            if (properties) {
+                parentLength = utils.parseLength(properties.getAttributeNS(namespace, name));
+                if (parentLength) {
+                    if (parentLength.unit !== '%') {
+                        result = (parentLength.value * multiplier) + parentLength.unit;
+                        break;
+                    }
+                    multiplier *= (parentLength.value / 100);
+                }
+            }
+            parentStyle = getParentStyleNode(parentStyle);
+        }
+        return result;
+    }
+
     /**
      * @param {!Element} props
      * @param {!Array.<!Array.<!string>>} mapping
@@ -350,6 +435,8 @@ odf.Style2CSS = function Style2CSS() {
 
                 if (borderPropertyMap.hasOwnProperty(r[1])) {
                     value = fixBorderWidth(value);
+                } else if (marginPropertyMap.hasOwnProperty(r[1])) {
+                    value = fixMargin(props, r[0], r[1], value);
                 }
                 if (r[2]) {
                     rule += r[2] + ':' + value + ';';
@@ -370,33 +457,6 @@ odf.Style2CSS = function Style2CSS() {
             return utils.parseFoFontSize(props.getAttributeNS(fons, 'font-size'));
         }
         return null;
-    }
-
-    /**
-     * Returns the parent style node of a given style node
-     * @param {!Element} styleNode
-     * @return {Element}
-     */
-    function getParentStyleNode(styleNode) {
-        var parentStyleName = '',
-            parentStyleFamily = '',
-            parentStyleNode = null,
-            xp;
-
-        if (styleNode.localName === 'default-style') {
-            return null;
-        }
-
-        parentStyleName = styleNode.getAttributeNS(stylens, 'parent-style-name');
-        parentStyleFamily = styleNode.getAttributeNS(stylens, 'family');
-        
-        if (parentStyleName) {
-            xp = "//style:*[@style:name='" + parentStyleName + "'][@style:family='" + parentStyleFamily + "']";
-        } else {
-            xp = "//style:default-style[@style:family='" + parentStyleFamily + "']";
-        }
-        parentStyleNode = xpath.getODFElementsWithXPath(/**@type{!Element}*/(odfRoot), xp, odf.Namespaces.lookupNamespaceURI)[0];
-        return parentStyleNode;
     }
 
     /**
