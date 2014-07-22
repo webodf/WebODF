@@ -513,6 +513,14 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     };
 
     /**
+     * Get the bounding client rectangle of the visual caret.
+     * @return {?ClientRect}
+     */
+    this.getBoundingClientRect = function() {
+        return domUtils.getBoundingClientRect(caretOverlay);
+    };
+
+    /**
      * @param {!function(!Object=)} callback
      * @return {undefined}
      */

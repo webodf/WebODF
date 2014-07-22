@@ -201,4 +201,56 @@ core.StepIterator = function StepIterator(filter, iterator) {
     this.leftNode = function() {
         return iterator.leftNode();
     };
+
+    /**
+     * Store a snapshot of the current step iterator position. Intended to be used
+     * in conjunction with restore to be able to save & restore a particular position.
+     *
+     * Note, the returned type should be treated as an opaque token, as the data structure
+     * is allowed to change at any moment.
+     *
+     * @return {!core.StepIterator.StepSnapshot}
+     */
+    this.snapshot = function() {
+        return new core.StepIterator.StepSnapshot(container(), offset());
+    };
+
+    /**
+     * Restore the step iterator back to a specific position. The input to this is
+     * expected to be the direct result of a snapshot call.
+     *
+     * @param {!core.StepIterator.StepSnapshot} snapshot
+     * @return {undefined}
+     */
+    this.restore = function(snapshot) {
+        setPosition(snapshot.container, snapshot.offset);
+    };
+};
+
+
+/**
+ * StepIterator snapshot token that is used to save and restore the current position of StepIterator
+ *
+ * All properties and methods on this class are intended to be private to StepIterator, and should not be used outside
+ * of the StepIterator file. The contents stored may be changed at any time and should not be relied upon by
+ * external consumers.
+ *
+ * @constructor
+ * @param {!Text|!Element} container
+ * @param {!number} offset
+ */
+core.StepIterator.StepSnapshot = function (container, offset) {
+    "use strict";
+
+    /**
+     * @private
+     * @type {!Text|!Element}
+     */
+    this.container = container;
+
+    /**
+     * @private
+     * @type {!number}
+     */
+    this.offset = offset;
 };

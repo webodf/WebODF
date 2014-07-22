@@ -29,6 +29,15 @@
         "core.UnitTester",
         "core.Zip"
     ],
+    "gui.GuiStepUtilsTests": [
+        "core.PositionFilter",
+        "core.PositionIterator",
+        "core.StepIterator",
+        "core.UnitTester",
+        "core.enums",
+        "gui.GuiStepUtils",
+        "gui.VisualStepScanner"
+    ],
     "gui.MetadataControllerTests": [
         "core.UnitTester",
         "gui.MetadataController",
@@ -45,6 +54,7 @@
         "xmldom.LSSerializer"
     ],
     "gui.SelectionControllerTests": [
+        "core.DomUtils",
         "core.LoopWatchDog",
         "core.UnitTester",
         "gui.SelectionController",

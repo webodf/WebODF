@@ -52,6 +52,24 @@ gui.CaretManager = function CaretManager(sessionController) {
     }
 
     /**
+     * Get the horizontal offset of the local caret from the
+     * left edge of the screen (in pixels).
+     * @return {!number|undefined}
+     */
+    function getLocalCaretXOffsetPx() {
+        var localCaret = getCaret(sessionController.getInputMemberId()),
+            lastRect;
+        if (localCaret) {
+            lastRect = localCaret.getBoundingClientRect();
+        }
+        // usually the rect is 1px width, so rect.left ~= rect.right.
+        // Right is used because during IME composition the caret width includes
+        // the chars being composed. The caret is *always* flush against the right side
+        // of the it's BCR.
+        return lastRect ? lastRect.right : undefined;
+    }
+
+    /**
      * @return {!Array.<!gui.Caret>}
      */
     function getCarets() {
@@ -217,6 +235,7 @@ gui.CaretManager = function CaretManager(sessionController) {
             eventManager = sessionController.getEventManager(),
             caretCleanup = getCarets().map(function(caret) { return caret.destroy; });
 
+        sessionController.getSelectionController().setCaretXPositionLocator(null);
         runtime.clearTimeout(ensureCaretVisibleTimeoutId);
         odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
         odtDocument.unsubscribe(ops.Document.signalCursorMoved, refreshLocalCaretBlinking);
@@ -235,6 +254,7 @@ gui.CaretManager = function CaretManager(sessionController) {
         var odtDocument = sessionController.getSession().getOdtDocument(),
             eventManager = sessionController.getEventManager();
 
+        sessionController.getSelectionController().setCaretXPositionLocator(getLocalCaretXOffsetPx);
         odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
         odtDocument.subscribe(ops.Document.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.subscribe(ops.Document.signalCursorRemoved, removeCaret);

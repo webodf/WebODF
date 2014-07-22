@@ -189,6 +189,38 @@ core.StepIteratorTests = function StepIteratorTests(runner) {
         performTest("A1BBB1B", 3, 1, t.steps.previousStep);
     }
 
+    function snapshotAndRestore_ResetsIteratorToRestoredPosition() {
+        var snapshot;
+
+        t.doc.appendChild(text("A1AB1B"));
+        t.steps.setPosition(t.doc.firstChild, 0);
+
+        t.steps.roundToClosestStep();
+        t.firstStep = {
+            container: t.steps.container(),
+            offset: t.steps.offset()
+        };
+
+        snapshot = t.steps.snapshot();
+
+        t.steps.nextStep();
+        t.secondStep = {
+            container: t.steps.container(),
+            offset: t.steps.offset()
+        };
+
+        t.steps.restore(snapshot);
+        t.finalStep = {
+            container: t.steps.container(),
+            offset: t.steps.offset()
+        };
+
+        r.shouldBe(t, "t.firstStep.container", "t.secondStep.container");
+        r.shouldBe(t, "t.firstStep === t.secondStep.offset", "false");
+        r.shouldBe(t, "t.firstStep", "t.finalStep");
+        r.shouldBe(t, "t.steps.isStep()", "true");
+    }
+
     this.tests = function () {
         return r.name([
             isStep_WhenAtStep_ReturnsTrue,
@@ -213,7 +245,9 @@ core.StepIteratorTests = function StepIteratorTests(runner) {
 
             previousStep_WhenNoAvailableStep_ReturnsFalse,
             previousStep_OnStep_MovesToStep_ReturnsTrue,
-            previousStep_BeforeStep_MovesToStep_ReturnsTrue
+            previousStep_BeforeStep_MovesToStep_ReturnsTrue,
+
+            snapshotAndRestore_ResetsIteratorToRestoredPosition
         ]);
     };
     this.asyncTests = function () {
