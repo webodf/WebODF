@@ -581,6 +581,7 @@
             styleId,
             clonedPageElement,
             clonedElement,
+            clonedDrawElements,
             pageNumber = 0,
             i,
             element,
@@ -613,13 +614,18 @@
                     if (elementToClone.getAttributeNS(presentationns, 'placeholder') !== 'true') {
                         clonedElement = /**@type{!Element}*/(elementToClone.cloneNode(true));
                         clonedPageElement.appendChild(clonedElement);
-                        setDrawElementPosition(styleId + '_' + i, clonedElement, stylesheet);
                     }
                     elementToClone = elementToClone.nextElementSibling;
                     i += 1;
                 }
                 // TODO: above already do not clone nodes which match the rule for being dropped
                 dropTemplateDrawFrames(clonedPageElement);
+
+                // Position all elements
+                clonedDrawElements = clonedPageElement.getElementsByTagNameNS(drawns, '*');
+                for (i = 0; i < clonedDrawElements.length; i += 1) {
+                    setDrawElementPosition(styleId + '_' + i, clonedDrawElements[i], stylesheet);
+                }
 
                 // Append the cloned master page to the "Shadow Content" element outside the main ODF dom
                 shadowContent.appendChild(clonedPageElement);
