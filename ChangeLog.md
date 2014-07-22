@@ -1,3 +1,12 @@
+# Changes between 0.5.1 and 0.5.2
+
+## WebODF
+
+### Fixes
+
+* For ODP files sometimes template elements from the master pages were rendered inside the actual slides.
+
+
 # Changes between 0.5.0 and 0.5.1
 
 ## WebODF

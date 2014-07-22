@@ -248,7 +248,7 @@
     function dropTemplateDrawFrames(clonedNode) {
         // drop all frames which are just template frames
         var i, element, presentationClass,
-            clonedDrawFrameElements = clonedNode.getElementsByTagNameNS(drawns, 'frame');
+            clonedDrawFrameElements = domUtils.getElementsByTagNameNS(clonedNode, drawns, 'frame');
         for (i = 0; i < clonedDrawFrameElements.length; i += 1) {
             element = /**@type{!Element}*/(clonedDrawFrameElements[i]);
             presentationClass = element.getAttributeNS(presentationns, 'class');
