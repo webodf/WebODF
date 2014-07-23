@@ -190,10 +190,9 @@ Runtime.prototype.cancelAnimationFrame = function (requestId) {"use strict"; };
 /**
  * @param {!boolean} condition
  * @param {!string} message
- * @param {!function():undefined=} callback
  * @return {undefined}
  */
-Runtime.prototype.assert = function (condition, message, callback) { "use strict"; };
+Runtime.prototype.assert = function (condition, message) { "use strict"; };
 /*jslint emptyblock: false, unparam: false */
 
 /** @define {boolean} */
@@ -517,15 +516,11 @@ function BrowserRuntime(logoutput) {
     /**
     * @param {!boolean} condition
     * @param {!string} message
-    * @param {!function():undefined=} callback
     * @return {undefined}
     */
-    function assert(condition, message, callback) {
+    function assert(condition, message) {
         if (!condition) {
             log("alert", "ASSERTION FAILED:\n" + message);
-            if (callback) {
-                callback();
-            }
             throw new Error(message); // interrupt execution and provide a backtrace
         }
     }
@@ -1196,15 +1191,11 @@ function NodeJSRuntime() {
     /**
     * @param {!boolean} condition
     * @param {!string} message
-    * @param {!function():undefined=} callback
     * @return {undefined}
     */
-    function assert(condition, message, callback) {
+    function assert(condition, message) {
         if (!condition) {
             process.stderr.write("ASSERTION FAILED: " + message);
-            if (callback) {
-                callback();
-            }
         }
     }
     this.assert = assert;
@@ -1546,15 +1537,11 @@ function RhinoRuntime() {
     /**
     * @param {!boolean} condition
     * @param {!string} message
-    * @param {!function():undefined=} callback
     * @return {undefined}
     */
-    function assert(condition, message, callback) {
+    function assert(condition, message) {
         if (!condition) {
             log("alert", "ASSERTION FAILED: " + message);
-            if (callback) {
-                callback();
-            }
         }
     }
     this.assert = assert;
