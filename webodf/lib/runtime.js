@@ -509,7 +509,7 @@ function BrowserRuntime(logoutput) {
         } else if (console) {
             console.log(msg);
         }
-        if (category === "alert") {
+        if (self.enableAlerts && category === "alert") {
             alert(msg);
         }
     }
@@ -862,6 +862,7 @@ function BrowserRuntime(logoutput) {
     this.isFile = isFile;
     this.getFileSize = getFileSize;
     this.log = log;
+    this.enableAlerts = true;
     this.assert = assert;
     /**
      * @param {!function():undefined} f
