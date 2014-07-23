@@ -526,7 +526,7 @@ function BrowserRuntime(logoutput) {
             if (callback) {
                 callback();
             }
-            throw message; // interrupt execution and provide a backtrace
+            throw new Error(message); // interrupt execution and provide a backtrace
         }
     }
     /**
