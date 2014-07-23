@@ -387,6 +387,8 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         completeCurrentUndoState();
         // We just threw away the cursors in the snapshot, so need to recover all these operations so the
         // cursor can be re-inserted when an undo is performed
+        // TODO the last move state may not reflect a valid position in the document!!!
+        // E.g., add cursor, move to end, delete all content + saveInitialState
         currentUndoStateTransition = initialStateTransition = extractCursorStates([initialStateTransition].concat(undoStateTransitions));
         undoStateTransitions.length = 0;
         redoStateTransitions.length = 0;
