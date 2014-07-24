@@ -733,6 +733,18 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             } else {
                 specsForA.push(styleParagraphFixup);
             }
+        } else if (mergeParagraphSpecB.sourceStartPosition === mergeParagraphSpecA.destinationStartPosition) {
+            // Two consecutive paragraphs are being merged. E.g., A <- B <- C.
+            // Use the styleName of the lowest destination paragraph to set the paragraph style (A <- B)
+            mergeParagraphSpecA.destinationStartPosition = mergeParagraphSpecB.destinationStartPosition;
+            mergeParagraphSpecA.sourceStartPosition -= 1;
+            mergeParagraphSpecA.paragraphStyleName = mergeParagraphSpecB.paragraphStyleName;
+        } else if (mergeParagraphSpecA.sourceStartPosition === mergeParagraphSpecB.destinationStartPosition) {
+            // Two consecutive paragraphs are being merged. E.g., A <- B <- C.
+            // Use the styleName of the lowest destination paragraph to set the paragraph style (A <- B)
+            mergeParagraphSpecB.destinationStartPosition = mergeParagraphSpecA.destinationStartPosition;
+            mergeParagraphSpecB.sourceStartPosition -= 1;
+            mergeParagraphSpecB.paragraphStyleName = mergeParagraphSpecA.paragraphStyleName;
         } else if (mergeParagraphSpecA.destinationStartPosition < mergeParagraphSpecB.destinationStartPosition) {
             mergeParagraphSpecB.destinationStartPosition -= 1;
             mergeParagraphSpecB.sourceStartPosition -= 1;
