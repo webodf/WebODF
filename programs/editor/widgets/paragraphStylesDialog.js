@@ -24,10 +24,13 @@
 
 /*global define,require,dojo,dijit */
 
-define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
+define("webodf/editor/widgets/paragraphStylesDialog", [
+    "webodf/editor/widgets/dialogWidgets/idMangler"],
+function (IdMangler) {
     "use strict";
     return function ParagraphStylesDialog(callback) {
         var self = this,
+            idMangler = new IdMangler(),
             editorSession,
             dialog,
             stylePicker, alignmentPane, fontEffectsPane;
@@ -220,9 +223,9 @@ define("webodf/editor/widgets/paragraphStylesDialog", [], function () {
                 mainLayoutContainer.addChild(topBar);
 
                 cloneTooltip = new TooltipDialog({
-                    content:
+                    content: idMangler.mangleIds(
                         '<h2 style="margin: 0;">'+tr("Clone this Style")+'</h2><br/>' +
-                        '<label for="name">'+tr("New Name:")+'</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>',
+                        '<label for="name">'+tr("New Name:")+'</label> <input data-dojo-type="dijit/form/TextBox" id="name" name="name"><br/><br/>'),
                     style: "width: 300px;"
                 });
                 cloneButton = new Button({
