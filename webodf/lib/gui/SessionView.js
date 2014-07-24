@@ -172,8 +172,13 @@ gui.SessionViewOptions = function () {
             setStyle('span.editInfoAuthor', '{ content: "' + name + '"; }', ':before');
             setStyle('dc|creator', '{ background-color: ' + color + '; }', '');
             setStyle('.webodf-selectionOverlay', '{ fill: ' + color + '; stroke: ' + color + ';}', '');
-            // Hide the handles of non-local users
-            if (memberId === gui.ShadowCursor.ShadowCursorMemberId || memberId === localMemberId) {
+            if (memberId === localMemberId) {
+                // Show selection handles for local user
+                setStyle('.webodf-touchEnabled .webodf-selectionOverlay', '{ display: block; }', ' > .webodf-draggable');
+
+                // Also set shadow cursor rules for local user
+                memberId = gui.ShadowCursor.ShadowCursorMemberId;
+                setStyle('.webodf-selectionOverlay', '{ fill: ' + color + '; stroke: ' + color + ';}', '');
                 setStyle('.webodf-touchEnabled .webodf-selectionOverlay', '{ display: block; }', ' > .webodf-draggable');
             }
         }
@@ -318,10 +323,6 @@ gui.SessionViewOptions = function () {
                 properties = member.getProperties();
 
             setAvatarInfoStyle(memberId, properties.fullName, properties.color);
-            if (localMemberId === memberId) {
-                // Shadow cursor has an empty member ID
-                setAvatarInfoStyle("", "", properties.color);
-            }
         }
 
         /**
