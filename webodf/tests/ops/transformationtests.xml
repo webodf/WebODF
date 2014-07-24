@@ -1227,6 +1227,34 @@
    <office:text><text:p>abc</text:p></office:text>
   </after>
  </test>
+ <test name="MergeParagraphMergeParagraph_BthenA_Styled_[abc]" isFailing="true">
+  <before>
+   <office:text><text:p>a</text:p><text:p text:style-name="b">b</text:p><text:p text:style-name="c">c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="2" sourceStartPosition="4" paragraphStyleName="c"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2" paragraphStyleName="b"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="b">abc</text:p></office:text>
+  </after>
+ </test>
+ <test name="MergeParagraphMergeParagraph_AthenB_Styled_[abc]" isFailing="true">
+  <before>
+   <office:text><text:p>a</text:p><text:p text:style-name="b">b</text:p><text:p text:style-name="c">c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="2" paragraphStyleName="b"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="2" sourceStartPosition="4" paragraphStyleName="c"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="b">abc</text:p></office:text>
+  </after>
+ </test>
  <test name="MergeParagraphSplitParagraph_sameSourcePos">
   <before>
    <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
