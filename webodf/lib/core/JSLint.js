@@ -1,6 +1,6 @@
 /*global core*/
 // jslint.js
-// 2013-11-21
+// 2014-07-08
 
 // Copyright (c) 2002 Douglas Crockford  (www.JSLint.com)
 
@@ -217,7 +217,7 @@
 // For example:
 
 /*properties
-    defined, emptyblock, unvar, JSLINT, JSLint,
+    defined, emptyblock, unvar, JSLINT, JSLint, core,
     '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'', '(begin)',
     '(error)', '*', '+', '-', '/', '<', '<=', '==', '===', '>', '>=', '\\', a,
     a_label, a_scope, already_defined, and, apply, arguments, arity, ass,
@@ -558,7 +558,7 @@ var JSLINT = (function () {
         lookahead,
         node = array_to_object([
             'Buffer', 'clearImmediate', 'clearInterval', 'clearTimeout',
-            'console', 'exports', 'global', 'module', 'process', 'querystring',
+            'console', 'exports', 'global', 'module', 'process',
             'require', 'setImmediate', 'setInterval', 'setTimeout',
             '__dirname', '__filename'
         ], false),
@@ -2195,6 +2195,8 @@ klass:              do {
                 if (s === '=') {
                     master.init = true;
                 }
+            } else if (that.reserved) {
+                that.warn('expected_identifier_a_reserved');
             }
         } else if (that.id === '.' || that.id === '[') {
             if (!that.first || that.first.string === 'arguments') {
@@ -2431,7 +2433,7 @@ klass:              do {
             array = [statement()];
             array.disrupt = array[0].disrupt;
         }
-        if (!option.emptyblock && (kind !== 'catch' && array.length === 0)) {
+        if (!(option.emptyblock || option.debug) && kind !== 'catch' && array.length === 0) {
             curly.warn('empty_block');
         }
         block_var.forEach(function (name) {
@@ -3020,6 +3022,8 @@ klass:              do {
             left.warn('write_is_wrong');
         } else if (!option.stupid && syx.test(name)) {
             token.warn('sync_a');
+        } else if (left && left.id === '{') {
+            that.warn('unexpected_a');
         }
         if (!option.evil && (name === 'eval' || name === 'execScript')) {
             next_token.warn('evil');
@@ -3052,6 +3056,9 @@ klass:              do {
             }
             tally_property(e.string);
             break;
+        }
+        if (left && (left.id === '{' || (left.id === '[' && left.arity === 'prefix'))) {
+            that.warn('unexpected_a');
         }
         step_out(']', that);
         no_space(prev_token, token);
@@ -3130,6 +3137,9 @@ klass:              do {
             for (;;) {
                 edge();
                 id = identifier();
+                if (token.reserved) {
+                    token.warn('expected_identifier_a_reserved');
+                }
                 define('parameter', token);
                 parameters.push(id);
                 token.init = true;
@@ -3684,6 +3694,9 @@ klass:              do {
                 this.forin = true;
                 value = expression(1000);
                 master = value.master;
+                if (!master) {
+                    value.stop('bad_in_a');
+                }
                 if (master.kind !== 'var' || master.function !== funct ||
                         !master.writeable || master.dead) {
                     value.warn('bad_in_a');
@@ -4042,7 +4055,8 @@ klass:              do {
 
                     step_in(1);
                     if (next_token.id === ';' && !node_js) {
-                        semicolon();
+                        next_token.edge = true;
+                        advance(';');
                     }
                     tree = statements();
                     begin.first = tree;
@@ -4222,7 +4236,7 @@ klass:              do {
         var i,
             key,
             keys = Object.keys(property).sort(),
-            mem = '    ',
+            mem = '   ',
             name,
             not_first = false,
             output = ['/*properties'];
@@ -4230,7 +4244,7 @@ klass:              do {
             key = keys[i];
             if (property[key] > 0) {
                 if (not_first) {
-                    mem += ', ';
+                    mem += ',';
                 }
                 name = ix.test(key)
                     ? key
@@ -4238,6 +4252,8 @@ klass:              do {
                 if (mem.length + name.length >= 80) {
                     output.push(mem);
                     mem = '    ';
+                } else {
+                    mem += ' ';
                 }
                 mem += name;
                 not_first = true;
@@ -4279,12 +4295,11 @@ klass:              do {
 
     itself.jslint = itself;
 
-    itself.edition = '2013-11-21';
+    itself.edition = '2014-07-08';
 
-    core.JSLINT = itself;
     return itself;
 }());
 core.JSLint = function JSLint() {
     "use strict";
-    this.JSLINT = core.JSLINT;
+    this.JSLINT = JSLINT;
 };
