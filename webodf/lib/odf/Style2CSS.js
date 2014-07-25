@@ -909,8 +909,8 @@ odf.Style2CSS = function Style2CSS() {
                             === stylename) {
                     masterStyleName = e.getAttributeNS(stylens, 'name');
 
-                    contentLayoutRule = 'draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
-                    pageSizeRule = 'office|body, draw|page[draw|master-page-name=' + masterStyleName + '] {'
+                    contentLayoutRule = 'draw|page[draw|master-page-name="' + masterStyleName + '"] {' + rule + '}';
+                    pageSizeRule = 'office|body, draw|page[draw|master-page-name="' + masterStyleName + '"] {'
                             + applySimpleMapping(props, pageSizePropertySimpleMapping)
                             + ' }';
 
