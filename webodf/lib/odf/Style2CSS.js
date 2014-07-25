@@ -784,7 +784,7 @@ odf.Style2CSS = function Style2CSS() {
                 rule;
             controlledFrameClasses.forEach(function(frameClass) {
                 styleNames.forEach(function(styleName) {
-                    selectors.push("draw|page[webodfhelper|page-style-name='"+styleName+"'] draw|frame[presentation|class='"+frameClass+"']");
+                    selectors.push('draw|page[webodfhelper|page-style-name="'+styleName+'"] draw|frame[presentation|class="'+frameClass+'"]');
                 });
             });
             if (selectors.length > 0) {
