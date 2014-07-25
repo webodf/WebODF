@@ -54,6 +54,9 @@ odf.Style2CSS = function Style2CSS() {
         /**@const
            @type{!string}*/
         presentationns = odf.Namespaces.presentationns,
+        /**@const
+         * @type {!string}*/
+        webodfhelperns = "urn:webodf:names:helper",
         domUtils = new core.DomUtils(),
 
         /**@const
@@ -617,6 +620,81 @@ odf.Style2CSS = function Style2CSS() {
 
         return rule;
     }
+
+    /**
+     * Gets a list with the names of all styles derived from the given style,
+     * including the name of the style itself.
+     * @param {!string} styleName
+     * @param {!odf.StyleTreeNode} node
+     * @return {!Array.<!string>}
+     */
+    function getDerivedStyleNames(styleName, node) {
+        var /** @type{!Array.<!string>} */
+            styleNames = [styleName],
+            derivedStyles = node.derivedStyles;
+
+        Object.keys(derivedStyles).forEach(function(styleName) {
+            var dsn = getDerivedStyleNames(styleName, derivedStyles[styleName]);
+            styleNames = styleNames.concat(dsn);
+        });
+
+        return styleNames;
+    }
+
+    /**
+     * Adds rules to control the display of certain frame classes in master pages
+     * when shown in page using the master page.
+     * @param {!CSSStyleSheet} sheet
+     * @param {!string} styleName
+     * @param {!Element} properties
+     * @param {!odf.StyleTreeNode} node
+     * @return {undefined}
+     */
+    function addDrawPageFrameDisplayRules(sheet, styleName, properties, node) {
+        var /**@const
+               @type {!Array.<!string>}*/
+            frameClasses = ["page-number", "date-time", "header", "footer"],
+            styleNames = getDerivedStyleNames(styleName, node),
+            /**@type {!Array.<!string>}*/
+            visibleFrameClasses = [],
+            /**@type {!Array.<!string>}*/
+            invisibleFrameClasses = [];
+
+        /**
+         * @param {!Array.<!string>} controlledFrameClasses
+         * @param {!string} visibility
+         * @return {undefined}
+         */
+        function insertFrameVisibilityRule(controlledFrameClasses, visibility) {
+            var selectors = [],
+                rule;
+            controlledFrameClasses.forEach(function(frameClass) {
+                styleNames.forEach(function(styleName) {
+                    selectors.push("draw|page[webodfhelper|page-style-name='"+styleName+"'] draw|frame[presentation|class='"+frameClass+"']");
+                });
+            });
+            if (selectors.length > 0) {
+                rule = selectors.join(",") + "{visibility:"+visibility+";}";
+                sheet.insertRule(rule, sheet.cssRules.length);
+            }
+        }
+
+        frameClasses.forEach(function(frameClass) {
+            var displayValue;
+
+            displayValue = properties.getAttributeNS(presentationns, 'display-'+frameClass);
+            if (displayValue === 'true') {
+                visibleFrameClasses.push(frameClass);
+            } else if (displayValue === 'false') {
+                invisibleFrameClasses.push(frameClass);
+            } // else the attribute does not exist (returned as ""/null) or has a bad value
+
+        });
+
+        insertFrameVisibilityRule(visibleFrameClasses, "visible");
+        insertFrameVisibilityRule(invisibleFrameClasses, "hidden");
+    }
+
     /**
      * @param {!CSSStyleSheet} sheet
      * @param {string} family
@@ -629,6 +707,7 @@ odf.Style2CSS = function Style2CSS() {
             selector = selectors.join(','),
             rule = '',
             properties;
+
         properties = domUtils.getDirectChild(node.element, stylens, 'text-properties');
         if (properties) {
             rule += getTextProperties(properties);
@@ -647,6 +726,7 @@ odf.Style2CSS = function Style2CSS() {
                  stylens, 'drawing-page-properties');
         if (properties) {
             rule += getDrawingPageProperties(properties);
+            addDrawPageFrameDisplayRules(sheet, name, /**@type{!Element}*/(properties), node);
         }
         properties = domUtils.getDirectChild(node.element,
                  stylens, 'table-cell-properties');
@@ -795,6 +875,21 @@ odf.Style2CSS = function Style2CSS() {
             /**@type{string}*/
             family;
 
+        /**
+         * @param {!string} prefix
+         * @param {!string} ns
+         * @return {undefined}
+         */
+        function insertCSSNamespace(prefix, ns) {
+            rule = '@namespace ' + prefix + ' url(' + ns + ');';
+            try {
+                stylesheet.insertRule(rule, stylesheet.cssRules.length);
+            } catch (/**@type{!DOMException}*/ignore) {
+                // WebKit can throw an exception here, but it will have
+                // retained the namespace declarations anyway.
+            }
+        }
+
         odfRoot = rootNode;
 
         // make stylesheet empty
@@ -803,15 +898,8 @@ odf.Style2CSS = function Style2CSS() {
         }
 
         // add @odfRoot namespace rules
-        odf.Namespaces.forEachPrefix(function (prefix, ns) {
-            rule = '@namespace ' + prefix + ' url(' + ns + ');';
-            try {
-                stylesheet.insertRule(rule, stylesheet.cssRules.length);
-            } catch (/**@type{!DOMException}*/ignore) {
-                // WebKit can throw an exception here, but it will have
-                // retained the namespace declarations anyway.
-            }
-        });
+        odf.Namespaces.forEachPrefix(insertCSSNamespace);
+        insertCSSNamespace("webodfhelper", webodfhelperns);
 
         fontFaceDeclsMap = fontFaceMap;
         documentType = doctype;

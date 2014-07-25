@@ -642,6 +642,12 @@
 
                 // Now call setDrawElementPosition on this new page to set the proper dimensions
                 setDrawElementPosition(styleId, clonedPageElement, stylesheet);
+                // Add a custom attribute with the style name of the normal page, so the CSS rules created for the styles of the normal page
+                // to display/hide frames of certain classes from the master page can address the cloned master page belonging to that normal page
+                // Cmp. addDrawPageFrameDisplayRules in Style2CSS
+                clonedPageElement.setAttributeNS(webodfhelperns, 'page-style-name', element.getAttributeNS(drawns, 'style-name'));
+                // TODO: investigate if the attributes draw:style-name and style:page-layoutname should be copied over
+                // to the cloned page from the master page as well, or if this one below is enough already
                 // And finally, add an attribute referring to the master page, so the CSS targeted for that master page will style this
                 clonedPageElement.setAttributeNS(drawns, 'draw:master-page-name', masterPageElement.getAttributeNS(stylens, 'name'));
             }

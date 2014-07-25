@@ -7,6 +7,7 @@
 * For ODP files sometimes template elements from the master pages were rendered inside the actual slides.
 * Navigation via home/end keys, or up/down cursor keys is more reliable on all browsers. ([#555](https://github.com/kogmbh/WebODF/issues/555), [#405](https://github.com/kogmbh/WebODF/issues/405), [#224](https://github.com/kogmbh/WebODF/issues/224), [#185](https://github.com/kogmbh/WebODF/issues/185), [#124](https://github.com/kogmbh/WebODF/issues/124), [#98](https://github.com/kogmbh/WebODF/issues/98))
 * More elements from master pages are now correctly positioned when displayed inside slides.
+* In slides hide elements of class "header", "footer", "page-number" and "date-time" from master pages when configured so.
 
 
 # Changes between 0.5.0 and 0.5.1
