@@ -42,7 +42,7 @@ else (OVERRULED_WEBODF_VERSION)
       ARGS describe --tags --dirty --match "v[0-9]*"
       OUTPUT_VARIABLE GIT_WEBODF_VERSION)
     # check version number from git
-    string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+(-[0-9]+-[0-9a-z]+(-dirty)?)?)$" CHECKED_WEBODF_VERSION "${GIT_WEBODF_VERSION}")
+    string(REGEX MATCH "^v([0-9]+.[0-9]+.[0-9]+((-[0-9]+-[0-9a-z]+)?(-dirty)?)?)$" CHECKED_WEBODF_VERSION "${GIT_WEBODF_VERSION}")
     if (CMAKE_MATCH_1)
       set(WEBODF_VERSION ${CMAKE_MATCH_1})
     else (CMAKE_MATCH_1)
