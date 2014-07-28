@@ -418,6 +418,14 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
         if (v === 0 && 1 / v < 0) {
             return "-0";
         }
+        if (typeof v === "object") {
+            try {
+                return JSON.stringify(v);
+            } catch (ignore) {
+                // JSON serialization will fail if there is a cyclic dependency of some sort.
+                // Just fall through to returning a normal string in this instance.
+            }
+        }
         return String(v);
     }
     /**
@@ -445,7 +453,7 @@ core.UnitTestRunner = function UnitTestRunner(resourcePrefix, logger) {
         } else if (isResultCorrect(av, bv, absoluteTolerance)) {
             testPassed(a + " is " + b);
         } else if (String(typeof av) === String(typeof bv)) {
-            testFailed(a + " should be " + bv + ". Was " + stringify(av) + ".");
+            testFailed(a + " should be " + stringify(bv) + ". Was " + stringify(av) + ".");
         } else {
             testFailed(a + " should be " + bv + " (of type " + typeof bv +
                     "). Was " + av + " (of type " + typeof av + ").");
