@@ -32,6 +32,7 @@ runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.StepIteratorTests");
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
+runtime.loadClass("gui.DirectFormattingControllerTests");
 runtime.loadClass("gui.GuiStepUtilsTests");
 runtime.loadClass("gui.MetadataControllerTests");
 runtime.loadClass("gui.SelectionControllerTests");
@@ -84,6 +85,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(core.PositionIteratorTests);
     tests.push(core.DomUtilsTests);
     tests.push(core.StepIteratorTests);
+    tests.push(gui.DirectFormattingControllerTests);
     tests.push(gui.GuiStepUtilsTests);
     tests.push(gui.UndoStateRulesTests);
     tests.push(gui.TextControllerTests);

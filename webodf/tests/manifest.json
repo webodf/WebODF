@@ -29,6 +29,23 @@
         "core.UnitTester",
         "core.Zip"
     ],
+    "gui.DirectFormattingControllerTests": [
+        "core.DomUtils",
+        "core.UnitTester",
+        "core.Utils",
+        "gui.DirectFormattingController",
+        "gui.SessionConstraints",
+        "gui.SessionContext",
+        "odf.Formatting",
+        "odf.Namespaces",
+        "odf.ObjectNameGenerator",
+        "odf.OdfCanvas",
+        "odf.OdfContainer",
+        "ops.Document",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Session"
+    ],
     "gui.GuiStepUtilsTests": [
         "core.PositionFilter",
         "core.PositionIterator",
