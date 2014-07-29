@@ -59,12 +59,12 @@ gui.DirectFormattingController = function DirectFormattingController(
         textns = odf.Namespaces.textns,
         /**@const*/
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
-        /**@type{Object}*/
-        directCursorStyleProperties,
+        /**@type{?odf.Formatting.StyleData}*/
+        directCursorStyleProperties = null,
         // cached text settings
         /**@type{!gui.StyleSummary}*/
         lastSignalledStyleSummary,
-        /**@type {!core.LazyProperty.<!{containsText: !boolean, appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}>} */
+        /**@type {!core.LazyProperty.<!{containsText: !boolean, appliedStyles: !Array.<!odf.Formatting.AppliedStyle>, styleSummary: !gui.StyleSummary}>} */
         selectionInfoCache,
         /**@type {!{directTextStyling: !boolean, directParagraphStyling: !boolean}}*/
         enabledFeatures = {
@@ -111,12 +111,13 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * Get all styles currently applied to the selected range. If the range is collapsed,
      * this will return the style the next inserted character will have
-     * @return {!{containsText: !boolean, appliedStyles: !Array.<!Object>, styleSummary: !gui.StyleSummary}}
+     * @return {!{containsText: !boolean, appliedStyles: !Array.<!odf.Formatting.AppliedStyle>, styleSummary: !gui.StyleSummary}}
      */
     function getSelectionInfo() {
         var cursor = odtDocument.getCursor(inputMemberId),
             range = cursor && cursor.getSelectedRange(),
             nodes = [],
+            /**@type{!Array.<!odf.Formatting.AppliedStyle>}*/
             selectionStyles = [],
             selectionContainsText = true;
 
@@ -131,8 +132,8 @@ gui.DirectFormattingController = function DirectFormattingController(
 
         if (selectionStyles[0] !== undefined && directCursorStyleProperties) {
             // direct cursor styles add to the style of the existing range, overriding where defined
-            selectionStyles[0] = utils.mergeObjects(selectionStyles[0],
-                /**@type {!Object}*/(directCursorStyleProperties));
+            selectionStyles[0].styleProperties = utils.mergeObjects(selectionStyles[0].styleProperties,
+                                                                    directCursorStyleProperties);
         }
 
         return {
@@ -313,8 +314,15 @@ gui.DirectFormattingController = function DirectFormattingController(
      */
     this.createCursorStyleOp = function (position, length, useCachedStyle) {
         var styleOp = null,
-            /**@type{Object.<!string,!Object>}*/
-            properties = useCachedStyle ? selectionInfoCache.value().appliedStyles[0] : directCursorStyleProperties;
+            /**@type{!odf.Formatting.AppliedStyle|undefined}*/
+            appliedStyles,
+            /**@type{?odf.Formatting.StyleData|undefined}*/
+            properties = directCursorStyleProperties;
+
+        if (useCachedStyle) {
+            appliedStyles = selectionInfoCache.value().appliedStyles[0];
+            properties = appliedStyles && appliedStyles.styleProperties;
+        }
 
         if (properties && properties['style:text-properties']) {
             styleOp = new ops.OpApplyDirectStyling();
@@ -411,7 +419,7 @@ gui.DirectFormattingController = function DirectFormattingController(
      * this will return the style the next inserted character will have.
      * (Note, this is not used internally by WebODF, but is provided as a convenience method
      * for external consumers)
-     * @return {!Array.<!Object>}
+     * @return {!Array.<!odf.Formatting.AppliedStyle>}
      */
     this.getAppliedStyles = function () {
         return selectionInfoCache.value().appliedStyles;
@@ -746,6 +754,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             range = cursor.getSelectedRange(),
             operations = [], op,
             startNode, endNode, paragraphNode,
+            appliedStyles,
             properties, parentStyleName, styleName;
 
         if (cursor.hasForwardSelection()) {
@@ -770,7 +779,8 @@ gui.DirectFormattingController = function DirectFormattingController(
             return operations;
         }
 
-        properties = selectionInfoCache.value().appliedStyles[0];
+        appliedStyles = selectionInfoCache.value().appliedStyles[0];
+        properties = appliedStyles && appliedStyles.styleProperties;
         if (!properties) {
             return operations;
         }
