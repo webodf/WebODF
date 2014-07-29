@@ -1,3 +1,12 @@
+# Changes between 0.5.2 and 0.5.3
+
+## WebODF
+
+### Fixes
+
+* Fixed occasional crash when splitting a paragraph ([#723](https://github.com/kogmbh/WebODF/issues/723))
+
+
 # Changes between 0.5.1 and 0.5.2
 
 ## WebODF
