@@ -128,7 +128,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
      * position. The horizontal position of the caret is specified in the "right" property
      * as a caret generally appears to the right of the character or object is represents.
      *
-     * @return {!{height: !number, top: !number, right: !number}}
+     * @return {!{height: !number, top: !number, right: !number, width: !number}}
      */
     function getSelectionRect() {
         var node = cursor.getNode(),
@@ -136,7 +136,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             nextRectangle,
             selectionRectangle,
             rootRect = /**@type{!ClientRect}*/(domUtils.getBoundingClientRect(canvas.getSizer())),
-            useLeftEdge = false;
+            useLeftEdge = false,
+            width = 0;
 
         if (node.getClientRects().length > 0) {
             // If the cursor is visible, use that as the caret location.
@@ -144,6 +145,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             // via an IME, or no nearby rect was discovered and cursor was forced visible for caret rect calculations
             // (see below when the show-caret attribute is set).
             selectionRectangle = getCaretSizeFromCursor();
+            // The space between the cursor BCR and the caretSizer is the width consumed by any visible composition text
+            width = selectionRectangle.left - domUtils.getBoundingClientRect(node).left;
             useLeftEdge = true;
         } else {
             // Need to resync the stepIterator prior to every use as it isn't automatically kept up-to-date
@@ -193,7 +196,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         caretRectangle = {
             top: selectionRectangle.top,
             height: selectionRectangle.height,
-            right: useLeftEdge ? selectionRectangle.left : selectionRectangle.right
+            right: useLeftEdge ? selectionRectangle.left : selectionRectangle.right,
+            width: domUtils.adaptRangeDifferenceToZoomLevel(width, canvas.getZoomLevel())
         };
         return caretRectangle;
     }
@@ -224,7 +228,8 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         }
         caretOverlay.style.height = selectionRect.height + "px";
         caretOverlay.style.top = selectionRect.top + "px";
-        caretOverlay.style.left = selectionRect.right + "px";
+        caretOverlay.style.left = (selectionRect.right - selectionRect.width) + "px";
+        caretOverlay.style.width = selectionRect.width ? (selectionRect.width + "px") : "";
 
         // Update the overlay element
         if (overlayElement) {
