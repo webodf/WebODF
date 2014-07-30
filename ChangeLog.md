@@ -5,6 +5,7 @@
 ### Fixes
 
 * Fixed occasional crash when splitting a paragraph ([#723](https://github.com/kogmbh/WebODF/issues/723))
+* Keep IME composition menu & avatar in the correct position when entering characters
 
 
 # Changes between 0.5.1 and 0.5.2
