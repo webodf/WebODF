@@ -6,6 +6,7 @@
 
 * Fixed occasional crash when splitting a paragraph ([#723](https://github.com/kogmbh/WebODF/issues/723))
 * Keep IME composition menu & avatar in the correct position when entering characters
+* Allow screen-readers to read the document content correctly in OSX 10.8+ versions of Safari
 
 
 # Changes between 0.5.1 and 0.5.2
