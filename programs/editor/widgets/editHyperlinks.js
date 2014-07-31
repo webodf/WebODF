@@ -48,17 +48,6 @@ define("webodf/editor/widgets/editHyperlinks", [
                 textSerializer = new odf.TextSerializer(),
                 dialog;
 
-            /**
-             * @param {!Range} selection
-             * @return {!string}
-             */
-            function getTextContent(selection) {
-                var document = selection.startContainer.ownerDocument,
-                    fragmentContainer = document.createElement('span');
-                fragmentContainer.appendChild(selection.cloneContents());
-                return textSerializer.writeToString(fragmentContainer);
-            }
-
             function updateLinkEditorContent() {
                 var selection = editorSession.getSelectedRange(),
                     linksInSelection = editorSession.getSelectedHyperlinks(),
@@ -75,7 +64,8 @@ define("webodf/editor/widgets/editHyperlinks", [
                     // User has selected part of a hyperlink or a block of text. Assume user is attempting to modify the
                     // existing hyperlink, or wants to convert the selection into a hyperlink
                     linkEditorContent.set({
-                        linkDisplayText: getTextContent(selection),
+                        // TODO Improve performance by rewriting to not clone the range contents
+                        linkDisplayText: textSerializer.writeToString(selection.cloneContents()),
                         linkUrl: linkTarget,
                         isReadOnlyText: true
                     });

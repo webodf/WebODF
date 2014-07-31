@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, core, ops, Node*/
+/*global runtime, gui, core, ops, Node, odf*/
 
 (function () {
     "use strict";
@@ -106,7 +106,6 @@
             doc = /**@type{!Document}*/(eventTrap.ownerDocument),
             /**@type{!Element}*/
             compositionElement,
-            FAKE_CONTENT = "b",
             /**@type{!core.ScheduledTask}*/
             processUpdates,
             pendingEvent = false,
@@ -115,6 +114,8 @@
             events = new core.EventNotifier([gui.InputMethodEditor.signalCompositionStart,
                                                 gui.InputMethodEditor.signalCompositionEnd]),
             lastCompositionData,
+            /**@type{!odf.TextSerializer}*/
+            textSerializer,
             filters = [],
             cleanup;
 
@@ -186,7 +187,8 @@
                 eventTrap.value = "";
             } else {
                 // Content is necessary for cut/copy/paste to be enabled
-                eventTrap.value = FAKE_CONTENT;
+                // TODO Improve performance by rewriting to not clone the range contents
+                eventTrap.value = textSerializer.writeToString(localCursor.getSelectedRange().cloneContents());
             }
 
             eventTrap.setSelectionRange(0, eventTrap.value.length);
@@ -289,6 +291,9 @@
         };
 
         function init() {
+            textSerializer = new odf.TextSerializer();
+            textSerializer.filter = new odf.OdfNodeFilter();
+
             eventManager.subscribe('compositionstart', compositionStart);
             eventManager.subscribe('compositionend', compositionEnd);
             eventManager.subscribe('textInput', textInput);

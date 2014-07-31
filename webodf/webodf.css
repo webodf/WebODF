@@ -339,6 +339,9 @@ cursor|cursor {
     opacity: 0;
     color: rgba(255, 255, 255, 0); /* hide the blinking caret by setting the colour to fully transparent */
     pointer-events: none;
+    /* prevent any text wrapping from occurring within the text area */
+    white-space: pre;
+    overflow: hidden;
 }
 
 /* within a cursor */

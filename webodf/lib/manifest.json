@@ -130,7 +130,8 @@
         "odf.OdfCanvas"
     ],
     "gui.InputMethodEditor": [
-        "gui.EventManager"
+        "gui.EventManager",
+        "odf.TextSerializer"
     ],
     "gui.KeyboardHandler": [
     ],

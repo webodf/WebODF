@@ -642,11 +642,12 @@ gui.EventManager = function EventManager(odtDocument) {
             doc = sizerElement.ownerDocument;
 
         runtime.assert(Boolean(window), "EventManager requires a window object to operate correctly");
-        eventTrap = /**@type{!HTMLInputElement}*/(doc.createElement("input"));
+        eventTrap = /**@type{!HTMLInputElement}*/(doc.createElement("textarea"));
         eventTrap.id = "eventTrap";
         // Negative tab index still allows focus, but removes accessibility by keyboard
         eventTrap.setAttribute("tabindex", "-1");
         eventTrap.setAttribute("readOnly", "true");
+        eventTrap.setAttribute("rows", "1");
         sizerElement.appendChild(eventTrap);
 
         subscribe("mousedown", disableTrapSelection);
