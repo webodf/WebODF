@@ -757,6 +757,7 @@ html[dir='rtl'] .dropdownToolbarButton {
 
 #blanked {
     display: none;
+    cursor: none;
     position: absolute;
     left: 0px;
     top: 0px;

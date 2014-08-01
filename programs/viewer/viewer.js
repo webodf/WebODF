@@ -78,6 +78,10 @@ function Viewer(viewerPlugin) {
         /**@const*/
         UI_FADE_DURATION = 5000;
 
+    function isBlankedOut() {
+        return (blanked.style.display === 'block');
+    }
+
     function initializeAboutInformation() {
         var aboutDialogCentererTable, aboutDialogCentererCell, aboutButton, pluginName, pluginVersion, pluginURL;
 
@@ -392,6 +396,9 @@ function Viewer(viewerPlugin) {
             };
             parseScale('page-fit');
         } else {
+            if (isBlankedOut()) {
+                leaveBlankOut();
+            }
             titlebar.style.display = toolbar.style.display = 'block';
             overlayCloseButton.style.display = 'none';
             canvasContainer.classList.remove('presentationMode');
@@ -491,18 +498,14 @@ function Viewer(viewerPlugin) {
     }
 
     function blankOut(value) {
-        if (blanked.style.display == 'block') {
-          blanked.style.display = 'none';
-          blanked.style.cursor = 'initial';
-          toggleToolbars()
-        } else {
-            if (presentationMode || isFullScreen) {
-                blanked.style.display = 'block';
-                blanked.style.backgroundColor = value;
-                blanked.style.cursor = 'none';
-                hideToolbars()
-            }
-        }
+        blanked.style.display = 'block';
+        blanked.style.backgroundColor = value;
+        hideToolbars();
+    }
+
+    function leaveBlankOut() {
+        blanked.style.display = 'none';
+        toggleToolbars();
     }
 
     function init() {
@@ -598,38 +601,60 @@ function Viewer(viewerPlugin) {
                 var key = evt.keyCode,
                     shiftKey = evt.shiftKey;
 
-                switch (key) {
-                case 8: // backspace
-                case 33: // pageUp
-                case 37: // left arrow
-                case 38: // up arrow
-                case 80: // key 'p'
-                    self.showPreviousPage();
-                    break;
-                case 13: // enter
-                case 34: // pageDown
-                case 39: // right arrow
-                case 40: // down arrow
-                case 78: // key 'n'
-                    self.showNextPage();
-                    break;
-                case 32: // space
-                    shiftKey ? self.showPreviousPage() : self.showNextPage();
-                    break;
-                case 66:  // key 'b' blanks screen (to black) or returns to the document
-                case 190: // and so does the key '.' (dot)
-                    blankOut('#000');
-                    break;
-                case 87:  // key 'w' blanks page (to white) or returns to the document
-                case 188: // and so does the key ',' (comma)
-                    blankOut('#FFF');
-                    break;
-                case 36: // key 'Home' goes to first page
-                    self.showPage(0);
-                    break;
-                case 35: // key 'End' goes to last page
-                    self.showPage(pages.length);
-                    break;
+                // blanked-out mode?
+                if (isBlankedOut()) {
+                    switch (key) {
+                    case 16: // Shift
+                    case 17: // Ctrl
+                    case 18: // Alt
+                    case 91: // LeftMeta
+                    case 93: // RightMeta
+                    case 224: // MetaInMozilla
+                    case 225: // AltGr
+                        // ignore modifier keys alone
+                        break;
+                    default:
+                        leaveBlankOut();
+                        break;
+                    }
+                } else {
+                    switch (key) {
+                    case 8: // backspace
+                    case 33: // pageUp
+                    case 37: // left arrow
+                    case 38: // up arrow
+                    case 80: // key 'p'
+                        self.showPreviousPage();
+                        break;
+                    case 13: // enter
+                    case 34: // pageDown
+                    case 39: // right arrow
+                    case 40: // down arrow
+                    case 78: // key 'n'
+                        self.showNextPage();
+                        break;
+                    case 32: // space
+                        shiftKey ? self.showPreviousPage() : self.showNextPage();
+                        break;
+                    case 66:  // key 'b' blanks screen (to black) or returns to the document
+                    case 190: // and so does the key '.' (dot)
+                        if (presentationMode) {
+                            blankOut('#000');
+                        }
+                        break;
+                    case 87:  // key 'w' blanks page (to white) or returns to the document
+                    case 188: // and so does the key ',' (comma)
+                        if (presentationMode) {
+                            blankOut('#FFF');
+                        }
+                        break;
+                    case 36: // key 'Home' goes to first page
+                        self.showPage(0);
+                        break;
+                    case 35: // key 'End' goes to last page
+                        self.showPage(pages.length);
+                        break;
+                    }
                 }
             });
         }
