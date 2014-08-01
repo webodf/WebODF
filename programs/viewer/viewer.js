@@ -490,6 +490,21 @@ function Viewer(viewerPlugin) {
         }
     }
 
+    function blankOut(value) {
+        if (blanked.style.display == 'block') {
+          blanked.style.display = 'none';
+          blanked.style.cursor = 'initial';
+          toggleToolbars()
+        } else {
+            if (presentationMode || isFullScreen) {
+                blanked.style.display = 'block';
+                blanked.style.backgroundColor = value;
+                blanked.style.cursor = 'none';
+                hideToolbars()
+            }
+        }
+    }
+
     function init() {
 
         initializeAboutInformation();
@@ -584,18 +599,36 @@ function Viewer(viewerPlugin) {
                     shiftKey = evt.shiftKey;
 
                 switch (key) {
+                case 8: // backspace
                 case 33: // pageUp
-                case 38: // up
-                case 37: // left
+                case 37: // left arrow
+                case 38: // up arrow
+                case 80: // key 'p'
                     self.showPreviousPage();
                     break;
+                case 13: // enter
                 case 34: // pageDown
-                case 40: // down
-                case 39: // right
+                case 39: // right arrow
+                case 40: // down arrow
+                case 78: // key 'n'
                     self.showNextPage();
                     break;
                 case 32: // space
                     shiftKey ? self.showPreviousPage() : self.showNextPage();
+                    break;
+                case 66:  // key 'b' blanks screen (to black) or returns to the document
+                case 190: // and so does the key '.' (dot)
+                    blankOut('#000');
+                    break;
+                case 87:  // key 'w' blanks page (to white) or returns to the document
+                case 188: // and so does the key ',' (comma)
+                    blankOut('#FFF');
+                    break;
+                case 36: // key 'Home' goes to first page
+                    self.showPage(0);
+                    break;
+                case 35: // key 'End' goes to last page
+                    self.showPage(pages.length);
                     break;
                 }
             });
