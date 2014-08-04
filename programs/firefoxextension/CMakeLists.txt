@@ -35,4 +35,8 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(product-firefoxextension DEPENDS ${FIREFOX_EXTENSION_ODFVIEWER})
+add_custom_target(build-firefoxextension DEPENDS ${FIREFOX_EXTENSION_ODFVIEWER})
+
+add_custom_target(test-firefoxextension DEPENDS webodf.js-tests)
+
+add_custom_target(product-firefoxextension DEPENDS build-firefoxextension test-firefoxextension)
