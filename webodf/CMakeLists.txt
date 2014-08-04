@@ -195,7 +195,7 @@ add_custom_command(
 add_custom_target(doc DEPENDS docs/index.html)
 add_custom_target(simplenodetest ALL
     COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
-    DEPENDS ${NODE} simplecompiled.js-target
+    DEPENDS ${NODE} simplecompiled.js-target copy_node_modules
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
 )
 
