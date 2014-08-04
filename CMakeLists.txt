@@ -305,7 +305,6 @@ macro(COPY_FILES _varname _srcdir _tgtdir)
   endforeach(_file)
 endmacro(COPY_FILES _directory _files)
 
-
 #############################
 ## Define some files and dirs
 #############################
@@ -333,6 +332,19 @@ set(WODOTEXTEDITORBUILDDIR ${CMAKE_CURRENT_BINARY_DIR}/wodotexteditor)
 
 set(FIREFOX_EXTENSION_ODFVIEWER_DIR ${CMAKE_CURRENT_BINARY_DIR}/firefox-extension-odfviewer-${WEBODF_VERSION})
 set(FIREFOX_EXTENSION_ODFVIEWER ${FIREFOX_EXTENSION_ODFVIEWER_DIR}.xpi)
+
+
+####################
+## WORKAROUND HELPER
+####################
+
+# cmake -E touch truncates time to seconds in older versions
+# see http://www.cmake.org/Bug/view.php?id=14020
+if (CMAKE_VERSION VERSION_LESS 2.8.12)
+  set(TOUCHFILE ${NODE} ${TOOLS_DIR}/touchfile.js)
+else()
+  set(TOUCHFILE ${CMAKE_COMMAND} -E touch)
+endif()
 
 
 #############################

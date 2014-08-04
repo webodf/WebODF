@@ -193,11 +193,15 @@ add_custom_command(
     DEPENDS ${LIBJSFILES} JsDoc
 )
 add_custom_target(doc DEPENDS docs/index.html)
-add_custom_target(simplenodetest ALL
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/simplenodetest.timestamp
     COMMAND ${NODE} ${CMAKE_CURRENT_BINARY_DIR}/simplecompiled.js
-    DEPENDS ${NODE} simplecompiled.js-target copy_node_modules
+    COMMAND ${TOUCHFILE} ${CMAKE_CURRENT_BINARY_DIR}/simplenodetest.timestamp
+    DEPENDS ${NODE} simplecompiled.js copy_node_modules
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/tests
 )
+add_custom_target(simplenodetest ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/simplenodetest.timestamp)
 
 if (NOT APPLE)
     add_custom_command(
@@ -211,6 +215,7 @@ if (NOT APPLE)
     add_custom_target(instrumented DEPENDS instrumented/index.html)
 endif(NOT APPLE)
 
+add_custom_target(webodf.js-tests DEPENDS syntaxcheck simplenodetest)
 
 add_custom_command(
     OUTPUT ${WEBODFJS_DIR}
