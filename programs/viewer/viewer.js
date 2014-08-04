@@ -346,20 +346,26 @@ function Viewer(viewerPlugin) {
     this.toggleFullScreen = function () {
         var elem = viewerElement;
         if (!isFullScreen) {
-            if (elem.requestFullScreen) {
-                elem.requestFullScreen();
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
             } else if (elem.mozRequestFullScreen) {
                 elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
             } else if (elem.webkitRequestFullScreen) {
-                elem.webkitRequestFullScreen();
+                elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
             } else if (elem.msRequestFullscreen) {
                 elem.msRequestFullscreen();
             }
         } else {
-            if (document.cancelFullScreen) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.cancelFullScreen) {
                 document.cancelFullScreen();
             } else if (document.mozCancelFullScreen) {
                 document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
             } else if (document.webkitCancelFullScreen) {
                 document.webkitCancelFullScreen();
             } else if (document.msExitFullscreen) {
@@ -515,7 +521,7 @@ function Viewer(viewerPlugin) {
         if (viewerPlugin) {
             self.initialize();
 
-            if (!(document.cancelFullScreen || document.mozCancelFullScreen || document.webkitCancelFullScreen || document.msExitFullscreen)) {
+            if (!(document.exitFullscreen || document.cancelFullScreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.webkitCancelFullScreen || document.msExitFullscreen)) {
                 document.getElementById('fullscreen').style.visibility = 'hidden';
                 document.getElementById('presentation').style.visibility = 'hidden';
             }
