@@ -421,4 +421,44 @@
    </check>
   </layoutchecks>
  </test>
+ <test name="fontsize">
+  <input>
+   <office:document-styles>
+    <office:styles>
+     <style:default-style style:family="text"><style:text-properties fo:font-size="10px"/></style:default-style>
+     <style:style style:name="percentSizeParent" style:family="text"><style:text-properties fo:font-size="20px"/></style:style>
+    </office:styles>
+    <office:automatic-styles>
+     <style:style style:name="nosize" style:family="text"><style:text-properties/></style:style>
+     <style:style style:name="ptSize" style:family="text"><style:text-properties fo:font-size="20pt"/></style:style>
+     <style:style style:name="pxSize" style:family="text"><style:text-properties fo:font-size="20px"/></style:style>
+     <style:style style:name="percentSize" style:parent-style-name="percentSizeParent" style:family="text">
+       <style:text-properties fo:font-size="50%"/>
+     </style:style>
+    </office:automatic-styles>
+   </office:document-styles>
+   <office:text>
+    <text:p>
+        <text:span text:style-name="nosize">nosize</text:span>
+        <text:span text:style-name="ptSize">ptSize</text:span>
+        <text:span text:style-name="pxSize">pxSize</text:span>
+        <text:span text:style-name="percentSize">percentSize</text:span>
+    </text:p>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="(.//text:span)[1]">
+    <fontSize value="10px"/>
+   </check>
+   <check xpath="(.//text:span)[2]">
+    <fontSize value="27px"/>
+   </check>
+   <check xpath="(.//text:span)[3]">
+    <fontSize value="20px"/>
+   </check>
+   <check xpath="(.//text:span)[4]">
+    <fontSize value="10px"/>
+   </check>
+  </layoutchecks>
+ </test>
 </layouttests>
