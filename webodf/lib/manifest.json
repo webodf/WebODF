@@ -308,6 +308,7 @@
     "odf.Style2CSS": [
         "core.CSSUnits",
         "odf.OdfUtils",
+        "odf.StyleParseUtils",
         "odf.StyleTree",
         "xmldom.XPath"
     ],
