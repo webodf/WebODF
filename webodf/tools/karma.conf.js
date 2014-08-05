@@ -55,6 +55,8 @@ module.exports = function (config) {
             'lib/odf/OdfContainer.js',
             'lib/odf/OdfUtils.js',
             'lib/gui/AnnotationViewManager.js',
+            'lib/gui/Viewport.js',
+            'lib/gui/SingleScrollViewport.js',
             'lib/odf/FontLoader.js',
             'lib/odf/Formatting.js',
             'lib/odf/StyleTree.js',

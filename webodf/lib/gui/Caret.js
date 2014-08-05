@@ -33,10 +33,11 @@
  * @constructor
  * @implements {core.Destroyable}
  * @param {!ops.OdtCursor} cursor
+ * @param {!gui.Viewport} viewport
  * @param {boolean} avatarInitiallyVisible Sets the initial visibility of the caret's avatar
  * @param {boolean} blinkOnRangeSelect Specify that the caret should blink if a non-collapsed range is selected
  */
-gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
+gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRangeSelect) {
     "use strict";
     var /**@const*/
         cursorns = 'urn:webodf:names:cursor',
@@ -91,24 +92,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
         // switch between transparent and color
         caretElement.style.opacity = caretElement.style.opacity === "0" ? "1" : "0";
         blinkTask.trigger(); // Trigger next blink to occur in BLINK_PERIOD_MS
-    }
-
-    /**
-     * Calculates the bounding client rect of the caret element,
-     * expanded with a specific margin
-     * @param {!Element} caretElement
-     * @param {!{left:!number,top:!number,right:!number,bottom:!number}} margin
-     * @return {!{left:!number,top:!number,right:!number,bottom:!number}}
-     */
-    function getCaretClientRectWithMargin(caretElement, margin) {
-        var caretRect = caretElement.getBoundingClientRect();
-
-        return {
-            left:   caretRect.left - margin.left,
-            top:    caretRect.top - margin.top,
-            right:  caretRect.right + margin.right,
-            bottom: caretRect.bottom + margin.bottom
-        };
     }
 
     /**
@@ -250,56 +233,6 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
     }
 
     /**
-     * Checks whether the caret is currently in view. If the caret is not on screen,
-     * this will scroll the caret into view.
-     * @return {undefined}
-     */
-    function ensureVisible() {
-        var canvasElement = cursor.getDocument().getCanvas().getElement(),
-            canvasContainerElement = /**@type{!HTMLElement}*/(canvasElement.parentNode),
-            caretRect,
-            canvasContainerRect,
-        // margin around the caret when calculating the visibility,
-        // to have the caret not stick directly to the containing border
-        // size in pixels, and also to avoid it hiding below scrollbars.
-        // The scrollbar width is in most cases the offsetWidth - clientWidth.
-        // We assume a 5px distance from the boundary is A Good Thing.
-            horizontalMargin = canvasContainerElement.offsetWidth - canvasContainerElement.clientWidth + 5,
-            verticalMargin = canvasContainerElement.offsetHeight - canvasContainerElement.clientHeight + 5;
-
-        // The visible part of the canvas is set by changing the
-        // scrollLeft/scrollTop properties of the containing element
-        // accordingly. Both are 0 if the canvas top-left corner is exactly
-        // in the top-left corner of the container.
-        // To find out the proper values for them. these other values are needed:
-        // * position of the caret inside the canvas
-        // * size of the caret
-        // * size of the canvas
-
-        caretRect = getCaretClientRectWithMargin(caretElement, {
-            top: verticalMargin,
-            left: horizontalMargin,
-            bottom: verticalMargin,
-            right: horizontalMargin
-        });
-        canvasContainerRect = canvasContainerElement.getBoundingClientRect();
-
-        // Vertical adjustment
-        if (caretRect.top < canvasContainerRect.top) {
-            canvasContainerElement.scrollTop -= canvasContainerRect.top - caretRect.top;
-        } else if (caretRect.bottom > canvasContainerRect.bottom) {
-            canvasContainerElement.scrollTop += caretRect.bottom - canvasContainerRect.bottom;
-        }
-
-        // Horizontal adjustment
-        if (caretRect.left < canvasContainerRect.left) {
-            canvasContainerElement.scrollLeft -= canvasContainerRect.left - caretRect.left;
-        } else if (caretRect.right > canvasContainerRect.right) {
-            canvasContainerElement.scrollLeft += caretRect.right - canvasContainerRect.right;
-        }
-    }
-
-    /**
      * Returns true if the requested property is different between the last state
      * and the current state
      * @param {!string} property
@@ -363,7 +296,7 @@ gui.Caret = function Caret(cursor, avatarInitiallyVisible, blinkOnRangeSelect) {
             }
 
             if (shouldCheckCaretVisibility) {
-                ensureVisible();
+                viewport.scrollIntoView(caretElement.getBoundingClientRect());
             }
         }
 

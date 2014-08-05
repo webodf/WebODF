@@ -202,6 +202,9 @@
     "gui.ShadowCursor": [
         "ops.OdtCursor"
     ],
+    "gui.SingleScrollViewport": [
+        "gui.Viewport"
+    ],
     "gui.StyleSummary": [
         "odf.Formatting"
     ],
@@ -227,6 +230,9 @@
     ],
     "gui.UndoStateRules": [
         "ops.Operation"
+    ],
+    "gui.Viewport": [
+        "core.typedefs"
     ],
     "gui.VisualStepScanner": [
         "core.StepIterator"
@@ -269,6 +275,7 @@
         "core.Async",
         "core.Task",
         "gui.AnnotationViewManager",
+        "gui.SingleScrollViewport",
         "odf.FontLoader",
         "odf.Formatting",
         "odf.ListStylesToCss",

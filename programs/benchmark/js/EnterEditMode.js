@@ -76,7 +76,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
             sessionController = new gui.SessionController(session, localMemberId, shadowCursor, sessionControllerOptions);
             sessionConstraints = sessionController.getSessionConstraints();
             sessionController.setUndoManager(undoManager);
-            caretManager = new gui.CaretManager(sessionController);
+            caretManager = new gui.CaretManager(sessionController, context.odfCanvas.getViewport());
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
             new gui.SessionView(viewOptions, localMemberId, session, sessionConstraints, caretManager, selectionViewManager);
             selectionViewManager.registerCursor(shadowCursor, true);
