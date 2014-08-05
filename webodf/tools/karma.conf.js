@@ -42,6 +42,7 @@ module.exports = function (config) {
             'lib/core/UnitTester.js',
             'lib/core/Utils.js',
             'lib/core/Zip.js',
+            'lib/core/typedefs.js',
             'lib/gui/CommonConstraints.js',
             'lib/gui/SessionConstraints.js',
             'lib/gui/BlacklistNamespaceNodeFilter.js',

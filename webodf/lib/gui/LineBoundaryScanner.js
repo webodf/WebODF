@@ -42,8 +42,8 @@ gui.LineBoundaryScanner = function () {
      * no overlap, or either of the rectangles is 0 height, this will
      * return 0.
      *
-     * @param {!gui.LineBoundaryRect} rect1
-     * @param {!gui.LineBoundaryRect} rect2
+     * @param {!core.SimpleClientRect} rect1
+     * @param {!core.SimpleClientRect} rect2
      * @return {!number}
      */
     function verticalOverlapPercent(rect1, rect2) {
@@ -61,21 +61,21 @@ gui.LineBoundaryScanner = function () {
      * Returns true if the amount of overlap between the known line rectangle and the visible next rectangle
      * is below the specified MIN_OVERLAP_THRESHOLD. If there is no known line rectangle, this will return false.
      *
-     * @param {!gui.LineBoundaryRect} nextRect Client rect of next step (by direction)
+     * @param {!core.SimpleClientRect} nextRect Client rect of next step (by direction)
      * @return {!boolean}
      */
     function isLineBoundary(nextRect) {
         if (lineRect) {
             // TODO this logic will fail if the caret is between a subscript & superscript char as the overlap will be 0
-            return verticalOverlapPercent(/**@type{!gui.LineBoundaryRect}*/(lineRect), nextRect) <= MIN_OVERLAP_THRESHOLD;
+            return verticalOverlapPercent(/**@type{!core.SimpleClientRect}*/(lineRect), nextRect) <= MIN_OVERLAP_THRESHOLD;
         }
         return false;
     }
 
     /**
-     * @param {!gui.LineBoundaryRect} rect1
-     * @param {!gui.LineBoundaryRect} rect2
-     * @return {!gui.LineBoundaryRect}
+     * @param {!core.SimpleClientRect} rect1
+     * @param {!core.SimpleClientRect} rect2
+     * @return {!core.SimpleClientRect}
      */
     function combineRects(rect1, rect2) {
         return {
@@ -87,14 +87,14 @@ gui.LineBoundaryScanner = function () {
     }
 
     /**
-     * @param {?gui.LineBoundaryRect} originalRect
-     * @param {?gui.LineBoundaryRect} newRect
-     * @return {?gui.LineBoundaryRect}
+     * @param {?core.SimpleClientRect} originalRect
+     * @param {?core.SimpleClientRect} newRect
+     * @return {?core.SimpleClientRect}
      */
     function growRect(originalRect, newRect) {
         if (originalRect && newRect) {
-            return combineRects(/**@type{!gui.LineBoundaryRect}*/(originalRect),
-                                /**@type{!gui.LineBoundaryRect}*/(newRect));
+            return combineRects(/**@type{!core.SimpleClientRect}*/(originalRect),
+                                /**@type{!core.SimpleClientRect}*/(newRect));
         }
         return originalRect || newRect;
     }
@@ -108,7 +108,7 @@ gui.LineBoundaryScanner = function () {
      * @return {!boolean}
      */
     this.process = function(stepInfo, previousRect, nextRect) {
-        if (nextRect && isLineBoundary(/**@type{!gui.LineBoundaryRect}*/(nextRect))) {
+        if (nextRect && isLineBoundary(/**@type{!core.SimpleClientRect}*/(nextRect))) {
             // Can only detect line boundaries when the next rectangle is visible. An invisible next-rect
             // indicates the next step does not have any visible content attached, so it's location on screen
             // is impossible to determine accurately.
@@ -126,8 +126,3 @@ gui.LineBoundaryScanner = function () {
         return false;
     };
 };
-
-/**
- * @typedef {(ClientRect|{left: !number, right: !number, top: !number, bottom: !number})}
- */
-gui.LineBoundaryRect;
