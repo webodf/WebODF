@@ -110,7 +110,7 @@ function ODFViewerPlugin() {
                     shadowCursor = new gui.ShadowCursor(odtDocument);
                     sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {});
                     eventManager = sessionController.getEventManager();
-                    caretManager = new gui.CaretManager(sessionController);
+                    caretManager = new gui.CaretManager(sessionController, odfCanvas.getViewport());
                     selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
                     sessionView = new gui.SessionView({
                         caretAvatarsInitiallyVisible: false

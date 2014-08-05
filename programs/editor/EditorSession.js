@@ -593,6 +593,7 @@ define("webodf/editor/EditorSession", [
 
         function init() {
             var head = document.getElementsByTagName('head')[0],
+                odfCanvas = session.getOdtDocument().getOdfCanvas(),
                 eventManager;
 
             // TODO: fonts.css should be rather done by odfCanvas, or?
@@ -609,12 +610,12 @@ define("webodf/editor/EditorSession", [
             sessionConstraints = self.sessionController.getSessionConstraints();
 
             eventManager = self.sessionController.getEventManager();
-            hyperlinkTooltipView = new gui.HyperlinkTooltipView(session.getOdtDocument().getOdfCanvas(),
+            hyperlinkTooltipView = new gui.HyperlinkTooltipView(odfCanvas,
                                                     self.sessionController.getHyperlinkClickHandler().getModifier);
             eventManager.subscribe("mousemove", hyperlinkTooltipView.showTooltip);
             eventManager.subscribe("mouseout", hyperlinkTooltipView.hideTooltip);
 
-            caretManager = new gui.CaretManager(self.sessionController);
+            caretManager = new gui.CaretManager(self.sessionController, odfCanvas.getViewport());
             selectionViewManager = new gui.SelectionViewManager(gui.SvgSelectionView);
             self.sessionView = new gui.SessionView(config.viewOptions, localMemberId, session, sessionConstraints, caretManager, selectionViewManager);
             self.availableFonts = getAvailableFonts();

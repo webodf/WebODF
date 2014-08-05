@@ -34,8 +34,9 @@
  * @constructor
  * @implements {core.Destroyable}
  * @param {!gui.SessionController} sessionController
+ * @param {!gui.Viewport} viewport
  */
-gui.CaretManager = function CaretManager(sessionController) {
+gui.CaretManager = function CaretManager(sessionController, viewport) {
     "use strict";
     var /**@type{!Object.<string,!gui.Caret>}*/
         carets = {},
@@ -195,7 +196,7 @@ gui.CaretManager = function CaretManager(sessionController) {
      */
     this.registerCursor = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
         var memberid = cursor.getMemberId(),
-            caret = new gui.Caret(cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect),
+            caret = new gui.Caret(cursor, viewport, caretAvatarInitiallyVisible, blinkOnRangeSelect),
             eventManager = sessionController.getEventManager();
 
         carets[memberid] = caret;

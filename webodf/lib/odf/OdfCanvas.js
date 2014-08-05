@@ -810,8 +810,9 @@
      * @implements {ops.Canvas}
      * @implements {core.Destroyable}
      * @param {!HTMLElement} element Put and ODF Canvas inside this element.
+     * @param {!gui.Viewport=} viewport Viewport used for scrolling elements and ranges into view
      */
-    odf.OdfCanvas = function OdfCanvas(element) {
+    odf.OdfCanvas = function OdfCanvas(element, viewport) {
         runtime.assert((element !== null) && (element !== undefined),
             "odf.OdfCanvas constructor needs DOM element");
         runtime.assert((element.ownerDocument !== null) && (element.ownerDocument !== undefined),
@@ -849,7 +850,9 @@
             shouldRerenderAnnotations = false,
             loadingQueue = new LoadingQueue(),
             /**@type{!gui.ZoomHelper}*/
-            zoomHelper = new gui.ZoomHelper();
+            zoomHelper = new gui.ZoomHelper(),
+            /**@type{!gui.Viewport}*/
+            canvasViewport = viewport || new gui.SingleScrollViewport(/**@type{!HTMLElement}*/(element.parentNode));
 
         /**
          * Load all the images that are inside an odf element.
@@ -1062,7 +1065,9 @@
         function modifyAnnotations(odffragment) {
             var annotationNodes = /**@type{!Array.<!odf.AnnotationElement>}*/(domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'));
 
-            annotationNodes.forEach(annotationViewManager.addAnnotation);
+            annotationNodes.forEach(function(annotation) {
+                annotationViewManager.addAnnotation(annotation, false);
+            });
             annotationViewManager.rerenderAnnotations();
         }
 
@@ -1293,7 +1298,7 @@
          */
         this.addAnnotation = function (annotation) {
             if (annotationViewManager) {
-                annotationViewManager.addAnnotation(annotation);
+                annotationViewManager.addAnnotation(annotation, true);
                 fixContainerSize();
             }
         };
@@ -1415,6 +1420,13 @@
          */
         this.getElement = function () {
             return element;
+        };
+
+        /**
+         * @return {!gui.Viewport}
+         */
+        this.getViewport = function () {
+            return canvasViewport;
         };
 
         /**
