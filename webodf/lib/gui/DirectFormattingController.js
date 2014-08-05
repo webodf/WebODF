@@ -57,8 +57,6 @@ gui.DirectFormattingController = function DirectFormattingController(
         ]),
         /**@const*/
         textns = odf.Namespaces.textns,
-        /**@const*/
-        FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@type{?odf.Formatting.StyleData}*/
         directCursorStyleProperties = null,
         // cached text settings
@@ -694,24 +692,18 @@ gui.DirectFormattingController = function DirectFormattingController(
     };
 
     /**
-     * Check if the selection is at the end of the last paragraph.
+     * Check if the selection ends at the last step of a paragraph.
      * @param {!Range} range
      * @param {!Node} paragraphNode
      * @return {boolean}
      */
     function isSelectionAtTheEndOfLastParagraph(range, paragraphNode) {
-        var iterator = gui.SelectionMover.createPositionIterator(paragraphNode),
-            rootConstrainedFilter = new core.PositionFilterChain();
-        rootConstrainedFilter.addFilter(odtDocument.getPositionFilter());
-        rootConstrainedFilter.addFilter(odtDocument.createRootFilter(inputMemberId));
+        var stepIterator,
+            filters = [odtDocument.getPositionFilter(), odtDocument.createRootFilter(inputMemberId)];
 
-        iterator.setUnfilteredPosition(/**@type{!Node}*/(range.endContainer), range.endOffset);
-        while (iterator.nextPosition()) {
-            if (rootConstrainedFilter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                return odtDocument.getParagraphElement(iterator.getCurrentNode()) !== paragraphNode;
-            }
-        }
-        return true;
+        stepIterator = odtDocument.createStepIterator(/**@type{!Node}*/(range.endContainer), range.endOffset,
+                                                        filters, paragraphNode);
+        return stepIterator.nextStep() === false;
     }
 
     /**

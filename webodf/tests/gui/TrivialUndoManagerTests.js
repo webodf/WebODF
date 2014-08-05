@@ -77,6 +77,9 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         this.createRootFilter =  function () {
             return new core.PositionFilterChain();
         };
+        this.createPositionIterator = function() {
+            throw new Error("Not implemented");
+        };
     }
 
     this.setUp = function () {

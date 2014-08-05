@@ -66,6 +66,8 @@
     "gui.Avatar": [
         "core.Destroyable"
     ],
+    "gui.BlacklistNamespaceNodeFilter": [
+    ],
     "gui.Caret": [
         "gui.Avatar",
         "gui.GuiStepUtils",
@@ -162,12 +164,6 @@
         "odf.WordBoundaryFilter",
         "ops.Session"
     ],
-    "gui.SelectionMover": [
-        "core.Cursor",
-        "core.LoopWatchDog",
-        "core.PositionFilter",
-        "odf.OdfUtils"
-    ],
     "gui.SelectionView": [
         "gui.ShadowCursor"
     ],
@@ -210,7 +206,8 @@
         "core.Async",
         "core.Task",
         "gui.SelectionView",
-        "odf.OdfNodeFilter"
+        "odf.OdfNodeFilter",
+        "odf.OdfUtils"
     ],
     "gui.TextController": [
         "gui.CommonConstraints",
@@ -349,11 +346,12 @@
     "ops.Member": [
     ],
     "ops.OdtCursor": [
-        "gui.SelectionMover",
+        "core.Cursor",
         "ops.Document"
     ],
     "ops.OdtDocument": [
         "core.PositionFilterChain",
+        "gui.BlacklistNamespaceNodeFilter",
         "odf.OdfCanvas",
         "odf.StepUtils",
         "ops.Member",

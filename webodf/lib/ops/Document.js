@@ -86,6 +86,11 @@ ops.Document.prototype.getCanvas = function () { "use strict"; };
  * @return {!core.PositionFilter}
  */
 ops.Document.prototype.createRootFilter = function (inputMemberId) { "use strict"; };
+/**
+ * @param {!Node} rootNode
+ * @return {!core.PositionIterator}
+ */
+ops.Document.prototype.createPositionIterator = function (rootNode) { "use strict"; };
 /**@const*/
 ops.Document.signalCursorAdded =   "cursor/added";
 /**@const*/
