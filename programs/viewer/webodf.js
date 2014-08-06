@@ -31,7 +31,6 @@ xhr.open("GET", runtimeFilePath, false);
 xhr.send(null);
 code = xhr.responseText;
 code += "\n//# sourceURL=" + runtimeFilePath;
-code += "\n//@ sourceURL=" + runtimeFilePath; // Chrome
 eval(code);
 
 // adapt for out-of-sources run
