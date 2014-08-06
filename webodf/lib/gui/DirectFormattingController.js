@@ -727,6 +727,7 @@ gui.DirectFormattingController = function DirectFormattingController(
 
         textStyle = /**@type {!odf.Formatting.StyleData}*/(textStyle['style:text-properties']);
         paragraphStyle = /**@type {!odf.Formatting.StyleData}*/(paragraphStyle['style:text-properties']);
+        // <style:text-properties> only has attributes, so no need to look for child elements (as in: objects)
         return !Object.keys(textStyle).every(function (key) {
             return textStyle[key] === paragraphStyle[key];
         });
