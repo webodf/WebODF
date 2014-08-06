@@ -211,7 +211,11 @@ add_custom_command(
         wodotexteditor-doc
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
-add_custom_target(product-wodotexteditor DEPENDS ${WODOTEXTEDITOR_ZIP})
+add_custom_target(build-wodotexteditor DEPENDS ${WODOTEXTEDITOR_ZIP})
+
+add_custom_target(test-wodotexteditor DEPENDS webodf.js-tests)
+
+add_custom_target(product-wodotexteditor DEPENDS build-wodotexteditor test-wodotexteditor)
 
 
 ################
