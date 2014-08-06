@@ -35,6 +35,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t,
         testarea,
         inputMemberId = "Joe",
+        /**@const*/
+        PREVIOUS = ops.OdtStepsTranslator.PREVIOUS_STEP,
         prefixToNamespace = {
             fo: odf.Namespaces.namespaceMap.fo,
             text: odf.Namespaces.namespaceMap.text,
@@ -160,12 +162,12 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.segmentCount = segments.length;
         r.shouldBe(t, "t.segmentCount > 1", "true");
         documentRoot = createOdtDocument(segments.join(""));
-        t.documentLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length);
+        t.documentLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length, PREVIOUS);
 
         // Test iteration forward
         for (position = 1; position < segments.length; position += 1) {
             setCursorPosition(step);
-            t.currentDocLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length);
+            t.currentDocLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length, PREVIOUS);
             r.shouldBe(t, "t.currentDocLength", "t.documentLength");
             t.lastValidStep = step;
             t.expected = "<office:text>" +
@@ -217,8 +219,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
@@ -235,8 +237,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
@@ -254,8 +256,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
@@ -273,8 +275,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");
@@ -292,8 +294,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         t.selectedText = t.cursor.getSelectedRange().toString();
         r.shouldBe(t, "t.selectedText", "'BC'");
         r.shouldBe(t, "t.isWalkable", "true");
@@ -313,8 +315,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         t.selectedText = t.cursor.getSelectedRange().toString();
         r.shouldBe(t, "t.selectedText", "'BCD'");
         r.shouldBe(t, "t.isWalkable", "true");
@@ -334,8 +336,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0);
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToAnchor = t.odtDocument.convertDomPointToCursorStep(t.cursor.getAnchorNode(), 0, PREVIOUS);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         t.selectedText = t.cursor.getSelectedRange().toString();
         r.shouldBe(t, "t.selectedText", "'BCD'");
         r.shouldBe(t, "t.isWalkable", "true");
@@ -354,7 +356,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         t.isWalkable = isCursorSelectionInWalkablePositions();
         t.anchorInDiv = t.cursor.getAnchorNode().parentNode.localName === "div";
         t.cursorInDiv = t.cursor.getNode().parentNode.localName === "div";
-        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0);
+        t.rootToFocus = t.odtDocument.convertDomPointToCursorStep(t.cursor.getNode(), 0, PREVIOUS);
         r.shouldBe(t, "t.isWalkable", "true");
         r.shouldBe(t, "t.anchorInDiv", "false");
         r.shouldBe(t, "t.cursorInDiv", "false");

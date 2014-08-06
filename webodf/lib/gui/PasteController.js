@@ -41,7 +41,9 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
     var odtDocument = session.getOdtDocument(),
         isEnabled = false,
         /**@const*/
-        textns = odf.Namespaces.textns;
+        textns = odf.Namespaces.textns,
+        /**@const*/
+        NEXT = ops.OdtStepsTranslator.NEXT_STEP;
 
     /**
      * @return {undefined}
@@ -72,15 +74,6 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
     };
 
     /**
-     * Rounds to the first step within the paragraph
-     * @param {!number} step
-     * @return {!boolean}
-     */
-    function roundUp(step) {
-        return step === ops.OdtStepsTranslator.NEXT_STEP;
-    }
-
-    /**
      * @param {!string} data
      * @return {undefined}
      */
@@ -96,7 +89,7 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
             /**@type{number}*/
             cursorPosition = originalCursorPosition,
             operations = [],
-            currentParagraphStartPosition = odtDocument.convertDomPointToCursorStep(originalParagraph, 0, roundUp),
+            currentParagraphStartPosition = odtDocument.convertDomPointToCursorStep(originalParagraph, 0, NEXT),
             paragraphs;
 
         paragraphs = data.replace(/\r/g, "").split("\n");

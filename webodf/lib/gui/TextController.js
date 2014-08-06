@@ -59,7 +59,9 @@ gui.TextController = function TextController(
         FORWARD = true,
         isEnabled = false,
         /** @const */
-        textns = odf.Namespaces.textns;
+        textns = odf.Namespaces.textns,
+        /**@const*/
+        NEXT = ops.OdtStepsTranslator.NEXT_STEP;
 
     /**
      * @return {undefined}
@@ -88,15 +90,6 @@ gui.TextController = function TextController(
     this.isEnabled = function () {
         return isEnabled;
     };
-
-    /**
-     * Rounds to the first step within the paragraph
-     * @param {!number} step
-     * @return {!boolean}
-     */
-    function roundUp(step) {
-        return step === ops.OdtStepsTranslator.NEXT_STEP;
-    }
 
     /**
      * Return the equivalent cursor range of the specified DOM range.
@@ -262,7 +255,7 @@ gui.TextController = function TextController(
             memberid: inputMemberId,
             position: selection.position,
             paragraphStyleName: paragraphStyle,
-            sourceParagraphPosition: odtDocument.convertDomPointToCursorStep(originalParagraph, 0, roundUp),
+            sourceParagraphPosition: odtDocument.convertDomPointToCursorStep(originalParagraph, 0, NEXT),
             moveCursor: true
         });
         operations.push(op);
