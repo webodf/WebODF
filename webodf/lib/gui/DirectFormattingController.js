@@ -261,7 +261,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     /**
      * Apply the supplied text properties to the current range. If no range is selected,
      * this styling will be applied to the next character entered.
-     * @param {!Object} textProperties
+     * @param {!odf.Formatting.StyleData} textProperties
      * @return {undefined}
      */
     function formatTextSelection(textProperties) {
@@ -532,7 +532,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     }
 
     /**
-     * @param {!function(!Object) : !Object} applyDirectStyling
+     * @param {!function(!odf.Formatting.StyleData) : !odf.Formatting.StyleData} applyDirectStyling
      * @return {undefined}
      */
     function applyParagraphDirectStyling(applyDirectStyling) {
@@ -602,11 +602,13 @@ gui.DirectFormattingController = function DirectFormattingController(
     }
 
     /**
-     * @param {!Object} styleOverrides
+     * @param {!odf.Formatting.StyleData} styleOverrides
      * @return {undefined}
      */
     function applySimpleParagraphDirectStyling(styleOverrides) {
-        applyParagraphDirectStyling(function (paragraphStyle) { return utils.mergeObjects(paragraphStyle, styleOverrides); });
+        applyParagraphDirectStyling(function (paragraphStyle) {
+            return /**@type {!odf.Formatting.StyleData}*/(utils.mergeObjects(paragraphStyle, styleOverrides));
+        });
     }
 
     /**
@@ -651,8 +653,8 @@ gui.DirectFormattingController = function DirectFormattingController(
 
     /**
      * @param {!number} direction
-     * @param {!Object.<string,Object.<string,string>>} paragraphStyle
-     * @return {!Object}
+     * @param {!odf.Formatting.StyleData} paragraphStyle
+     * @return {!odf.Formatting.StyleData}
      */
     function modifyParagraphIndent(direction, paragraphStyle) {
         var tabStopDistance = odtDocument.getFormatting().getDefaultTabStopDistance(),
@@ -661,7 +663,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             indent,
             newIndent;
         if (paragraphProperties) {
-            indentValue = paragraphProperties["fo:margin-left"];
+            indentValue = /**@type {!string}*/(paragraphProperties["fo:margin-left"]);
             indent = odfUtils.parseLength(indentValue);
         }
 
@@ -672,7 +674,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             newIndent = (direction * tabStopDistance.value) + tabStopDistance.unit;
         }
 
-        return utils.mergeObjects(paragraphStyle, {"style:paragraph-properties" : {"fo:margin-left" : newIndent}});
+        return /**@type {!odf.Formatting.StyleData}*/(utils.mergeObjects(paragraphStyle, {"style:paragraph-properties" : {"fo:margin-left" : newIndent}}));
     }
 
     /**
@@ -723,8 +725,8 @@ gui.DirectFormattingController = function DirectFormattingController(
             return true;
         }
 
-        textStyle = /**@type{!Object.<string,string>}*/(textStyle['style:text-properties']);
-        paragraphStyle = /**@type{!Object.<string,string>}*/(paragraphStyle['style:text-properties']);
+        textStyle = /**@type {!odf.Formatting.StyleData}*/(textStyle['style:text-properties']);
+        paragraphStyle = /**@type {!odf.Formatting.StyleData}*/(paragraphStyle['style:text-properties']);
         return !Object.keys(textStyle).every(function (key) {
             return textStyle[key] === paragraphStyle[key];
         });

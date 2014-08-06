@@ -48,7 +48,8 @@ odf.Formatting = function Formatting() {
         utils = new core.Utils(),
         cssUnits = new core.CSSUnits(),
         // TODO: needs to be extended. Possibly created together with CSS from sone default description?
-        /**@const*/
+        /**@const
+           @type {!Object.<!string,!odf.Formatting.StyleData>}*/
         builtInDefaultStyleAttributesByFamily = {
             'paragraph' : {
                 'style:paragraph-properties': {
@@ -70,11 +71,11 @@ odf.Formatting = function Formatting() {
      * Creates a deep copy, so the result can be modified by the callee.
      * If there are no such attributes, null is returned.
      * @param {string} styleFamily
-     * @return {!Object.<string,!Object.<string,string>>}
+     * @return {!odf.Formatting.StyleData}
      */
     function getSystemDefaultStyleAttributes(styleFamily) {
         var result,
-            /**@type{!Object|undefined}*/
+            /**@type{!odf.Formatting.StyleData|undefined}*/
             builtInDefaultStyleAttributes = builtInDefaultStyleAttributesByFamily[styleFamily];
 
         if (builtInDefaultStyleAttributes) {
@@ -460,7 +461,7 @@ odf.Formatting = function Formatting() {
     /**
      * Returns an array of all unique styles in the given text nodes
      * @param {!Array.<!Node>} nodes
-     * @param {Object.<!string, !Object>=} calculatedStylesCache Short-lived cache of calculated styles.
+     * @param {!Object.<!string, !odf.Formatting.AppliedStyle>=} calculatedStylesCache Short-lived cache of calculated styles.
      *      Useful if a function is looking up the style information for multiple nodes without updating
      *      any style definitions.
      * @return {!Array.<!odf.Formatting.AppliedStyle>}
@@ -489,7 +490,7 @@ odf.Formatting = function Formatting() {
     /**
      * Returns a the applied style to the current node
      * @param {!Node} node
-     * @param {Object.<!string, !Object>=} calculatedStylesCache Short-lived cache of calculated styles.
+     * @param {!Object.<!string, !odf.Formatting.AppliedStyle>=} calculatedStylesCache Short-lived cache of calculated styles.
      *      Useful if a function is looking up the style information for multiple nodes without updating
      *      any style definitions.
      * @return {!odf.Formatting.AppliedStyle|undefined}
@@ -502,14 +503,15 @@ odf.Formatting = function Formatting() {
      * Overrides the specific properties on the styleNode from the values in the supplied properties Object.
      * If a newStylePrefix is supplied, this method will automatically generate a unique name for the style node
      * @param {!Element} styleNode
-     * @param {!Object.<string,!Object.<string,string>>} properties Prefix to put in front of new auto styles
+     * @param {!odf.Formatting.StyleData} properties Prefix to put in front of new auto styles
      */
     this.updateStyle = function (styleNode, properties) {
-        var fontName, fontFaceNode;
+        var fontName, fontFaceNode, textProperties;
 
         domUtils.mapObjOntoNode(styleNode, properties, odf.Namespaces.lookupNamespaceURI);
 
-        fontName = properties["style:text-properties"] && properties["style:text-properties"]["style:font-name"];
+        textProperties = /**@type {!odf.Formatting.StyleData|undefined}*/(properties["style:text-properties"]);
+        fontName = /**@type {!string}*/(textProperties && textProperties["style:font-name"]);
         if (fontName && !getFontMap().hasOwnProperty(fontName)) {
             fontFaceNode = styleNode.ownerDocument.createElementNS(stylens, 'style:font-face');
             fontFaceNode.setAttributeNS(stylens, 'style:name', fontName);
@@ -524,8 +526,8 @@ odf.Formatting = function Formatting() {
      * This contains logic for simulating inheritance for automatic styles
      * @param {!string} parentStyleName
      * @param {!string} family
-     * @param {!Object} overrides
-     * @return {!Object}
+     * @param {!odf.Formatting.StyleData} overrides
+     * @return {!odf.Formatting.StyleData}
      */
     this.createDerivedStyleObject = function(parentStyleName, family, overrides) {
         var originalStyleElement = /**@type{!Element}*/(getStyleElement(parentStyleName, family)),
