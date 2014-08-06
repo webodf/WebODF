@@ -39,11 +39,11 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         CACHE_STEP_SIZE = 5;
 
     function roundDown(step) {
-        return step === ops.OdtStepsTranslator.PREVIOUS_STEP;
+        return step === core.StepDirection.PREVIOUS;
     }
 
     function roundUp(step) {
-        return step === ops.OdtStepsTranslator.NEXT_STEP;
+        return step === core.StepDirection.NEXT;
     }
 
     /**

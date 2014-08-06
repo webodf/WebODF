@@ -36,7 +36,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         testarea,
         inputMemberId = "Joe",
         /**@const*/
-        PREVIOUS = ops.OdtStepsTranslator.PREVIOUS_STEP,
+        PREVIOUS = core.StepDirection.PREVIOUS,
         prefixToNamespace = {
             fo: odf.Namespaces.namespaceMap.fo,
             text: odf.Namespaces.namespaceMap.text,

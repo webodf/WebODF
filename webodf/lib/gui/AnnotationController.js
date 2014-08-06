@@ -39,7 +39,7 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
         eventNotifier = new core.EventNotifier([gui.AnnotationController.annotatableChanged]),
         odfUtils = new odf.OdfUtils(),
         /**@const*/
-        NEXT = ops.OdtStepsTranslator.NEXT_STEP;
+        NEXT = core.StepDirection.NEXT;
 
     /**
      * @return {undefined}

@@ -61,7 +61,7 @@ gui.TextController = function TextController(
         /** @const */
         textns = odf.Namespaces.textns,
         /**@const*/
-        NEXT = ops.OdtStepsTranslator.NEXT_STEP;
+        NEXT = core.StepDirection.NEXT;
 
     /**
      * @return {undefined}

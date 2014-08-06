@@ -58,7 +58,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         /**@const*/
         textns = odf.Namespaces.textns,
         /**@const*/
-        NEXT = ops.OdtStepsTranslator.NEXT_STEP,
+        NEXT = core.StepDirection.NEXT,
         /**@type{?odf.Formatting.StyleData}*/
         directCursorStyleProperties = null,
         // cached text settings

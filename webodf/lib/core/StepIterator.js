@@ -39,6 +39,8 @@ core.StepIterator = function StepIterator(filter, iterator) {
 
     var /**@const*/
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+        /**@const*/
+        NEXT = core.StepDirection.NEXT,
         cachedContainer,
         cachedOffset,
         cachedFilterResult;
@@ -139,7 +141,7 @@ core.StepIterator = function StepIterator(filter, iterator) {
      * @return {!boolean}
      */
     this.advanceStep = function(direction) {
-        return direction === core.StepDirection.NEXT ? nextStep() : previousStep();
+        return direction === NEXT ? nextStep() : previousStep();
     };
 
     /**

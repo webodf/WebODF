@@ -86,7 +86,7 @@ define("webodf/editor/EditorSession", [
             shadowCursor = new gui.ShadowCursor(odtDocument),
             sessionConstraints,
             /**@const*/
-            NEXT = ops.OdtStepsTranslator.NEXT_STEP;
+            NEXT = core.StepDirection.NEXT;
 
         /**
          * @return {Array.<!string>}

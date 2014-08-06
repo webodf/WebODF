@@ -72,7 +72,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         /**@const*/
         FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
         /**@const*/
-        NEXT = ops.OdtStepsTranslator.NEXT_STEP,
+        NEXT = core.StepDirection.NEXT,
         filter,
         /**@type{!ops.OdtStepsTranslator}*/
         stepsTranslator,
@@ -263,7 +263,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     /**
      * Rounds to the first step within the paragraph
-     * @param {!number} step
+     * @param {!core.StepDirection} step
      * @return {!boolean}
      */
     function roundUp(step) {
@@ -275,7 +275,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * the default is to round down to the previous step.
      * @param {!Node} node
      * @param {!number} offset
-     * @param {!number=} roundDirection Whether to round down to the previous step or round up to the next step
+     * @param {core.StepDirection=} roundDirection Whether to round down to the previous step or round up
+     * to the next step. The default value if unspecified is core.StepDirection.PREVIOUS
      * @return {!number}
      */
     this.convertDomPointToCursorStep = function (node, offset, roundDirection) {

@@ -189,12 +189,12 @@
     ],
     "ops.OdtDocumentTests": [
         "core.UnitTester",
+        "core.enums",
         "odf.Namespaces",
         "odf.OdfCanvas",
         "odf.OdfNodeFilter",
         "ops.OdtCursor",
         "ops.OdtDocument",
-        "ops.OdtStepsTranslator",
         "xmldom.LSSerializer",
         "xmldom.LSSerializerFilter"
     ],
@@ -203,19 +203,20 @@
         "core.PositionFilter",
         "core.PositionIterator",
         "core.UnitTester",
+        "core.enums",
         "odf.Namespaces",
         "ops.OdtStepsTranslator",
         "ops.TextPositionFilter"
     ],
     "ops.OperationTests": [
         "core.UnitTester",
+        "core.enums",
         "odf.Namespaces",
         "odf.OdfCanvas",
         "odf.OdfContainer",
         "ops.Document",
         "ops.Member",
         "ops.OdtDocument",
-        "ops.OdtStepsTranslator",
         "ops.OperationFactory",
         "xmldom.LSSerializer"
     ],

@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, gui, ops, odf*/
+/*global runtime, gui, ops, odf, core*/
 
 /**
  * Provides a method to paste text at the current cursor
@@ -43,7 +43,7 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         /**@const*/
         textns = odf.Namespaces.textns,
         /**@const*/
-        NEXT = ops.OdtStepsTranslator.NEXT_STEP;
+        NEXT = core.StepDirection.NEXT;
 
     /**
      * @return {undefined}
