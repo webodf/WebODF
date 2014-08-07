@@ -464,7 +464,9 @@ ops.OperationTests = function OperationTests(runner) {
                 setUp: function () {
                     var rootElement = t.odfContainer.rootElement,
                         doc = rootElement.ownerDocument,
-                        paddedElement = doc.getElementById("paddedByEmptyTextNodes");
+                        // Using doc.getElementById("paddedByEmptyTextNodes"); is blocked by firefox
+                        // being strict about attributes named "id" from a DTD it does not know
+                        paddedElement = doc.querySelector("*[id='paddedByEmptyTextNodes']");
 
                     paddedElement.insertBefore(doc.createTextNode(""), paddedElement.firstChild);
                     paddedElement.appendChild(doc.createTextNode(""));

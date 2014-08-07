@@ -1803,7 +1803,6 @@ var webodf = {};
     function addContent(path, content) {
         "use strict";
         content += "\n//# sourceURL=" + path;
-        content += "\n//@ sourceURL=" + path; // Chrome
         return content;
     }
     /**
