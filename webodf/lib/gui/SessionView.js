@@ -97,6 +97,16 @@ gui.SessionViewOptions = function () {
             blinkOnRangeSelect = configOption(viewOptions.caretBlinksOnRangeSelect, true);
 
         /**
+         * @param {!{memberId: !string, annotation: !Element}} info
+         * @return {undefined}
+         */
+        function onAnnotationAdded(info) {
+            if (info.memberId === localMemberId) {
+                odfCanvas.getViewport().scrollIntoView(info.annotation.getBoundingClientRect());
+            }
+        }
+
+        /**
          * @return {!HTMLStyleElement}
          */
         function newStyleSheet() {
@@ -473,6 +483,7 @@ gui.SessionViewOptions = function () {
          */
         this.destroy = function (callback) {
             var cleanup = [highlightRefreshTask.destroy, destroy];
+            odtDocument.unsubscribe(ops.OdtDocument.signalAnnotationAdded, onAnnotationAdded);
             core.Async.destroyAll(cleanup, callback);
         };
 
@@ -480,6 +491,7 @@ gui.SessionViewOptions = function () {
             odtDocument = session.getOdtDocument();
             odfCanvas = odtDocument.getOdfCanvas();
 
+            odtDocument.subscribe(ops.OdtDocument.signalAnnotationAdded, onAnnotationAdded);
             odtDocument.subscribe(ops.Document.signalMemberAdded, renderMemberData);
             odtDocument.subscribe(ops.Document.signalMemberUpdated, renderMemberData);
             odtDocument.subscribe(ops.Document.signalCursorAdded, onCursorAdded);

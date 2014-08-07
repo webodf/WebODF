@@ -174,6 +174,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         // Track this annotation
         odtDocument.getOdfCanvas().addAnnotation(annotation);
         odtDocument.fixCursorPositions();
+        odtDocument.emit(ops.OdtDocument.signalAnnotationAdded, { memberId: memberid, annotation: annotation });
 
         return true;
     };

@@ -64,7 +64,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             ops.OdtDocument.signalUndoStackChanged,
             ops.OdtDocument.signalStepsInserted,
             ops.OdtDocument.signalStepsRemoved,
-            ops.OdtDocument.signalMetadataUpdated
+            ops.OdtDocument.signalMetadataUpdated,
+            ops.OdtDocument.signalAnnotationAdded
         ]),
         /**@const*/
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
@@ -1004,5 +1005,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 /**@const*/ops.OdtDocument.signalStepsInserted = "steps/inserted";
 /**@const*/ops.OdtDocument.signalStepsRemoved = "steps/removed";
 /**@const*/ops.OdtDocument.signalMetadataUpdated = "metadata/updated";
+/**@const*/ops.OdtDocument.signalAnnotationAdded = "annotation/added";
 
 // vim:expandtab
