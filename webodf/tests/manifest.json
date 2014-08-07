@@ -189,6 +189,7 @@
     ],
     "ops.OdtDocumentTests": [
         "core.UnitTester",
+        "core.enums",
         "odf.Namespaces",
         "odf.OdfCanvas",
         "odf.OdfNodeFilter",
@@ -202,12 +203,14 @@
         "core.PositionFilter",
         "core.PositionIterator",
         "core.UnitTester",
+        "core.enums",
         "odf.Namespaces",
         "ops.OdtStepsTranslator",
         "ops.TextPositionFilter"
     ],
     "ops.OperationTests": [
         "core.UnitTester",
+        "core.enums",
         "odf.Namespaces",
         "odf.OdfCanvas",
         "odf.OdfContainer",

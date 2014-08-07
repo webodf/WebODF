@@ -26,17 +26,6 @@
 
 (function () {
     "use strict";
-    var
-        /**
-         * @const
-         * @type {!number}
-         */
-        PREVIOUS_STEP = 0,
-        /**
-         * @const
-         * @type {!number}
-         */
-        NEXT_STEP = 1;
 
     /**
      *
@@ -55,7 +44,11 @@
             /**@type{!core.PositionIterator}*/
             iterator,
             /**@const*/
-            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT;
+            FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
+            /**@const*/
+            PREVIOUS = core.StepDirection.PREVIOUS,
+            /**@const*/
+            NEXT = core.StepDirection.NEXT;
 
         /**
          * Update the steps cache based on the current iterator position. This can either add new
@@ -163,7 +156,7 @@
         /**
          * Uses the provided delegate to choose between rounding up or rounding down to the nearest step.
          * @param {!core.PositionIterator} iterator
-         * @param {function(!number, !Node, !number):boolean=} roundDirection
+         * @param {function(!core.StepDirection, !Node, !number):boolean=} roundDirection
          * @return {!boolean} Returns true if an accepted position is found, otherwise returns false.
          */
         function roundToPreferredStep(iterator, roundDirection) {
@@ -173,7 +166,7 @@
 
             while (iterator.previousPosition()) {
                 if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                    if (roundDirection(PREVIOUS_STEP, iterator.container(), iterator.unfilteredDomOffset())) {
+                    if (roundDirection(PREVIOUS, iterator.container(), iterator.unfilteredDomOffset())) {
                         return true;
                     }
                     break;
@@ -182,7 +175,7 @@
 
             while (iterator.nextPosition()) {
                 if (filter.acceptPosition(iterator) === FILTER_ACCEPT) {
-                    if (roundDirection(NEXT_STEP, iterator.container(), iterator.unfilteredDomOffset())) {
+                    if (roundDirection(NEXT, iterator.container(), iterator.unfilteredDomOffset())) {
                         return true;
                     }
                     break;
@@ -200,7 +193,7 @@
          * behaviour is to round down.
          * @param {!Node} node
          * @param {!number} offset
-         * @param {function(!number, !Node, !number):!boolean=} roundDirection
+         * @param {function(!core.StepDirection, !Node, !number):!boolean=} roundDirection
          * @return {!number}
          */
         this.convertDomPointToSteps = function (node, offset, roundDirection) {
@@ -301,16 +294,4 @@
         }
         init();
     };
-
-    /**
-     * @const
-     * @type {!number}
-     */
-    ops.OdtStepsTranslator.PREVIOUS_STEP = PREVIOUS_STEP;
-
-    /**
-     * @const
-     * @type {!number}
-     */
-    ops.OdtStepsTranslator.NEXT_STEP = NEXT_STEP;
 }());

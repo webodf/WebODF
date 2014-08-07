@@ -166,7 +166,7 @@ ops.OperationTests = function OperationTests(runner) {
     function verifyStepsCache() {
         var rootNode = t.odtDocument.getRootNode();
         // Asking for the maximum available step will cause the cache to reverify itself completely
-        t.odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length);
+        t.odtDocument.convertDomPointToCursorStep(rootNode, rootNode.childNodes.length, core.StepDirection.PREVIOUS);
     }
 
     function parseTest(name, node) {

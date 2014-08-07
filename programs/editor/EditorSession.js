@@ -84,7 +84,9 @@ define("webodf/editor/EditorSession", [
                 EditorSession.signalParagraphStyleModified,
                 EditorSession.signalUndoStackChanged]),
             shadowCursor = new gui.ShadowCursor(odtDocument),
-            sessionConstraints;
+            sessionConstraints,
+            /**@const*/
+            NEXT = core.StepDirection.NEXT;
 
         /**
          * @return {Array.<!string>}
@@ -299,15 +301,6 @@ define("webodf/editor/EditorSession", [
         };
 
         /**
-         * Round the step up to the next step
-         * @param {!number} step
-         * @return {!boolean}
-         */
-        function roundUp(step) {
-            return step === ops.OdtStepsTranslator.NEXT_STEP;
-        }
-
-        /**
          * Applies the paragraph style with the given
          * style name to all the paragraphs within
          * the cursor selection.
@@ -320,7 +313,7 @@ define("webodf/editor/EditorSession", [
                 opQueue = [];
 
             paragraphs.forEach(function (paragraph) {
-                var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
+                var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, NEXT),
                     paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
                     opSetParagraphStyle;
 

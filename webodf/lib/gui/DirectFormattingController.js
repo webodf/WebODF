@@ -57,6 +57,8 @@ gui.DirectFormattingController = function DirectFormattingController(
         ]),
         /**@const*/
         textns = odf.Namespaces.textns,
+        /**@const*/
+        NEXT = core.StepDirection.NEXT,
         /**@type{?odf.Formatting.StyleData}*/
         directCursorStyleProperties = null,
         // cached text settings
@@ -514,15 +516,6 @@ gui.DirectFormattingController = function DirectFormattingController(
     };
 
     /**
-     * Round the step up to the next step
-     * @param {!number} step
-     * @return {!boolean}
-     */
-    function roundUp(step) {
-        return step === ops.OdtStepsTranslator.NEXT_STEP;
-    }
-
-    /**
      * @param {!Object.<string,string>} obj
      * @param {string} key
      * @return {string|undefined}
@@ -549,7 +542,7 @@ gui.DirectFormattingController = function DirectFormattingController(
             defaultStyleName;
 
         paragraphs.forEach(function (paragraph) {
-            var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, roundUp),
+            var paragraphStartPoint = odtDocument.convertDomPointToCursorStep(paragraph, 0, NEXT),
                 paragraphStyleName = paragraph.getAttributeNS(odf.Namespaces.textns, "style-name"),
                 /**@type{string|undefined}*/
                 newParagraphStyleName,

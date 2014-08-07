@@ -71,6 +71,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
         /**@const*/
         FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT,
+        /**@const*/
+        NEXT = core.StepDirection.NEXT,
         filter,
         /**@type{!ops.OdtStepsTranslator}*/
         stepsTranslator,
@@ -260,15 +262,30 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
+     * Rounds to the first step within the paragraph
+     * @param {!core.StepDirection} step
+     * @return {!boolean}
+     */
+    function roundUp(step) {
+        return step === NEXT;
+    }
+
+    /**
+     * Converts a DOM node and offset pair to a cursor step. If a rounding direction is not supplied then
+     * the default is to round down to the previous step.
      * @param {!Node} node
      * @param {!number} offset
-     * @param {function(!number, !Node, !number):!boolean=} roundDirection if the node & offset
-     * is not in an accepted location, this delegate is used to choose between rounding up or
-     * rounding down to the nearest step. If not provided, the default behaviour is to round down.
+     * @param {core.StepDirection=} roundDirection Whether to round down to the previous step or round up
+     * to the next step. The default value if unspecified is core.StepDirection.PREVIOUS
      * @return {!number}
      */
     this.convertDomPointToCursorStep = function (node, offset, roundDirection) {
-        return stepsTranslator.convertDomPointToSteps(node, offset, roundDirection);
+        var roundingFunc;
+        if(roundDirection === NEXT) {
+            roundingFunc = roundUp;
+        }
+
+        return stepsTranslator.convertDomPointToSteps(node, offset, roundingFunc);
     };
 
     /**

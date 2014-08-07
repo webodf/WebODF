@@ -372,6 +372,7 @@
     ],
     "ops.OdtStepsTranslator": [
         "core.PositionFilter",
+        "core.enums",
         "odf.OdfUtils",
         "ops.StepsCache"
     ],

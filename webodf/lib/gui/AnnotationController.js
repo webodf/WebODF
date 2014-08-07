@@ -37,7 +37,9 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
     var odtDocument = session.getOdtDocument(),
         isAnnotatable = false,
         eventNotifier = new core.EventNotifier([gui.AnnotationController.annotatableChanged]),
-        odfUtils = new odf.OdfUtils();
+        odfUtils = new odf.OdfUtils(),
+        /**@const*/
+        NEXT = core.StepDirection.NEXT;
 
     /**
      * @return {undefined}
@@ -134,9 +136,8 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
             }
         }
 
-        // (annotationNode, 0) will report as the step just before the first step in the annotation node
-        // Add 1 to this to actually get *within* the annotation
-        startStep = odtDocument.convertDomPointToCursorStep(annotationNode, 0) + 1;
+        // round up to get the first step within the annotation node
+        startStep = odtDocument.convertDomPointToCursorStep(annotationNode, 0, NEXT);
         // Will report the last walkable step within the annotation
         endStep = odtDocument.convertDomPointToCursorStep(annotationNode, annotationNode.childNodes.length);
 
