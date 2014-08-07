@@ -62,7 +62,6 @@
         "ops.Session"
     ],
     "gui.AnnotationViewManager": [
-        "gui.Viewport",
         "odf.OdfContainer",
         "odf.OdfUtils"
     ],

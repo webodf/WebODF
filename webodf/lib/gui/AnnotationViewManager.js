@@ -46,11 +46,6 @@ gui.AnnotatableCanvas.prototype.getZoomLevel = function () {"use strict"; };
  * @return {Element}
  */
 gui.AnnotatableCanvas.prototype.getSizer = function () {"use strict"; };
-
-/**
- * @return {!gui.Viewport}
- */
-gui.AnnotatableCanvas.prototype.getViewport = function () {"use strict"; };
 /*jslint emptyblock:false*/
 
 /**
@@ -80,7 +75,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     /**
      * Wraps an annotation with various HTML elements for styling, including connectors
      * @param {!odf.AnnotationElement} annotation
-     * @return {!Element}
+     * @return {undefined}
      */
     function wrapAnnotation(annotation) {
         var annotationWrapper = doc.createElement('div'),
@@ -107,7 +102,6 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
         annotationWrapper.appendChild(annotationNote);
         annotationWrapper.appendChild(connectorHorizontal);
         annotationWrapper.appendChild(connectorAngular);
-        return annotationNote;
     }
 
     /**
@@ -349,11 +343,9 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     /**
      * Adds an annotation to track, and wraps and highlights it
      * @param {!odf.AnnotationElement} annotation
-     * @param {!boolean=} scrollIntoView Scroll the annotation note into view after creation
      * @return {undefined}
      */
-    function addAnnotation(annotation, scrollIntoView) {
-        var annotationNote;
+    function addAnnotation(annotation) {
         showAnnotationsPane(true);
 
         // TODO: make use of the fact that current list is already sorted
@@ -362,14 +354,11 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
 
         sortAnnotations();
 
-        annotationNote = wrapAnnotation(annotation);
+        wrapAnnotation(annotation);
         if (annotation.annotationEndElement) {
             highlightAnnotation(annotation);
         }
         rerenderAnnotations();
-        if (scrollIntoView === true) {
-            canvas.getViewport().scrollIntoView(annotationNote.getBoundingClientRect());
-        }
     }
     this.addAnnotation = addAnnotation;
 
