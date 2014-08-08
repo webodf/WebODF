@@ -41,8 +41,8 @@ gui.CaretManager = function CaretManager(sessionController, viewport) {
     var /**@type{!Object.<string,!gui.Caret>}*/
         carets = {},
         window = runtime.getWindow(),
-        ensureCaretVisibleTimeoutId,
-        scrollIntoViewScheduled = false;
+        odtDocument = sessionController.getSession().getOdtDocument(),
+        eventManager = sessionController.getEventManager();
 
     /**
      * @param {!string} memberId
@@ -90,101 +90,22 @@ gui.CaretManager = function CaretManager(sessionController, viewport) {
             // triggered. This ensures the caret can't receive any new events once destroy has been invoked
             delete carets[memberId];
             if (memberId === sessionController.getInputMemberId()) {
-                sessionController.getEventManager().unsubscribe("compositionupdate", caret.handleUpdate);
-                sessionController.getEventManager().unsubscribe("compositionend", caret.handleUpdate);
+                odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, caret.ensureVisible);
+                odtDocument.unsubscribe(ops.Document.signalCursorMoved, caret.refreshCursorBlinking);
+
+                eventManager.unsubscribe("compositionupdate", caret.handleUpdate);
+                eventManager.unsubscribe("compositionend", caret.handleUpdate);
+                eventManager.unsubscribe("focus", caret.setFocus);
+                eventManager.unsubscribe("blur", caret.removeFocus);
+
+                window.removeEventListener("focus", caret.show, false);
+                window.removeEventListener("blur", caret.hide, false);
+            } else {
+                odtDocument.unsubscribe(ops.OdtDocument.signalProcessingBatchEnd, caret.handleUpdate);
             }
             /*jslint emptyblock:true*/
             caret.destroy(function() {});
             /*jslint emptyblock:false*/
-        }
-    }
-
-    /**
-     * @param {!ops.OdtCursor} cursor
-     * @return {undefined}
-     */
-    function refreshLocalCaretBlinking(cursor) {
-        var caret, memberId = cursor.getMemberId();
-
-        if (memberId === sessionController.getInputMemberId()) {
-            caret = getCaret(memberId);
-            if (caret) {
-                caret.refreshCursorBlinking();
-            }
-        }
-    }
-
-    function executeEnsureCaretVisible() {
-        var caret = getCaret(sessionController.getInputMemberId());
-        scrollIntoViewScheduled = false;
-        if (caret) {
-            // Just in case CaretManager was destroyed whilst waiting for the timeout to elapse
-            caret.ensureVisible();
-        }
-    }
-
-    function scheduleCaretVisibilityCheck() {
-        var caret = getCaret(sessionController.getInputMemberId());
-        if (caret) {
-            caret.handleUpdate(); // This is really noticeable if delayed. Calculate the cursor size immediately
-            if (!scrollIntoViewScheduled) {
-                scrollIntoViewScheduled = true;
-                // Delay the actual scrolling just in case there are a batch of
-                // operations being performed. 50ms is close enough to "instant"
-                // that the user won't notice the delay here.
-                ensureCaretVisibleTimeoutId = runtime.setTimeout(executeEnsureCaretVisible, 50);
-            }
-        }
-    }
-
-    /**
-     * @param {!{memberId:string}} info
-     * @return {undefined}
-     */
-    function ensureLocalCaretVisible(info) {
-        if (info.memberId === sessionController.getInputMemberId()) {
-            // on member edit actions ensure visibility of cursor
-            scheduleCaretVisibilityCheck();
-        }
-    }
-
-    /**
-     * @return {undefined}
-     */
-    function focusLocalCaret() {
-        var caret = getCaret(sessionController.getInputMemberId());
-        if (caret) {
-            caret.setFocus();
-        }
-    }
-
-    /**
-     * @return {undefined}
-     */
-    function blurLocalCaret() {
-        var caret = getCaret(sessionController.getInputMemberId());
-        if (caret) {
-            caret.removeFocus();
-        }
-    }
-
-    /**
-     * @return {undefined}
-     */
-    function showLocalCaret() {
-        var caret = getCaret(sessionController.getInputMemberId());
-        if (caret) {
-            caret.show();
-        }
-    }
-
-    /**
-     * @return {undefined}
-     */
-    function hideLocalCaret() {
-        var caret = getCaret(sessionController.getInputMemberId());
-        if (caret) {
-            caret.hide();
         }
     }
 
@@ -196,23 +117,28 @@ gui.CaretManager = function CaretManager(sessionController, viewport) {
      */
     this.registerCursor = function (cursor, caretAvatarInitiallyVisible, blinkOnRangeSelect) {
         var memberid = cursor.getMemberId(),
-            caret = new gui.Caret(cursor, viewport, caretAvatarInitiallyVisible, blinkOnRangeSelect),
-            eventManager = sessionController.getEventManager();
+            caret = new gui.Caret(cursor, viewport, caretAvatarInitiallyVisible, blinkOnRangeSelect);
 
         carets[memberid] = caret;
 
         // if local input member, then let controller listen on caret span
         if (memberid === sessionController.getInputMemberId()) {
             runtime.log("Starting to track input on new cursor of " + memberid);
+            odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchEnd, caret.ensureVisible);
+            odtDocument.subscribe(ops.Document.signalCursorMoved, caret.refreshCursorBlinking);
 
-            // wire up the cursor update to caret visibility update
-            cursor.subscribe(ops.OdtCursor.signalCursorUpdated, scheduleCaretVisibilityCheck);
             eventManager.subscribe("compositionupdate", caret.handleUpdate);
             eventManager.subscribe("compositionend", caret.handleUpdate);
+            eventManager.subscribe("focus", caret.setFocus);
+            eventManager.subscribe("blur", caret.removeFocus);
+
+            window.addEventListener("focus", caret.show, false);
+            window.addEventListener("blur", caret.hide, false);
+
             // Add event trap as an overlay element to the caret
             caret.setOverlayElement(eventManager.getEventTrap());
         } else {
-            cursor.subscribe(ops.OdtCursor.signalCursorUpdated, caret.handleUpdate);
+            odtDocument.subscribe(ops.OdtDocument.signalProcessingBatchEnd, caret.handleUpdate);
         }
 
         return caret;
@@ -234,38 +160,17 @@ gui.CaretManager = function CaretManager(sessionController, viewport) {
      * @return {undefined}
      */
     this.destroy = function (callback) {
-        var odtDocument = sessionController.getSession().getOdtDocument(),
-            eventManager = sessionController.getEventManager(),
-            caretCleanup = getCarets().map(function(caret) { return caret.destroy; });
+        var caretCleanup = getCarets().map(function(caret) { return caret.destroy; });
 
         sessionController.getSelectionController().setCaretXPositionLocator(null);
-        runtime.clearTimeout(ensureCaretVisibleTimeoutId);
-        odtDocument.unsubscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
-        odtDocument.unsubscribe(ops.Document.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.unsubscribe(ops.Document.signalCursorRemoved, removeCaret);
-
-        eventManager.unsubscribe("focus", focusLocalCaret);
-        eventManager.unsubscribe("blur", blurLocalCaret);
-        window.removeEventListener("focus", showLocalCaret, false);
-        window.removeEventListener("blur", hideLocalCaret, false);
-
         carets = {};
         core.Async.destroyAll(caretCleanup, callback);
     };
 
     function init() {
-        var odtDocument = sessionController.getSession().getOdtDocument(),
-            eventManager = sessionController.getEventManager();
-
         sessionController.getSelectionController().setCaretXPositionLocator(getLocalCaretXOffsetPx);
-        odtDocument.subscribe(ops.OdtDocument.signalParagraphChanged, ensureLocalCaretVisible);
-        odtDocument.subscribe(ops.Document.signalCursorMoved, refreshLocalCaretBlinking);
         odtDocument.subscribe(ops.Document.signalCursorRemoved, removeCaret);
-
-        eventManager.subscribe("focus", focusLocalCaret);
-        eventManager.subscribe("blur", blurLocalCaret);
-        window.addEventListener("focus", showLocalCaret, false);
-        window.addEventListener("blur", hideLocalCaret, false);
     }
 
     init();
