@@ -286,18 +286,16 @@ gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRang
                 // this call will have no effect.
                 blinkTask.trigger();
             }
+        }
 
-            if (shouldUpdateCaretSize || shouldCheckCaretVisibility || hasStateChanged("visibility")) {
-                // Ensure the caret height and position are correct if the caret has just become visible,
-                // or is just about to be scrolled into view. This is necessary because client rectangles
-                // are not reported when an element is hidden, so the caret size is likely to be out of date
-                // when it is drawn
-                updateOverlayHeightAndPosition();
-            }
+        if (shouldUpdateCaretSize || shouldCheckCaretVisibility) {
+            // Update the caret size if explicitly requested, or if the caret is about to be scrolled into view.
+            updateOverlayHeightAndPosition();
+        }
 
-            if (shouldCheckCaretVisibility) {
-                viewport.scrollIntoView(caretElement.getBoundingClientRect());
-            }
+        if (state.isShown && shouldCheckCaretVisibility) {
+            // The caret can only scroll into view if it hasn't been explicitly hidden via the hide() function.
+            viewport.scrollIntoView(caretElement.getBoundingClientRect());
         }
 
         if (hasStateChanged("isFocused")) {
@@ -371,6 +369,9 @@ gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRang
         redrawTask.trigger();
     };
     /**
+     * Hide the caret from view. All requests to scroll into view will be
+     * ignored while the caret is hidden.
+     * 
      * @return {undefined}
      */
     this.hide = function () {
@@ -443,6 +444,10 @@ gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRang
      * completely visible, with a small margin around.
      * The view on the canvas is only scrolled as much as needed.
      * If the caret is already visible nothing will happen.
+     *
+     * If the caret has been hidden via the hide() function, no scrolling will
+     * occur when this function is called.
+     *
      * @return {undefined}
      */
     this.ensureVisible = function() {
