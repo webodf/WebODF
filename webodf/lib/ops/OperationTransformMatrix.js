@@ -1494,6 +1494,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "AddMember": {
             "AddStyle":             passUnchanged,
+            "ApplyDirectStyling":   passUnchanged,
             "InsertText":           passUnchanged,
             "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
@@ -1527,10 +1528,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "MergeParagraph":       transformApplyDirectStylingMergeParagraph,
             "MoveCursor":           passUnchanged,
             "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           transformApplyDirectStylingRemoveText,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       transformApplyDirectStylingSplitParagraph,
+            "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
         },
