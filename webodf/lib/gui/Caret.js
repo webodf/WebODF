@@ -122,6 +122,8 @@ gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRang
             useLeftEdge = false,
             width = 0;
 
+        // Hide the caret sizer if it was previously active. This is only a fallback if an adjacent step can't be found.
+        node.removeAttributeNS(cursorns, "caret-sizer-active");
         if (node.getClientRects().length > 0) {
             // If the cursor is visible, use that as the caret location.
             // The most common reason for the cursor to be visible is because the user is entering some text
@@ -319,23 +321,6 @@ gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRang
      */
     this.handleUpdate = function() {
         shouldUpdateCaretSize = true;
-        if (state.visibility !== "hidden") {
-            // There are significant performance costs with calculating the caret size, so still
-            // want to avoid computing this until all ops have been performed.
-            // However, if the caret size is wildly incorrect for it's new position after an update
-            // (e.g., caret moving from beside an image to beside text), the caret will be user visible
-            // before the render occurs, and results in a large caret momentarily flashing before shrinking
-            // to an appropriate size.
-            // To prevent this flicker, we hide the caret until it is redrawn, as an absent caret is far less
-            // noticeable than an oversized one.
-            state.visibility = "hidden";
-            caretElement.style.visibility = "hidden";
-
-            // Remove the cursor visibility override. This prevents word-wrapping from occurring
-            // as a result of the cursor being incorrectly visible. Will be re-shown if necessary
-            // when the caret is rendered
-            cursor.getNode().removeAttributeNS(cursorns, "caret-sizer-active");
-        }
         redrawTask.trigger();
     };
 
