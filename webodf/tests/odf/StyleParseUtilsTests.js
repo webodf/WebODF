@@ -45,8 +45,6 @@ odf.StyleParseUtilsTests = function StyleParseUtilsTests(runner) {
     }
 
     function testParseLength() {
-        t.styleParseUtils = new odf.StyleParseUtils();
-
         doTestParseLength(null,        undefined);
         doTestParseLength(undefined,   undefined);
         doTestParseLength("very long", undefined);
@@ -78,15 +76,47 @@ odf.StyleParseUtilsTests = function StyleParseUtilsTests(runner) {
         doTestParseLength("0pc", 0);
     }
 
+    function parseAttributeList_IgnoresLeadingAndTrailingSpace() {
+        t.result = t.styleParseUtils.parseAttributeList("    a b c    ");
+        r.shouldBe(t, "t.result", "['a', 'b', 'c']");
+    }
+
+    function parseAttributeList_CollapsesExcessiveSpace() {
+        t.result = t.styleParseUtils.parseAttributeList("   a   bc def    ");
+        r.shouldBe(t, "t.result", "['a', 'bc', 'def']");
+    }
+
+    function parseAttributeList_WhenInputIsUndefined_ReturnsEmptyArray() {
+        t.result = t.styleParseUtils.parseAttributeList(null);
+        r.shouldBe(t, "t.result", "[]");
+
+        t.result = t.styleParseUtils.parseAttributeList(undefined);
+        r.shouldBe(t, "t.result", "[]");
+    }
+
+    function parseAttributeList_WhenInputIsBlankString_ReturnsEmptyArray() {
+        t.result = t.styleParseUtils.parseAttributeList("");
+        r.shouldBe(t, "t.result", "[]");
+
+        t.result = t.styleParseUtils.parseAttributeList("   ");
+        r.shouldBe(t, "t.result", "[]");
+    }
+
     this.setUp = function () {
-        t = {};
+        t = {
+            styleParseUtils: new odf.StyleParseUtils()
+        };
     };
     this.tearDown = function () {
         t = {};
     };
     this.tests = function () {
         return r.name([
-            testParseLength
+            testParseLength,
+            parseAttributeList_IgnoresLeadingAndTrailingSpace,
+            parseAttributeList_CollapsesExcessiveSpace,
+            parseAttributeList_WhenInputIsUndefined_ReturnsEmptyArray,
+            parseAttributeList_WhenInputIsBlankString_ReturnsEmptyArray
         ]);
     };
     this.asyncTests = function () {

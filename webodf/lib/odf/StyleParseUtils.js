@@ -182,4 +182,25 @@ odf.StyleParseUtils = function () {
         return e;
     }
     this.getPropertiesElement = getPropertiesElement;
+
+
+    /**
+     * Split a space-separated attribute list into it's list items. Ignores leading & trailing
+     * whitespace, and collapses excessive internal whitespace. If the input text is null, undefined
+     * or pure whitespace, an empty array will be returned.
+     *
+     * @param {?string|undefined} text
+     * @return {!Array.<!string>}
+     */
+    /*jslint regexp: true*/
+    function parseAttributeList(text) {
+        if (text) {
+            text = text.replace(/^\s*(.*?)\s*$/g, "$1"); // Trim leading + trailing whitespace
+        }
+        // Calling split on an empty string returns a [""]. Avoid this by only attempting to split if the
+        // string is non-zero-length
+        return text && text.length > 0 ? text.split(/\s+/) : [];
+    }
+    /*jslint regexp: false*/
+    this.parseAttributeList = parseAttributeList;
 };

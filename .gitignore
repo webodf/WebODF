@@ -35,5 +35,4 @@ fontFaceDeclsTest.odt
 test.odt
 simple.odt
 simpleFrame.odt
-webodf/tests/label-alignment-list.odt
-webodf/tests/label-width-and-position-list.odt
+webodf/tests/*.odt

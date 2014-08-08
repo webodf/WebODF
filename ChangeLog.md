@@ -4,7 +4,8 @@
 
 ### Improvements
 
-* Add support for double line-through in Firefox (Chrome/Safari + IE don't support this feature) ([#755](https://github.com/kogmbh/WebODF/pull/755))
+* Add support for double line-through in Firefox (Chrome/Safari + IE don't support this feature) ([#758](https://github.com/kogmbh/WebODF/pull/758))
+* Add support for subscript & superscript ([#755](https://github.com/kogmbh/WebODF/pull/755))
 
 ### Fixes
 

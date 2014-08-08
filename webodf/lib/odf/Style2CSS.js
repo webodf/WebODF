@@ -58,6 +58,7 @@ odf.Style2CSS = function Style2CSS() {
          * @type {!string}*/
         webodfhelperns = "urn:webodf:names:helper",
         domUtils = new core.DomUtils(),
+        styleParseUtils = new odf.StyleParseUtils(),
 
         /**@const
            @type{!Object.<string,string>}*/
@@ -397,17 +398,42 @@ odf.Style2CSS = function Style2CSS() {
         parentStyleNode = xpath.getODFElementsWithXPath(/**@type{!Element}*/(odfRoot), xp, odf.Namespaces.lookupNamespaceURI)[0];
         return parentStyleNode;
     }
+
+    /**
+     * Parse the style:text-position property
+     * http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1420212_253892949
+     *
+     * Examples:
+     * "sub"
+     * "super 20%"
+     * "10% 20%"
+     * "-15% 50%"
+     *
+     * @param {!string} position
+     * @return {!{verticalTextPosition: !string, fontHeight: (!string|undefined)}}
+     */
+    function parseTextPosition(position) {
+        var parts = styleParseUtils.parseAttributeList(position);
+        return {
+            verticalTextPosition: parts[0],
+            fontHeight: parts[1]
+        };
+    }
     /**
      * @param {!Element} props
      * @return {!string}
      */
     function getTextProperties(props) {
-        var rule = '', fontName, fontSize, value,
+        var rule = '',
+            fontName,
+            fontSize,
+            value,
             textDecorationLine = '',
             textDecorationStyle = '',
+            textPosition,
             fontSizeRule = '',
             sizeMultiplier = 1,
-            parentStyle;
+            textFamilyStyleNode;
 
         rule += applySimpleMapping(props, textPropertySimpleMapping);
 
@@ -453,35 +479,41 @@ odf.Style2CSS = function Style2CSS() {
             rule += 'font-family: ' + (value || fontName) + ';';
         }
 
-        parentStyle = /**@type{!Element}*/(props.parentNode);
-        fontSize = getFontSize(parentStyle);
-        // This is actually the font size of the current style.
-        if (!fontSize) {
-            return rule;
-        }
-
-        while (parentStyle) {
-            fontSize = getFontSize(parentStyle);
-            if (fontSize) {
-                // If the current style's font size is a non-% value, then apply the multiplier to get the child style (with the %)'s
-                // actual font size. And now we can stop crawling up the style ancestry since we have a concrete font size.
-                if (fontSize.unit !== '%') {
-                    fontSizeRule = 'font-size: ' + (fontSize.value * sizeMultiplier) + fontSize.unit + ';';
-                    break;
-                }
-                // If we got a % font size for the current style, then update the multiplier with it's 'normalized' multiplier
-                sizeMultiplier *= (fontSize.value / 100);
+        value = props.getAttributeNS(stylens, 'text-position');
+        if (value) {
+            textPosition = parseTextPosition(value);
+            rule += 'vertical-align: ' + textPosition.verticalTextPosition + '\n; ';
+            if (textPosition.fontHeight) {
+                sizeMultiplier = parseFloat(textPosition.fontHeight) / 100;
             }
-            // Crawl up the style ancestry
-            parentStyle = getParentStyleNode(parentStyle);
         }
 
-        // If there was nothing in the ancestry that specified a concrete font size, just apply the multiplier onto the page's default font size.
-        if (!fontSizeRule) {
-            fontSizeRule = 'font-size: ' + parseFloat(defaultFontSize) * sizeMultiplier + cssUnits.getUnits(defaultFontSize) + ';';
+        if (props.hasAttributeNS(fons, "font-size") || sizeMultiplier !== 1) {
+            // This is actually the font size of the current style.
+            textFamilyStyleNode = /**@type{!Element}*/(props.parentNode);
+            while (textFamilyStyleNode) {
+                fontSize = getFontSize(textFamilyStyleNode);
+                if (fontSize) {
+                    // If the current style's font size is a non-% value, then apply the multiplier to get the child style (with the %)'s
+                    // actual font size. And now we can stop crawling up the style ancestry since we have a concrete font size.
+                    if (fontSize.unit !== '%') {
+                        fontSizeRule = 'font-size: ' + (fontSize.value * sizeMultiplier) + fontSize.unit + ';';
+                        break;
+                    }
+                    // If we got a % font size for the current style, then update the multiplier with it's 'normalized' multiplier
+                    sizeMultiplier *= (fontSize.value / 100);
+                }
+                // Crawl up the style ancestry
+                textFamilyStyleNode = getParentStyleNode(textFamilyStyleNode);
+            }
+            // If there was nothing in the ancestry that specified a concrete font size, just apply the multiplier onto the page's default font size.
+            if (!fontSizeRule) {
+                fontSizeRule = 'font-size: ' + parseFloat(defaultFontSize) * sizeMultiplier + cssUnits.getUnits(defaultFontSize) + ';';
+            }
         }
 
         rule += fontSizeRule;
+
         return rule;
     }
     /**
