@@ -402,7 +402,9 @@ odf.Style2CSS = function Style2CSS() {
      * @return {!string}
      */
     function getTextProperties(props) {
-        var rule = '', fontName, fontSize, value, textDecoration = '',
+        var rule = '', fontName, fontSize, value,
+            textDecorationLine = '',
+            textDecorationStyle = '',
             fontSizeRule = '',
             sizeMultiplier = 1,
             parentStyle;
@@ -411,16 +413,36 @@ odf.Style2CSS = function Style2CSS() {
 
         value = props.getAttributeNS(stylens, 'text-underline-style');
         if (value === 'solid') {
-            textDecoration += ' underline';
+            textDecorationLine += ' underline';
         }
         value = props.getAttributeNS(stylens, 'text-line-through-style');
         if (value === 'solid') {
-            textDecoration += ' line-through';
+            textDecorationLine += ' line-through';
         }
 
-        if (textDecoration.length) {
-            textDecoration = 'text-decoration:' + textDecoration + ';';
-            rule += textDecoration;
+        if (textDecorationLine.length) {
+            // CSS2
+            rule += 'text-decoration:' + textDecorationLine + ';\n';
+            // CSS3 text-decoration shorthand
+            rule += 'text-decoration-line:' + textDecorationLine + ';\n';
+            // CSS3 text-decoration shorthand - FF
+            rule += '-moz-text-decoration-line:' + textDecorationLine + ';\n';
+        }
+
+        value = props.getAttributeNS(stylens, 'text-line-through-type');
+        switch (value) {
+            case 'double':
+                textDecorationStyle += ' double';
+                break;
+            case 'single':
+                textDecorationStyle += ' single';
+                break;
+        }
+        if (textDecorationStyle) {
+            // CSS3
+            rule += 'text-decoration-style:' + textDecorationStyle + ';\n';
+            // CSS3 text-decoration shorthand - FF
+            rule += '-moz-text-decoration-style:' + textDecorationStyle + ';\n';
         }
 
         fontName = props.getAttributeNS(stylens, 'font-name')

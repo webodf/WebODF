@@ -2,6 +2,10 @@
 
 ## WebODF
 
+### Improvements
+
+* Add support for double line-through in Firefox (Chrome/Safari + IE don't support this feature) ([#755](https://github.com/kogmbh/WebODF/pull/755))
+
 ### Fixes
 
 * Fixed occasional crash when splitting a paragraph ([#723](https://github.com/kogmbh/WebODF/issues/723))
