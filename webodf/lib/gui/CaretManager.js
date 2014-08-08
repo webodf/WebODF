@@ -80,26 +80,6 @@ gui.CaretManager = function CaretManager(sessionController, viewport) {
     }
 
     /**
-     * @param {!string} memberId
-     * @return {undefined}
-     */
-    function removeCaret(memberId) {
-        var caret = carets[memberId];
-        if (caret) {
-            // Remove the caret before destroying it in case the destroy function causes new window/webodf events to be
-            // triggered. This ensures the caret can't receive any new events once destroy has been invoked
-            delete carets[memberId];
-            if (memberId === sessionController.getInputMemberId()) {
-                sessionController.getEventManager().unsubscribe("compositionupdate", caret.handleUpdate);
-                sessionController.getEventManager().unsubscribe("compositionend", caret.handleUpdate);
-            }
-            /*jslint emptyblock:true*/
-            caret.destroy(function() {});
-            /*jslint emptyblock:false*/
-        }
-    }
-
-    /**
      * @param {!ops.OdtCursor} cursor
      * @return {undefined}
      */
@@ -185,6 +165,26 @@ gui.CaretManager = function CaretManager(sessionController, viewport) {
         var caret = getCaret(sessionController.getInputMemberId());
         if (caret) {
             caret.hide();
+        }
+    }
+
+    /**
+     * @param {!string} memberId
+     * @return {undefined}
+     */
+    function removeCaret(memberId) {
+        var caret = carets[memberId];
+        if (caret) {
+            // Remove the caret before destroying it in case the destroy function causes new window/webodf events to be
+            // triggered. This ensures the caret can't receive any new events once destroy has been invoked
+            delete carets[memberId];
+            if (memberId === sessionController.getInputMemberId()) {
+                sessionController.getEventManager().unsubscribe("compositionupdate", caret.handleUpdate);
+                sessionController.getEventManager().unsubscribe("compositionend", caret.handleUpdate);
+            }
+            /*jslint emptyblock:true*/
+            caret.destroy(function() {});
+            /*jslint emptyblock:false*/
         }
     }
 
