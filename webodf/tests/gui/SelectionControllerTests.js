@@ -549,6 +549,16 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         t.newPosition = getCursorPosition().position;
         r.shouldBe(t, "t.newPosition", "3");
     }
+    function testCountStepsToLineBoundary_Forward_NonTextWrapPoint() {
+        // spans actually display as blocks to force the browser to put each text block on it's own line
+        createOdtDocument("<text:p>ABC<text:span display='block'>DEF</text:span></text:p>");
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorToLineEnd();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
+    }
     function testCountStepsToLineBoundary_Backward_FromParagraphStart() {
         createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
         setCursorPosition(0);
@@ -629,6 +639,17 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
 
         t.newPosition = getCursorPosition().position;
         r.shouldBe(t, "t.newPosition", "4");
+    }
+
+    function testCountStepsToLineBoundary_Backward_NonTextWrapPoint() {
+        // spans actually display as blocks to force the browser to put each text block on it's own line
+        createOdtDocument("<text:p>ABC<text:span display='block'>DEF</text:span></text:p>");
+        setCursorPosition(6);
+
+        t.selectionController.moveCursorToLineStart();
+
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
     }
 
     /**
@@ -731,6 +752,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='2.7'] { width: 2.7em; }\n"));
         stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='3'] { width: 3em; }\n"));
         stylesElement.appendChild(doc.createTextNode("text|p[paragraph-width='4'] { width: 4em; }\n"));
+        stylesElement.appendChild(doc.createTextNode("text|span[display='block'] { display: block; }\n"));
         doc.getElementsByTagName("head")[0].appendChild(stylesElement);
         t = {
             doc: testarea.ownerDocument,
@@ -793,6 +815,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             testCountStepsToLineBoundary_Forward_StartingAtSpace,
             testCountStepsToLineBoundary_Forward_EndingAtSpace,
             testCountStepsToLineBoundary_Forward_OverWrapping,
+            testCountStepsToLineBoundary_Forward_NonTextWrapPoint,
 
             testCountStepsToLineBoundary_Backward_FromParagraphStart,
             testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace,
@@ -802,6 +825,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             testCountStepsToLineBoundary_Backward_OverEmptyTextNodes,
             testCountStepsToLineBoundary_Backward_OverWrapping,
             testCountStepsToLineBoundary_Backward_OverWrapping2,
+            testCountStepsToLineBoundary_Backward_NonTextWrapPoint,
 
             testCountLinesStepsDown_FromParagraphStart,
             testCountLinesStepsDown_FromParagraphEnd,

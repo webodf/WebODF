@@ -108,18 +108,23 @@ gui.LineBoundaryScanner = function () {
      * @return {!boolean}
      */
     this.process = function(stepInfo, previousRect, nextRect) {
-        if (nextRect && isLineBoundary(/**@type{!core.SimpleClientRect}*/(nextRect))) {
-            // Can only detect line boundaries when the next rectangle is visible. An invisible next-rect
-            // indicates the next step does not have any visible content attached, so it's location on screen
-            // is impossible to determine accurately.
+        // Can only detect line boundaries when the next rectangle is visible. An invisible next-rect
+        // indicates the next step does not have any visible content attached, so it's location on screen
+        // is impossible to determine accurately.
+        var isOverLineBoundary = nextRect && isLineBoundary(/**@type{!core.SimpleClientRect}*/(nextRect));
+
+        if (previousRect && (!nextRect || isOverLineBoundary)) {
+            // Detect a possible line wrap point in one of two ways:
+            // 1. Going from a visible to an invisible rectangle. An invisible rectangle can indicate a collapsed
+            //      whitespace text node, or an invisible element that the browser may choose to wrap at.
+            // 2. A confirmed wrap point where the nextRect is visible and clearly not on the same line as the previous.
+            self.token = stepInfo.token;
+        }
+
+        if (isOverLineBoundary) {
             return true;
         }
 
-        if (previousRect && !nextRect) {
-            // Going from a visible rect to a non-visible rect indicates a possible wrap
-            // point. Store this as a likely step to return to.
-            self.token = stepInfo.token;
-        }
         // Grow the current line rectangle by the (now approved) previous rectangle. This allows the line height
         // to grow naturally.
         lineRect = growRect(lineRect, previousRect);
