@@ -559,6 +559,27 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         t.newPosition = getCursorPosition().position;
         r.shouldBe(t, "t.newPosition", "3");
     }
+    function testCountStepsToLineBoundary_Forward_NonWhitespaceWrap_Instability() {
+        // NOTE: This test is here to show the instability of the line detection at the end of
+        // a non-whitespace wrapped line. The behaviour is not particularly desirable, but there
+        // is no easy fix for this available.
+
+        // spans actually display as blocks to force the browser to put each text block on it's own line
+        createOdtDocument("<text:p>ABC<text:span display='block'>DEF</text:span></text:p>");
+        setCursorPosition(0);
+
+        t.selectionController.moveCursorToLineEnd();
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
+
+        t.selectionController.moveCursorToLineEnd();
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "4");
+
+        t.selectionController.moveCursorToLineEnd();
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "6");
+    }
     function testCountStepsToLineBoundary_Backward_FromParagraphStart() {
         createOdtDocument("<text:p>ABCD</text:p><text:p>FGHIJ</text:p>");
         setCursorPosition(0);
@@ -650,6 +671,28 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
 
         t.newPosition = getCursorPosition().position;
         r.shouldBe(t, "t.newPosition", "3");
+    }
+
+    function testCountStepsToLineBoundary_Backward_NonWhitespaceWrap_Instability() {
+        // NOTE: This test is here to show the instability of the line detection at the end of
+        // a non-whitespace wrapped line. The behaviour is not particularly desirable, but there
+        // is no easy fix for this available.
+
+        // spans actually display as blocks to force the browser to put each text block on it's own line
+        createOdtDocument("<text:p>ABC<text:span display='block'>DEF</text:span></text:p>");
+        setCursorPosition(6);
+
+        t.selectionController.moveCursorToLineStart();
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "3");
+
+        t.selectionController.moveCursorToLineStart();
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "2");
+
+        t.selectionController.moveCursorToLineStart();
+        t.newPosition = getCursorPosition().position;
+        r.shouldBe(t, "t.newPosition", "0");
     }
 
     /**
@@ -816,6 +859,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             testCountStepsToLineBoundary_Forward_EndingAtSpace,
             testCountStepsToLineBoundary_Forward_OverWrapping,
             testCountStepsToLineBoundary_Forward_NonTextWrapPoint,
+            testCountStepsToLineBoundary_Forward_NonWhitespaceWrap_Instability,
 
             testCountStepsToLineBoundary_Backward_FromParagraphStart,
             testCountStepsToLineBoundary_Backward_EndingAtWhiteSpace,
@@ -826,6 +870,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
             testCountStepsToLineBoundary_Backward_OverWrapping,
             testCountStepsToLineBoundary_Backward_OverWrapping2,
             testCountStepsToLineBoundary_Backward_NonTextWrapPoint,
+            testCountStepsToLineBoundary_Backward_NonWhitespaceWrap_Instability,
 
             testCountLinesStepsDown_FromParagraphStart,
             testCountLinesStepsDown_FromParagraphEnd,
