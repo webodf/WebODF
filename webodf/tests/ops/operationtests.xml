@@ -697,7 +697,7 @@
   </ops>
   <after><office:text><text:p/><text:p><c:cursor c:memberId="Alice"/>B</text:p></office:text></after>
  </test>
- <test name="Merge_CopesWithOddElements_AtParagraphBounds" isFailing="true">
+ <test name="Merge_CopesWithOddElements_AtParagraphBounds">
   <before><office:text><text:p/><text:p><text:hidden-text>hidden</text:hidden-text>B</text:p></office:text></before>
   <ops>
    <op optype="MergeParagraph" memberid="Alice" destinationStartPosition="0" sourceStartPosition="1"/>
