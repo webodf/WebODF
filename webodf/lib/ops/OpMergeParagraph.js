@@ -89,6 +89,33 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
     }
 
     /**
+     * Returns true if the specified node is insignificant whitespace
+     * @param {!Node} node
+     * @return {!boolean}
+     */
+    function isInsignificantWhitespace(node) {
+        var textNode,
+            badNodeDescription;
+        if (node.nodeType === Node.TEXT_NODE) {
+            textNode = /**@type{!Text}*/(node);
+            if (textNode.length === 0) {
+                // This is not a critical issue, but indicates an operation somewhere isn't correctly normalizing text nodes
+                // after manipulation of the DOM.
+                runtime.log("WARN: Empty text node found during merge operation");
+                return true;
+            }
+            if (odfUtils.isODFWhitespace(textNode.data) && odfUtils.isSignificantWhitespace(textNode, 0) === false) {
+                return true;
+            }
+            badNodeDescription = "#text";
+        } else {
+            badNodeDescription = (node.prefix ? (node.prefix + ":") : "") + node.localName;
+        }
+        runtime.log("WARN: Unexpected text element found near paragraph boundary [" + badNodeDescription + "]");
+        return false;
+    }
+
+    /**
      * Remove all the text nodes within the supplied range. These are expected to be insignificant whitespace only.
      * Assertions will be thrown if this is not the case.
      *
@@ -96,32 +123,19 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
      * @return {undefined}
      */
     function removeTextNodes(range) {
-        var textNodes;
+        var emptyTextNodes;
 
         if (range.collapsed) {
             return;
         }
 
         domUtils.splitBoundaries(range);
-        textNodes = odfUtils.getTextElements(range, false, true);
-        textNodes.forEach(function(node) {
-            var textNode = /**@type{!Text}*/(node);
-
-            runtime.assert(textNode.nodeType === Node.TEXT_NODE, "Expected node type 3 (Node.TEXT_NODE), found node type " + textNode.nodeType);
-            if (textNode.length > 0) {
-                runtime.assert(odfUtils.isODFWhitespace(textNode.data),
-                    "Non-whitespace node found between paragraph boundary and first or last step");
-
-                // Significant whitespace is only ever the first space char in a series of space.
-                // Therefore, only need to check the first character to ensure complete string is insignificant whitespace.
-                runtime.assert(odfUtils.isSignificantWhitespace(textNode, 0) === false,
-                    "Significant whitespace node found between paragraph boundary and first or last step");
-            } else {
-                // This is not a critical issue, but indicates an operation somewhere isn't correctly normalizing text nodes
-                // after manipulation of the DOM.
-                runtime.log("WARN: Empty text node found during merge operation");
-            }
-            textNode.parentNode.removeChild(textNode);
+        // getTextElements may return some unexpected text nodes if the step filters haven't correctly identified the
+        // first/last step in the paragraph. Rather than failing completely in this case, simply log the unexpected
+        // items and skip them.
+        emptyTextNodes = odfUtils.getTextElements(range, false, true).filter(isInsignificantWhitespace);
+        emptyTextNodes.forEach(function(node) {
+            node.parentNode.removeChild(node);
         });
     }
 
