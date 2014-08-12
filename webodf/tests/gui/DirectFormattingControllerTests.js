@@ -231,11 +231,20 @@ gui.DirectFormattingControllerTests = function DirectFormattingControllerTests(r
         r.shouldBe(t, "t.operations.shift()", "undefined");
     }
 
+    function createParagraphStyleOp_NoSelectedText_ReturnsEmptyArray() {
+        createOdtDocument("", "<text:p>a[</text:p><text:p>]</text:p>");
+
+        t.operations = t.formattingController.createParagraphStyleOps(1);
+
+        r.shouldBe(t, "t.operations.shift()", "undefined");
+    }
+
     this.tests = function () {
         return r.name([
             getSelectionInfo_ReportedStyleSummaryIncludesCursorStyling,
             createCursorStyleOp_UseCachedStyle_ReturnsSetOpForCachedStyle,
-            createParagraphStyleOp_OnLastStepInParagraph_CreatesParagraphStyleForNewParagraph
+            createParagraphStyleOp_OnLastStepInParagraph_CreatesParagraphStyleForNewParagraph,
+            createParagraphStyleOp_NoSelectedText_ReturnsEmptyArray
         ]);
     };
     this.asyncTests = function () {
