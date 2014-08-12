@@ -461,7 +461,7 @@
    </check>
   </layoutchecks>
  </test>
- 
+
  <test name="superscript">
   <input>
    <office:document-styles>
@@ -496,11 +496,11 @@
     <fontSize value="8px"/>
    </check>
    <check xpath="(.//text:span)[3]">
-    <verticalAlign value="30%"/>
+    <verticalAlign value="30%|3.9px"/>
     <fontSize value="10px"/>
    </check>
    <check xpath="(.//text:span)[4]">
-    <verticalAlign value="30%"/>
+    <verticalAlign value="30%|3px"/>
     <fontSize value="8px"/>
    </check>
    <check xpath="(.//text:span)[5]">
@@ -509,8 +509,7 @@
    </check>
   </layoutchecks>
  </test>
- 
- 
+
  <test name="subscript">
   <input>
    <office:document-styles>
@@ -541,7 +540,7 @@
     <fontSize value="8px"/>
    </check>
    <check xpath="(.//text:span)[3]">
-    <verticalAlign value="-30%"/>
+    <verticalAlign value="-30%|-3.9px"/>
     <fontSize value="10px"/>
    </check>
   </layoutchecks>
