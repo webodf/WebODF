@@ -466,13 +466,14 @@
   <input>
    <office:document-styles>
     <office:styles>
+      <style:default-style style:family="paragraph"><style:paragraph-properties fo:line-height="20px"/></style:default-style>
       <style:default-style style:family="text"><style:text-properties fo:font-size="10px"/></style:default-style>
     </office:styles>
     <office:automatic-styles>
      <style:style style:name="super" style:family="text"><style:text-properties style:text-position="super"/></style:style>
      <style:style style:name="superWithPercent" style:family="text"><style:text-properties style:text-position="super 80%"/></style:style>
-     <style:style style:name="superPercent" style:family="text"><style:text-properties style:text-position="30%"/></style:style>
-     <style:style style:name="superPercentWithPercent" style:family="text"><style:text-properties style:text-position="30% 80%"/></style:style>
+     <style:style style:name="superPercent" style:family="text"><style:text-properties style:text-position="50%"/></style:style>
+     <style:style style:name="superPercentWithPercent" style:family="text"><style:text-properties style:text-position="50% 80%"/></style:style>
      <style:style style:name="superWithFontSize" style:family="text"><style:text-properties fo:font-size="30px" style:text-position="super 50%"/></style:style>
     </office:automatic-styles>
    </office:document-styles>
@@ -496,11 +497,11 @@
     <fontSize value="8px"/>
    </check>
    <check xpath="(.//text:span)[3]">
-    <verticalAlign value="30%|3.9px"/>
+    <verticalAlign value="50%|10px"/>
     <fontSize value="10px"/>
    </check>
    <check xpath="(.//text:span)[4]">
-    <verticalAlign value="30%|3px"/>
+    <verticalAlign value="50%|10px"/>
     <fontSize value="8px"/>
    </check>
    <check xpath="(.//text:span)[5]">
@@ -514,12 +515,13 @@
   <input>
    <office:document-styles>
     <office:styles>
+      <style:default-style style:family="paragraph"><style:paragraph-properties fo:line-height="20px"/></style:default-style>
       <style:default-style style:family="text"><style:text-properties fo:font-size="10px"/></style:default-style>
     </office:styles>
     <office:automatic-styles>
      <style:style style:name="subscript" style:family="text"><style:text-properties style:text-position="sub"/></style:style>
      <style:style style:name="subscriptWithPercent" style:family="text"><style:text-properties style:text-position="sub 80%"/></style:style>
-     <style:style style:name="subscriptPercent" style:family="text"><style:text-properties style:text-position="-30%"/></style:style>
+     <style:style style:name="subscriptPercent" style:family="text"><style:text-properties style:text-position="-50%"/></style:style>
     </office:automatic-styles>
    </office:document-styles>
    <office:text>
@@ -540,7 +542,7 @@
     <fontSize value="8px"/>
    </check>
    <check xpath="(.//text:span)[3]">
-    <verticalAlign value="-30%|-3.9px"/>
+    <verticalAlign value="-50%|-10px"/>
     <fontSize value="10px"/>
    </check>
   </layoutchecks>
