@@ -430,7 +430,7 @@
     </office:styles>
     <office:automatic-styles>
      <style:style style:name="nosize" style:family="text"><style:text-properties/></style:style>
-     <style:style style:name="ptSize" style:family="text"><style:text-properties fo:font-size="20pt"/></style:style>
+     <style:style style:name="ptSize" style:family="text"><style:text-properties fo:font-size="20.25pt"/></style:style>
      <style:style style:name="pxSize" style:family="text"><style:text-properties fo:font-size="20px"/></style:style>
      <style:style style:name="percentSize" style:parent-style-name="percentSizeParent" style:family="text">
        <style:text-properties fo:font-size="50%"/>
