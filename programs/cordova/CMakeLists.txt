@@ -1,5 +1,8 @@
 
-set(CORDOVA_FILES WebODF/config.xml)
+configure_file(config.xml.in config.xml)
+configure_file(manifest.webapp.in manifest.webapp)
+
+#set(CORDOVA_FILES WebODF/config.xml)
 
 # install cordova in the top level node_modules directory
 set(CORDOVA ${CMAKE_BINARY_DIR}/node_modules/cordova/bin/cordova)
@@ -45,10 +48,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/www ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www
     COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/merges ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/config.xml ${CMAKE_CURRENT_BINARY_DIR}/WebODF/config.xml
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/config.xml ${CMAKE_CURRENT_BINARY_DIR}/WebODF
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/manifest.webapp ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges/firefoxos/manifest.webapp
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_BINARY_DIR}/webodf/webodf.js ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www/webodf.js
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/hooks/README.md
-            ${CMAKE_CURRENT_SOURCE_DIR}/config.xml
+            config.xml.in manifest.webapp.in
             webodf.js-target
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )

@@ -1,6 +1,6 @@
 {
     "name": "WebODF",
-    "version": "1.3.0",
+    "version": "@WEBODF_VERSION@",
     "description": "A viewer for OpenDocument Format files.",
     "launch_path": "/index.html",
     "developer": {
