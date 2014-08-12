@@ -52,6 +52,7 @@ gui.ImageController = function ImageController(
            @type{!string}*/
         textns = odf.Namespaces.textns,
         odtDocument = session.getOdtDocument(),
+        odfUtils = new odf.OdfUtils(),
         formatting = odtDocument.getFormatting(),
         eventNotifier = new core.EventNotifier([
             gui.HyperlinkController.enabledChanged
@@ -295,7 +296,7 @@ gui.ImageController = function ImageController(
             height: heightInPx
         };
         // TODO: resize the image to fit in a cell if paragraphElement is in a table-cell
-        paragraphElement = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
+        paragraphElement = odfUtils.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
         styleName = paragraphElement.getAttributeNS(textns, 'style-name');
         if (styleName) {
             // TODO cope with no paragraph style name being specified (i.e., use the default paragraph style)

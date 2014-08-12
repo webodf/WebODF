@@ -35,7 +35,8 @@ ops.OpInsertImage = function OpInsertImage() {
         drawns = odf.Namespaces.drawns,
         svgns = odf.Namespaces.svgns,
         textns = odf.Namespaces.textns,
-        xlinkns = odf.Namespaces.xlinkns;
+        xlinkns = odf.Namespaces.xlinkns,
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @param {!ops.OpInsertImage.InitSpec} data
@@ -91,7 +92,7 @@ ops.OpInsertImage = function OpInsertImage() {
         }
 
         textNode = domPosition.textNode;
-        paragraphElement = odtDocument.getParagraphElement(textNode);
+        paragraphElement = odfUtils.getParagraphElement(textNode);
         refNode = domPosition.offset !== textNode.length ?
             textNode.splitText(domPosition.offset) : textNode.nextSibling;
         frameElement = createFrameElement(odtDocument.getDOMDocument());

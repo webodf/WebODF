@@ -243,7 +243,7 @@ gui.TextController = function TextController(
             op,
             operations = [],
             styleOps,
-            originalParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(cursor.getNode())),
+            originalParagraph = /**@type{!Element}*/(odfUtils.getParagraphElement(cursor.getNode())),
             paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "";
 
         if (selection.length > 0) {
@@ -263,7 +263,7 @@ gui.TextController = function TextController(
         // disabled for now, because nowjs seems to revert the order of the ops, which does not work here TODO: grouping of ops
         /*
          if (isAtEndOfParagraph) {
-            paragraphNode = odtDocument.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
+            paragraphNode = odfUtils.getParagraphElement(odtDocument.getCursor(inputMemberId).getNode());
             nextStyleName = odtDocument.getFormatting().getParagraphStyleAttribute(styleName, odf.Namespaces.stylens, 'next-style-name');
 
             if (nextStyleName && nextStyleName !== styleName) {

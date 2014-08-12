@@ -435,14 +435,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
-     * @param {?Node} node
-     * @return {?Element}
-     */
-    function getParagraphElement(node) {
-        return odfUtils.getParagraphElement(node);
-    }
-
-    /**
      * @param {!string} styleName
      * @param {!string} styleFamily
      * @return {Element}
@@ -680,8 +672,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
     this.getParagraphStyleElement = getParagraphStyleElement;
 
-    this.getParagraphElement = getParagraphElement;
-
     /**
      * This method returns the style attributes for a given stylename, including all properties
      * inherited from any parent styles, and also the Default style in the family.
@@ -709,7 +699,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     function paragraphOrRoot(container, offset, root) {
         var node = container.childNodes.item(offset) || container,
-            paragraph = getParagraphElement(node);
+            paragraph = odfUtils.getParagraphElement(node);
         if (paragraph && domUtils.containsNode(root, paragraph)) {
             // Only return the paragraph if it is contained within the destination root
             return /**@type{!Node}*/(paragraph);

@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops, runtime*/
+/*global ops, odf, runtime*/
 
 /**
  * @constructor
@@ -38,7 +38,8 @@ ops.OpInsertTable = function OpInsertTable() {
         /**@const*/
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         /**@const*/
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @param {!ops.OpInsertTable.InitSpec} data
@@ -153,7 +154,7 @@ ops.OpInsertTable = function OpInsertTable() {
             tableNode = createTableNode(odtDocument.getDOMDocument());
             // For now assume the table should be inserted after the current paragraph
             // or failing that, as the first element in the root node
-            previousSibling = odtDocument.getParagraphElement(domPosition.textNode);
+            previousSibling = odfUtils.getParagraphElement(domPosition.textNode);
             rootNode.insertBefore(tableNode, previousSibling.nextSibling);
             // The parent table counts for 1 position, and 1 paragraph is added per cell
             odtDocument.emit(ops.OdtDocument.signalStepsInserted, {position: position});

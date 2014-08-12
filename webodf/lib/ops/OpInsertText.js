@@ -131,7 +131,7 @@ ops.OpInsertText = function OpInsertText() {
             previousNode = domPosition.textNode;
             nextNode = previousNode.nextSibling;
             parentElement = /**@type{!Element}*/(previousNode.parentNode);
-            paragraphElement = odtDocument.getParagraphElement(previousNode);
+            paragraphElement = odfUtils.getParagraphElement(previousNode);
 
             // first do the insertion with any contained tabs or spaces
             for (i = 0; i < text.length; i += 1) {

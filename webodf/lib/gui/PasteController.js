@@ -43,7 +43,8 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         /**@const*/
         textns = odf.Namespaces.textns,
         /**@const*/
-        NEXT = core.StepDirection.NEXT;
+        NEXT = core.StepDirection.NEXT,
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @return {undefined}
@@ -84,7 +85,7 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
 
         var originalCursorPosition = odtDocument.getCursorPosition(inputMemberId),
             cursorNode = odtDocument.getCursor(inputMemberId).getNode(),
-            originalParagraph = /**@type{!Element}*/(odtDocument.getParagraphElement(cursorNode)),
+            originalParagraph = /**@type{!Element}*/(odfUtils.getParagraphElement(cursorNode)),
             paragraphStyle = originalParagraph.getAttributeNS(textns, "style-name") || "",
             /**@type{number}*/
             cursorPosition = originalCursorPosition,

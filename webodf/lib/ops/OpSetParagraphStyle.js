@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops, runtime*/
+/*global ops, odf, runtime*/
 
 /**
  * Sets the paragraph style name of the specified paragraph.
@@ -36,7 +36,8 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, position, styleName,
-        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+        textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        odfUtils = new odf.OdfUtils();
 
     /**
      * @param {!ops.OpSetParagraphStyle.InitSpec} data
@@ -77,7 +78,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
             paragraphNode;
 
         iterator = odtDocument.getIteratorAtPosition(position);
-        paragraphNode = odtDocument.getParagraphElement(iterator.container());
+        paragraphNode = odfUtils.getParagraphElement(iterator.container());
         if (paragraphNode) {
             runtime.assert(isFirstStep(odtDocument, paragraphNode, iterator),
                 "SetParagraphStyle position should be the first position in the paragraph");
