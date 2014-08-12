@@ -203,7 +203,7 @@ odf.Formatting = function Formatting() {
      * @param {!string} family
      * @param {!Array.<!Element>=} styleElements Specific style trees to search. If unspecified will search both automatic
      *  and user-created styles
-     * @return {Element}
+     * @return {?Element}
      */
     function getStyleElement(styleName, family, styleElements) {
         var node,

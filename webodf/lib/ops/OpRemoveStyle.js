@@ -51,7 +51,7 @@ ops.OpRemoveStyle = function OpRemoveStyle() {
      */
     this.execute = function (document) {
         var odtDocument = /**@type{ops.OdtDocument}*/(document),
-            styleNode = odtDocument.getStyleElement(styleName, styleFamily);
+            styleNode = odtDocument.getFormatting().getStyleElement(styleName, styleFamily);
 
         if (!styleNode) {
             return false;

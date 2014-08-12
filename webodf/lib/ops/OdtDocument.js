@@ -435,37 +435,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     }
 
     /**
-     * @param {!string} styleName
-     * @param {!string} styleFamily
-     * @return {Element}
-     */
-    function getStyleElement(styleName, styleFamily) {
-        return odfCanvas.getFormatting().getStyleElement(styleName, styleFamily);
-    }
-    this.getStyleElement = getStyleElement;
-
-    /**
-     * @param {!string} styleName
-     * @return {Element}
-     */
-    function getParagraphStyleElement(styleName) {
-        return getStyleElement(styleName, 'paragraph');
-    }
-
-    /**
-     * @param {!string} styleName
-     * @return {?odf.Formatting.StyleData}
-     */
-    function getParagraphStyleAttributes(styleName) {
-        var node = getParagraphStyleElement(styleName);
-        if (node) {
-            return odfCanvas.getFormatting().getInheritedStyleAttributes(node, false);
-        }
-
-        return null;
-    }
-
-    /**
      * Called after an operation is executed, this
      * function will check if the operation is an
      * 'edit', and in that case will update the
@@ -669,16 +638,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
 
         downgradeWhitespaces(stepIterator);
     };
-
-    this.getParagraphStyleElement = getParagraphStyleElement;
-
-    /**
-     * This method returns the style attributes for a given stylename, including all properties
-     * inherited from any parent styles, and also the Default style in the family.
-     * @param {!string} styleName
-     * @return {?Object}
-     */
-    this.getParagraphStyleAttributes = getParagraphStyleAttributes;
 
     /**
      * This function will return the Text node as well as the offset in that text node
