@@ -182,7 +182,7 @@ odf.LayoutTests = function LayoutTests(runner) {
             } else if (length && length.unit === "cm") {
                 n = length.value / 2.54 * 96;
             } else {
-                throw "Unit " + length.unit + " not supported.";
+                throw "Could not convert '" + val + "'. Unit " + length.unit + " not supported.";
             }
         }
         return n;
@@ -206,7 +206,15 @@ odf.LayoutTests = function LayoutTests(runner) {
      * @return {undefined}
      */
     function compareValues(a, b) {
-        if (typeof a === "number" || a.substr(-2) === "px") {
+        if (b.indexOf("|") !== -1) {
+            // Allow multiple matches against the string value of a.
+            // This enables cross-browser tests to be written for cases where Chrome & FF perform different conversions
+            // on the computed value (e.g., vertical-align with a %, FF converts to pixels, while Chrome returns the
+            // original string).
+            if (b.split("|").indexOf(a) !== -1) {
+                a = b;
+            }
+        } else if (typeof a === "number" || a.substr(-2) === "px") {
             if (compareLengths(a, b)) {
                 a = b;
             }
@@ -223,16 +231,13 @@ odf.LayoutTests = function LayoutTests(runner) {
     function checkNodeLayout(check, node) {
         var window = runtime.getWindow(),
             style = window.getComputedStyle(node),
-            i,
             value;
-        for (i in check.values) {
-            if (check.values.hasOwnProperty(i)) {
-                // get value from computed style (e.g. margin-left) or from
-                // node properties (e.g. clientWidth).
-                value = style[i] || node[i];
-                compareValues(value, check.values[i]);
-            }
-        }
+        Object.keys(check.values).forEach(function(i) {
+            // get value from computed style (e.g. margin-left) or from
+            // node properties (e.g. clientWidth).
+            value = style[i] || node[i];
+            compareValues(value, check.values[i]);
+        });
     }
     /**
      * @param {!{count:!number,values:!Object.<!string,!string>,xpath:!string}} check
