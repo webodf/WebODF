@@ -66,6 +66,15 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
     this.group = undefined;
 
     /**
+     * Returns true if the supplied node is an ODF grouping element with no content
+     * @param {!Node} element
+     * @return {!boolean}
+     */
+    function isEmptyGroupingElement(element) {
+        return odfUtils.isGroupingElement(element) && odfUtils.hasNoODFContent(element);
+    }
+
+    /**
      * Merges the source paragraph into the destination paragraph.
      * @param {!Element} destination Paragraph to merge content into
      * @param {!Element} source Paragraph to merge content from
@@ -76,13 +85,15 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
 
         child = source.firstChild;
         while (child) {
-            if (child.localName === 'editinfo'
-                || (odfUtils.isGroupingElement(child) && odfUtils.hasNoODFContent(child))) {
-                // Empty spans need to be cleaned up on merge, as remove text only removes things that contain text content
+            if (child.localName === 'editinfo') {
+                // TODO It should be the view's responsibility to clean these up. This would fix #431
                 source.removeChild(child);
             } else {
-                // TODO It should be the view's responsibility to clean these up. This would fix #431
                 destination.appendChild(child);
+                // Empty spans need to be cleaned up on merge, as remove text only removes things that contain text content
+                // Child is moved across before collapsing so any foreign sub-elements are collapsed up the chain next to
+                // the destination location
+                domUtils.removeUnwantedNodes(child, isEmptyGroupingElement);
             }
             child = source.firstChild;
         }
@@ -212,6 +223,9 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
 
         mergeParagraphs(destinationParagraph, sourceParagraph);
         // All children have been migrated, now consume up the source parent chain
+        runtime.assert(sourceParagraph.childNodes.length === 0, "Source paragraph should be empty before it is removed");
+        // Merge into parent logic still necessary as the parent may have surrounding containers that collapse
+        // (e.g., is now inside an empty list)
         collapseRules.mergeChildrenIntoParent(sourceParagraph);
 
         // Merging removes a single step between the boundary of the two paragraphs
