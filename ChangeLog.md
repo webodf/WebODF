@@ -14,6 +14,7 @@
 * Keep IME composition menu & avatar in the correct position when entering characters
 * Allow screen-readers to read the document content correctly in OSX 10.8+ versions of Safari
 * Scroll newly created annotations completely into view ([#486](https://github.com/kogmbh/WebODF/issues/486))
+* Improve line ending detection when word-wrapping occurs ([#774](https://github.com/kogmbh/WebODF/pull/774))
 
 
 ## Wodo.TextEditor
