@@ -231,16 +231,13 @@ odf.LayoutTests = function LayoutTests(runner) {
     function checkNodeLayout(check, node) {
         var window = runtime.getWindow(),
             style = window.getComputedStyle(node),
-            i,
             value;
-        for (i in check.values) {
-            if (check.values.hasOwnProperty(i)) {
-                // get value from computed style (e.g. margin-left) or from
-                // node properties (e.g. clientWidth).
-                value = style[i] || node[i];
-                compareValues(value, check.values[i]);
-            }
-        }
+        Object.keys(check.values).forEach(function(i) {
+            // get value from computed style (e.g. margin-left) or from
+            // node properties (e.g. clientWidth).
+            value = style[i] || node[i];
+            compareValues(value, check.values[i]);
+        });
     }
     /**
      * @param {!{count:!number,values:!Object.<!string,!string>,xpath:!string}} check
