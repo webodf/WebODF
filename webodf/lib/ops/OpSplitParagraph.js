@@ -86,7 +86,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
             return false;
         }
 
-        paragraphNode = odtDocument.getParagraphElement(domPosition.textNode);
+        paragraphNode = odfUtils.getParagraphElement(domPosition.textNode);
         if (!paragraphNode) {
             return false;
         }

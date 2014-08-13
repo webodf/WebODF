@@ -188,7 +188,7 @@ define("webodf/editor/EditorSession", [
         function trackCursor(cursor) {
             var node;
 
-            node = odtDocument.getParagraphElement(cursor.getNode());
+            node = odfUtils.getParagraphElement(cursor.getNode());
             if (!node) {
                 return;
             }
@@ -352,13 +352,15 @@ define("webodf/editor/EditorSession", [
          * element. If the style name is an empty string, the default style
          * is returned.
          * @param {!string} styleName
-         * @return {Element}
+         * @return {?Element}
          */
-        this.getParagraphStyleElement = function (styleName) {
+        function getParagraphStyleElement(styleName) {
             return (styleName === "")
                 ? formatting.getDefaultStyleElement('paragraph')
-                : odtDocument.getParagraphStyleElement(styleName);
-        };
+                : formatting.getStyleElement(styleName, 'paragraph');
+        }
+
+        this.getParagraphStyleElement = getParagraphStyleElement;
 
         /**
          * Returns if the style is used anywhere in the document
@@ -369,26 +371,22 @@ define("webodf/editor/EditorSession", [
             return formatting.isStyleUsed(styleElement);
         };
 
-        function getDefaultParagraphStyleAttributes() {
-            var styleNode = formatting.getDefaultStyleElement('paragraph');
-            if (styleNode) {
-                return formatting.getInheritedStyleAttributes(styleNode);
-            }
-
-            return null;
-        }
-
         /**
          * Returns the attributes of a given paragraph style name
          * (with inheritance). If the name is an empty string,
          * the attributes of the default style are returned.
          * @param {!string} styleName
-         * @return {Object}
+         * @return {?odf.Formatting.StyleData}
          */
         this.getParagraphStyleAttributes = function (styleName) {
-            return (styleName === "")
-                ? getDefaultParagraphStyleAttributes()
-                : odtDocument.getParagraphStyleAttributes(styleName);
+            var styleNode = getParagraphStyleElement(styleName),
+                includeSystemDefault = styleName === "";
+
+            if (styleNode) {
+                return formatting.getInheritedStyleAttributes(styleNode, includeSystemDefault);
+            }
+
+            return null;
         };
 
         /**
@@ -420,7 +418,7 @@ define("webodf/editor/EditorSession", [
          */
         this.cloneParagraphStyle = function (styleName, newStyleDisplayName) {
             var newStyleName = uniqueParagraphStyleNCName(newStyleDisplayName),
-                styleNode = self.getParagraphStyleElement(styleName),
+                styleNode = getParagraphStyleElement(styleName),
                 formatting = odtDocument.getFormatting(),
                 op, setProperties, attributes, i;
 

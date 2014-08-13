@@ -245,7 +245,7 @@ gui.DirectFormattingController = function DirectFormattingController(
         var cursor = odtDocument.getCursor(inputMemberId),
             p = args.paragraphElement;
 
-        if (cursor && odtDocument.getParagraphElement(cursor.getNode()) === p) {
+        if (cursor && odfUtils.getParagraphElement(cursor.getNode()) === p) {
             selectionInfoCache.reset();
         }
     }
@@ -753,14 +753,14 @@ gui.DirectFormattingController = function DirectFormattingController(
             endNode = cursor.getAnchorNode();
         }
 
-        paragraphNode = /**@type{!Element}*/(odtDocument.getParagraphElement(endNode));
+        paragraphNode = /**@type{!Element}*/(odfUtils.getParagraphElement(endNode));
         runtime.assert(Boolean(paragraphNode), "DirectFormattingController: Cursor outside paragraph");
         if (!isSelectionAtTheEndOfLastParagraph(range, paragraphNode)) {
             return operations;
         }
 
         if (endNode !== startNode) {
-            paragraphNode = /**@type{!Element}*/(odtDocument.getParagraphElement(startNode));
+            paragraphNode = /**@type{!Element}*/(odfUtils.getParagraphElement(startNode));
         }
 
         if (!directCursorStyleProperties && !isTextStyleDifferentFromFirstParagraph(range, paragraphNode)) {

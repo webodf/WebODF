@@ -669,7 +669,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.extendSelectionToParagraphStart = function() {
-        adjustSelectionByNode(PREVIOUS, true, odtDocument.getParagraphElement);
+        adjustSelectionByNode(PREVIOUS, true, odfUtils.getParagraphElement);
         return true;
     };
 
@@ -677,7 +677,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.extendSelectionToParagraphEnd = function () {
-        adjustSelectionByNode(NEXT, true, odtDocument.getParagraphElement);
+        adjustSelectionByNode(NEXT, true, odfUtils.getParagraphElement);
         return true;
     };
 
@@ -685,7 +685,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.moveCursorToParagraphStart = function () {
-        adjustSelectionByNode(PREVIOUS, false, odtDocument.getParagraphElement);
+        adjustSelectionByNode(PREVIOUS, false, odfUtils.getParagraphElement);
         return true;
     };
 
@@ -693,7 +693,7 @@ gui.SelectionController = function SelectionController(session, inputMemberId) {
      * @return {!boolean}
      */
     this.moveCursorToParagraphEnd = function () {
-        adjustSelectionByNode(NEXT, false, odtDocument.getParagraphElement);
+        adjustSelectionByNode(NEXT, false, odfUtils.getParagraphElement);
         return true;
     };
 

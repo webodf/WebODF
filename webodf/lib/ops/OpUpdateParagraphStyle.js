@@ -84,7 +84,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
 
         if (styleName !== "") {
             // Common Style
-            styleNode = odtDocument.getParagraphStyleElement(styleName);
+            styleNode = formatting.getStyleElement(styleName, 'paragraph');
         } else {
             // Default Style
             styleNode = formatting.getDefaultStyleElement('paragraph');
