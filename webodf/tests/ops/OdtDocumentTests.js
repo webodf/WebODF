@@ -188,6 +188,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         // Test iteration backward
         for (position = segments.length - 1; position > 0; position -= 1) {
             setCursorPosition(step);
+            t.currentDocLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length, PREVIOUS);
             r.shouldBe(t, "t.currentDocLength", "t.documentLength");
             t.expected = "<office:text>" +
                 segments.slice(0, position).join("") + "|" + segments.slice(position, segments.length).join("") +
