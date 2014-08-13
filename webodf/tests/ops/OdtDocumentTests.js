@@ -624,6 +624,8 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             '<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>|c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>',
             '<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|c|<office:annotation-end></office:annotation-end>1|2|</text:p>',
             '<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|<office:annotation-end></office:annotation-end>1|2|</text:p>',
+            '<text:p>|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>|</text:span></text:p>',
+            '<text:p>|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><e:editinfo></e:editinfo><text:span>|</text:span></text:p>',
 
 
             // *************** Annotations with highlighting *************** //
