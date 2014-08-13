@@ -300,9 +300,12 @@
     "odf.OdfNodeFilter": [
         "xmldom.LSSerializerFilter"
     ],
+    "odf.OdfSchema": [
+        "odf.Namespaces"
+    ],
     "odf.OdfUtils": [
         "core.DomUtils",
-        "odf.Namespaces"
+        "odf.OdfSchema"
     ],
     "odf.PageLayoutProperties": [
         "odf.StyleParseUtils"

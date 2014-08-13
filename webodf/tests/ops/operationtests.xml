@@ -633,7 +633,7 @@
  <test name="Remove_DeleteImageWithSvgDesc">
   <before><office:text><text:p><draw:frame draw:name="graphics1" draw:style-name="fr1" text:anchor-type="as-char" svg:width="5cm" svg:height="6cm"><draw:image xlink:href="Pictures/helloworld.jpg" xlink:type="simple" xlink:actuate="onLoad" xlink:show="embed" /><svg:desc>hello world</svg:desc></draw:frame></text:p></office:text></before>
   <ops>
-   <op optype="RemoveText" position="0" length="1"/>
+   <op optype="RemoveText" position="0" length="13"/>
   </ops>
   <after><office:text><text:p/></office:text></after>
  </test>
