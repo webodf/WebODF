@@ -69,9 +69,10 @@ gui.SingleScrollViewport = function(scrollPane) {
 
     /**
      * @param {?core.SimpleClientRect} clientRect
+     * @param {!boolean=} alignWithTop
      * @return {undefined}
      */
-    this.scrollIntoView = function(clientRect) {
+    this.scrollIntoView = function(clientRect, alignWithTop) {
         var verticalScrollbarHeight = scrollPane.offsetHeight - scrollPane.clientHeight,
             horizontalScrollbarWidth = scrollPane.offsetWidth - scrollPane.clientWidth,
             nonNullClientRect,
@@ -95,7 +96,7 @@ gui.SingleScrollViewport = function(scrollPane) {
         });
 
         // Vertical adjustment
-        if (nonNullClientRect.top < paneRect.top) {
+        if (alignWithTop || nonNullClientRect.top < paneRect.top) {
             // Scroll top down into view
             scrollPane.scrollTop -= paneRect.top - nonNullClientRect.top;
         } else if (nonNullClientRect.top > paneRect.bottom || nonNullClientRect.bottom > paneRect.bottom) {
