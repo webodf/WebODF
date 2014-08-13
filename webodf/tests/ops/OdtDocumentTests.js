@@ -160,9 +160,11 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         serializer.filter = new OdfOrCursorNodeFilter();
         runtime.log("Scenario: " + documentString);
         t.segmentCount = segments.length;
+        t.expectedCursorPositionsCount = segments.length - 1; // e.g., <a>|</a> has two segments, but only one cursor position
         r.shouldBe(t, "t.segmentCount > 1", "true");
         documentRoot = createOdtDocument(segments.join(""));
         t.documentLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length, PREVIOUS);
+        r.shouldBe(t, "t.expectedCursorPositionsCount", "(t.documentLength+1)");
 
         // Test iteration forward
         for (position = 1; position < segments.length; position += 1) {
