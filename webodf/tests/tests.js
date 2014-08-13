@@ -188,7 +188,7 @@ function runSuite(name) {
 }
 function runTest(suite, name) {
     "use strict";
-    runtime.getWindow().location.search = "?suite=" + suite + "&test=" + name;
+    runtime.getWindow().location.search = "?suite=" + suite + "&test=" + encodeURIComponent(name);
 }
 
 function runSelectedTests(selectedTests) {
@@ -211,7 +211,7 @@ function getTestNameFromUrl(selectedTests) {
         return;
     }
     if (options.test) {
-        selectedTests.testNames = options.test.split(",");
+        selectedTests.testNames = options.test.split(",").map(decodeURIComponent);
     }
 }
 
