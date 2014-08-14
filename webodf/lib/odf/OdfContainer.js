@@ -312,6 +312,7 @@
         var self = this,
             /**@type {!core.Zip}*/
             zip,
+            /**@type {!Object.<!string,!string>}*/
             partMimetypes = {},
             /**@type {?Element}*/
             contentElement,
@@ -1130,6 +1131,40 @@
         this.getDocumentType = function () {
             var content = self.getContentElement();
             return content && content.localName;
+        };
+
+        /**
+         * Returns whether the document is a template.
+         * @return {!boolean}
+         */
+        this.isTemplate = function () {
+            var docMimetype = partMimetypes["/"];
+            return (docMimetype.substr(-9) === "-template");
+        };
+
+         /**
+         * Sets whether the document is a template or not.
+         * @param {!boolean} isTemplate
+         * @return {undefined}
+         */
+       this.setIsTemplate = function (isTemplate) {
+            var docMimetype = partMimetypes["/"],
+                oldIsTemplate = (docMimetype.substr(-9) === "-template"),
+                data;
+
+            if (isTemplate === oldIsTemplate) {
+                return;
+            }
+
+            if (isTemplate) {
+                docMimetype = docMimetype + "-template";
+            } else {
+                docMimetype = docMimetype.substr(0, docMimetype.length-9);
+            }
+
+            partMimetypes["/"] = docMimetype;
+            data = runtime.byteArrayFromString(docMimetype, "utf8");
+            zip.save("mimetype", data, false, new Date());
         };
 
         /**
