@@ -49,9 +49,14 @@ function loadDocument(documentUrl) {
 
         switch (extension) {
         case 'odt':
-        case 'odp':
-        case 'ods':
         case 'fodt':
+        case 'ott':
+        case 'odp':
+        case 'fodp':
+        case 'otp':
+        case 'ods':
+        case 'fods':
+        case 'ots':
             loadPlugin('./ODFViewerPlugin', function () {
                 Plugin = ODFViewerPlugin;
             });
