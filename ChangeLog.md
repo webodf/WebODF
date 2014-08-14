@@ -6,6 +6,7 @@
 
 * Add support for double line-through in Firefox (Chrome/Safari + IE don't support this feature) ([#758](https://github.com/kogmbh/WebODF/pull/758))
 * Add support for subscript & superscript ([#755](https://github.com/kogmbh/WebODF/pull/755))
+* In odf.OdfContainer allow creation of document template types as well as querying and setting the template state of the document
 
 ### Fixes
 
@@ -13,6 +14,13 @@
 * Keep IME composition menu & avatar in the correct position when entering characters
 * Allow screen-readers to read the document content correctly in OSX 10.8+ versions of Safari
 * Scroll newly created annotations completely into view ([#486](https://github.com/kogmbh/WebODF/issues/486))
+
+
+## Wodo.TextEditor
+See also section about WebODF
+
+### Improvements
+* Allow querying and setting template state of the document
 
 
 # Changes between 0.5.1 and 0.5.2
