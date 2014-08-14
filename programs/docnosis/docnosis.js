@@ -387,11 +387,11 @@ function GetThumbnailJob() {
         input.thumbnail = null;
         input.errors.thumbnailErrors = [];
         var i, e = input.file.entries, mime = input.mimetype, thumb = null;
-        if (mime === "application/vnd.oasis.opendocument.text") {
+        if (/^application\/vnd.oasis.opendocument.text/.test(mime)) {
             thumb = "application-vnd.oasis.opendocument.text.png";
-        } else if (mime === "application/vnd.oasis.opendocument.spreadsheet") {
+        } else if (/^application\/vnd.oasis.opendocument.spreadsheet/.test(mime)) {
             thumb = "application-vnd.oasis.opendocument.spreadsheet.png";
-        } else if (mime === "application/vnd.oasis.opendocument.presentation") {
+        } else if (/^application\/vnd.oasis.opendocument.presentation/.test(mime)) {
             thumb = "application-vnd.oasis.opendocument.presentation.png";
         }
         for (i = 0; i < e.length; i += 1) {
