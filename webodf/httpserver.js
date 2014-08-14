@@ -117,11 +117,11 @@ http.createServer(function (request, response) {
                 } else if (filename.substr(-4) === ".odt" ||
                         filename.substr(-5) === ".fodt") {
                     head["Content-Type"] = "application/vnd.oasis.opendocument.text";
-                } else if (filename.substr(-4) === ".ods" ||
-                        filename.substr(-5) === ".fods") {
-                    head["Content-Type"] = "application/vnd.oasis.opendocument.presentation";
                 } else if (filename.substr(-4) === ".odp" ||
                         filename.substr(-5) === ".fodp") {
+                    head["Content-Type"] = "application/vnd.oasis.opendocument.presentation";
+                } else if (filename.substr(-4) === ".ods" ||
+                        filename.substr(-5) === ".fods") {
                     head["Content-Type"] = "application/vnd.oasis.opendocument.spreadsheet";
                 } else if (filename.substr(-4) === ".txt") {
                     head["Content-Type"] = "text/plain; charset=utf-8";
