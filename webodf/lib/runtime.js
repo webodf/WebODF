@@ -190,10 +190,9 @@ Runtime.prototype.cancelAnimationFrame = function (requestId) {"use strict"; };
 /**
  * @param {!boolean} condition
  * @param {!string} message
- * @param {!function():undefined=} callback
  * @return {undefined}
  */
-Runtime.prototype.assert = function (condition, message, callback) { "use strict"; };
+Runtime.prototype.assert = function (condition, message) { "use strict"; };
 /*jslint emptyblock: false, unparam: false */
 
 /** @define {boolean} */
@@ -326,6 +325,21 @@ Runtime.getFunctionName = function getFunctionName(f) {
     }
     return f.name;
 };
+
+/**
+ * @this {Runtime}
+ * @param {!boolean} condition
+ * @param {!string} message
+ * @return {undefined}
+ */
+Runtime.assert = function (condition, message) {
+    "use strict";
+    if (!condition) {
+        this.log("alert", "ASSERTION FAILED:\n" + message);
+        throw new Error(message); // interrupt execution and provide a backtrace
+    }
+};
+
 /**
  * @class
  * @constructor
@@ -509,26 +523,11 @@ function BrowserRuntime(logoutput) {
         } else if (console) {
             console.log(msg);
         }
-        if (category === "alert") {
+        if (self.enableAlerts && category === "alert") {
             alert(msg);
         }
     }
 
-    /**
-    * @param {!boolean} condition
-    * @param {!string} message
-    * @param {!function():undefined=} callback
-    * @return {undefined}
-    */
-    function assert(condition, message, callback) {
-        if (!condition) {
-            log("alert", "ASSERTION FAILED:\n" + message);
-            if (callback) {
-                callback();
-            }
-            throw message; // interrupt execution and provide a backtrace
-        }
-    }
     /**
      * @param {!Array.<!number>} buffer
      * @return {!Uint8Array}
@@ -862,7 +861,8 @@ function BrowserRuntime(logoutput) {
     this.isFile = isFile;
     this.getFileSize = getFileSize;
     this.log = log;
-    this.assert = assert;
+    this.enableAlerts = true;
+    this.assert = Runtime.assert;
     /**
      * @param {!function():undefined} f
      * @param {!number} msec
@@ -1192,21 +1192,9 @@ function NodeJSRuntime() {
         }
     }
     this.log = log;
-    /**
-    * @param {!boolean} condition
-    * @param {!string} message
-    * @param {!function():undefined=} callback
-    * @return {undefined}
-    */
-    function assert(condition, message, callback) {
-        if (!condition) {
-            process.stderr.write("ASSERTION FAILED: " + message);
-            if (callback) {
-                callback();
-            }
-        }
-    }
-    this.assert = assert;
+
+    this.assert = Runtime.assert;
+
     /**
      * @param {!function():undefined} f
      * @param {!number} msec
@@ -1542,21 +1530,8 @@ function RhinoRuntime() {
     }
     this.log = log;
 
-    /**
-    * @param {!boolean} condition
-    * @param {!string} message
-    * @param {!function():undefined=} callback
-    * @return {undefined}
-    */
-    function assert(condition, message, callback) {
-        if (!condition) {
-            log("alert", "ASSERTION FAILED: " + message);
-            if (callback) {
-                callback();
-            }
-        }
-    }
-    this.assert = assert;
+    this.assert = Runtime.assert;
+
     /**
      * @param {!function():undefined} f
      * @return {!number}
