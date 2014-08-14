@@ -231,11 +231,61 @@ gui.DirectFormattingControllerTests = function DirectFormattingControllerTests(r
         r.shouldBe(t, "t.operations.shift()", "undefined");
     }
 
+    function createParagraphStyleOp_NoSelectedText_ReturnsEmptyArray() {
+        createOdtDocument("", "<text:p>a[</text:p><text:p>]</text:p>");
+
+        t.operations = t.formattingController.createParagraphStyleOps(1);
+
+        r.shouldBe(t, "t.operations.shift()", "undefined");
+    }
+
+    function createParagraphStyleOp_NoSelectedText_UsesStyleBeforeSelection() {
+        createOdtDocument(
+            "<style:style style:name='simple' style:family='paragraph'>" +
+                "<style:text-properties fo:font-weight='normal'/>" +
+            "</style:style>" +
+            "<style:style style:name='bold' style:family='text'>" +
+                "<style:text-properties fo:font-weight='bold'/>" +
+            "</style:style>",
+            "<text:p text:style-name='simple'><text:span text:style-name='bold'>a[</text:span></text:p><text:p>]</text:p>");
+
+        t.operations = t.formattingController.createParagraphStyleOps(1);
+
+        t.expectedOperation0 = {
+            optype: "AddStyle",
+            timestamp: undefined,
+            memberid: inputMemberId,
+            styleName: 'auto74656_0',
+            styleFamily: 'paragraph',
+            isAutomaticStyle: true,
+            setProperties: {
+                'style:parent-style-name': 'simple',
+                'style:family': 'paragraph',
+                'style:text-properties': {
+                    'fo:font-weight': 'bold'
+                }
+            }
+        };
+        r.shouldBe(t, "t.operations.shift().spec()", "t.expectedOperation0");
+
+        t.expectedOperation1 = {
+            optype: "SetParagraphStyle",
+            timestamp: undefined,
+            memberid: inputMemberId,
+            styleName: 'auto74656_0',
+            position: 1
+        };
+        r.shouldBe(t, "t.operations.shift().spec()", "t.expectedOperation1");
+        r.shouldBe(t, "t.operations.shift()", "undefined");
+    }
+
     this.tests = function () {
         return r.name([
             getSelectionInfo_ReportedStyleSummaryIncludesCursorStyling,
             createCursorStyleOp_UseCachedStyle_ReturnsSetOpForCachedStyle,
-            createParagraphStyleOp_OnLastStepInParagraph_CreatesParagraphStyleForNewParagraph
+            createParagraphStyleOp_OnLastStepInParagraph_CreatesParagraphStyleForNewParagraph,
+            createParagraphStyleOp_NoSelectedText_ReturnsEmptyArray,
+            createParagraphStyleOp_NoSelectedText_UsesStyleBeforeSelection
         ]);
     };
     this.asyncTests = function () {
