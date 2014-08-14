@@ -1211,12 +1211,14 @@
 
         /**
          * @param {!string} type
+         * @param {!boolean=} isTemplate  Default value is false.
          * @return {!core.Zip}
          */
-        function createEmptyDocument(type) {
+        function createEmptyDocument(type, isTemplate) {
             var emptyzip = new core.Zip("", null),
+                mimetype = "application/vnd.oasis.opendocument." + type + (isTemplate === true ? "-template" : ""),
                 data = runtime.byteArrayFromString(
-                    "application/vnd.oasis.opendocument." + type,
+                    mimetype,
                     "utf8"
                 ),
                 root = self.rootElement,
@@ -1246,7 +1248,7 @@
             addToplevelElement("masterStyles",    "master-styles");
             addToplevelElement("body");
             root.body.appendChild(content);
-            partMimetypes["/"] = "application/vnd.oasis.opendocument." + type;
+            partMimetypes["/"] = mimetype;
             partMimetypes["settings.xml"] = "text/xml";
             partMimetypes["meta.xml"] = "text/xml";
             partMimetypes["styles.xml"] = "text/xml";
@@ -1363,10 +1365,16 @@
         // initialize private variables
         if (urlOrType === odf.OdfContainer.DocumentType.TEXT) {
             zip = createEmptyDocument("text");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.TEXT_TEMPLATE) {
+            zip = createEmptyDocument("text", true);
         } else if (urlOrType === odf.OdfContainer.DocumentType.PRESENTATION) {
             zip = createEmptyDocument("presentation");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.PRESENTATION_TEMPLATE) {
+            zip = createEmptyDocument("presentation", true);
         } else if (urlOrType === odf.OdfContainer.DocumentType.SPREADSHEET) {
             zip = createEmptyDocument("spreadsheet");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.SPREADSHEET_TEMPLATE) {
+            zip = createEmptyDocument("spreadsheet", true);
         } else {
             url = /**@type{!string}*/(urlOrType);
             zip = new core.Zip(url, function (err, zipobject) {
@@ -1402,7 +1410,10 @@
  * @enum {number}
  */
 odf.OdfContainer.DocumentType = {
-    TEXT:         1,
-    PRESENTATION: 2,
-    SPREADSHEET:  3
+    TEXT:                  1,
+    TEXT_TEMPLATE:         2,
+    PRESENTATION:          3,
+    PRESENTATION_TEMPLATE: 4,
+    SPREADSHEET:           5,
+    SPREADSHEET_TEMPLATE:  6
 };

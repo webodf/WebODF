@@ -61,6 +61,9 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
+    /**
+     * @return {undefined}
+     */
     function testEmptyDocument() {
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         r.shouldBeNonNull(t, "t.odf.rootElement");
@@ -80,14 +83,32 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         r.shouldBeNonNull(t, "t.odf.rootElement.text");
     }
 
+    function createNewTextTemplate() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT_TEMPLATE, null);
+        testEmptyDocument();
+        r.shouldBeNonNull(t, "t.odf.rootElement.text");
+    }
+
     function createNewPresentation() {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.PRESENTATION, null);
         testEmptyDocument();
         r.shouldBeNonNull(t, "t.odf.rootElement.presentation");
     }
 
+    function createNewPresentationTemplate() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.PRESENTATION_TEMPLATE, null);
+        testEmptyDocument();
+        r.shouldBeNonNull(t, "t.odf.rootElement.presentation");
+    }
+
     function createNewSpreadsheet() {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.SPREADSHEET, null);
+        testEmptyDocument();
+        r.shouldBeNonNull(t, "t.odf.rootElement.spreadsheet");
+    }
+
+    function createNewSpreadsheetTemplate() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.SPREADSHEET_TEMPLATE, null);
         testEmptyDocument();
         r.shouldBeNonNull(t, "t.odf.rootElement.spreadsheet");
     }
@@ -335,8 +356,11 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     this.tests = function () {
         return r.name([
             createNewText,
+            createNewTextTemplate,
             createNewPresentation,
+            createNewPresentationTemplate,
             createNewSpreadsheet,
+            createNewSpreadsheetTemplate,
             setRootElement_OverwritesAllDocumentElements
         ]);
     };
