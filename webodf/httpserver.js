@@ -98,6 +98,40 @@ http.createServer(function (request, response) {
         });
         return;
     }
+
+    function setContentTypeInHead(head, filename) {
+        var contentTypeLookupTable = [
+                {ext: [".js"],          type: "text/javascript"},
+                {ext: [".css"],         type: "text/css"},
+                {ext: [".odt"],         type: "application/vnd.oasis.opendocument.text"},
+                {ext: [".fodt"],        type: "application/vnd.oasis.opendocument.text-flat-xml"},
+                {ext: [".ott"],         type: "application/vnd.oasis.opendocument.text-template"},
+                {ext: [".odp"],         type: "application/vnd.oasis.opendocument.presentation"},
+                {ext: [".fodp"],        type: "application/vnd.oasis.opendocument.presentation-flat-xml"},
+                {ext: [".otp"],         type: "application/vnd.oasis.opendocument.presentation-template"},
+                {ext: [".ods"],         type: "application/vnd.oasis.opendocument.spreadsheet"},
+                {ext: [".fods"],        type: "application/vnd.oasis.opendocument.spreadsheet-flat-xml"},
+                {ext: [".ots"],         type: "application/vnd.oasis.opendocument.spreadsheet-template"},
+                {ext: [".txt"],         type: "text/plain; charset=utf-8"},
+                {ext: [".html"],        type: "text/html; charset=utf-8"},
+                {ext: [".xhtml"],       type: "application/xhtml+xml; charset=utf-8"},
+                {ext: [".xml"],         type: "text/xml; charset=utf-8"},
+                {ext: [".ttf"],         type: "application/x-font-ttf"},
+                {ext: [".jpg",".jpeg"], type: "image/jpeg"},
+                {ext: [".gif"],         type: "image/gif"},
+                {ext: [".png"],         type: "image/png"}
+            ];
+
+        contentTypeLookupTable.some(function (contentTypeEntry) {
+            return contentTypeEntry.ext.some(function (ext) {
+                if (filename.substr(-ext.length) === ext) {
+                    head["Content-Type"] = contentTypeEntry.type;
+                    return true;
+                }
+                return false;
+            });
+        });
+    }
     function handleStat(err, stats, lookForIndexHtml) {
         if (!err && stats.isFile()) {
             fs.readFile(filename, "binary", function (err, file) {
@@ -110,32 +144,7 @@ http.createServer(function (request, response) {
                     return;
                 }
                 var head = {"Content-Length": stats.size};
-                if (filename.substr(-3) === ".js") {
-                    head["Content-Type"] = "text/javascript";
-                } else if (filename.substr(-4) === ".css") {
-                    head["Content-Type"] = "text/css";
-                } else if (filename.substr(-4) === ".odt" ||
-                        filename.substr(-5) === ".fodt") {
-                    head["Content-Type"] = "application/vnd.oasis.opendocument.text";
-                } else if (filename.substr(-4) === ".odp" ||
-                        filename.substr(-5) === ".fodp") {
-                    head["Content-Type"] = "application/vnd.oasis.opendocument.presentation";
-                } else if (filename.substr(-4) === ".ods" ||
-                        filename.substr(-5) === ".fods") {
-                    head["Content-Type"] = "application/vnd.oasis.opendocument.spreadsheet";
-                } else if (filename.substr(-4) === ".txt") {
-                    head["Content-Type"] = "text/plain; charset=utf-8";
-                } else if (filename.substr(-5) === ".html") {
-                    head["Content-Type"] = "text/html; charset=utf-8";
-                } else if (filename.substr(-6) === ".xhtml") {
-                    head["Content-Type"] = "application/xhtml+xml; charset=utf-8";
-                } else if (filename.substr(-4) === ".xml") {
-                    head["Content-Type"] = "text/xml; charset=utf-8";
-                } else if (filename.substr(-4) === ".ttf") {
-                    head["Content-Type"] = "application/x-font-ttf";
-                } else if (filename.substr(-4) === ".png") {
-                    head["Content-Type"] = "image/png";
-                }
+                setContentTypeInHead(head, filename);
                 response.writeHead(200, head);
                 if (request.method !== "HEAD") {
                     response.write(file, "binary");
