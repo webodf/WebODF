@@ -23,6 +23,13 @@ See also section about WebODF
 * Allow querying and setting template state of the document
 
 
+## Firefox Add-on ODF Viewer
+
+### Improvements
+
+* Add support for the flat-xml and template variants of ODT, ODP, ODS (i.e. FODT, FODP, FODS and OTT, OTP, OTS)
+
+
 # Changes between 0.5.1 and 0.5.2
 
 ## WebODF
