@@ -23,7 +23,9 @@
  */
 
 /*global Components, Services, dump, XPCOMUtils, APP_SHUTDOWN,
-  OdtStreamConverter, OdsStreamConverter, OdpStreamConverter*/
+  OdtStreamConverter, FOdtStreamConverter, OttStreamConverter,
+  OdsStreamConverter, FOdsStreamConverter, OtsStreamConverter,
+  OdpStreamConverter, FOdpStreamConverter, OtpStreamConverter*/
 
 function bootstrap() {
     "use strict";
@@ -34,9 +36,7 @@ function bootstrap() {
         Cr = Components.results,
         Cu = Components.utils,
         ComponentFactory,
-        odtComponentFactory,
-        odpComponentFactory,
-        odsComponentFactory,
+        componentFactories = [],
         odfStreamConverterUrl = null;
 
     Cu["import"]('resource://gre/modules/XPCOMUtils.jsm');
@@ -84,9 +84,6 @@ function bootstrap() {
         };
     };
 
-    odtComponentFactory = new ComponentFactory();
-    odpComponentFactory = new ComponentFactory();
-    odsComponentFactory = new ComponentFactory();
 
 // As of Firefox 13 bootstrapped add-ons don't support automatic registering and
 // unregistering of resource urls and components/contracts. Until then we do
@@ -97,16 +94,28 @@ function bootstrap() {
         var ioService = Services.io,
             resProt = ioService.getProtocolHandler('resource')
                   .QueryInterface(Ci.nsIResProtocolHandler),
-            aliasURI = ioService.newURI('content/', 'UTF-8', aData.resourceURI);
+            aliasURI = ioService.newURI('content/', 'UTF-8', aData.resourceURI),
+            converters,
+            i;
         resProt.setSubstitution(RESOURCE_NAME, aliasURI);
 
         // Load the component and register it.
         odfStreamConverterUrl = aData.resourceURI.spec
             + 'components/OdfStreamConverter.js';
         Cu["import"](odfStreamConverterUrl);
-        odtComponentFactory.register(OdtStreamConverter);
-        odsComponentFactory.register(OdsStreamConverter);
-        odpComponentFactory.register(OdpStreamConverter);
+        converters = [
+            OdtStreamConverter, FOdtStreamConverter, OttStreamConverter,
+            OdsStreamConverter, FOdsStreamConverter, OtsStreamConverter,
+            OdpStreamConverter, FOdpStreamConverter, OtpStreamConverter];
+
+        if (componentFactories.length === 0) {
+            for (i = 0; i < converters.length; i += 1) {
+                componentFactories.push(new ComponentFactory());
+            }
+        }
+        for (i = 0; i < componentFactories.length; i += 1) {
+            componentFactories[i].register(converters[i]);
+        }
     }
     function shutdown(aData, aReason) {
         if (aReason === APP_SHUTDOWN) {
@@ -118,9 +127,9 @@ function bootstrap() {
         // Remove the resource url.
         resProt.setSubstitution(RESOURCE_NAME, null);
         // Remove the contract/component.
-        odtComponentFactory.unregister();
-        odsComponentFactory.unregister();
-        odpComponentFactory.unregister();
+        componentFactories.forEach(function(componentFactory) {
+            componentFactory.unregister();
+        });
         // Unload the converter
         Cu.unload(odfStreamConverterUrl);
         odfStreamConverterUrl = null;

@@ -49,6 +49,32 @@ function makeODFStreamConverters() {
         return win;
     }
 
+    function getMimetypeByPath(path) {
+        var mimetypeLookupTable = [
+                {ext: ".odt",  type: "application/vnd.oasis.opendocument.text"},
+                {ext: ".fodt", type: "application/vnd.oasis.opendocument.text-flat-xml"},
+                {ext: ".ott",  type: "application/vnd.oasis.opendocument.text-template"},
+                {ext: ".odp",  type: "application/vnd.oasis.opendocument.presentation"},
+                {ext: ".fodp", type: "application/vnd.oasis.opendocument.presentation-flat-xml"},
+                {ext: ".otp",  type: "application/vnd.oasis.opendocument.presentation-template"},
+                {ext: ".ods",  type: "application/vnd.oasis.opendocument.spreadsheet"},
+                {ext: ".fods", type: "application/vnd.oasis.opendocument.spreadsheet-flat-xml"},
+                {ext: ".ots",  type: "application/vnd.oasis.opendocument.spreadsheet-template"}
+            ],
+            mimetype = "application/vnd.oasis.opendocument.text";
+
+        mimetypeLookupTable.some(function (mimetypeEntry) {
+            var isMatch = (path.substr(-mimetypeEntry.ext.length) === mimetypeEntry.ext);
+            if (isMatch) {
+                mimetype = mimetypeEntry.type;
+            }
+            return isMatch;
+        });
+
+        return mimetype;
+    }
+
+
     // All the priviledged actions.
     function ChromeActions(domWindow) {
         this.domWindow = domWindow;
@@ -71,15 +97,8 @@ function makeODFStreamConverters() {
             listener = {
                 extListener: null,
                 onStartRequest: function (aRequest, aContext) {
-                    var path = aRequest.URI.path,
-                        mimetype = "application/vnd.oasis.opendocument.";
-                    if (path.indexOf("ods") === path.length - 3) {
-                        mimetype += "spreadsheet";
-                    } else if (path.indexOf("odp") === path.length - 3) {
-                        mimetype += "presentation";
-                    } else {
-                        mimetype += "text";
-                    }
+                    var mimetype = getMimetypeByPath(aRequest.URI.path);
+
                     this.extListener = extHelperAppSvc.doContent(mimetype,
                                 aRequest, frontWindow, false);
                     this.extListener.onStartRequest(aRequest, aContext);
@@ -136,7 +155,7 @@ function makeODFStreamConverters() {
         actions[action].call(this.actions, data);
     };
 
-    /* common base for ODT, ODS and ODP stream converters */
+    /* common base for ODT/OTT, ODS/OTS and ODP/OTP stream converters */
     var OdfStreamConverter = {
 
         // properties required for XPCOM registration, except classID
@@ -262,6 +281,36 @@ function makeODFStreamConverters() {
         onStopRequest: OdfStreamConverter.onStopRequest
     };
 
+    function FOdtStreamConverter() {
+    }
+    FOdtStreamConverter.prototype = {
+        // properties required for XPCOM registration:
+        classID: Components.ID('{44327fea-721f-4f09-beeb-488179e3b308}'),
+        classDescription: 'OpenDocument Text Flat converter',
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text-flat-xml&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
+    };
+
+    function OttStreamConverter() {
+    }
+    OttStreamConverter.prototype = {
+        // properties required for XPCOM registration:
+        classID: Components.ID('{0600b310-ae8d-4912-b21e-4d0aeef005af}'),
+        classDescription: 'OpenDocument Text Template converter',
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.text-template&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
+    };
+
     function OdsStreamConverter() {
     }
     OdsStreamConverter.prototype = {
@@ -269,6 +318,36 @@ function makeODFStreamConverters() {
         classID: Components.ID('{5f0cd28d-cd7a-4c38-8dd9-72135474b9bc}'),
         classDescription: 'OpenDocument Spreadsheet converter',
         contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
+    };
+
+    function FOdsStreamConverter() {
+    }
+    FOdsStreamConverter.prototype = {
+        // properties required for XPCOM registration:
+        classID: Components.ID('{03fb3d00-3274-4573-87ab-542e9649a2dc}'),
+        classDescription: 'OpenDocument Spreadsheet Flat converter',
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet-flat-xml&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
+    };
+
+    function OtsStreamConverter() {
+    }
+    OtsStreamConverter.prototype = {
+        // properties required for XPCOM registration:
+        classID: Components.ID('{4f93193f-4dff-40a0-98e7-f96138798dd0}'),
+        classDescription: 'OpenDocument Spreadsheet Template converter',
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.spreadsheet-template&to=*/*',
         QueryInterface: OdfStreamConverter.QueryInterface,
         convert: OdfStreamConverter.convert,
         asyncConvertData: OdfStreamConverter.asyncConvertData,
@@ -292,18 +371,65 @@ function makeODFStreamConverters() {
         onStopRequest: OdfStreamConverter.onStopRequest
     };
 
+    function FOdpStreamConverter() {
+    }
+    FOdpStreamConverter.prototype = {
+      // properties required for XPCOM registration:
+        classID: Components.ID('{b1daa2e0-886d-41a6-8101-323be49531d3}'),
+        classDescription: 'OpenDocument Presentation Flat converter',
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.presentation-flat-xml&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
+    };
+
+    function OtpStreamConverter() {
+    }
+    OtpStreamConverter.prototype = {
+      // properties required for XPCOM registration:
+        classID: Components.ID('{17192d8d-fc0a-4f15-b752-23652c781fec}'),
+        classDescription: 'OpenDocument Presentation Template converter',
+        contractID: '@mozilla.org/streamconv;1?from=application/vnd.oasis.opendocument.presentation-template&to=*/*',
+        QueryInterface: OdfStreamConverter.QueryInterface,
+        convert: OdfStreamConverter.convert,
+        asyncConvertData: OdfStreamConverter.asyncConvertData,
+        onDataAvailable: OdfStreamConverter.onDataAvailable,
+        onStartRequest: OdfStreamConverter.onStartRequest,
+        onStopRequest: OdfStreamConverter.onStopRequest
+    };
+
     return {
-        EXPORTED_SYMBOLS: ['OdtStreamConverter', 'OdsStreamConverter', 'OdpStreamConverter'],
-        OdtStreamConverter: OdtStreamConverter,
-        OdsStreamConverter: OdsStreamConverter,
-        OdpStreamConverter: OdpStreamConverter,
+        EXPORTED_SYMBOLS: [
+            'OdtStreamConverter', 'FOdtStreamConverter', 'OttStreamConverter',
+            'OdsStreamConverter', 'FOdsStreamConverter', 'OtsStreamConverter',
+            'OdpStreamConverter', 'FOdpStreamConverter', 'OtpStreamConverter'],
+        OdtStreamConverter:  OdtStreamConverter,
+        FOdtStreamConverter: FOdtStreamConverter,
+        OttStreamConverter:  OttStreamConverter,
+        OdsStreamConverter:  OdsStreamConverter,
+        FOdsStreamConverter: FOdsStreamConverter,
+        OtsStreamConverter:  OtsStreamConverter,
+        OdpStreamConverter:  OdpStreamConverter,
+        FOdpStreamConverter: FOdpStreamConverter,
+        OtpStreamConverter:  OtpStreamConverter,
         NSGetFactory: XPCOMUtils.generateNSGetFactory([
-            OdtStreamConverter, OdsStreamConverter, OdpStreamConverter])
+            OdtStreamConverter, FOdtStreamConverter, OttStreamConverter,
+            OdsStreamConverter, FOdsStreamConverter, OtsStreamConverter,
+            OdpStreamConverter, FOdpStreamConverter, OtpStreamConverter])
     };
 }
 var o = makeODFStreamConverters(),
     EXPORTED_SYMBOLS = o.EXPORTED_SYMBOLS,
-    OdtStreamConverter = o.OdtStreamConverter,
-    OdsStreamConverter = o.OdsStreamConverter,
-    OdpStreamConverter = o.OdpStreamConverter,
+    OdtStreamConverter =  o.OdtStreamConverter,
+    FOdtStreamConverter = o.FOdtStreamConverter,
+    OttStreamConverter =  o.OttStreamConverter,
+    OdsStreamConverter =  o.OdsStreamConverter,
+    FOdsStreamConverter = o.FOdsStreamConverter,
+    OtsStreamConverter =  o.OtsStreamConverter,
+    OdpStreamConverter =  o.OdpStreamConverter,
+    FOdpStreamConverter = o.FOdpStreamConverter,
+    OtpStreamConverter =  o.OtpStreamConverter,
     NSGetFactory = o.NSGetFactory;
