@@ -312,6 +312,7 @@
         var self = this,
             /**@type {!core.Zip}*/
             zip,
+            /**@type {!Object.<!string,!string>}*/
             partMimetypes = {},
             /**@type {?Element}*/
             contentElement,
@@ -1133,6 +1134,40 @@
         };
 
         /**
+         * Returns whether the document is a template.
+         * @return {!boolean}
+         */
+        this.isTemplate = function () {
+            var docMimetype = partMimetypes["/"];
+            return (docMimetype.substr(-9) === "-template");
+        };
+
+         /**
+         * Sets whether the document is a template or not.
+         * @param {!boolean} isTemplate
+         * @return {undefined}
+         */
+       this.setIsTemplate = function (isTemplate) {
+            var docMimetype = partMimetypes["/"],
+                oldIsTemplate = (docMimetype.substr(-9) === "-template"),
+                data;
+
+            if (isTemplate === oldIsTemplate) {
+                return;
+            }
+
+            if (isTemplate) {
+                docMimetype = docMimetype + "-template";
+            } else {
+                docMimetype = docMimetype.substr(0, docMimetype.length-9);
+            }
+
+            partMimetypes["/"] = docMimetype;
+            data = runtime.byteArrayFromString(docMimetype, "utf8");
+            zip.save("mimetype", data, false, new Date());
+        };
+
+        /**
          * Open file and parse it. Return the XML Node. Return the root node of
          * the file or null if this is not possible.
          * For 'content.xml', 'styles.xml', 'meta.xml', and 'settings.xml', the
@@ -1211,12 +1246,14 @@
 
         /**
          * @param {!string} type
+         * @param {!boolean=} isTemplate  Default value is false.
          * @return {!core.Zip}
          */
-        function createEmptyDocument(type) {
+        function createEmptyDocument(type, isTemplate) {
             var emptyzip = new core.Zip("", null),
+                mimetype = "application/vnd.oasis.opendocument." + type + (isTemplate === true ? "-template" : ""),
                 data = runtime.byteArrayFromString(
-                    "application/vnd.oasis.opendocument." + type,
+                    mimetype,
                     "utf8"
                 ),
                 root = self.rootElement,
@@ -1246,7 +1283,7 @@
             addToplevelElement("masterStyles",    "master-styles");
             addToplevelElement("body");
             root.body.appendChild(content);
-            partMimetypes["/"] = "application/vnd.oasis.opendocument." + type;
+            partMimetypes["/"] = mimetype;
             partMimetypes["settings.xml"] = "text/xml";
             partMimetypes["meta.xml"] = "text/xml";
             partMimetypes["styles.xml"] = "text/xml";
@@ -1363,10 +1400,16 @@
         // initialize private variables
         if (urlOrType === odf.OdfContainer.DocumentType.TEXT) {
             zip = createEmptyDocument("text");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.TEXT_TEMPLATE) {
+            zip = createEmptyDocument("text", true);
         } else if (urlOrType === odf.OdfContainer.DocumentType.PRESENTATION) {
             zip = createEmptyDocument("presentation");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.PRESENTATION_TEMPLATE) {
+            zip = createEmptyDocument("presentation", true);
         } else if (urlOrType === odf.OdfContainer.DocumentType.SPREADSHEET) {
             zip = createEmptyDocument("spreadsheet");
+        } else if (urlOrType === odf.OdfContainer.DocumentType.SPREADSHEET_TEMPLATE) {
+            zip = createEmptyDocument("spreadsheet", true);
         } else {
             url = /**@type{!string}*/(urlOrType);
             zip = new core.Zip(url, function (err, zipobject) {
@@ -1402,7 +1445,10 @@
  * @enum {number}
  */
 odf.OdfContainer.DocumentType = {
-    TEXT:         1,
-    PRESENTATION: 2,
-    SPREADSHEET:  3
+    TEXT:                  1,
+    TEXT_TEMPLATE:         2,
+    PRESENTATION:          3,
+    PRESENTATION_TEMPLATE: 4,
+    SPREADSHEET:           5,
+    SPREADSHEET_TEMPLATE:  6
 };

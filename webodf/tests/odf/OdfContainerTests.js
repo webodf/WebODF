@@ -61,7 +61,11 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
-    function testEmptyDocument() {
+    /**
+     * @param {!boolean} isTemplate
+     * @return {undefined}
+     */
+    function testEmptyDocument(isTemplate) {
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         r.shouldBeNonNull(t, "t.odf.rootElement");
         r.shouldBeNonNull(t, "t.odf.rootElement.meta");
@@ -72,25 +76,56 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         r.shouldBeNonNull(t, "t.odf.rootElement.automaticStyles");
         r.shouldBeNonNull(t, "t.odf.rootElement.masterStyles");
         r.shouldBeNonNull(t, "t.odf.rootElement.body");
+        t.isTemplate = isTemplate;
+        r.shouldBe(t, "t.odf.isTemplate()", "t.isTemplate");
     }
 
     function createNewText() {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
-        testEmptyDocument();
+        testEmptyDocument(false);
+        r.shouldBeNonNull(t, "t.odf.rootElement.text");
+    }
+
+    function createNewTextTemplate() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT_TEMPLATE, null);
+        testEmptyDocument(true);
         r.shouldBeNonNull(t, "t.odf.rootElement.text");
     }
 
     function createNewPresentation() {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.PRESENTATION, null);
-        testEmptyDocument();
+        testEmptyDocument(false);
+        r.shouldBeNonNull(t, "t.odf.rootElement.presentation");
+    }
+
+    function createNewPresentationTemplate() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.PRESENTATION_TEMPLATE, null);
+        testEmptyDocument(true);
         r.shouldBeNonNull(t, "t.odf.rootElement.presentation");
     }
 
     function createNewSpreadsheet() {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.SPREADSHEET, null);
-        testEmptyDocument();
+        testEmptyDocument(false);
         r.shouldBeNonNull(t, "t.odf.rootElement.spreadsheet");
     }
+
+    function createNewSpreadsheetTemplate() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.SPREADSHEET_TEMPLATE, null);
+        testEmptyDocument(true);
+        r.shouldBeNonNull(t, "t.odf.rootElement.spreadsheet");
+    }
+
+     function setToTemplateAndBack() {
+        t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
+        r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
+        r.shouldBe(t, "t.odf.isTemplate()", "false");
+        t.odf.setIsTemplate(true);
+        r.shouldBe(t, "t.odf.isTemplate()", "true");
+        t.odf.setIsTemplate(false);
+        r.shouldBe(t, "t.odf.isTemplate()", "false");
+    }
+
 
     function setRootElement_OverwritesAllDocumentElements() {
         var originalProperties = {};
@@ -335,8 +370,12 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
     this.tests = function () {
         return r.name([
             createNewText,
+            createNewTextTemplate,
             createNewPresentation,
+            createNewPresentationTemplate,
             createNewSpreadsheet,
+            createNewSpreadsheetTemplate,
+            setToTemplateAndBack,
             setRootElement_OverwritesAllDocumentElements
         ]);
     };
