@@ -51,8 +51,14 @@ text|p, text|h {
   margin: 0;
   line-height: normal;
   position: relative;
-  min-height: 1.3em; /* prevent empty paragraphs and headings from collapsing if they are empty */
 }
+
+text|p::after, text|h::after {
+    /* prevent empty paragraphs and headings from collapsing */
+    content: '\200B'; /* ZERO WIDTH SPACE */
+    white-space: pre;
+}
+
 *[webodfhelper|containsparagraphanchor] {
   position: relative;
 }
@@ -264,6 +270,7 @@ cursor|cursor {
     top: 5%; /* push down the caret; 0px can do the job, 5% looks better, 10% is a bit over */
     height: 1em;
     z-index: 10;
+    padding-left: 1px; /* centre 2px caret into middle of overlay */
     pointer-events: none;
 }
 
