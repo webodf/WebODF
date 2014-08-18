@@ -51,8 +51,14 @@ text|p, text|h {
   margin: 0;
   line-height: normal;
   position: relative;
-  min-height: 1.3em; /* prevent empty paragraphs and headings from collapsing if they are empty */
 }
+
+text|p::after, text|h::after {
+    /* prevent empty paragraphs and headings from collapsing */
+    content: '\200B'; /* ZERO WIDTH SPACE */
+    white-space: pre;
+}
+
 *[webodfhelper|containsparagraphanchor] {
   position: relative;
 }
