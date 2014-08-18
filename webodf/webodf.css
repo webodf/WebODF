@@ -270,6 +270,7 @@ cursor|cursor {
     top: 5%; /* push down the caret; 0px can do the job, 5% looks better, 10% is a bit over */
     height: 1em;
     z-index: 10;
+    padding-left: 1px; /* centre 2px caret into middle of overlay */
     pointer-events: none;
 }
 
