@@ -176,6 +176,17 @@
             return cache[namespaceURI + ":" + localName] === FIELD;
         };
 
+        /**
+         * Return a list of all known ODF fields. These are prefixed with the standard prefixes.
+         * E.g., ["text:author-name"]
+         *
+         * @return {!Array.<!string>}
+         */
+        this.getFields = function() {
+            return containers.filter(function(containerInfo) { return containerInfo[1] === FIELD; })
+                .map(function(containerInfo) { return containerInfo[0]; });
+        };
+
         function init() {
             containers.forEach(function(containerInfo) {
                 var name = containerInfo[0],
