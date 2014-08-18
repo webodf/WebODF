@@ -178,19 +178,27 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
     }
 
     /**
+     * Fetch the paragraph at the specified step. In addition, if a stepIterator is provided,
+     * set the step iterator position to the exact DOM point of the requested step.
+     *
      * @param {!ops.OdtDocument} odtDocument
      * @param {!number} steps
-     * @returns {!Element}
+     * @param {!core.StepIterator=} stepIterator
+     * @return {!Element}
      */
-    function getParagraphAtStep(odtDocument, steps) {
+    function getParagraphAtStep(odtDocument, steps, stepIterator) {
         var domPoint = odtDocument.convertCursorStepToDomPoint(steps),
             paragraph = odfUtils.getParagraphElement(domPoint.node, domPoint.offset);
         runtime.assert(Boolean(paragraph), "Paragraph not found at step " + steps);
+        if (stepIterator) {
+            stepIterator.setPosition(domPoint.node, domPoint.offset);
+        }
         return /**@type{!Element}*/(paragraph);
     }
 
     /**
      * @param {!ops.Document} document
+     * @return {!boolean}
      */
     this.execute = function (document) {
         var odtDocument = /**@type{!ops.OdtDocument}*/(document),
@@ -208,11 +216,10 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
                         "before source paragraph (" + sourceStartPosition + ")");
 
         destinationParagraph = getParagraphAtStep(odtDocument, destinationStartPosition);
-        sourceParagraph = getParagraphAtStep(odtDocument, sourceStartPosition);
 
         // Merging is not expected to be able to re-order document content. It is only ever removing a single paragraph
         // split and merging the content back into the previous paragraph. This helps ensure OT behaviour is straightforward
-        stepIterator.setPosition(sourceParagraph, 0);
+        sourceParagraph = getParagraphAtStep(odtDocument, sourceStartPosition, stepIterator);
         stepIterator.previousStep();
         runtime.assert(domUtils.containsNode(destinationParagraph, stepIterator.container()),
                         "Destination paragraph must be adjacent to the source paragraph");
