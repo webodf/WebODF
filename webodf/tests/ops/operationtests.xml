@@ -2119,4 +2119,42 @@
     <office:text><text:p><text:span>A<c:anchor c:memberId="Joe"/></text:span><text:span text:style-name="auto63350368_0">B</text:span><text:span text:style-name="auto63350368_0">C<text:s> </text:s><text:s> </text:s>D<text:s> </text:s>E<c:cursor c:memberId="Joe"/></text:span><text:s> </text:s></text:p></office:text>
   </after>
  </test>
+ <test name="ApplyDirectStyling_AnnotatedRange_MaintainsCorrectCursorPosition" isFailing="true">
+  <before>
+    <office:text><text:p>ABC</text:p></office:text>
+  </before>
+  <ops>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="AddAnnotation" memberid="Alice" position="1" length="1" name="a" timestamp="1375706047061"/>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="1"/>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="1">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </ops>
+  <after>
+    <office:text><text:p>A<office:annotation office:name="a"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p/></text:list-item></text:list></office:annotation><text:span text:style-name="auto63350368_0"><c:anchor c:memberId="Alice"/>B<c:cursor c:memberId="Alice"/></text:span><office:annotation-end office:name="a"/>C</text:p></office:text>
+  </after>
+ </test>
+ <test name="RemoveText_AnnotatedRange_MaintainsCorrectCursorPosition" isFailing="true">
+  <before>
+    <office:text><text:p>AB<html:span class="webodf-annotationHighlight"/>CD</text:p></office:text>
+  </before>
+  <ops>
+   <op optype="AddCursor" memberid="Alice"/>
+   <op optype="AddAnnotation" memberid="Alice" position="3" length="0" name="b" timestamp="1375706047061"/>
+   <op optype="AddAnnotation" memberid="Alice" position="1" length="2" name="a" timestamp="1375706047061"/>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="4" length="1">
+    <setProperties><style:text-properties fo:font-style="italic" /></setProperties>
+   </op>
+   <op optype="ApplyDirectStyling" memberid="Alice" position="3" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+   <op optype="MoveCursor" memberid="Alice" position="3" length="2"/>
+   <op optype="RemoveText" memberid="Alice" position="3" length="2"/>
+   <op optype="InsertText" memberid="Alice" position="3" text="1" moveCursor="true"/>
+  </ops>
+  <after>
+    <office:text><text:p>A<office:annotation office:name="a"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p/></text:list-item></text:list></office:annotation><html:span class="webodf-annotationHighlight">1<c:cursor c:memberId="Alice"/></html:span><office:annotation-end office:name="a"/><office:annotation office:name="b"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p/></text:list-item></text:list></office:annotation>D</text:p></office:text>
+  </after>
+ </test>
 </tests>
