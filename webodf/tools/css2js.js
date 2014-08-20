@@ -37,6 +37,7 @@ function main(args) {
             });
         } else {
             data = runtime.readFileSync(args[pos], "utf8");
+            data = data.replace(/\\/g, "\\\\");
             data = data.replace(new RegExp("\\r{0,1}\\n", "g"), "\\n");
             data = data.replace(new RegExp("\"", "g"), "\\\"");
             text += "var " + args[pos].replace(".", "_") + " = \"" +
