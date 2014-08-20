@@ -1679,7 +1679,6 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     };
 
     /**
-     * TODO: priority could be read from op spec, here be an attribute from-server
      * @param {!{optype:string}} opSpecA op with lower priority in case of tie breaking
      * @param {!{optype:string}} opSpecB op with higher priority in case of tie breaking
      * @return {?{opSpecsA:!Array.<!{optype:string}>,
