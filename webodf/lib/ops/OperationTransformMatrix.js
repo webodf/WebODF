@@ -1466,12 +1466,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
          * empty if the opspec turned into a no-op in the transformation.
          * If a transformation is not doable, the method returns "null".
          *
-         * Some operations are added onto the stack by the server, for example
-         * AddMember, RemoveMember, and UpdateMember. These therefore need
-         * not be transformed against each other, since the server is the
-         * only originator of these ops. Therefore, their entries in the
+         * Some operations are added onto the stack only by the master session,
+         * for example AddMember, RemoveMember, and UpdateMember. These therefore need
+         * not be transformed against each other, since the master session is the
+         * only originator of these ops. Therefore, their pairing entries in the
          * matrix are missing. They do however require a passUnchanged entry
-         * with other ops.
+         * with the other ops.
          *
          * Here the CC signature of each transformation method:
          * param {!Object} opspecA

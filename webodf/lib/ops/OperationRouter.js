@@ -61,7 +61,7 @@ ops.OperationRouter.prototype.push = function (operations) {"use strict"; };
 
 /**
  * Requests a gracefull shutdown of the Operation Router.
- * Buffered operations shall be sent to the server.
+ * Buffered operations shall be sent to the master session (if any).
  * A callback is called, getting passed an error object in case of error.
  *
  * @param {!function(!Object=)} callback

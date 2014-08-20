@@ -71,7 +71,7 @@ gui.MetadataController = function MetadataController(session, inputMemberId) {
      *     dc:date
      *     meta:editing-cycles
      * If you do wish to externally set these fields, try getting
-     * the server backend (if any) to inject operations into the timeline
+     * the master session to inject operations into the timeline
      * with the relevant properties.
      *
      * The following properties are never used and will be removed for semantic
