@@ -25,16 +25,16 @@
 /*global define, ops*/
 
 
-define("webodf/editor/server/pullbox/SessionBackend", [
-    "webodf/editor/server/pullbox/OperationRouter"],
-    function (PullBoxOperationRouter) {
+define("webodf/editor/backend/jsglobal/SessionBackend", [
+    "webodf/editor/backend/jsglobal/OperationRouter"],
+    function (JsGlobalOperationRouter) {
         "use strict";
 
         /**
          * @constructor
          * @implements SessionBackend
          */
-        function PullBoxSessionBackend(sessionId, memberId, server) {
+        function JsGlobalSessionBackend(sessionId, memberId, server) {
 
             /**
              * @return {!string}
@@ -49,7 +49,7 @@ define("webodf/editor/server/pullbox/SessionBackend", [
              * @return {!ops.OperationRouter}
              */
             this.createOperationRouter = function (odfContainer, errorCallback) {
-                return new PullBoxOperationRouter(sessionId, memberId, server, odfContainer, errorCallback);
+                return new JsGlobalOperationRouter(sessionId, memberId, server, odfContainer, errorCallback);
             };
 
             /**
@@ -60,5 +60,5 @@ define("webodf/editor/server/pullbox/SessionBackend", [
             };
         }
 
-        return PullBoxSessionBackend;
+        return JsGlobalSessionBackend;
 });

@@ -24,7 +24,7 @@
 
 /*global define, ops, runtime */
 
-define("webodf/editor/server/jsglobal/SessionList", [], function () {
+define("webodf/editor/backend/jsglobal/SessionList", [], function () {
     "use strict";
 
     var /**@const @type {!string}*/

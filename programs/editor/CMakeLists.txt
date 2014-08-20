@@ -232,7 +232,7 @@ COPY_FILES(COLLAB_EDITOR_DEPS ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(server-collab-editorfiles-target
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/server/ server/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/backend backend/
 )
 
 add_custom_target(collabeditor DEPENDS dojo-amalgamation.js editor-webodf.js-target ${COLLAB_EDITOR_DEPS} more-common-editorfiles-target server-collab-editorfiles-target)
