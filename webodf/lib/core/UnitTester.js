@@ -639,7 +639,7 @@ core.UnitTester = function UnitTester() {
                 + link(testName, "runSuite(\"" + testName + "\");")
                 + ": " + test.description() + "</span>");
         } else {
-            runtime.log("Running " + testName + ": " + test.description);
+            runtime.log("Running " + testName + ": " + test.description());
         }
         tests = test.tests();
         for (i = 0; i < tests.length; i += 1) {
