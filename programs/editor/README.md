@@ -116,8 +116,8 @@ When using the Wodo.TextEditor component this is all automatically done, the fol
 
 1. How can I use the collab editor?
 
- The WebODF sources include only client-side files, no code for servers. There are abstraction layers in WebODF to support whatever
- server or P2P systems. Currently there is one backend support by the files in "programs/editor/backend/pullbox", which implement the client-side part of
+ The WebODF sources include only client-side files, no code for servers. There are abstraction layers in WebODF to support any server or P2P systems.
+ Currently there is one backend support by the files in "programs/editor/backend/pullbox", which implement the client-side part of
  the communication as used for "ownCloud Documents".
 
 2. Is there a Free Software collaboration server for WebODF-based editing?
