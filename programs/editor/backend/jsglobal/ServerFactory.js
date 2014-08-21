@@ -24,26 +24,26 @@
 
 /*global define, document, require, runtime, ops */
 
-define("webodf/editor/server/pullbox/ServerFactory", [
-    "webodf/editor/server/pullbox/Server",
-    "webodf/editor/server/pullbox/SessionBackend",
-    "webodf/editor/server/pullbox/SessionList"],
-    function (PullBoxServer, PullBoxSessionBackend, PullBoxSessionList) {
+define("webodf/editor/backend/jsglobal/ServerFactory", [
+    "webodf/editor/backend/jsglobal/Server",
+    "webodf/editor/backend/jsglobal/SessionBackend",
+    "webodf/editor/backend/jsglobal/SessionList"],
+    function (JsGlobalServer, JsGlobalSessionBackend, JsGlobalSessionList) {
         "use strict";
 
         /**
         * @constructor
         * @implements ServerFactory
         */
-        return function PullBoxServerFactory() {
+        return function JsGlobalServerFactory() {
             this.createServer = function (args) {
-                return new PullBoxServer(args);
+                return new JsGlobalServer(args);
             };
             this.createSessionBackend = function (sid, mid, server) {
-                return new PullBoxSessionBackend(sid, mid, server);
+                return new JsGlobalSessionBackend(sid, mid, server);
             };
             this.createSessionList = function (server) {
-                return new PullBoxSessionList(server);
+                return new JsGlobalSessionList(server);
             };
         };
 });

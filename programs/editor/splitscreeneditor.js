@@ -199,7 +199,7 @@ function createEditor(args) {
 
     // start the editor with network
     runtime.log("starting collaborative editor for ["+backend+"].");
-    require(["webodf/editor/server/"+backend+"/ServerFactory"], function (ServerFactory) {
+    require(["webodf/editor/backend/"+backend+"/ServerFactory"], function (ServerFactory) {
         serverFactory = new ServerFactory();
         server = serverFactory.createServer();
         // wait for a network connection to establish.

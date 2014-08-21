@@ -24,7 +24,7 @@
 
 /*global runtime, ops*/
 
-define("webodf/editor/server/jsglobal/OperationRouter", [], function () {
+define("webodf/editor/backend/jsglobal/OperationRouter", [], function () {
     "use strict";
 
     var /**@const @type {!string}*/

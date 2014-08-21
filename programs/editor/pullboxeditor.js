@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-function createEditor(args) {
+function createEditor() {
     "use strict";
 
     var editor = null,
@@ -36,8 +36,7 @@ function createEditor(args) {
         savingOverlay, disconnectedOverlay, hasLocalUnsyncedOpsOverlay,
         sessionList,
         userId, token,
-        currentSessionId, currentMemberId,
-        backend = args.backend;
+        currentSessionId, currentMemberId;
 
     // TODO: just some quick hack done for testing, make nice (e.g. the position calculation is fragile)
     function addStatusOverlay(parentElement, symbolFileName, position) {
@@ -252,8 +251,8 @@ function createEditor(args) {
     }
 
     // start the editor with network
-    runtime.log("starting collaborative editor for ["+backend+"].");
-    require(["webodf/editor/server/"+backend+"/ServerFactory"], function (ServerFactory) {
+    runtime.log("starting collaborative editor for [pullbox].");
+    require(["webodf/editor/backend/pullbox/ServerFactory"], function (ServerFactory) {
         serverFactory = new ServerFactory();
         server = serverFactory.createServer();
         // wait for a network connection to establish.

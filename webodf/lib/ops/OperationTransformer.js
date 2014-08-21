@@ -38,7 +38,6 @@ ops.OperationTransformer = function OperationTransformer() {
     var operationTransformMatrix = new ops.OperationTransformMatrix();
 
     /**
-     * TODO: priority could be read from op spec, here be an attribute from-server
      * @param {!{optype:string}} opSpecA op with lower priority in case of tie breaking
      * @param {!{optype:string}} opSpecB op with higher priority in case of tie breaking
      * @return {?{opSpecsA:!Array.<!{optype:string}>,
@@ -111,6 +110,13 @@ ops.OperationTransformer = function OperationTransformer() {
     };
 
     /**
+     * Currently the priority of ops for tie breaking is defined by how they
+     * are passed to this method. Which usually reflects the origin of the ops,
+     * being created locally or coming from the master session.
+     * E. g. the pullbox backend gives this way higher priority to the ops from
+     * the master session.
+     * That is just a randomly chosen rule, because there are no cases known
+     * yet where priority needs to be derived from something non-random.
      * @param {!Array.<!Object>} opSpecsA   sequence of opspecs with lower priority in case of tie breaking
      * @param {!Array.<!{optype:string}>} opSpecsB   opspecs with higher priority in case of tie breaking
      * @return {?{opSpecsA:!Array.<!Object>,

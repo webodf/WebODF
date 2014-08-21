@@ -1466,12 +1466,12 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
          * empty if the opspec turned into a no-op in the transformation.
          * If a transformation is not doable, the method returns "null".
          *
-         * Some operations are added onto the stack by the server, for example
-         * AddMember, RemoveMember, and UpdateMember. These therefore need
-         * not be transformed against each other, since the server is the
-         * only originator of these ops. Therefore, their entries in the
+         * Some operations are added onto the stack only by the master session,
+         * for example AddMember, RemoveMember, and UpdateMember. These therefore need
+         * not be transformed against each other, since the master session is the
+         * only originator of these ops. Therefore, their pairing entries in the
          * matrix are missing. They do however require a passUnchanged entry
-         * with other ops.
+         * with the other ops.
          *
          * Here the CC signature of each transformation method:
          * param {!Object} opspecA
@@ -1679,7 +1679,6 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     };
 
     /**
-     * TODO: priority could be read from op spec, here be an attribute from-server
      * @param {!{optype:string}} opSpecA op with lower priority in case of tie breaking
      * @param {!{optype:string}} opSpecB op with higher priority in case of tie breaking
      * @return {?{opSpecsA:!Array.<!{optype:string}>,

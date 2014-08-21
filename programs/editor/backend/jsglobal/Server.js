@@ -24,7 +24,7 @@
 
 /*global runtime, core*/
 
-define("webodf/editor/server/jsglobal/Server", [], function () {
+define("webodf/editor/backend/jsglobal/Server", [], function () {
     "use strict";
 
     runtime.loadClass("core.Base64");

@@ -92,7 +92,7 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
         // Decide the decay path:
         // this decides the initial opacity and subsequent decays to apply
         // depending on the age of the edit (for example the edit might have arrived
-        // here a long time after it was already processed by the server. We don't want
+        // here a long time after it was added to the master session. We don't want
         // an opaque marker in that case, we would want it to start with a lower opacity
         // and decay accordingly further, if possible.
         if (age < decayTimeStep) {
