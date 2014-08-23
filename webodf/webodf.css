@@ -55,7 +55,7 @@ text|p, text|h {
 
 text|p::after, text|h::after {
     /* prevent empty paragraphs and headings from collapsing */
-    content: '\200B'; /* ZERO WIDTH SPACE */
+    content: "\200B"; /* ZERO WIDTH SPACE */
     white-space: pre;
 }
 
@@ -317,7 +317,7 @@ cursor|cursor {
 }
 
 .webodf-caretOverlay .handle:after {
-    content: ' ';
+    content: " ";
     position: absolute;
     width: 0px;
     height: 0px;
@@ -395,7 +395,7 @@ editinfo|editinfo {
     left: -25px;
 }
 .editInfoHandle:after {
-    content: ' ';
+    content: " ";
     position: absolute;
     width: 0px;
     height: 0px;
@@ -445,7 +445,7 @@ editinfo|editinfo {
 }
 
 .annotationRemoveButton:before {
-    content: '×';
+    content: "×";
     color: white;
     padding: 5px;
     line-height: 1em;
@@ -502,7 +502,7 @@ editinfo|editinfo {
     left: 0;
 }
 .annotationConnector.horizontal:before {
-    content: '';
+    content: "";
     display: inline;
     position: absolute;
     width: 0px;

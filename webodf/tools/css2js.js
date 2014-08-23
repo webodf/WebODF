@@ -37,11 +37,13 @@ function main(args) {
             });
         } else {
             data = runtime.readFileSync(args[pos], "utf8");
-            data = data.replace(/\\/g, "\\\\");
-            data = data.replace(new RegExp("\\r{0,1}\\n", "g"), "\\n");
-            data = data.replace(new RegExp("\"", "g"), "\\\"");
-            text += "var " + args[pos].replace(".", "_") + " = \"" +
-                        data + "\";\n";
+            data = data.replace(/\/\*([\r\n]|.)*?\*\//g, ""); // remove comments (no /* & */ expected with normal CSS)
+            data = data.replace(/(^\s*)|(\s*$)/gm, ""); // remove leading & trailing whitespace
+            data = data.replace(/\r{0,1}\n/g, ""); // remove line breaks
+            data = data.replace(/\\/g, "\\\\"); // escape escape char
+            data = data.replace(/'/g, "\\\'"); // escape single-quotes
+            text += "var " + args[pos].replace(".", "_") + " = '" +
+                        data + "';\n";
             loadCSS(pos + 1, text);
         }
     }
