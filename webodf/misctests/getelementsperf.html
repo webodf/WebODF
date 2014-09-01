@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .description { text-align: right; }
+        .nodeList { text-align: right; color: green; }
+        .array { text-align: right; color: blue; }
+    </style>
+</head>
+<body>
+<div id="targetArea"></div>
+<script type="text/javascript">
+    var tests = {
+        "iteration over nodes": function (nodes) {
+            var i,
+                result = 0;
+
+            for (i = 0; i < nodes.length; i++) {
+                result += i;
+            }
+            return result;
+        },
+
+        "remove nodes": function (nodes) {
+            while (nodes.length > 0) {
+                nodes[0].parentNode.removeChild(nodes[0]);
+                if (nodes.shift) {
+                    nodes.shift();
+                }
+            }
+        },
+
+        "update node attributes": function (nodes) {
+            var i;
+            for (i = nodes.length; i !== 0; i--) {
+                nodes[i - 1].setAttribute("value", "s" + i);
+            }
+        },
+
+        "update node content": function (nodes) {
+            var i;
+            for (i = nodes.length; i !== 0; i--) {
+                nodes[i - 1].textContent = "node " + i;
+            }
+        },
+
+        "re-order nodes": function (nodes) {
+            var i,
+                src,
+                dest;
+
+            for (i = nodes.length; i !== 1; i--) {
+                src = nodes[i - 1];
+                dest = nodes[i - 2];
+                src.parentNode.insertBefore(dest, src);
+            }
+        }
+    };
+
+</script>
+<div>NodeList vs. Array performance</div>
+<table id="logs">
+    <thead>
+        <tr>
+            <th class="description">Description</th>
+            <th class="nodeList">NodeList</th>
+            <th class="array">Array</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<script type="text/javascript">
+    var targetArea = document.getElementById("targetArea"),
+        logs = document.getElementById("logs").lastElementChild,
+        testCycles = 100,
+        i;
+
+    function setTargetArea(node) {
+        targetArea.parentNode.replaceChild(node, targetArea);
+        targetArea = node;
+    }
+
+    function runTest(func, createDoc, getNodes) {
+        var template = document.createElement("div"),
+            start,
+            end,
+            totalTime = 0,
+            cycleCount;
+
+        createDoc(template);
+        for (cycleCount = testCycles; cycleCount !== 0; cycleCount--) {
+            setTargetArea(template.cloneNode(true));
+            start = performance.now();
+            func(getNodes());
+            end = performance.now();
+            totalTime += (end - start);
+        }
+        setTargetArea(document.createElement("div"));
+        return totalTime;
+    }
+
+    function getNodesList() {
+        return document.getElementsByTagName("a");
+    }
+
+    function getArray() {
+        return Array.prototype.slice.call(document.getElementsByTagName("a"));
+    }
+
+    function createRow(textContent) {
+        var row = document.createElement("tr");
+        textContent.forEach(function(content) {
+            var cell = document.createElement("td");
+            cell.textContent = content;
+            row.appendChild(cell);
+        });
+        return row;
+    }
+
+    function runAllTests(desc, createDoc) {
+        var testScenarioRow = createRow([desc]);
+        testScenarioRow.setAttribute("colspan", "3");
+        logs.appendChild(testScenarioRow);
+
+        Object.keys(tests).forEach(function (testDesc) {
+            var nodesListTime = runTest(tests[testDesc], createDoc, getNodesList),
+                arrayTime = runTest(tests[testDesc], createDoc, getArray),
+                row = createRow([testDesc, Math.round(nodesListTime) + "ms ", Math.round(arrayTime) + "ms"]);
+
+            row.childNodes[0].className = "description";
+            row.childNodes[1].className = "nodeList";
+            row.childNodes[2].className = "array";
+            logs.appendChild(row);
+        });
+    }
+
+    runAllTests("10 a nodes", function(node) {
+        var i;
+        for (i = 0; i < 10; i++) {
+            node.appendChild(document.createElement("a"));
+        }
+    });
+
+    runAllTests("1000 a nodes", function(node) {
+        var i;
+        for (i = 0; i < 1000; i++) {
+            node.appendChild(document.createElement("a"));
+        }
+    });
+
+    runAllTests("1000 a nodes & 1000 span nodes interleaved", function(node) {
+        var i;
+        for (i = 0; i < 1000; i++) {
+            node.appendChild(document.createElement("a"));
+            node.appendChild(document.createElement("span"));
+        }
+    });
+
+    runAllTests("1000 span nodes then 1000 a nodes", function(node) {
+        var i;
+        for (i = 0; i < 1000; i++) {
+            node.appendChild(document.createElement("span"));
+        }
+        for (i = 0; i < 1000; i++) {
+            node.appendChild(document.createElement("a"));
+        }
+    });
+
+    runAllTests("1000 a nodes & 10000 span nodes interleaved", function(node) {
+        var i, j;
+        for (i = 0; i < 1000; i++) {
+            node.appendChild(document.createElement("a"));
+            for (j = 0; j < 10; j++) {
+                node.appendChild(document.createElement("span"));
+            }
+        }
+    });
+</script>
+</body>
+</html>
