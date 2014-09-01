@@ -26,6 +26,7 @@
 
 /**
  * @constructor
+ * @implements {core.EventSource}
  * @param {!Array.<!string>=} eventIds
  */
 core.EventNotifier = function EventNotifier(eventIds) {

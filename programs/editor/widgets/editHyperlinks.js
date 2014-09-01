@@ -35,6 +35,8 @@ define("webodf/editor/widgets/editHyperlinks", [
         "use strict";
 
         runtime.loadClass("odf.OdfUtils");
+        runtime.loadClass("odf.TextSerializer");
+        runtime.loadClass("core.EventSubscriptions");
 
         var EditHyperlinks = function (callback) {
             var self = this,
@@ -46,6 +48,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 removeHyperlinkButton,
                 odfUtils = new odf.OdfUtils(),
                 textSerializer = new odf.TextSerializer(),
+                eventSubscriptions = new core.EventSubscriptions(),
                 dialog;
 
             function updateLinkEditorContent() {
@@ -119,22 +122,15 @@ define("webodf/editor/widgets/editHyperlinks", [
             }
 
             this.setEditorSession = function (session) {
-                if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, updateHyperlinkButtons);
-                    editorSession.unsubscribe(EditorSession.signalParagraphChanged, updateHyperlinkButtons);
-                    editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, updateHyperlinkButtons);
-                    hyperlinkController.unsubscribe(gui.HyperlinkController.enabledChanged, updateHyperlinkButtons);
-                }
-
+                eventSubscriptions.unsubscribeAll();
                 hyperlinkController = undefined;
                 editorSession = session;
                 if (editorSession) {
                     hyperlinkController = editorSession.sessionController.getHyperlinkController();
-                    editorSession.subscribe(EditorSession.signalCursorMoved, updateHyperlinkButtons);
-                    editorSession.subscribe(EditorSession.signalParagraphChanged, updateHyperlinkButtons);
-                    editorSession.subscribe(EditorSession.signalParagraphStyleModified, updateHyperlinkButtons);
-                    hyperlinkController.subscribe(gui.HyperlinkController.enabledChanged, updateHyperlinkButtons);
-
+                    eventSubscriptions.addFrameSubscription(editorSession, EditorSession.signalCursorMoved, updateHyperlinkButtons);
+                    eventSubscriptions.addFrameSubscription(editorSession, EditorSession.signalParagraphChanged, updateHyperlinkButtons);
+                    eventSubscriptions.addFrameSubscription(editorSession, EditorSession.signalParagraphStyleModified, updateHyperlinkButtons);
+                    eventSubscriptions.addSubscription(hyperlinkController, gui.HyperlinkController.enabledChanged, updateHyperlinkButtons);
                 }
                 updateHyperlinkButtons();
             };

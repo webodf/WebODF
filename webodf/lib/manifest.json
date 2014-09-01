@@ -17,6 +17,14 @@
     "core.DomUtils": [
     ],
     "core.EventNotifier": [
+        "core.EventSource"
+    ],
+    "core.EventSource": [
+    ],
+    "core.EventSubscriptions": [
+        "core.Async",
+        "core.EventNotifier",
+        "core.Task"
     ],
     "core.LazyProperty": [
     ],
