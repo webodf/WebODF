@@ -37,6 +37,8 @@ core.Zip = function Zip(url, entriesReadCallback) {
     "use strict";
     var /**@type{Array.<!ZipEntry>}*/
         entries,
+        /**@type{?Uint8Array}*/
+        fileData,
         /**@type{number}*/
         filesize,
         /**@type{number}*/
@@ -46,6 +48,20 @@ core.Zip = function Zip(url, entriesReadCallback) {
         /**@type{!core.Zip}*/
         zip = this,
         base64 = new core.Base64();
+
+    /**
+     * @param {!number} offset
+     * @param {!number} length
+     * @param {!function(?string,?Uint8Array):undefined} callback
+     * @return {undefined}
+     */
+    function read(offset, length, callback) {
+        if (fileData) {
+            callback(null, fileData.subarray(offset, offset + length));
+        } else {
+            callback("File data not loaded", null);
+        }
+    }
 
     /**
      * @param {!Uint8Array} data
@@ -226,7 +242,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
             if (size + offset > filesize) {
                 size = filesize - offset;
             }
-            runtime.read(url, offset, size, function (err, data) {
+            read(offset, size, function (err, data) {
                 if (err || data === null) {
                     callback(err, data);
                 } else {
@@ -349,7 +365,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
 
         // for some reason cdsOffset is not always equal to offset calculated
         // from the central directory size. The latter is reliable.
-        runtime.read(url, cdsOffset, filesize - cdsOffset,
+        read(cdsOffset, filesize - cdsOffset,
             function (err, data) {
                 if (err || data === null) {
                     callback(err, zip);
@@ -628,7 +644,13 @@ core.Zip = function Zip(url, entriesReadCallback) {
         // make sure all data is in memory, for each entry that has data
         // undefined, try to load the entry
         createByteArray(function (data) {
-            runtime.writeFile(newurl, data, callback);
+            runtime.writeFile(newurl, data, function (err) {
+                if (!err) {
+                    fileData = data;
+                    filesize = fileData.length;
+                }
+                callback(err);
+            });
         }, callback);
     }
     /**
@@ -661,17 +683,21 @@ core.Zip = function Zip(url, entriesReadCallback) {
         entries = [];
         return;
     }
-    runtime.getFileSize(url, function (size) {
-        filesize = size;
-        if (filesize < 0) {
-            entriesReadCallback("File '" + url + "' cannot be read.", zip);
+    runtime.readFile(url, "binary", function (err, result) {
+        if (typeof result === "string") {
+            err = "file was read as a string. Should be Uint8Array.";
+        }
+        if (err || !result || result.length === 0) {
+            entriesReadCallback("File '" + url + "' cannot be read. Err: " + (err || "[none]"), zip);
         } else {
-            runtime.read(url, filesize - 22, 22, function (err, data) {
+            fileData = /**@type{!Uint8Array}*/(result);
+            filesize = fileData.length;
+            read(filesize - 22, 22, function (err, data) {
                 // todo: refactor entire zip class
-                if (err || entriesReadCallback === null || data === null) {
+                if (err || data === null) {
                     entriesReadCallback(err, zip);
                 } else {
-                    handleCentralDirectoryEnd(data, entriesReadCallback);
+                    handleCentralDirectoryEnd(data, /**@type{!function(?string, !core.Zip):undefined}*/(entriesReadCallback));
                 }
             });
         }
