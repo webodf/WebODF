@@ -349,9 +349,7 @@ Runtime.assert = function (condition, message) {
  */
 function BrowserRuntime(logoutput) {
     "use strict";
-    var self = this,
-        /**@type{!Object.<!string|!Uint8Array>}*/
-        cache = {};
+    var self = this;
 
     /**
      * Return the number of bytes a string would take up when encoded as utf-8.
@@ -608,7 +606,6 @@ function BrowserRuntime(logoutput) {
                 // if we just want text, it's simple
                 data = xhr.responseText;
             }
-            cache[path] = data;
             r = {err: null, data: data};
         } else {
             // report error
@@ -644,10 +641,6 @@ function BrowserRuntime(logoutput) {
      * @return {undefined}
      */
     function readFile(path, encoding, callback) {
-        if (cache.hasOwnProperty(path)) {
-            callback(null, cache[path]);
-            return;
-        }
         var xhr = createXHR(path, encoding, true);
         function handleResult() {
             var r;
@@ -712,7 +705,6 @@ function BrowserRuntime(logoutput) {
      * @return {undefined}
      */
     function writeFile(path, data, callback) {
-        cache[path] = data;
         var xhr = new XMLHttpRequest(),
             /**@type{!string|!ArrayBuffer}*/
             d;
@@ -761,7 +753,6 @@ function BrowserRuntime(logoutput) {
      * @return {undefined}
      */
     function deleteFile(path, callback) {
-        delete cache[path];
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', path, true);
         xhr.onreadystatechange = function () {
@@ -822,10 +813,6 @@ function BrowserRuntime(logoutput) {
      * @return {undefined}
      */
     function getFileSize(path, callback) {
-        if (cache.hasOwnProperty(path) && typeof cache[path] !== "string") {
-            callback(cache[path].length);
-            return;
-        }
         var xhr = new XMLHttpRequest();
         xhr.open("HEAD", path, true);
         xhr.onreadystatechange = function () {
@@ -840,7 +827,6 @@ function BrowserRuntime(logoutput) {
                 // even if the server says it's ok. This specific bug was observed in Cocoa's WebView on OSX10.8.
                 // However, even though the browser won't pull the content-length header (coz it's a security risk!)
                 // the content can still be fetched.
-                // This data will be cached, so we'll still only ever have to fetch it once
                 readFile(path, "binary", function (err, data) {
                     if (!err) {
                         callback(data.length);
