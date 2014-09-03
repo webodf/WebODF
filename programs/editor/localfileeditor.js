@@ -136,11 +136,8 @@ function createEditor() {
                 return;
             }
             // TODO: odfcontainer should have a property mimetype
-            var isTemplate = editor.isTemplate(),
-                mimetype = isTemplate ?
-                    "application/vnd.oasis.opendocument.text-template" :
-                    "application/vnd.oasis.opendocument.text",
-                filename = loadedFilename || (isTemplate ? "doc.ott" : "doc.odt"),
+            var mimetype = "application/vnd.oasis.opendocument.text",
+                filename = loadedFilename || "doc.odt",
                 blob = new Blob([data.buffer], {type: mimetype});
             saveAs(blob, filename);
         }
