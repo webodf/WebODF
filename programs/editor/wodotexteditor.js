@@ -525,35 +525,6 @@ var Wodo = Wodo || (function () {
         }
 
         /**
-         * Sets whether the document is a template or not.
-         *
-         * @name TextEditor#setIsTemplate
-         * @function
-         * @param {!boolean} isTemplate
-         * @return {undefined}
-         */
-        this.setIsTemplate = function(isTemplate) {
-            var odfContainer = odfCanvas.odfContainer();
-
-            runtime.assert(odfContainer, "odfContainer should exist here. Possibly no document opened ATM.");
-            odfContainer.setIsTemplate(isTemplate);
-        };
-
-        /**
-         * Returns whether the document is a template.
-         * @name TextEditor#isTemplate
-         * @function
-         * @return {!boolean}
-         */
-        this.isTemplate = function() {
-            var odfContainer = odfCanvas.odfContainer();
-
-            runtime.assert(odfContainer, "odfContainer should exist here. Possibly no document opened ATM.");
-
-            return odfContainer.isTemplate();
-        };
-
-        /**
          * @return {undefined}
          */
         function setFocusToOdfCanvas() {
