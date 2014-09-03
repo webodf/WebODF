@@ -19,9 +19,6 @@
 ## Wodo.TextEditor
 See also section about WebODF
 
-### Improvements
-* Allow querying and setting template state of the document
-
 
 ## Firefox Add-on ODF Viewer
 
