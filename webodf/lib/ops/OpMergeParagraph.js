@@ -151,25 +151,30 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
     }
 
     /**
-     * Remove all insignificant whitespace between the paragraph node boundaries and the first and last step within the
-     * paragraph. This prevents this insignificant whitespace accidentally becoming significant whitespace during the
-     * merge.
+     * Discard insignificant whitespace between the start of the paragraph node and the first step in the paragraph
      *
      * @param {!core.StepIterator} stepIterator
      * @param {!Element} paragraphElement
      * @return {undefined}
      */
-    function trimInsignificantWhitespace(stepIterator, paragraphElement) {
+    function trimLeadingInsignificantWhitespace(stepIterator, paragraphElement) {
         var range = paragraphElement.ownerDocument.createRange();
-
-        // Discard insignificant whitespace between the start of the paragraph node and the first step in the paragraph
         stepIterator.setPosition(paragraphElement, 0);
         stepIterator.roundToNextStep();
         range.setStart(paragraphElement, 0);
         range.setEnd(stepIterator.container(), stepIterator.offset());
         removeTextNodes(range);
+    }
 
-        // Discard insignificant whitespace between the last step in the paragraph and the end of the paragraph node
+    /**
+     * Discard insignificant whitespace between the last step in the paragraph and the end of the paragraph node
+     *
+     * @param {!core.StepIterator} stepIterator
+     * @param {!Element} paragraphElement
+     * @return {undefined}
+     */
+    function trimTrailingInsignificantWhitespace(stepIterator, paragraphElement) {
+        var range = paragraphElement.ownerDocument.createRange();
         stepIterator.setPosition(paragraphElement, paragraphElement.childNodes.length);
         stepIterator.roundToPreviousStep();
         range.setStart(stepIterator.container(), stepIterator.offset());
@@ -224,9 +229,9 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
         runtime.assert(domUtils.containsNode(destinationParagraph, stepIterator.container()),
                         "Destination paragraph must be adjacent to the source paragraph");
 
-        trimInsignificantWhitespace(stepIterator, destinationParagraph);
+        trimTrailingInsignificantWhitespace(stepIterator, destinationParagraph);
         downgradeOffset = destinationParagraph.childNodes.length;
-        trimInsignificantWhitespace(stepIterator, sourceParagraph);
+        trimLeadingInsignificantWhitespace(stepIterator, sourceParagraph);
 
         mergeParagraphs(destinationParagraph, sourceParagraph);
         // All children have been migrated, now consume up the source parent chain
