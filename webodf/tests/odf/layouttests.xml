@@ -547,4 +547,62 @@
    </check>
   </layoutchecks>
  </test>
+
+ <test name="margin_100percent_1">
+  <input>
+   <office:document-styles>
+    <office:styles>
+      <style:style style:name="Contents_20_2" style:display-name="Contents 2" style:family="paragraph" style:class="index">
+        <style:paragraph-properties fo:margin="100%" fo:margin-left="10px" fo:margin-right="10px" fo:text-indent="0cm" style:auto-text-indent="false"/>
+      </style:style>
+    </office:styles>
+    <office:automatic-styles>
+      <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Contents_20_2">
+        <style:paragraph-properties fo:margin-left="100%"/>
+      </style:style>
+    </office:automatic-styles>
+   </office:document-styles>
+   <office:text>
+    <text:p text:style-name="P8">One</text:p>
+    <text:p text:style-name="P8">Two</text:p>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="(.//text:p)[1]">
+    <margin value="0px 10px"/>
+   </check>
+   <check xpath="(.//text:p)[2]">
+    <margin value="0px 10px"/>
+   </check>
+  </layoutchecks>
+ </test>
+
+ <test name="margin_100percent_2">
+  <input>
+   <office:document-styles>
+    <office:styles>
+      <style:style style:name="Contents_20_2" style:display-name="Contents 2" style:family="paragraph" style:class="index">
+        <style:paragraph-properties fo:margin="100%" fo:margin-left="10px" fo:margin-right="10px" fo:text-indent="0cm" style:auto-text-indent="false"/>
+      </style:style>
+    </office:styles>
+    <office:automatic-styles>
+      <style:style style:name="P8" style:family="paragraph" style:parent-style-name="Contents_20_2">
+        <style:paragraph-properties fo:margin-left="50%"/>
+      </style:style>
+    </office:automatic-styles>
+   </office:document-styles>
+   <office:text>
+    <text:p text:style-name="P8">One</text:p>
+    <text:p text:style-name="P8">Two</text:p>
+   </office:text>
+  </input>
+  <layoutchecks>
+   <check xpath="(.//text:p)[1]">
+    <margin value="0px 10px 0px 5px"/>
+   </check>
+   <check xpath="(.//text:p)[2]">
+    <margin value="0px 10px 0px 5px"/>
+   </check>
+  </layoutchecks>
+ </test>
 </layouttests>
