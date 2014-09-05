@@ -2024,6 +2024,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "UpdateParagraphStyle": passUnchanged
         },
         "AddMember": {
+            "AddMember":            passUnchanged, // TODO this should throw if the same member is added twice or something
             "AddStyle":             passUnchanged,
             "ApplyDirectStyling":   passUnchanged,
             "InsertText":           passUnchanged,
