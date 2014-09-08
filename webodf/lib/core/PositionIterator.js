@@ -425,10 +425,7 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
                     runtime.assert(false, "Error in setUnfilteredPosition: position not valid.");
                 }
             }
-            return true;
-        }
-
-        if (offset < container.childNodes.length) {
+        } else if (offset < container.childNodes.length) {
             // Immediately advance to the child node at that offset to begin iteration.
             // This is necessary in order to satisfy the most frequent use case where developer will
             // store the (container, unfilteredDomOffset) from a previous position iterator, and use

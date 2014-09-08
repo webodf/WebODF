@@ -400,6 +400,16 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
         r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
+    function testSetUnfilteredPosition_TextChildOfInvalidNode_ImmediatelyMovesToNextValidPosition() {
+        createWalker('<p><b id="b1">TEXT</b><a id="a1"/></p>');
+        t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0].childNodes[0], 0); // #text "TEXT"
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "1");
+
+        t.iterator.nextPosition();
+        r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
+    }
     function testSetUnfilteredPosition_GrandChildOfInvalidNode_ImmediatelyMovesToNextValidPosition() {
         createWalker('<p><b id="b1"><a id="a0"><a id="a0.0"/></a></b><a id="a1"/></p>');
         t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0].childNodes[0].childNodes[0], 0); // a0.0
@@ -583,6 +593,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             testSetUnfilteredPosition_UsesUnfilteredOffsets,
             testSetUnfilteredPosition_ImmediatelyMovesToNextValidPosition,
             testSetUnfilteredPosition_ChildOfInvalidNode_ImmediatelyMovesToNextValidPosition,
+            testSetUnfilteredPosition_TextChildOfInvalidNode_ImmediatelyMovesToNextValidPosition,
             testSetUnfilteredPosition_GrandChildOfInvalidNode_ImmediatelyMovesToNextValidPosition,
             testSetUnfilteredPosition_ChildOfNestedInvalidNodes_ImmediatelyMovesToNextValidPosition,
             testSetUnfilteredPosition_HandlesChildNodesCorrectly,
