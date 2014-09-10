@@ -1,6 +1,11 @@
---- jslint.js	2013-11-22 11:58:27.468563613 +0100
-+++ lib/core/JSLint.js	2013-11-23 13:51:19.072692196 +0100
-@@ -183,7 +183,9 @@
+--- jslint.js	2014-07-08 21:12:20.000000000 +0200
++++ lib/core/JSLint.js	2014-07-25 21:41:33.883288847 +0200
+@@ -1,3 +1,4 @@
++/*global core*/
+ // jslint.js
+ // 2014-07-08
+ 
+@@ -183,7 +184,9 @@
  //     closure    true, if Google Closure idioms should be tolerated
  //     continue   true, if the continuation statement should be tolerated
  //     debug      true, if debugger statements should be allowed
@@ -10,7 +15,7 @@
  //     eqeq       true, if == should be allowed
  //     evil       true, if eval should be allowed
  //     forin      true, if for in statements need not filter
-@@ -203,6 +205,7 @@
+@@ -203,6 +206,7 @@
  //     stupid     true, if really stupid practices are tolerated
  //     sub        true, if all forms of subscript notation are tolerated
  //     todo       true, if TODO comments are tolerated
@@ -18,7 +23,15 @@
  //     vars       true, if multiple var statements per function should be allowed
  //     white      true, if sloppy whitespace is tolerated
  
-@@ -292,7 +295,9 @@
+@@ -213,6 +217,7 @@
+ // For example:
+ 
+ /*properties
++    defined, emptyblock, unvar, JSLINT, JSLint, core,
+     '\b', '\t', '\n', '\f', '\r', '!', '!=', '!==', '"', '%', '\'', '(begin)',
+     '(error)', '*', '+', '-', '/', '<', '<=', '==', '===', '>', '>=', '\\', a,
+     a_label, a_scope, already_defined, and, apply, arguments, arity, ass,
+@@ -292,7 +297,9 @@
              continue  : true,
              couch     : true,
              debug     : true,
@@ -28,7 +41,7 @@
              eqeq      : true,
              evil      : true,
              forin     : true,
-@@ -312,6 +317,7 @@
+@@ -312,6 +319,7 @@
              stupid    : true,
              sub       : true,
              todo      : true,
@@ -36,7 +49,7 @@
              vars      : true,
              white     : true
          },
-@@ -1346,7 +1352,7 @@
+@@ -1347,7 +1355,7 @@
  // It is an error if the name has already been defined in this scope, except
  // when reusing an exception variable name.
  
@@ -45,7 +58,7 @@
                  if (master.function === funct) {
                      if (master.kind !== 'exception' || kind !== 'exception' ||
                              !master.dead) {
-@@ -1701,7 +1707,11 @@
+@@ -1702,7 +1710,11 @@
          right = right || next_token;
          if ((!option.white) &&
                  left.thru !== right.from && left.line === right.line) {
@@ -58,16 +71,16 @@
          }
      }
  
-@@ -2403,7 +2413,7 @@
+@@ -2421,7 +2433,7 @@
              array = [statement()];
              array.disrupt = array[0].disrupt;
          }
--        if (kind !== 'catch' && array.length === 0) {
-+        if (!option.emptyblock && (kind !== 'catch' && array.length === 0)) {
+-        if (kind !== 'catch' && array.length === 0 && !option.debug) {
++        if (!(option.emptyblock || option.debug) && kind !== 'catch' && array.length === 0) {
              curly.warn('empty_block');
          }
          block_var.forEach(function (name) {
-@@ -3149,9 +3159,10 @@
+@@ -3175,9 +3187,10 @@
          Object.keys(scope).forEach(function (name) {
              var master = scope[name];
              if (!master.used && master.kind !== 'exception' &&
@@ -80,10 +93,11 @@
                  master.warn('uninitialized_a');
              }
          });
-@@ -4250,3 +4261,6 @@
+@@ -4286,3 +4299,7 @@
  
      return itself;
  }());
 +core.JSLint = function JSLint() {
++    "use strict";
 +    this.JSLINT = JSLINT;
 +};
