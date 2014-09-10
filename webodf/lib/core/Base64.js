@@ -119,7 +119,8 @@ function makeBase64() {
             padlen = b64.length % 4,
             o = 0,
             i,
-            n;
+            n,
+            a = [0, 0, 2, 1];
         for (i = 0; i < l; i += 4) {
             n = ((b64tab[b64.charAt(i)]     || 0) << 18) |
                 ((b64tab[b64.charAt(i + 1)] || 0) << 12) |
@@ -130,7 +131,7 @@ function makeBase64() {
             bin[o + 2] =  n       & 0xff;
             o += 3;
         }
-        l = 3 * l - [0, 0, 2, 1][padlen];
+        l = 3 * l - a[padlen];
         return bin.subarray(0, l);
     }
     /**
