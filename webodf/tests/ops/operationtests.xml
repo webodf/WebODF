@@ -1402,7 +1402,17 @@
    </op>
   </ops>
   <after>
-   <office:text><text:p>AB<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>CD</text:p></office:text>
+   <office:text>
+    <text:p>AB<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>CD</text:p>
+   </office:text>
   </after>
  </test>
  <test name="AddMemberAddAnnotation_simple">
@@ -1418,7 +1428,17 @@
    </op>
   </ops>
   <after>
-   <office:text><text:p>AB<office:annotation office:name="alice_1"><dc:creator e:memberid="John">John Doe</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>CD</text:p></office:text>
+   <office:text>
+    <text:p>AB<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="John">John Doe</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>CD</text:p>
+   </office:text>
   </after>
  </test>
  <test name="AddAnnotationUpdateMember_simple">
@@ -1438,19 +1458,43 @@
    </op>
   </ops>
   <after>
-   <office:text><text:p>AB<office:annotation office:name="alice_1"><dc:creator e:memberid="John">Don Joe</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>CD</text:p></office:text>
+   <office:text>
+    <text:p>AB<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="John">Don Joe</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>CD</text:p>
+   </office:text>
   </after>
  </test>
  <test name="AddAnnotation_ranged">
   <before>
-   <office:text><text:p>ABCD</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABCD</text:p>
+    <text:p>EFG<text:span>HIJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="AddAnnotation" memberid="Alice" position="3" length="6" name="alice_2" timestamp="1375706047061">
    </op>
   </ops>
   <after>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>H<office:annotation-end office:name="alice_2"/>IJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>H<office:annotation-end office:name="alice_2"/>IJ</text:span></text:p>
+   </office:text>
   </after>
  </test>
  <test name="AddAnnotation_rangedMultiple">
@@ -1462,12 +1506,41 @@
    <op optype="AddAnnotation" memberid="Alice" position="3" length="0" name="alice_2" timestamp="1375706047061"/>
   </ops>
   <after>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>H<office:annotation-end office:name="alice_1"/>IJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p></text:list-item>
+     </text:list>
+    </office:annotation><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>H<office:annotation-end office:name="alice_1"/>IJ</text:span></text:p>
+   </office:text>
   </after>
  </test>
  <test name="RemoveAnnotation_ranged" hasSetup="true">
   <before>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p>xyz</text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>H<office:annotation-end office:name="alice_2"/>IJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>xyz</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>H<office:annotation-end office:name="alice_2"/>IJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="RemoveAnnotation" memberid="Alice" position="4" length="3">
@@ -1479,7 +1552,18 @@
  </test>
  <test name="RemoveAnnotation_simple">
   <before>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>HIJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="RemoveAnnotation" memberid="Alice" position="4" length="0">
@@ -1491,7 +1575,18 @@
  </test>
  <test name="RemoveAnnotation_preservesExpandedCursor">
   <before>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"/><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice"/>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>HIJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="AddCursor" memberid="Alice" position="0" />
@@ -1504,7 +1599,18 @@
  </test>
  <test name="RemoveAnnotation_preservesExpandedCursor_2">
   <before>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"/><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice"/>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>HIJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="AddCursor" memberid="Alice" position="0" />
@@ -1517,7 +1623,18 @@
  </test>
  <test name="RemoveAnnotation_preservesMultipleExpandedCursors">
   <before>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"/><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p>X</text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice"/>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>X</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>HIJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="AddCursor" memberid="Alice" position="0" />
@@ -1532,7 +1649,18 @@
  </test>
  <test name="RemoveAnnotation_preservesForeignElements" isFailing="true">
   <before>
-   <office:text><text:p>ABC<office:annotation office:name="alice_2"><dc:creator e:memberid="Alice"/><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><foreign:text/></text:p></text:list-item></text:list></office:annotation>D</text:p><text:p>EFG<text:span>HIJ</text:span></text:p></office:text>
+   <office:text>
+    <text:p>ABC<office:annotation office:name="alice_2">
+     <dc:creator e:memberid="Alice"/>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><foreign:text/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D</text:p>
+    <text:p>EFG<text:span>HIJ</text:span></text:p>
+   </office:text>
   </before>
   <ops>
    <op optype="RemoveAnnotation" memberid="Alice" position="4" length="0">
@@ -1553,7 +1681,19 @@
    <op optype="MoveCursor" memberid="Eve" position="3"/>
    <op optype="AddAnnotation" memberid="Alice" position="3" length="0" name="alice_1" timestamp="1375706047061"/>
   </ops>
-  <after><office:text><text:p>abc<c:cursor c:memberId="Bob"/><c:cursor c:memberId="Eve"/><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>defgh</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>abc<c:cursor c:memberId="Bob"/><c:cursor c:memberId="Eve"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><c:cursor c:memberId="Alice"/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>defgh</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="AddAnnotation_simple_multiCursors_2">
   <before><office:text><text:p>abcdefgh</text:p></office:text></before>
@@ -1566,7 +1706,19 @@
    <op optype="AddCursor" memberid="Eve"/>
    <op optype="MoveCursor" memberid="Eve" position="3"/>
   </ops>
-  <after><office:text><text:p>abc<c:cursor c:memberId="Bob"/><c:cursor c:memberId="Eve"/><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>defgh</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>abc<c:cursor c:memberId="Bob"/><c:cursor c:memberId="Eve"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><c:cursor c:memberId="Alice"/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>defgh</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="SplitParagraphAddAnnotation_startPosSame">
   <!-- a paragraph split at the position of the start of an annotation should keep the split outside of the annotation,
@@ -1580,7 +1732,20 @@
    <op optype="AddAnnotation" memberid="Alice" position="2" length="1" name="alice_1" timestamp="1375706047061"/>
    <op optype="SplitParagraph" memberid="Bob" position="2" moveCursor="true"/>
   </ops>
-  <after><office:text><text:p>ab</text:p><text:p><c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>ab</text:p>
+    <text:p><c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><c:cursor c:memberId="Alice"/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="SplitParagraphAddAnnotation_endPosSame">
   <!-- a paragraph split at the position of the end of an annotation should add the split to the annotated area -->
@@ -1593,7 +1758,18 @@
    <op optype="AddAnnotation" memberid="Alice" position="2" length="1" name="alice_1" timestamp="1375706047061"/>
    <op optype="SplitParagraph" memberid="Bob" position="5" moveCursor="true"/>
   </ops>
-  <after><office:text><text:p>ab<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>c</text:p><text:p><office:annotation-end office:name="alice_1"/><c:cursor c:memberId="Bob"/>d</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+    <dc:creator e:memberid="Alice">Alice</dc:creator>
+    <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+    <text:list>
+     <text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item>
+    </text:list>
+    </office:annotation>c</text:p>
+    <text:p><office:annotation-end office:name="alice_1"/><c:cursor c:memberId="Bob"/>d</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="AddAnnotationInsertText_startPosSameAtStartOfParagraph" isFailing="true">
   <!-- text inserted at the position of a start of an annotation at the start of a paragraph should be added to the annotated area -->
@@ -1606,7 +1782,17 @@
    <op optype="AddAnnotation" memberid="Alice" position="0" length="1" name="alice_1" timestamp="1375706047061"/>
    <op optype="InsertText" memberid="Bob" position="0" text="123"/>
   </ops>
-  <after><office:text><text:p><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice"></dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>123<c:cursor c:memberId="Bob"/>a<office:annotation-end office:name="alice_1"/>bcd</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice"></dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item>
+     </text:list>
+     </office:annotation>123<c:cursor c:memberId="Bob"/>a<office:annotation-end office:name="alice_1"/>bcd</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="AddAnnotationInsertText_startPosSameNotAtStartOfParagraph">
   <!-- text inserted at the position of the start of an annotation which is not at the start of a paragraph should be added before the annotated area -->
@@ -1619,7 +1805,19 @@
    <op optype="AddAnnotation" memberid="Alice" position="2" length="1" name="alice_1" timestamp="1375706047061"/>
    <op optype="InsertText" memberid="Bob" position="2" text="123" moveCursor="true"/>
   </ops>
-  <after><office:text><text:p>ab123<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>ab123<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><c:cursor c:memberId="Alice"/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="AddAnnotationInsertText_endPosSameNotAtEndOfParagraph">
   <!-- text inserted at the position of the end of an annotation which is not at the end of a paragraph should be added to the annotated area -->
@@ -1633,7 +1831,19 @@
    <op optype="InsertText" memberid="Bob" position="5" text="1" moveCursor="true"/>
    <op optype="InsertText" memberid="Bob" position="6" text="2" moveCursor="true"/>
   </ops>
-  <after><office:text><text:p>ab<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>c12<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><c:cursor c:memberId="Alice"/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c12<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
  </test>
  <test name="AddAnnotationInsertText_endPosSameAtEndOfParagraph">
   <!-- also text inserted at the position of the end of an annotation which is at the end of a paragraph should be added to the annotated area -->
@@ -1647,7 +1857,19 @@
    <op optype="InsertText" memberid="Bob" position="6" text="1" moveCursor="true"/>
    <op optype="InsertText" memberid="Bob" position="7" text="2" moveCursor="true"/>
   </ops>
-  <after><office:text><text:p>ab<office:annotation office:name="alice_1"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p><c:cursor c:memberId="Alice"/></text:p></text:list-item></text:list></office:annotation>cd12<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/></text:p></office:text></after>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p><c:cursor c:memberId="Alice"/></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd12<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
  </test>
  <test name="InsertImage">
   <before>
@@ -1670,7 +1892,13 @@
    </op>
   </ops>
   <after>
-   <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><meta:initial-creator>Bob</meta:initial-creator></office:meta><office:text></office:text>
+   <office:meta>
+    <meta:editing-cycles>1</meta:editing-cycles>
+    <dc:creator>Alice</dc:creator>
+    <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+    <meta:initial-creator>Bob</meta:initial-creator>
+   </office:meta>
+   <office:text></office:text>
   </after>
  </test>
  <test name="UpdateMetadata_modifySet">
@@ -1683,7 +1911,13 @@
    </op>
   </ops>
   <after>
-   <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:title>Title</dc:title><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date></office:meta><office:text></office:text>
+   <office:meta>
+    <meta:editing-cycles>1</meta:editing-cycles>
+    <dc:title>Title</dc:title>
+    <dc:creator>Alice</dc:creator>
+    <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+   </office:meta>
+   <office:text></office:text>
   </after>
  </test>
  <test name="UpdateMetadata_modifySetRemove">
@@ -1697,7 +1931,12 @@
    </op>
   </ops>
   <after>
-   <office:meta><meta:editing-cycles>1</meta:editing-cycles><dc:creator>Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date></office:meta><office:text></office:text>
+   <office:meta>
+    <meta:editing-cycles>1</meta:editing-cycles>
+    <dc:creator>Alice</dc:creator>
+    <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+   </office:meta>
+   <office:text></office:text>
   </after>
  </test>
  <test name="ApplyHyperlink_WithinSpan">
@@ -1841,7 +2080,19 @@
    <op optype="MoveCursor" memberid="Joe" position="15" length="0"/>
   </ops>
   <after>
-   <office:text><text:p/><text:p>A<office:annotation office:name="a"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p></text:p></text:list-item></text:list></office:annotation>D<office:annotation-end office:name="a"/>EFGH</text:p><text:p>12345<c:cursor c:memberId="Joe"/>678</text:p></office:text>.
+   <office:text>
+    <text:p/>
+    <text:p>A<office:annotation office:name="a">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>D<office:annotation-end office:name="a"/>EFGH</text:p>
+    <text:p>12345<c:cursor c:memberId="Joe"/>678</text:p>
+   </office:text>.
   </after>
  </test>
  <test name="RemoveText_CopesWithEmptyTextNodes" hasSetup="true">

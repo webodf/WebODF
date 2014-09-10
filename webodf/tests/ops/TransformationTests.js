@@ -32,7 +32,8 @@
  */
 ops.TransformationTests = function TransformationTests(runner) {
     "use strict";
-    var r = runner, t, tests;
+    var r = runner, t, tests,
+        opsTestHelper = new ops.OperationTestHelper();
 
     function serialize(element) {
         var serializer = new xmldom.LSSerializer();
@@ -322,6 +323,7 @@ ops.TransformationTests = function TransformationTests(runner) {
         runtime.assert(Boolean(opsBElement), "Expected <ops/> in " + name + ".");
         runtime.assert(Boolean(after), "Expected <after/> in " + name + ".");
         runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
+        opsTestHelper.removeInsignificantTextNodes(element);
         return {
             isFailing: isFailing,
             before: before,

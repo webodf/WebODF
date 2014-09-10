@@ -31,7 +31,8 @@
  */
 ops.OperationTests = function OperationTests(runner) {
     "use strict";
-    var self = this, r = runner, t, tests;
+    var self = this, r = runner, t, tests,
+        opsTestHelper = new ops.OperationTestHelper();
 
     function serialize(element) {
         var serializer = new xmldom.LSSerializer();
@@ -185,6 +186,7 @@ ops.OperationTests = function OperationTests(runner) {
         runtime.assert(after.localName === "after", "Expected <after/> in " + name + ".");
         runtime.assert(checkWhitespace(after, "s", " "), "Unexpanded text:s element or text:c attribute found in " + name + ".");
         runtime.assert(checkWhitespace(after, "tab", "\t"), "Unexpanded text:tab element found in " + name + ".");
+        opsTestHelper.removeInsignificantTextNodes(node);
         op = opsElement.firstElementChild;
         while (op) {
             runtime.assert(op.localName === "op", "Expected <op/> in " + name + ".");
