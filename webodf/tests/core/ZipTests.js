@@ -47,8 +47,8 @@ core.ZipTests = function ZipTests(runner) {
         var path = "core/ZipTests.js";
         // check that file exists
         path = r.resourcePrefix() + path;
-        runtime.isFile(path, function (exists) {
-            t.exists = exists;
+        runtime.readFile(path, "binary", function (error, data) {
+            t.exists = !error && Boolean(data);
             r.shouldBe(t, "t.exists", "true");
             // check that zip file opening returns an error
             t.zip = new core.Zip("core/ZipTests.js", function (err) {

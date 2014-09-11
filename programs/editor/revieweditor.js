@@ -77,8 +77,7 @@ function createReviewEditor() {
 
     function enhanceRuntime() {
         var openedFiles = {},
-            read = runtime.read,
-            getFileSize = runtime.getFileSize;
+            read = runtime.read;
         runtime.read = function (path, offset, length, callback) {
             var array;
             if (openedFiles.hasOwnProperty(path)) {
@@ -86,13 +85,6 @@ function createReviewEditor() {
                 callback(undefined, array);
             } else {
                 return read(path, offset, length, callback);
-            }
-        };
-        runtime.getFileSize = function (path, callback) {
-            if (openedFiles.hasOwnProperty(path)) {
-                return callback(openedFiles[path].byteLength);
-            } else {
-                return getFileSize(path, callback);
             }
         };
         runtime.registerFile = function (path, data) {
