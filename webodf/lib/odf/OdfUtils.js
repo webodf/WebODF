@@ -56,7 +56,8 @@ odf.OdfUtils = function OdfUtils() {
             odf.Namespaces.svgns,
             odf.Namespaces.tablens,
             odf.Namespaces.textns
-        ];
+        ],
+        odfSchema = odf.OdfSchema;
 
     /**
      * Determine if the node is a draw:image element.
@@ -269,12 +270,25 @@ odf.OdfUtils = function OdfUtils() {
         }
         var e = /**@type{!Element}*/(n),
             localName = e.localName;
-        return (/^(span|p|h|a|meta)$/.test(localName)
-                && e.namespaceURI === textns)
-               || (localName === "span"
-                   && e.className === "webodf-annotationHighlight");
+        return odfSchema.isTextContainer(e.namespaceURI, localName)
+               || (localName === "span" && e.className === "webodf-annotationHighlight");
     }
     this.isGroupingElement = isGroupingElement;
+
+    /**
+     * @param {?Node} n
+     * @return {!boolean}
+     */
+    function isFieldElement(n) {
+        if (n === null || n.nodeType !== Node.ELEMENT_NODE) {
+            return false;
+        }
+        var e = /**@type{!Element}*/(n),
+            localName = e.localName;
+        return odfSchema.isField(e.namespaceURI, localName);
+    }
+    this.isFieldElement = isFieldElement;
+
     /**
      * Determine if the node is a character element,
      * namely "s", "tab", or "line-break".
@@ -305,7 +319,7 @@ odf.OdfUtils = function OdfUtils() {
      * @return {!boolean}
      */
     function isAnchoredAsCharacterElement(e) {
-        return isCharacterElement(e) || isCharacterFrame(e) || isInlineRoot(e);
+        return isCharacterElement(e) || isFieldElement(e) || isCharacterFrame(e) || isInlineRoot(e);
     }
     this.isAnchoredAsCharacterElement = isAnchoredAsCharacterElement;
     /**
@@ -344,7 +358,7 @@ odf.OdfUtils = function OdfUtils() {
      */
     function hasNoODFContent(node) {
         var childNode;
-        if (isCharacterElement(node)) {
+        if (isCharacterElement(node) || isFieldElement(node)) {
             return false;
         }
         if (isGroupingElement(/**@type{!Node}*/(node.parentNode)) && node.nodeType === Node.TEXT_NODE) {
@@ -843,7 +857,7 @@ odf.OdfUtils = function OdfUtils() {
         function nodeFilter(node) {
             var result = NodeFilter.FILTER_REJECT;
             // do not return anything inside an character element or an inline root such as an annotation
-            if (isCharacterElement(node.parentNode) || isInlineRoot(node)) {
+            if (isCharacterElement(node.parentNode) || isFieldElement(node.parentNode) || isInlineRoot(node)) {
                 result = NodeFilter.FILTER_REJECT;
             } else if (node.nodeType === Node.TEXT_NODE) {
                 if (includeInsignificantWhitespace || isSignificantTextContent(/**@type{!Text}*/(node))) {
