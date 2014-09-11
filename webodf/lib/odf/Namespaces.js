@@ -31,6 +31,7 @@
  */
 odf.Namespaces = {
     namespaceMap: {
+        config: "urn:oasis:names:tc:opendocument:xmlns:config:1.0",
         db: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
         dc: "http://purl.org/dc/elements/1.1/",
         dr3d: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
@@ -38,6 +39,7 @@ odf.Namespaces = {
         chart: "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
         fo: "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
         form: "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+        math: "http://www.w3.org/1998/Math/MathML",
         meta: "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
         number: "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
         office: "urn:oasis:names:tc:opendocument:xmlns:office:1.0",
@@ -46,11 +48,13 @@ odf.Namespaces = {
         svg: "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
         table: "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         text: "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+        xforms: "http://www.w3.org/2002/xforms",
         xlink: 'http://www.w3.org/1999/xlink',
         xml: "http://www.w3.org/XML/1998/namespace"
     },
     /**@type{!Object.<string,string>}*/
     prefixMap: {},
+    configns: "urn:oasis:names:tc:opendocument:xmlns:config:1.0",
     dbns: "urn:oasis:names:tc:opendocument:xmlns:database:1.0",
     dcns: "http://purl.org/dc/elements/1.1/",
     dr3dns: "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0",
@@ -58,6 +62,7 @@ odf.Namespaces = {
     chartns: "urn:oasis:names:tc:opendocument:xmlns:chart:1.0",
     fons: "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0",
     formns: "urn:oasis:names:tc:opendocument:xmlns:form:1.0",
+    mathns: "http://www.w3.org/1998/Math/MathML",
     metans: "urn:oasis:names:tc:opendocument:xmlns:meta:1.0",
     numberns: "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0",
     /**
@@ -70,6 +75,7 @@ odf.Namespaces = {
     svgns: "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0",
     tablens: "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
     textns: "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
+    xformsns: "http://www.w3.org/2002/xforms",
     xlinkns: 'http://www.w3.org/1999/xlink',
     xmlns: "http://www.w3.org/XML/1998/namespace"
 };
