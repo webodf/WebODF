@@ -43,6 +43,9 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
             if (node.localName === "c") {
                 return NodeFilter.FILTER_SKIP;
             }
+            if (node.nodeType === Node.TEXT_NODE && node.data === "xxxx") {
+                return NodeFilter.FILTER_REJECT;
+            }
             return NodeFilter.FILTER_ACCEPT;
         };
     }
@@ -390,6 +393,16 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
         r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
         r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
     }
+    function testSetUnfilteredPosition_ImmediatelyMovesToNextValidPosition_FirstChildIsText() {
+        createWalker('<p>xxxx<b id="b1"/><a id="a1"/><b id="b2"/><b id="b3"/><a id="a2"/><b id="b4"/><a id="a3"/></p>');
+        t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0], 0);
+        r.shouldBe(t, "t.iterator.container()", "t.doc.documentElement");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "2");
+
+        t.iterator.nextPosition();
+        r.shouldBe(t, "t.iterator.container().getAttribute('id')", "'a1'");
+        r.shouldBe(t, "t.iterator.unfilteredDomOffset()", "0");
+    }
     function testSetUnfilteredPosition_ChildOfInvalidNode_ImmediatelyMovesToNextValidPosition() {
         createWalker('<p><b id="b1"><a id="a0"/></b><a id="a1"/></p>');
         t.iterator.setUnfilteredPosition(t.doc.documentElement.childNodes[0].childNodes[0], 0); // a0
@@ -592,6 +605,7 @@ core.PositionIteratorTests = function PositionIteratorTests(runner) {
 
             testSetUnfilteredPosition_UsesUnfilteredOffsets,
             testSetUnfilteredPosition_ImmediatelyMovesToNextValidPosition,
+            testSetUnfilteredPosition_ImmediatelyMovesToNextValidPosition_FirstChildIsText,
             testSetUnfilteredPosition_ChildOfInvalidNode_ImmediatelyMovesToNextValidPosition,
             testSetUnfilteredPosition_TextChildOfInvalidNode_ImmediatelyMovesToNextValidPosition,
             testSetUnfilteredPosition_GrandChildOfInvalidNode_ImmediatelyMovesToNextValidPosition,

@@ -988,7 +988,7 @@
             webKitOrSafari = appVersion.indexOf('chrome') === -1
                 && (appVersion.indexOf('applewebkit') !== -1
                     || appVersion.indexOf('safari') !== -1);
-            ie = appVersion.indexOf('msie'); // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
+            ie = appVersion.indexOf('msie') !== -1; // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
             if (webKitOrSafari || ie) {
                 self.containsNode = containsNodeForBrokenWebKit;
             }

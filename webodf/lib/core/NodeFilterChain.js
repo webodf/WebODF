@@ -22,35 +22,29 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global gui, NodeFilter*/
+/*global core, NodeFilter*/
 
 /**
  * @constructor
  * @extends NodeFilter
- * @param {!Array.<!string>} excludedNamespaces
+ * @param {!Array.<!NodeFilter>} filters
  */
-gui.BlacklistNamespaceNodeFilter = function (excludedNamespaces) {
+core.NodeFilterChain = function (filters) {
     "use strict";
-    var /**@type{!Object.<!string, !boolean>}*/
-        excludedNamespacesObj = {},
-        FILTER_REJECT = NodeFilter.FILTER_REJECT,
+    var FILTER_REJECT = NodeFilter.FILTER_REJECT,
         FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT;
 
     /**
-     * @param {?Node} node
+     * @param {!Node} node
      * @return {!number}
      */
     this.acceptNode = function (node) {
-        if (!node || excludedNamespacesObj.hasOwnProperty(node.namespaceURI)) {
-            return FILTER_REJECT;
+        var i;
+        for (i = 0; i < filters.length; i += 1) {
+            if (filters[i].acceptNode(node) === FILTER_REJECT) {
+                return FILTER_REJECT;
+            }
         }
         return FILTER_ACCEPT;
     };
-
-    function init() {
-        excludedNamespaces.forEach(function(ns) {
-            excludedNamespacesObj[ns] = true;
-        });
-    }
-    init();
 };

@@ -26,10 +26,9 @@
 
 /**
  * @constructor
- * @param {!function():!Node} getRootNode
  * @implements {core.PositionFilter}
  */
-ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
+ops.TextPositionFilter = function TextPositionFilter() {
     "use strict";
     var odfUtils = new odf.OdfUtils(),
         ELEMENT_NODE = Node.ELEMENT_NODE,
@@ -119,13 +118,6 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
             return FILTER_REJECT;
         }
         if (nodeType === TEXT_NODE) {
-            if (!odfUtils.isGroupingElement(container.parentNode)
-                    || odfUtils.isWithinTrackedChanges(
-                        container.parentNode,
-                        getRootNode()
-                    )) {
-                return FILTER_REJECT;
-            }
             // In a PositionIterator, the offset in a text node is never
             // equal to the length of the text node.
             offset = iterator.unfilteredDomOffset();
@@ -176,8 +168,7 @@ ops.TextPositionFilter = function TextPositionFilter(getRootNode) {
             rightNode = container;
             container = /**@type{!Node}*/(container.parentNode);
             r = checkLeftRight(container, leftNode, rightNode);
-        } else if (!odfUtils.isGroupingElement(container)
-                || odfUtils.isWithinTrackedChanges(container, getRootNode())) {
+        } else if (!odfUtils.isGroupingElement(container)) {
             r = FILTER_REJECT;
         } else {
             leftNode = iterator.leftNode();
