@@ -143,8 +143,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
             annotation, annotationEnd,
             cursor = odtDocument.getCursor(memberid),
             selectedRange,
-            paragraphElement,
-            domUtils = new core.DomUtils();
+            paragraphElement;
 
         doc = odtDocument.getDOMDocument();
 
@@ -165,7 +164,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         // by selecting the paragraph's range.
         if (cursor) {
             selectedRange = doc.createRange();
-            paragraphElement = domUtils.getElementsByTagNameNS(annotation, odf.Namespaces.textns, "p")[0];
+            paragraphElement = /**@type{!Element}*/(annotation.getElementsByTagNameNS(odf.Namespaces.textns, "p")[0]);
             selectedRange.selectNodeContents(paragraphElement);
             cursor.setSelectedRange(selectedRange, false);
             cursor.setSelectionType(ops.OdtCursor.RangeSelection);

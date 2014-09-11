@@ -600,7 +600,12 @@
         this.removeUnwantedNodes = removeUnwantedNodes;
 
         /**
-         * Get an array of nodes below the specified node with the specific namespace and tag name
+         * Get an array of nodes below the specified node with the specific namespace and tag name.
+         *
+         * Use this function instead of node.getElementsByTagNameNS when modifications are going to be made
+         * to the document content during iteration. For read-only uses, node.getElementsByTagNameNS will perform
+         * faster and use less memory. See https://github.com/kogmbh/WebODF/issues/736 for further discussion.
+         *
          * @param {!Element|!Document} node
          * @param {!string} namespace
          * @param {!string} tagName
@@ -619,6 +624,11 @@
 
         /**
          * Get an array of nodes below the specified node with the specific name tag name.
+         *
+         * Use this function instead of node.getElementsByTagName when modifications are going to be made
+         * to the document content during iteration. For read-only uses, node.getElementsByTagName will perform
+         * faster and use less memory. See https://github.com/kogmbh/WebODF/issues/736 for further discussion.
+         *
          * @param {!Element|!Document} node
          * @param {!string} tagName
          * @return {!Array.<!Element>}

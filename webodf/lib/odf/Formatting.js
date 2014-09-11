@@ -631,11 +631,11 @@ odf.Formatting = function Formatting() {
                 // It would be surprising if we still haven't found a page by now. Still, better safe than sorry!
                 // Note, all warnings are already logged in the above conditions
                 layoutName = node.getAttributeNS(stylens, "page-layout-name");
-                pageLayoutElements = domUtils.getElementsByTagNameNS(odfContainer.rootElement.automaticStyles, stylens, "page-layout");
+                pageLayoutElements = odfContainer.rootElement.automaticStyles.getElementsByTagNameNS(stylens, "page-layout");
                 for (i = 0; i < pageLayoutElements.length; i += 1) {
-                    node = pageLayoutElements[i];
+                    node = /**@type{!Element}*/(pageLayoutElements.item(i));
                     if (node.getAttributeNS(stylens, "name") === layoutName) {
-                        return /** @type {!Element} */(node);
+                        return node;
                     }
                 }
             }

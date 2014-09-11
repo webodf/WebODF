@@ -295,7 +295,7 @@
             document = rootElement.ownerDocument,
             e;
 
-        containerList = rootElement.getElementsByTagNameNS(ns, localName);
+        containerList = domUtils.getElementsByTagNameNS(rootElement, ns, localName);
         for (i = 0; i < containerList.length; i += 1) {
             clear(containerList[i]);
             if (value) {
@@ -457,9 +457,9 @@
                     node.getAttributeNS(tablens, "number-rows-spanned"));
             }
         }
-        tableCells = odffragment.getElementsByTagNameNS(tablens, 'table-cell');
+        tableCells = domUtils.getElementsByTagNameNS(odffragment, tablens, 'table-cell');
         for (i = 0; i < tableCells.length; i += 1) {
-            node = /**@type{!Element}*/(tableCells.item(i));
+            node = /**@type{!Element}*/(tableCells[i]);
             modifyTableCell(node);
         }
     }
@@ -622,7 +622,7 @@
                 dropTemplateDrawFrames(clonedPageElement);
 
                 // Position all elements
-                clonedDrawElements = clonedPageElement.getElementsByTagNameNS(drawns, '*');
+                clonedDrawElements = domUtils.getElementsByTagNameNS(clonedPageElement, drawns, '*');
                 for (i = 0; i < clonedDrawElements.length; i += 1) {
                     setDrawElementPosition(styleId + '_' + i, clonedDrawElements[i], stylesheet);
                 }

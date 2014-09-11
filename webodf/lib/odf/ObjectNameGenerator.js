@@ -50,7 +50,6 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
     var stylens = odf.Namespaces.stylens,
         drawns = odf.Namespaces.drawns,
         xlinkns = odf.Namespaces.xlinkns,
-        domUtils = new core.DomUtils(),
         utils = new core.Utils(),
         memberIdHash = utils.hashString(memberId),
         styleNameGenerator = null,
@@ -134,11 +133,13 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
      * @return {!string}
      */
     this.generateFrameName = function () {
+        var i, nodes, node;
         if (frameNameGenerator === null) {
-            var nodes = domUtils.getElementsByTagNameNS(odfContainer.rootElement.body, drawns, 'frame');
-            nodes.forEach(function (frame) {
-                existingFrameNames[frame.getAttributeNS(drawns, 'name')] = true;
-            });
+            nodes = odfContainer.rootElement.body.getElementsByTagNameNS(drawns, 'frame');
+            for (i = 0; i < nodes.length; i += 1) {
+                node = /**@type{!Element}*/(nodes.item(i));
+                existingFrameNames[node.getAttributeNS(drawns, 'name')] = true;
+            }
 
             frameNameGenerator = new NameGenerator(
                 "fr" + memberIdHash + "_",
@@ -154,13 +155,16 @@ odf.ObjectNameGenerator = function ObjectNameGenerator(odfContainer, memberId) {
      * @return {!string}
      */
     this.generateImageName = function () {
+        var i, path, nodes, node;
+
         if (imageNameGenerator === null) {
-            var nodes = domUtils.getElementsByTagNameNS(odfContainer.rootElement.body, drawns, 'image');
-            nodes.forEach(function (image) {
-                var path = image.getAttributeNS(xlinkns, 'href');
+            nodes = odfContainer.rootElement.body.getElementsByTagNameNS(drawns, 'image');
+            for (i = 0; i < nodes.length; i += 1) {
+                node = /**@type{!Element}*/(nodes.item(i));
+                path = node.getAttributeNS(xlinkns, 'href');
                 path = path.substring("Pictures/".length, path.lastIndexOf('.'));
                 existingImageNames[path] = true;
-            });
+            }
 
             imageNameGenerator = new NameGenerator(
                 "img" + memberIdHash + "_",
