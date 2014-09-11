@@ -31,8 +31,10 @@
  */
 gui.BlacklistNamespaceNodeFilter = function (excludedNamespaces) {
     "use strict";
-    /**@type{!Object.<!string, !boolean>}*/
-    var excludedNamespacesObj = {};
+    var /**@type{!Object.<!string, !boolean>}*/
+        excludedNamespacesObj = {},
+        FILTER_REJECT = NodeFilter.FILTER_REJECT,
+        FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT;
 
     /**
      * @param {?Node} node
@@ -40,9 +42,9 @@ gui.BlacklistNamespaceNodeFilter = function (excludedNamespaces) {
      */
     this.acceptNode = function (node) {
         if (!node || excludedNamespacesObj.hasOwnProperty(node.namespaceURI)) {
-            return NodeFilter.FILTER_REJECT;
+            return FILTER_REJECT;
         }
-        return NodeFilter.FILTER_ACCEPT;
+        return FILTER_ACCEPT;
     };
 
     function init() {
