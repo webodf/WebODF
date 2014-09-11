@@ -340,8 +340,8 @@ core.PositionIterator = function PositionIterator(root, whatToShow, filter,
         }
 
         if (filterResult === FILTER_REJECT) {
-            // Set currentPos will be 1, so nextPosition will jump to the next sibling or parent
-            currentPos = 1;
+            // Set currentPos to be 1 (or text data.length), so nextPosition will jump to the next sibling or parent
+            currentPos = walker.currentNode.nodeType === TEXT_NODE ? /**@type{!Text}*/(node).length : 1;
             moveResult = self.nextPosition();
         } else if (filterResult === FILTER_ACCEPT) {
             moveResult = true;
