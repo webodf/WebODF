@@ -11,6 +11,12 @@
         "core.DomUtils",
         "core.UnitTester"
     ],
+    "core.EventSubscriptionsTests": [
+        "core.EventNotifier",
+        "core.EventSubscriptions",
+        "core.Task",
+        "core.UnitTester"
+    ],
     "core.PositionIteratorTests": [
         "core.PositionIterator",
         "core.UnitTester"

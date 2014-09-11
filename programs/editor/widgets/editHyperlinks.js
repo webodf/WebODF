@@ -35,6 +35,8 @@ define("webodf/editor/widgets/editHyperlinks", [
         "use strict";
 
         runtime.loadClass("odf.OdfUtils");
+        runtime.loadClass("odf.TextSerializer");
+        runtime.loadClass("core.EventSubscriptions");
 
         var EditHyperlinks = function (callback) {
             var self = this,
@@ -46,6 +48,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 removeHyperlinkButton,
                 odfUtils = new odf.OdfUtils(),
                 textSerializer = new odf.TextSerializer(),
+                eventSubscriptions = new core.EventSubscriptions(),
                 dialog;
 
             function updateLinkEditorContent() {
@@ -79,17 +82,19 @@ define("webodf/editor/widgets/editHyperlinks", [
                 }
             }
 
-            function checkHyperlinkButtons() {
-                var linksInSelection = editorSession.getSelectedHyperlinks();
+            function updateHyperlinkButtons() {
+                var controllerEnabled = hyperlinkController && hyperlinkController.isEnabled(),
+                    linksInSelection = controllerEnabled && editorSession.getSelectedHyperlinks();
 
-                // The 3rd parameter is false to avoid firing onChange when setting the value programmatically.
-                removeHyperlinkButton.set('disabled', linksInSelection.length === 0, false);
-            }
-
-            function enableHyperlinkButtons(isEnabled) {
+                // Enable to disable all widgets initially
                 widget.children.forEach(function (element) {
-                    element.setAttribute('disabled', !isEnabled);
+                    element.set('disabled', controllerEnabled === false, false);
                 });
+                if (controllerEnabled) {
+                    // Specifically enable the remove hyperlink button only if there are links in the current selection
+                    linksInSelection = editorSession.getSelectedHyperlinks();
+                    removeHyperlinkButton.set('disabled', linksInSelection.length === 0, false);
+                }
             }
 
             function updateSelectedLink(hyperlinkData) {
@@ -117,27 +122,17 @@ define("webodf/editor/widgets/editHyperlinks", [
             }
 
             this.setEditorSession = function (session) {
-                if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
-                    editorSession.unsubscribe(EditorSession.signalParagraphChanged, checkHyperlinkButtons);
-                    editorSession.unsubscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
-                    hyperlinkController.unsubscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
-                }
-
+                eventSubscriptions.unsubscribeAll();
+                hyperlinkController = undefined;
                 editorSession = session;
                 if (editorSession) {
                     hyperlinkController = editorSession.sessionController.getHyperlinkController();
-
-                    editorSession.subscribe(EditorSession.signalCursorMoved, checkHyperlinkButtons);
-                    editorSession.subscribe(EditorSession.signalParagraphChanged, checkHyperlinkButtons);
-                    editorSession.subscribe(EditorSession.signalParagraphStyleModified, checkHyperlinkButtons);
-                    hyperlinkController.subscribe(gui.HyperlinkController.enabledChanged, enableHyperlinkButtons);
-
-                    enableHyperlinkButtons(hyperlinkController.isEnabled());
-                    checkHyperlinkButtons();
-                } else {
-                    enableHyperlinkButtons( false );
+                    eventSubscriptions.addFrameSubscription(editorSession, EditorSession.signalCursorMoved, updateHyperlinkButtons);
+                    eventSubscriptions.addFrameSubscription(editorSession, EditorSession.signalParagraphChanged, updateHyperlinkButtons);
+                    eventSubscriptions.addFrameSubscription(editorSession, EditorSession.signalParagraphStyleModified, updateHyperlinkButtons);
+                    eventSubscriptions.addSubscription(hyperlinkController, gui.HyperlinkController.enabledChanged, updateHyperlinkButtons);
                 }
+                updateHyperlinkButtons();
             };
 
             this.onToolDone = function () {};

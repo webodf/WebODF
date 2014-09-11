@@ -27,6 +27,7 @@
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.DomUtilsTests");
+runtime.loadClass("core.EventSubscriptionsTests");
 runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.StepIteratorTests");
@@ -84,6 +85,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
 //     tests.push(core.CursorTests);
     tests.push(core.PositionIteratorTests);
     tests.push(core.DomUtilsTests);
+    tests.push(core.EventSubscriptionsTests);
     tests.push(core.StepIteratorTests);
     tests.push(gui.DirectFormattingControllerTests);
     tests.push(gui.GuiStepUtilsTests);

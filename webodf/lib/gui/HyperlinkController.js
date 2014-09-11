@@ -27,6 +27,7 @@
 /**
  * @constructor
  * @implements {core.Destroyable}
+ * @implements {core.EventSource}
  * @param {!ops.Session} session
  * @param {!gui.SessionConstraints} sessionConstraints
  * @param {!gui.SessionContext} sessionContext

@@ -52,10 +52,11 @@ define("webodf/editor/EditorSession", [
 
     /**
      * Instantiate a new editor session attached to an existing operation session
+     * @constructor
+     * @implements {core.EventSource}
      * @param {!ops.Session} session
      * @param {!string} localMemberId
      * @param {{viewOptions:gui.SessionViewOptions,directParagraphStylingEnabled:boolean,annotationsEnabled:boolean}} config
-     * @constructor
      */
     var EditorSession = function EditorSession(session, localMemberId, config) {
         var self = this,

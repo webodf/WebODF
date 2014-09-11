@@ -167,16 +167,8 @@ define("webodf/editor/widgets/simpleStyles", [
                 });
             }
 
-            function handleCursorMoved(cursor) {
-                if (directFormattingController.enabledFeatures().directTextStyling) {
-                    var disabled = cursor.getSelectionType() === ops.OdtCursor.RegionSelection;
-                    enableStyleButtons({ directTextStyling: !disabled });
-                }
-            }
-
             this.setEditorSession = function(session) {
                 if (editorSession) {
-                    editorSession.unsubscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.unsubscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
                 }
@@ -186,7 +178,6 @@ define("webodf/editor/widgets/simpleStyles", [
                 if (editorSession) {
                     directFormattingController = editorSession.sessionController.getDirectFormattingController();
 
-                    editorSession.subscribe(EditorSession.signalCursorMoved, handleCursorMoved);
                     directFormattingController.subscribe(gui.DirectFormattingController.textStylingChanged, updateStyleButtons);
                     directFormattingController.subscribe(gui.DirectFormattingController.enabledChanged, enableStyleButtons);
 
