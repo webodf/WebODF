@@ -110,12 +110,6 @@ Runtime.prototype.loadXML = function (path, callback) {"use strict"; };
 Runtime.prototype.writeFile = function (path, data, callback) {"use strict"; };
 /**
  * @param {!string} path
-/**
- * @param {!string} path
- * @param {!function(number):undefined} callback
- * @return {undefined}
- */
-Runtime.prototype.getFileSize = function (path, callback) {"use strict"; };
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
@@ -791,44 +785,12 @@ function BrowserRuntime(logoutput) {
             callback(e.message, null);
         }
     }
-    /**
-     * @param {!string} path
-     * @param {!function(number):undefined} callback
-     * @return {undefined}
-     */
-    function getFileSize(path, callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("HEAD", path, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState !== 4) {
-                return;
-            }
-            var cl = xhr.getResponseHeader("Content-Length");
-            if (cl) {
-                callback(parseInt(cl, 10));
-            } else {
-                // Due to CORS implementation bugs, some browsers will not allow access to certain headers
-                // even if the server says it's ok. This specific bug was observed in Cocoa's WebView on OSX10.8.
-                // However, even though the browser won't pull the content-length header (coz it's a security risk!)
-                // the content can still be fetched.
-                readFile(path, "binary", function (err, data) {
-                    if (!err) {
-                        callback(data.length);
-                    } else {
-                        callback(-1);
-                    }
-                });
-            }
-        };
-        xhr.send(null);
-    }
     this.readFile = readFile;
     this.read = read;
     this.readFileSync = readFileSync;
     this.writeFile = writeFile;
     this.deleteFile = deleteFile;
     this.loadXML = loadXML;
-    this.getFileSize = getFileSize;
     this.log = log;
     this.enableAlerts = true;
     this.assert = Runtime.assert;
@@ -1112,21 +1074,6 @@ function NodeJSRuntime() {
             s = /**@type{!string}*/(r);
         }
         return s;
-    };
-    /**
-     * @param {!string} path
-     * @param {!function(number):undefined} callback
-     * @return {undefined}
-     */
-    this.getFileSize = function (path, callback) {
-        path = pathmod.resolve(currentDirectory, path);
-        fs.stat(path, function (err, stats) {
-            if (err) {
-                callback(-1);
-            } else {
-                callback(stats.size);
-            }
-        });
     };
     /**
      * @param {!string} msgOrCategory
@@ -1439,18 +1386,6 @@ function RhinoRuntime() {
             throw "File could not be read.";
         }
         return s;
-    };
-    /**
-     * @param {!string} path
-     * @param {!function(number):undefined} callback
-     * @return {undefined}
-     */
-    this.getFileSize = function (path, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
-        var file = new Packages.java.io.File(path);
-        callback(file.length());
     };
     /**
      * @param {!string} msgOrCategory

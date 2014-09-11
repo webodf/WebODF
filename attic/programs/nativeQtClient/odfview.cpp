@@ -75,9 +75,6 @@ OdfView::slotLoadFinished(bool ok) {
             "    var data = nativeio.read(path, offset, length);"
             "    data = runtime.byteArrayFromString(data, 'binary');"
             "    callback(nativeio.error()||null, data);"
-            "};"
-            "runtime.getFileSize = function (path, callback) {"
-            "    callback(nativeio.getFileSize(path));"
             "};";
     frame->evaluateJavaScript(js);
 }

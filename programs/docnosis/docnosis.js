@@ -783,20 +783,12 @@ function Docnosis(element) {
     }
 
     function enhanceRuntime() {
-        var read = runtime.read,
-            getFileSize = runtime.getFileSize;
+        var read = runtime.read;
         runtime.read = function (path, offset, length, callback) {
             if (openedFiles.hasOwnProperty(path)) {
                 return openedFiles[path].read(offset, length, callback);
             } else {
                 return read(path, offset, length, callback);
-            }
-        };
-        runtime.getFileSize = function (path, callback) {
-            if (openedFiles.hasOwnProperty(path)) {
-                return callback(openedFiles[path].file.size);
-            } else {
-                return getFileSize(path, callback);
             }
         };
     }
