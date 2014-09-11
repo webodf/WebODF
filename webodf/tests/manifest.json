@@ -214,6 +214,9 @@
         "ops.OdtStepsTranslator",
         "ops.TextPositionFilter"
     ],
+    "ops.OperationTestHelper": [
+        "odf.OdfUtils"
+    ],
     "ops.OperationTests": [
         "core.UnitTester",
         "core.enums",
@@ -224,6 +227,7 @@
         "ops.Member",
         "ops.OdtDocument",
         "ops.OperationFactory",
+        "ops.OperationTestHelper",
         "xmldom.LSSerializer"
     ],
     "ops.SessionTests": [
@@ -240,6 +244,7 @@
         "ops.OdtDocument",
         "ops.Operation",
         "ops.OperationFactory",
+        "ops.OperationTestHelper",
         "ops.OperationTransformer",
         "xmldom.LSSerializer"
     ],
