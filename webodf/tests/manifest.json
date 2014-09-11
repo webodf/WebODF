@@ -210,6 +210,7 @@
         "core.PositionIterator",
         "core.UnitTester",
         "core.enums",
+        "gui.OdfTextBodyNodeFilter",
         "odf.Namespaces",
         "ops.OdtStepsTranslator",
         "ops.TextPositionFilter"

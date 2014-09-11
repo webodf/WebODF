@@ -30,6 +30,8 @@
     ],
     "core.LoopWatchDog": [
     ],
+    "core.NodeFilterChain": [
+    ],
     "core.PositionFilter": [
         "core.PositionIterator"
     ],
@@ -157,6 +159,9 @@
     "gui.MimeDataExporter": [
         "odf.OdfNodeFilter",
         "odf.TextSerializer"
+    ],
+    "gui.OdfTextBodyNodeFilter": [
+        "odf.OdfUtils"
     ],
     "gui.ParagraphBoundaryScanner": [
         "gui.VisualStepScanner",
@@ -372,8 +377,10 @@
         "ops.Document"
     ],
     "ops.OdtDocument": [
+        "core.NodeFilterChain",
         "core.PositionFilterChain",
         "gui.BlacklistNamespaceNodeFilter",
+        "gui.OdfTextBodyNodeFilter",
         "odf.OdfCanvas",
         "odf.StepUtils",
         "ops.Member",

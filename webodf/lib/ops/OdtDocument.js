@@ -79,7 +79,9 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         lastEditingOp,
         unsupportedMetadataRemoved = false,
         /**@const*/ SHOW_ALL = NodeFilter.SHOW_ALL,
-        defaultNodeFilter = new gui.BlacklistNamespaceNodeFilter(["urn:webodf:names:cursor", "urn:webodf:names:editinfo"]);
+        blacklistedNodes = new gui.BlacklistNamespaceNodeFilter(["urn:webodf:names:cursor", "urn:webodf:names:editinfo"]),
+        odfTextBodyFilter = new gui.OdfTextBodyNodeFilter(),
+        defaultNodeFilter = new core.NodeFilterChain([blacklistedNodes, odfTextBodyFilter]);
 
     /**
      *
@@ -945,7 +947,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {undefined}
      */
     function init() {
-        filter = new ops.TextPositionFilter(getRootNode);
+        filter = new ops.TextPositionFilter();
         odfUtils = new odf.OdfUtils();
         domUtils = new core.DomUtils();
         stepUtils = new odf.StepUtils();

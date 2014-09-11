@@ -130,13 +130,13 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
      * @return {!core.PositionIterator}
      */
     function createPositionIterator(rootNode) {
-        return new core.PositionIterator(rootNode, NodeFilter.SHOW_ALL, undefined, false);
+        return new core.PositionIterator(rootNode, NodeFilter.SHOW_ALL, new gui.OdfTextBodyNodeFilter(), false);
     }
 
     this.setUp = function () {
         testarea = core.UnitTest.provideTestAreaDiv();
         t = {
-            filter: new CallCountedPositionFilter(new ops.TextPositionFilter(function() { return testarea; }))
+            filter: new CallCountedPositionFilter(new ops.TextPositionFilter())
         };
         t.translator = new ops.OdtStepsTranslator(function() { return testarea; },
             createPositionIterator,
