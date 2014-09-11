@@ -110,18 +110,12 @@ Runtime.prototype.loadXML = function (path, callback) {"use strict"; };
 Runtime.prototype.writeFile = function (path, data, callback) {"use strict"; };
 /**
  * @param {!string} path
- * @param {!function(boolean):undefined} callback
- * @return {undefined}
- */
-Runtime.prototype.isFile = function (path, callback) {"use strict"; };
 /**
  * @param {!string} path
  * @param {!function(number):undefined} callback
  * @return {undefined}
  */
 Runtime.prototype.getFileSize = function (path, callback) {"use strict"; };
-/**
- * @param {!string} path
  * @param {!function(?string):undefined} callback
  * @return {undefined}
  */
@@ -799,16 +793,6 @@ function BrowserRuntime(logoutput) {
     }
     /**
      * @param {!string} path
-     * @param {!function(boolean):undefined} callback
-     * @return {undefined}
-     */
-    function isFile(path, callback) {
-        self.getFileSize(path, function (size) {
-            callback(size !== -1);
-        });
-    }
-    /**
-     * @param {!string} path
      * @param {!function(number):undefined} callback
      * @return {undefined}
      */
@@ -844,7 +828,6 @@ function BrowserRuntime(logoutput) {
     this.writeFile = writeFile;
     this.deleteFile = deleteFile;
     this.loadXML = loadXML;
-    this.isFile = isFile;
     this.getFileSize = getFileSize;
     this.log = log;
     this.enableAlerts = true;
@@ -1012,17 +995,6 @@ function NodeJSRuntime() {
     this.toJson = Runtime.toJson;
 
     /**
-     * @param {!string} path
-     * @param {!function(boolean):undefined} callback
-     * @return {undefined}
-     */
-    function isFile(path, callback) {
-        path = pathmod.resolve(currentDirectory, path);
-        fs.stat(path, function (err, stats) {
-            callback(!err && stats.isFile());
-        });
-    }
-    /**
      * Read the contents of a file. Returns the result via a callback. If the
      * encoding is 'binary', the result is returned as a Uint8Array,
      * otherwise, it is returned as a string.
@@ -1141,7 +1113,6 @@ function NodeJSRuntime() {
         }
         return s;
     };
-    this.isFile = isFile;
     /**
      * @param {!string} path
      * @param {!function(number):undefined} callback
@@ -1391,18 +1362,6 @@ function RhinoRuntime() {
         }
         return readFile(path, encoding);
     }
-    /**
-     * @param {!string} path
-     * @param {!function(boolean):undefined} callback
-     * @return {undefined}
-     */
-    function isFile(path, callback) {
-        if (currentDirectory) {
-            path = currentDirectory + "/" + path;
-        }
-        var file = new Packages.java.io.File(path);
-        callback(file.isFile());
-    }
     this.loadXML = loadXML;
     this.readFile = runtimeReadFile;
     /**
@@ -1481,7 +1440,6 @@ function RhinoRuntime() {
         }
         return s;
     };
-    this.isFile = isFile;
     /**
      * @param {!string} path
      * @param {!function(number):undefined} callback
