@@ -98,6 +98,10 @@ endforeach(JSFILE ${TESTJSFILES})
 # -XX:+TieredCompilation reduces compilation time by about 30%
 set(SHARED_CLOSURE_ARGS -XX:+TieredCompilation -jar ${CLOSURE_JAR})
 
+# Do quick syntax check on javascript files of webodf lib and webodf tests.
+# This compile uses no optimization and runs simple syntax tests. That is why
+# this target is mentioned early in the list of dependencies.
+# The result of this compilation is used in running tests with Node and Rhino.
 add_custom_command(
     OUTPUT simplecompiled.js
     COMMAND ${Java_JAVA_EXECUTABLE}
@@ -113,6 +117,13 @@ add_custom_command(
 )
 add_custom_target(simplecompiled.js-target DEPENDS simplecompiled.js)
 
+# Compile code and tests with more strict settings.
+# This reports more syntax issues with the code and tests but cannot be used
+# to actually run the tests because the strong compilation gives broken code.
+# One of the things that break is that many more function and member names are
+# shortened. This is a problem in the tests where test status is determined
+# from code in strings.
+# See https://developers.google.com/closure/compiler/docs/limitations
 add_custom_command(
     OUTPUT compiled.js
     COMMAND ${Java_JAVA_EXECUTABLE}
@@ -128,6 +139,7 @@ add_custom_command(
 )
 add_custom_target(compiled.js-target DEPENDS compiled.js)
 
+# Compile the optimized production version of WebODF.
 add_custom_command(
     OUTPUT webodf.js
     COMMAND ${Java_JAVA_EXECUTABLE}
@@ -143,6 +155,7 @@ add_custom_command(
 )
 add_custom_target(webodf.js-target DEPENDS webodf.js)
 
+# Compile the debug version of WebODF. This is also published as a product.
 add_custom_command(
     OUTPUT webodf-debug.js
     COMMAND ${Java_JAVA_EXECUTABLE}
