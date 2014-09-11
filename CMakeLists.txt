@@ -190,6 +190,26 @@ add_custom_target(copy_node_modules ALL
     COMMENT copying node_modules from source to build
 )
 
+# Android
+# If android sdk is properly installed, cmake only needs to know where to find
+# the executable 'android'.
+# The variable ANDROID_SDK_DIR can be provided if a specific android sdk version
+# is desired or if the android executable is not in the path.
+if (ANDROID_SDK_DIR)
+  set(ANDROID ${ANDROID_SDK_DIR}/tools/android)
+else (ANDROID_SDK_DIR)
+  find_program(ANDROID NAMES android DOC "Path to the Android executable.")
+endif(ANDROID_SDK_DIR)
+FIND_PROGRAM(ANT NAMES ant DOC "Path to the Ant executable.")
+if(ANDROID AND ANT)
+  set(BUILD_APK TRUE)
+  message(STATUS "Found Android and Ant: building an APK for Android.")
+  message(STATUS "android: ${ANDROID}")
+  message(STATUS "ant: ${ANT}")
+else()
+  message(STATUS "Android was not found: APK will not be built.")
+endif()
+
 # JSCoverage
 if(WIN32)
     # JSCoverage only builds with Cygwin/MiniGW

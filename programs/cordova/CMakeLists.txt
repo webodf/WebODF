@@ -56,21 +56,26 @@ add_custom_command(
             webodf.js-target
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
-# build the android apk
-add_custom_command(
-    OUTPUT WebODF/platforms/android/ant-build/WebODF-debug.apk
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-        ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/AndroidManifest.xml
-        ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/AndroidManifest.xml
-    COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/res/
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/res/ ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/res/
-    COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/src/org/webodf/ ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
-    COMMAND ${CORDOVA} build android
-    DEPENDS WebODF/config.xml
-            ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
-)
+
+if(BUILD_APK)
+    # build the android apk
+    add_custom_command(
+        OUTPUT WebODF/platforms/android/ant-build/WebODF-debug.apk
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/AndroidManifest.xml
+            ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/AndroidManifest.xml
+        COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/res/
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/res/ ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/res/
+        COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
+        COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/src/org/webodf/ ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
+        COMMAND ${CORDOVA} build android
+        DEPENDS WebODF/config.xml
+                ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
+    )
+    add_custom_target(product-androidviewer DEPENDS WebODF/platforms/android/ant-build/WebODF-debug.apk)
+endif()
+
 # build the firefoxos package
 add_custom_command(
     OUTPUT WebODF/platforms/firefoxos/build/package.zip
@@ -84,5 +89,4 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
 
-add_custom_target(product-androidviewer DEPENDS WebODF/platforms/android/ant-build/WebODF-debug.apk)
 add_custom_target(product-firefoxosviewer DEPENDS WebODF/platforms/firefoxos/build/package.zip)
