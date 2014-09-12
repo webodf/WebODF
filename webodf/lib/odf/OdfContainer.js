@@ -27,7 +27,7 @@
 (function () {
     "use strict";
     var styleInfo = new odf.StyleInfo(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         /**@const
            @type{!string}*/
         officens = "urn:oasis:names:tc:opendocument:xmlns:office:1.0",

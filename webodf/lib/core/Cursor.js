@@ -61,7 +61,7 @@ core.Cursor = function Cursor(document, memberId) {
         /**@type{!Range}*/
         selectedRange = /**@type{!Range}*/(document.createRange()),
         isCollapsed,
-        domUtils = new core.DomUtils();
+        domUtils = core.DomUtils;
 
     /**
      * Split a text node and put the cursor into it.

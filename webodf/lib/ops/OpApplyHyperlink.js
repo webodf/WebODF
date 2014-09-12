@@ -32,7 +32,7 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
     "use strict";
 
     var memberid, timestamp, position, length, hyperlink,
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         odfUtils = new odf.OdfUtils();
 
     /**

@@ -152,7 +152,7 @@
      * A collection of Dom utilities
      * @constructor
      */
-    core.DomUtils = function DomUtils() {
+    core.DomUtilsImpl = function DomUtilsImpl() {
         var /**@type{?Range}*/
             sharedRange = null;
 
@@ -973,7 +973,7 @@
         this.getDirectChild = getDirectChild;
 
         /**
-         * @param {!core.DomUtils} self
+         * @param {!core.DomUtilsImpl} self
          */
         function init(self) {
             var appVersion, webKitOrSafari, ie,
@@ -995,4 +995,9 @@
         }
         init(this);
     };
+
+    /**
+     * @type {!core.DomUtilsImpl}
+     */
+    core.DomUtils = new core.DomUtilsImpl();
 }());

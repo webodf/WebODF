@@ -46,7 +46,7 @@ gui.TextController = function TextController(
 
     var odtDocument = session.getOdtDocument(),
         odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         /**
          * @const
          * @type {!boolean}

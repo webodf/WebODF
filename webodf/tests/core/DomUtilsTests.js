@@ -37,7 +37,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
     this.setUp = function () {
         t = {
             doc : core.UnitTest.provideTestAreaDiv(),
-            utils : new core.DomUtils(),
+            utils : core.DomUtils,
             range : document.createRange()
         };
     };

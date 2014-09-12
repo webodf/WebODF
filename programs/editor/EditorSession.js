@@ -70,7 +70,7 @@ define("webodf/editor/EditorSession", [
             textns = odf.Namespaces.textns,
             fontStyles = document.createElement('style'),
             formatting = odtDocument.getFormatting(),
-            domUtils = new core.DomUtils(),
+            domUtils = core.DomUtils,
             odfUtils = new odf.OdfUtils(),
             eventNotifier = new core.EventNotifier([
                 EditorSession.signalMemberAdded,

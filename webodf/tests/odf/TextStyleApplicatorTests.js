@@ -34,7 +34,7 @@ odf.TextStyleApplicatorTests = function TextStyleApplicatorTests(runner) {
     var t,
         r = runner,
         odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         namespace = {
             "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
             "office": "urn:oasis:names:tc:opendocument:xmlns:office:1.0",

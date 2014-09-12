@@ -57,7 +57,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const
          * @type {!string}*/
         webodfhelperns = "urn:webodf:names:helper",
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         styleParseUtils = new odf.StyleParseUtils(),
 
         /**@const

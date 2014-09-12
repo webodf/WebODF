@@ -79,7 +79,7 @@
             stepToDomPoint = {},
             /**@type{!Object.<!string, !ops.StepsCache.Bookmark>}*/
             nodeToBookmark = {},
-            domUtils = new core.DomUtils(),
+            domUtils = core.DomUtils,
             /**@type{!RootBookmark}*/
             basePoint,
             /**@type{!number|undefined}*/

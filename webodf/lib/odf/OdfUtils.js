@@ -39,7 +39,7 @@ odf.OdfUtils = function OdfUtils() {
         /**@const
            @type{!string}*/
         xlinkns = odf.Namespaces.xlinkns,
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         // only add odf element namespaces here.
         // Namespaces solely used for attributes are excluded. eg. fo, xlink & xml
         odfNodeNamespaceMap = [

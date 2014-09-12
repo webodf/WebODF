@@ -40,7 +40,7 @@
             /**@type{!ops.StepsCache}*/
             stepsCache,
             odfUtils = new odf.OdfUtils(),
-            domUtils = new core.DomUtils(),
+            domUtils = core.DomUtils,
             /**@type{!core.PositionIterator}*/
             iterator,
             /**@const*/

@@ -32,7 +32,7 @@
  */
 gui.HyperlinkTooltipView = function HyperlinkTooltipView(odfCanvas, getActiveModifier) {
     "use strict";
-    var domUtils = new core.DomUtils(),
+    var domUtils = core.DomUtils,
         odfUtils = new odf.OdfUtils(),
         /**@type{!Window}*/
         window = /**@type{!Window}*/(runtime.getWindow()),

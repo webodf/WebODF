@@ -35,8 +35,7 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         position,
         /**@type{number}*/
         length,
-        /**@type{!core.DomUtils}*/
-        domUtils;
+        domUtils = core.DomUtils;
 
     /**
      * @param {!ops.OpRemoveAnnotation.InitSpec} data
@@ -46,7 +45,6 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         timestamp = data.timestamp;
         position = parseInt(data.position, 10);
         length = parseInt(data.length, 10);
-        domUtils = new core.DomUtils();
     };
 
     this.isEdit = true;

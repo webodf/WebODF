@@ -32,7 +32,7 @@ gui.GuiStepUtils = function GuiStepUtils() {
     "use strict";
     var odfUtils = new odf.OdfUtils(),
         stepUtils = new odf.StepUtils(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         NEXT = core.StepDirection.NEXT,
         LEFT_TO_RIGHT = gui.StepInfo.VisualDirection.LEFT_TO_RIGHT,
         RIGHT_TO_LEFT = gui.StepInfo.VisualDirection.RIGHT_TO_LEFT;

@@ -58,7 +58,7 @@ gui.Caret = function Caret(cursor, viewport, avatarInitiallyVisible, blinkOnRang
         /**@type{!Range}*/
         caretSizerRange,
         canvas = cursor.getDocument().getCanvas(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         guiStepUtils = new gui.GuiStepUtils(),
         /**@type{!core.StepIterator}*/
         stepIterator,

@@ -47,7 +47,7 @@ gui.SvgSelectionView = function SvgSelectionView(cursor) {
         handle1 = doc.createElementNS(svgns, 'circle'),
         handle2 = doc.createElementNS(svgns, 'circle'),
         odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         /**@type{!gui.ZoomHelper}*/
         zoomHelper = document.getCanvas().getZoomHelper(),
         /**@type{boolean}*/

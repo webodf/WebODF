@@ -32,7 +32,7 @@
 ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
     "use strict";
     var t,
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         textns = odf.Namespaces.textns,
         r = runner,
         testarea,
