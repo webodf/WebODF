@@ -30,7 +30,7 @@
  */
 ops.TextPositionFilter = function TextPositionFilter() {
     "use strict";
-    var odfUtils = new odf.OdfUtils(),
+    var odfUtils = odf.OdfUtils,
         ELEMENT_NODE = Node.ELEMENT_NODE,
         TEXT_NODE = Node.TEXT_NODE,
         /**@const*/FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,

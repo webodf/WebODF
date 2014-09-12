@@ -27,7 +27,7 @@
 /**
  * @constructor
  */
-odf.OdfUtils = function OdfUtils() {
+odf.OdfUtilsImpl = function OdfUtilsImpl() {
     "use strict";
 
     var /**@const
@@ -1055,3 +1055,8 @@ odf.OdfUtils = function OdfUtils() {
     };
     /*jslint regexp: false*/
 };
+
+/**
+ * @type {!odf.OdfUtilsImpl}
+ */
+odf.OdfUtils = new odf.OdfUtilsImpl();

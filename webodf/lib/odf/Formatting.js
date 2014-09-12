@@ -43,7 +43,7 @@ odf.Formatting = function Formatting() {
         numberns = odf.Namespaces.numberns,
         /**@const*/
         fons = odf.Namespaces.fons,
-        odfUtils = new odf.OdfUtils(),
+        odfUtils = odf.OdfUtils,
         domUtils = core.DomUtils,
         utils = new core.Utils(),
         cssUnits = new core.CSSUnits(),

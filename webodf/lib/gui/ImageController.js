@@ -52,7 +52,7 @@ gui.ImageController = function ImageController(
            @type{!string}*/
         textns = odf.Namespaces.textns,
         odtDocument = session.getOdtDocument(),
-        odfUtils = new odf.OdfUtils(),
+        odfUtils = odf.OdfUtils,
         formatting = odtDocument.getFormatting(),
         eventNotifier = new core.EventNotifier([
             gui.HyperlinkController.enabledChanged

@@ -33,7 +33,7 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
 
     var memberid, timestamp, position, length,
         domUtils = core.DomUtils,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpRemoveHyperlink.InitSpec} data

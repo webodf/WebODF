@@ -46,7 +46,7 @@ define("webodf/editor/widgets/editHyperlinks", [
                 linkEditorContent,
                 editHyperlinkButton,
                 removeHyperlinkButton,
-                odfUtils = new odf.OdfUtils(),
+                odfUtils = odf.OdfUtils,
                 textSerializer = new odf.TextSerializer(),
                 eventSubscriptions = new core.EventSubscriptions(),
                 dialog;

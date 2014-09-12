@@ -37,7 +37,7 @@ gui.ParagraphBoundaryScanner = function () {
         isInitialised = false,
         /**@type{?Element}*/
         lastParagraph,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     this.token = undefined;
 

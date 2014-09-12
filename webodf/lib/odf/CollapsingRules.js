@@ -32,7 +32,7 @@
  */
 odf.CollapsingRules = function CollapsingRules(rootNode) {
     "use strict";
-    var odfUtils = new odf.OdfUtils(),
+    var odfUtils = odf.OdfUtils,
         domUtils = core.DomUtils;
 
     /**

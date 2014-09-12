@@ -30,7 +30,7 @@
  */
 gui.GuiStepUtils = function GuiStepUtils() {
     "use strict";
-    var odfUtils = new odf.OdfUtils(),
+    var odfUtils = odf.OdfUtils,
         stepUtils = new odf.StepUtils(),
         domUtils = core.DomUtils,
         NEXT = core.StepDirection.NEXT,

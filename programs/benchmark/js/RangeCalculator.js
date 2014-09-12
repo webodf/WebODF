@@ -30,7 +30,7 @@ define([], function() {
      * @constructor
      */
     function RangeCalculator() {
-        var odfUtils = new odf.OdfUtils(),
+        var odfUtils = odf.OdfUtils,
             textRange = document.createRange(),
             TEXT_NODE = Node.TEXT_NODE;
 

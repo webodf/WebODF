@@ -62,7 +62,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     var /**@type{!Array.<!odf.AnnotationElement>}*/
         annotations = [],
         doc = odfFragment.ownerDocument,
-        odfUtils = new odf.OdfUtils(),
+        odfUtils = odf.OdfUtils,
         /**@const*/
         CONNECTOR_MARGIN = 30,
         /**@const*/

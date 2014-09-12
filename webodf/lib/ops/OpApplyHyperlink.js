@@ -33,7 +33,7 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
 
     var memberid, timestamp, position, length, hyperlink,
         domUtils = core.DomUtils,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpApplyHyperlink.InitSpec} data

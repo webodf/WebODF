@@ -30,7 +30,7 @@
 ops.OperationTestHelper = function OperationTestHelper() {
     "use strict";
 
-    var odfUtils = new odf.OdfUtils();
+    var odfUtils = odf.OdfUtils;
 
     /**
      * Returns true for any node not contained in an ODF paragraph

@@ -37,8 +37,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     var self = this,
         /**@type{!odf.StepUtils}*/
         stepUtils,
-        /**@type{!odf.OdfUtils}*/
-        odfUtils,
+        odfUtils = odf.OdfUtils,
         domUtils = core.DomUtils,
         /**!Object.<!ops.OdtCursor>*/
         cursors = {},
@@ -947,7 +946,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      */
     function init() {
         filter = new ops.TextPositionFilter();
-        odfUtils = new odf.OdfUtils();
         stepUtils = new odf.StepUtils();
         stepsTranslator = new ops.OdtStepsTranslator(getRootNode, createPositionIterator, filter, 500);
         eventNotifier.subscribe(ops.OdtDocument.signalStepsInserted, stepsTranslator.handleStepsInserted);

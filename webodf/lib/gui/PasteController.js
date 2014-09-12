@@ -44,7 +44,7 @@ gui.PasteController = function PasteController(session, sessionConstraints, sess
         textns = odf.Namespaces.textns,
         /**@const*/
         NEXT = core.StepDirection.NEXT,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @return {undefined}

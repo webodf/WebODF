@@ -34,7 +34,7 @@
 odf.TextSerializer = function TextSerializer() {
     "use strict";
     var self = this,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!Node} node

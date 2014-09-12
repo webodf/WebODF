@@ -36,7 +36,7 @@ ops.OpInsertImage = function OpInsertImage() {
         svgns = odf.Namespaces.svgns,
         textns = odf.Namespaces.textns,
         xlinkns = odf.Namespaces.xlinkns,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpInsertImage.InitSpec} data
