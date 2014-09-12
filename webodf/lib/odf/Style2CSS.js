@@ -57,7 +57,7 @@ odf.Style2CSS = function Style2CSS() {
         /**@const
          * @type {!string}*/
         webodfhelperns = "urn:webodf:names:helper",
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         styleParseUtils = new odf.StyleParseUtils(),
 
         /**@const
@@ -257,7 +257,7 @@ odf.Style2CSS = function Style2CSS() {
         // A font-face declaration map, to be populated once style2css is called.
         /**@type{!Object.<string,string>}*/
         fontFaceDeclsMap = {},
-        utils = new odf.OdfUtils(),
+        utils = odf.OdfUtils,
         documentType,
         odfRoot,
         defaultFontSize,

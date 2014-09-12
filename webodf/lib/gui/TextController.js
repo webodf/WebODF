@@ -45,8 +45,8 @@ gui.TextController = function TextController(
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+        odfUtils = odf.OdfUtils,
+        domUtils = core.DomUtils,
         /**
          * @const
          * @type {!boolean}

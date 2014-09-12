@@ -33,7 +33,7 @@ odf.LayoutTests = function LayoutTests(runner) {
     "use strict";
     var r = runner, t, tests,
         xpath = xmldom.XPath,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
     /**
      * @param {!Element} node
      * @return {!{count:!number,values:!Object.<!string,!string>,xpath:!string}}

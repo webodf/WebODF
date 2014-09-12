@@ -174,7 +174,7 @@
         /**@const@type {!string}*/presentationns = odf.Namespaces.presentationns,
         /**@const@type {!string}*/webodfhelperns = "urn:webodf:names:helper",
         xpath = xmldom.XPath,
-        domUtils = new core.DomUtils();
+        domUtils = core.DomUtils;
 
     /**
      * @param {!Element} element

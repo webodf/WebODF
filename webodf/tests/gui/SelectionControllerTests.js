@@ -36,7 +36,7 @@ gui.SelectionControllerTests = function SelectionControllerTests(runner) {
         testarea,
         textns = odf.Namespaces.textns,
         officens = odf.Namespaces.officens,
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         inputMemberId = "Joe";
 
     /**

@@ -41,7 +41,7 @@ gui.HyperlinkController = function HyperlinkController(
     ) {
     "use strict";
 
-    var odfUtils = new odf.OdfUtils(),
+    var odfUtils = odf.OdfUtils,
         odtDocument = session.getOdtDocument(),
         eventNotifier = new core.EventNotifier([
             gui.HyperlinkController.enabledChanged

@@ -33,8 +33,8 @@
 gui.SelectionController = function SelectionController(session, inputMemberId) {
     "use strict";
     var odtDocument = session.getOdtDocument(),
-        domUtils = new core.DomUtils(),
-        odfUtils = new odf.OdfUtils(),
+        domUtils = core.DomUtils,
+        odfUtils = odf.OdfUtils,
         baseFilter = odtDocument.getPositionFilter(),
         guiStepUtils = new gui.GuiStepUtils(),
         rootFilter = odtDocument.createRootFilter(inputMemberId),

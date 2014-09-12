@@ -34,7 +34,7 @@
  */
 gui.OdfTextBodyNodeFilter = function () {
     "use strict";
-    var odfUtils = new odf.OdfUtils(),
+    var odfUtils = odf.OdfUtils,
         TEXT_NODE = Node.TEXT_NODE,
         FILTER_REJECT = NodeFilter.FILTER_REJECT,
         FILTER_ACCEPT = NodeFilter.FILTER_ACCEPT,

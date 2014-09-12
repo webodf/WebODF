@@ -39,8 +39,8 @@
         var rootNode,
             /**@type{!ops.StepsCache}*/
             stepsCache,
-            odfUtils = new odf.OdfUtils(),
-            domUtils = new core.DomUtils(),
+            odfUtils = odf.OdfUtils,
+            domUtils = core.DomUtils,
             /**@type{!core.PositionIterator}*/
             iterator,
             /**@const*/

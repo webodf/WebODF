@@ -36,7 +36,7 @@ gui.DirectFormattingControllerTests = function DirectFormattingControllerTests(r
         testarea,
         officens = odf.Namespaces.officens,
         utils = new core.Utils(),
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         inputMemberId = "Joe";
 
     /**

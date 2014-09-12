@@ -37,7 +37,7 @@ ops.OpSetParagraphStyle = function OpSetParagraphStyle() {
 
     var memberid, timestamp, position, styleName,
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpSetParagraphStyle.InitSpec} data

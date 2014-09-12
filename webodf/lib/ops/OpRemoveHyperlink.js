@@ -32,8 +32,8 @@ ops.OpRemoveHyperlink = function OpRemoveHyperlink() {
     "use strict";
 
     var memberid, timestamp, position, length,
-        domUtils = new core.DomUtils(),
-        odfUtils = new odf.OdfUtils();
+        domUtils = core.DomUtils,
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpRemoveHyperlink.InitSpec} data

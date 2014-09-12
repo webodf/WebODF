@@ -66,9 +66,8 @@ gui.SessionControllerOptions = function () {
             odtDocument = session.getOdtDocument(),
             sessionConstraints = new gui.SessionConstraints(),
             sessionContext = new gui.SessionContext(session, inputMemberId),
-            /**@type{!core.DomUtils}*/
-            domUtils = new core.DomUtils(),
-            odfUtils = new odf.OdfUtils(),
+            domUtils = core.DomUtils,
+            odfUtils = odf.OdfUtils,
             mimeDataExporter = new gui.MimeDataExporter(),
             clipboard = new gui.Clipboard(mimeDataExporter),
             keyDownHandler = new gui.KeyboardHandler(),

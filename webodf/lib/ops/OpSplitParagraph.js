@@ -50,8 +50,7 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         moveCursor,
         /**@type{!string}*/
         paragraphStyleName,
-        /**@type{!odf.OdfUtils}*/
-        odfUtils,
+        odfUtils = odf.OdfUtils,
         /**@const*/
         textns = odf.Namespaces.textns;
 
@@ -65,7 +64,6 @@ ops.OpSplitParagraph = function OpSplitParagraph() {
         sourceParagraphPosition = data.sourceParagraphPosition;
         paragraphStyleName = data.paragraphStyleName;
         moveCursor = data.moveCursor === 'true' || data.moveCursor === true;
-        odfUtils = new odf.OdfUtils();
     };
 
     this.isEdit = true;

@@ -47,7 +47,7 @@ ops.OpInsertText = function OpInsertText() {
         moveCursor,
         /**@type{string}*/
         text,
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpInsertText.InitSpec} data

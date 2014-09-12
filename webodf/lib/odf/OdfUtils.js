@@ -27,7 +27,7 @@
 /**
  * @constructor
  */
-odf.OdfUtils = function OdfUtils() {
+odf.OdfUtilsImpl = function OdfUtilsImpl() {
     "use strict";
 
     var /**@const
@@ -39,7 +39,7 @@ odf.OdfUtils = function OdfUtils() {
         /**@const
            @type{!string}*/
         xlinkns = odf.Namespaces.xlinkns,
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         // only add odf element namespaces here.
         // Namespaces solely used for attributes are excluded. eg. fo, xlink & xml
         odfNodeNamespaceMap = [
@@ -1055,3 +1055,8 @@ odf.OdfUtils = function OdfUtils() {
     };
     /*jslint regexp: false*/
 };
+
+/**
+ * @type {!odf.OdfUtilsImpl}
+ */
+odf.OdfUtils = new odf.OdfUtilsImpl();

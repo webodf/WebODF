@@ -39,7 +39,7 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer, keyDown
         modifier = gui.KeyboardHandler.Modifier,
         keyCode = gui.KeyboardHandler.KeyCode,
         xpath = xmldom.XPath,
-        odfUtils = new odf.OdfUtils(),
+        odfUtils = odf.OdfUtils,
         window = /**@type{!Window}*/(runtime.getWindow()),
         /**@type{!number}*/
         activeModifier = modifier.None,

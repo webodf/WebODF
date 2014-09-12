@@ -49,7 +49,7 @@ gui.DirectFormattingController = function DirectFormattingController(
     var self = this,
         odtDocument = session.getOdtDocument(),
         utils = new core.Utils(),
-        odfUtils = new odf.OdfUtils(),
+        odfUtils = odf.OdfUtils,
         eventNotifier = new core.EventNotifier([
             gui.DirectFormattingController.enabledChanged,
             gui.DirectFormattingController.textStylingChanged,

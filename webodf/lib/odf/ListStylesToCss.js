@@ -348,7 +348,7 @@
     odf.ListStyleToCss = function ListStyleToCss() {
 
         var cssUnits = new core.CSSUnits(),
-            odfUtils = new odf.OdfUtils();
+            odfUtils = odf.OdfUtils;
 
         /**
          * Takes a value with a valid CSS unit and converts it to a CSS pixel value

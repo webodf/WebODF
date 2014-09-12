@@ -32,8 +32,8 @@
  */
 odf.CollapsingRules = function CollapsingRules(rootNode) {
     "use strict";
-    var odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils();
+    var odfUtils = odf.OdfUtils,
+        domUtils = core.DomUtils;
 
     /**
      * Returns true if a given node is odf node or a text node that has a odf parent.

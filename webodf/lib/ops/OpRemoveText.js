@@ -36,10 +36,8 @@ ops.OpRemoveText = function OpRemoveText() {
         position,
         /**@type {number}*/
         length,
-        /**@type{!odf.OdfUtils}*/
-        odfUtils,
-        /**@type{!core.DomUtils}*/
-        domUtils;
+        odfUtils = odf.OdfUtils,
+        domUtils = core.DomUtils;
 
     /**
      * @param {!ops.OpRemoveText.InitSpec} data
@@ -50,8 +48,6 @@ ops.OpRemoveText = function OpRemoveText() {
         timestamp = data.timestamp;
         position = parseInt(data.position, 10);
         length = parseInt(data.length, 10);
-        odfUtils = new odf.OdfUtils();
-        domUtils = new core.DomUtils();
     };
 
     this.isEdit = true;

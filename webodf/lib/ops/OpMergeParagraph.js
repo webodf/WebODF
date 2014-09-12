@@ -45,8 +45,8 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
         sourceStartPosition,
         /**@type{!number}*/
         destinationStartPosition,
-        odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+        odfUtils = odf.OdfUtils,
+        domUtils = core.DomUtils,
         /**@const*/
         textns = odf.Namespaces.textns;
 

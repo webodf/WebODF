@@ -50,7 +50,7 @@ odf.OdfUtilsTests = function OdfUtilsTests(runner) {
             testArea : core.UnitTest.provideTestAreaDiv(),
             ns: namespace
         };
-        t.odfUtils = new odf.OdfUtils();
+        t.odfUtils = odf.OdfUtils;
     };
     this.tearDown = function () {
         t = {};

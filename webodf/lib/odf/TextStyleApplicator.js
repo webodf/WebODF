@@ -33,7 +33,7 @@
  */
 odf.TextStyleApplicator = function TextStyleApplicator(objectNameGenerator, formatting, automaticStyles) {
     "use strict";
-    var domUtils = new core.DomUtils(),
+    var domUtils = core.DomUtils,
         /**@const*/
         textns = odf.Namespaces.textns,
         /**@const*/

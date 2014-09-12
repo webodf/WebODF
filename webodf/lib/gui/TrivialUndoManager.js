@@ -34,7 +34,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
     var self = this,
         cursorns = 'urn:webodf:names:cursor',
-        domUtils = new core.DomUtils(),
+        domUtils = core.DomUtils,
         /**@type{?Element}*/
         initialDoc,
         /**@type{!Array.<!ops.Operation>}*/

@@ -43,8 +43,8 @@ odf.Formatting = function Formatting() {
         numberns = odf.Namespaces.numberns,
         /**@const*/
         fons = odf.Namespaces.fons,
-        odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils(),
+        odfUtils = odf.OdfUtils,
+        domUtils = core.DomUtils,
         utils = new core.Utils(),
         cssUnits = new core.CSSUnits(),
         // TODO: needs to be extended. Possibly created together with CSS from sone default description?

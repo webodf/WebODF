@@ -29,7 +29,7 @@
 (function () {
     "use strict";
     var xpath = xmldom.XPath,
-        odfUtils = new odf.OdfUtils(),
+        odfUtils = odf.OdfUtils,
         base64 = new core.Base64();
 
     /**

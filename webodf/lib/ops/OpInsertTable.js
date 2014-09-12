@@ -39,7 +39,7 @@ ops.OpInsertTable = function OpInsertTable() {
         tablens = "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
         /**@const*/
         textns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0",
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @param {!ops.OpInsertTable.InitSpec} data

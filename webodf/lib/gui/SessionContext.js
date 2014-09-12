@@ -34,7 +34,7 @@ gui.SessionContext = function (session, inputMemberId) {
     "use strict";
 
     var odtDocument = session.getOdtDocument(),
-        odfUtils = new odf.OdfUtils();
+        odfUtils = odf.OdfUtils;
 
     /**
      * @return {!boolean}

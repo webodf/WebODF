@@ -37,8 +37,8 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         /**@type {number}*/
         length,
         setProperties,
-        odfUtils = new odf.OdfUtils(),
-        domUtils = new core.DomUtils();
+        odfUtils = odf.OdfUtils,
+        domUtils = core.DomUtils;
 
     /**
      * @param {!ops.OpApplyDirectStyling.InitSpec} data
