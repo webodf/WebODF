@@ -87,6 +87,11 @@ var Wodo = Wodo || (function () {
             a = document.createElement('a');
             a.href = scriptElementSrc;
             pathname = a.pathname;
+            if (pathname.charAt(0) !== "/") {
+                // Various versions of Internet Explorer seems to neglect the leading slash under some conditions
+                // (not when watching it with the dev tools of course!). This was confirmed in IE10 + IE11
+                pathname = "/" + pathname;
+            }
 
             pos = pathname.lastIndexOf("/");
             if (pos !== -1) {
