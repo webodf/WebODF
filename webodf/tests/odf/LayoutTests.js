@@ -214,7 +214,7 @@ odf.LayoutTests = function LayoutTests(runner) {
             if (b.split("|").indexOf(a) !== -1) {
                 a = b;
             }
-        } else if (typeof a === "number" || a.substr(-2) === "px") {
+        } else if (a !== undefined && (typeof a === "number" || a.substr(-2) === "px")) {
             if (compareLengths(a, b)) {
                 a = b;
             }
