@@ -988,7 +988,10 @@
             webKitOrSafari = appVersion.indexOf('chrome') === -1
                 && (appVersion.indexOf('applewebkit') !== -1
                     || appVersion.indexOf('safari') !== -1);
-            ie = appVersion.indexOf('msie') !== -1; // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
+            // See http://connect.microsoft.com/IE/feedback/details/780874/node-contains-is-incorrect
+            // Also, IE cleverly removed the MSIE tag without fixing the bug we're attempting to sniff here...
+            // http://msdn.microsoft.com/en-us/library/ie/bg182625%28v=vs.110%29.aspx
+            ie = appVersion.indexOf('msie') !== -1 || appVersion.indexOf('trident') !== -1;
             if (webKitOrSafari || ie) {
                 self.containsNode = containsNodeForBrokenWebKit;
             }

@@ -117,7 +117,8 @@
             /**@type{!odf.TextSerializer}*/
             textSerializer,
             filters = [],
-            cleanup;
+            cleanup,
+            processingFocusEvent = false;
 
         /**
          * Subscribe to IME events
@@ -176,6 +177,12 @@
          * @return {undefined}
          */
         function synchronizeWindowSelection() {
+            if (processingFocusEvent) {
+                // Prevent infinite focus-stealing loops. If a focus event was already in progress, do nothing
+                // on the second loop
+                return;
+            }
+            processingFocusEvent = true;
             flushEvent();
 
             // If there is a local cursor, and it is collapsed, collapse the window selection as well.
@@ -192,6 +199,7 @@
             }
 
             eventTrap.setSelectionRange(0, eventTrap.value.length);
+            processingFocusEvent = false;
         }
 
         /**
