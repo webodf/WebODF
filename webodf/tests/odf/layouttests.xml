@@ -569,10 +569,16 @@
   </input>
   <layoutchecks>
    <check xpath="(.//text:p)[1]">
-    <margin value="0px 10px"/>
+    <marginTop value="0px"/>
+    <marginBottom value="0px"/>
+    <marginLeft value="10px"/>
+    <marginRight value="10px"/>
    </check>
    <check xpath="(.//text:p)[2]">
-    <margin value="0px 10px"/>
+    <marginTop value="0px"/>
+    <marginBottom value="0px"/>
+    <marginLeft value="10px"/>
+    <marginRight value="10px"/>
    </check>
   </layoutchecks>
  </test>
@@ -598,10 +604,16 @@
   </input>
   <layoutchecks>
    <check xpath="(.//text:p)[1]">
-    <margin value="0px 10px 0px 5px"/>
+    <marginTop value="0px"/>
+    <marginBottom value="0px"/>
+    <marginLeft value="5px"/>
+    <marginRight value="10px"/>
    </check>
    <check xpath="(.//text:p)[2]">
-    <margin value="0px 10px 0px 5px"/>
+    <marginTop value="0px"/>
+    <marginBottom value="0px"/>
+    <marginLeft value="5px"/>
+    <marginRight value="10px"/>
    </check>
   </layoutchecks>
  </test>
