@@ -7,6 +7,14 @@
 * Only highlight ODF fields in edit mode ([#816](https://github.com/kogmbh/WebODF/issues/816))
 
 
+## Wodo.TextEditor
+See also section about WebODF
+
+### Fixes
+
+* Fix broken loading of other files via "Open file..." button in localfileeditor example
+
+
 # Changes between 0.5.2 and 0.5.3
 
 ## WebODF
