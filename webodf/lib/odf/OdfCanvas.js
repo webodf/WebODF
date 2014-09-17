@@ -729,32 +729,6 @@
     }
 
     /**
-     * @param {!Array.<!string>} selectors
-     * @param {!string} css
-     * @return {!string}
-     */
-    function createRule(selectors, css) {
-        return selectors.join(",\n") + "\n" + css + "\n";
-    }
-
-    /**
-     * Applies a grey background to all ODF field containers as defined in the container definitions within
-     * this class.
-     *
-     * @return {!string}
-     */
-    function generateFieldCSS() {
-        var /**@type{!Array.<!string>}*/
-            cssSelectors = odf.OdfSchema.getFields().map(function(prefixedName) { return prefixedName.replace(":", "|"); }),
-            highlightFields = createRule(cssSelectors, "{ background-color: #D0D0D0; }"),
-            emptyCssSelectors = cssSelectors.map(function(selector) { return selector + ":empty::after"; }),
-            // Ensure fields are always visible even if they contain no content
-            highlightEmptyFields = createRule(emptyCssSelectors, "{ content:' '; white-space: pre; }");
-
-        return highlightFields + "\n" + highlightEmptyFields;
-    }
-
-    /**
      * @param {!Document} document
      * @return {!HTMLStyleElement}
      */
@@ -790,8 +764,7 @@
         style.setAttribute('media', 'screen, print, handheld, projection');
         style.setAttribute('type', 'text/css');
         style.setAttribute('webodfcss', '1');
-        style.appendChild(document.createTextNode(css + "\n"));
-        style.appendChild(document.createTextNode(generateFieldCSS()));
+        style.appendChild(document.createTextNode(css));
         head.appendChild(style);
         return style;
     }

@@ -40,6 +40,7 @@ define("webodf/editor/EditorSession", [
     runtime.loadClass("odf.OdfUtils");
     runtime.loadClass("gui.CaretManager");
     runtime.loadClass("gui.Caret");
+    runtime.loadClass("gui.OdfFieldView");
     runtime.loadClass("gui.SessionController");
     runtime.loadClass("gui.SessionView");
     runtime.loadClass("gui.HyperlinkTooltipView");
@@ -72,6 +73,7 @@ define("webodf/editor/EditorSession", [
             formatting = odtDocument.getFormatting(),
             domUtils = core.DomUtils,
             odfUtils = odf.OdfUtils,
+            odfFieldView,
             eventNotifier = new core.EventNotifier([
                 EditorSession.signalMemberAdded,
                 EditorSession.signalMemberUpdated,
@@ -577,6 +579,7 @@ define("webodf/editor/EditorSession", [
                     selectionViewManager.destroy,
                     self.sessionController.destroy,
                     hyperlinkTooltipView.destroy,
+                    odfFieldView.destroy,
                     destroy
                 ];
 
@@ -594,6 +597,8 @@ define("webodf/editor/EditorSession", [
             fontStyles.appendChild(document.createTextNode(fontsCSS));
             head.appendChild(fontStyles);
 
+            odfFieldView = new gui.OdfFieldView(odfCanvas);
+            odfFieldView.showFieldHighlight();
             self.sessionController = new gui.SessionController(session, localMemberId, shadowCursor, {
                 annotationsEnabled: config.annotationsEnabled,
                 directTextStylingEnabled: config.directTextStylingEnabled,

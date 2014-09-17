@@ -1,3 +1,12 @@
+# Changes between 0.5.3 and 0.5.4
+
+## WebODF
+
+### Fixes
+
+* Only highlight ODF fields in edit mode ([#816](https://github.com/kogmbh/WebODF/issues/816))
+
+
 # Changes between 0.5.2 and 0.5.3
 
 ## WebODF
