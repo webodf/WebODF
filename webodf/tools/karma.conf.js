@@ -145,6 +145,7 @@ module.exports = function (config) {
             'lib/ops/EditInfo.js',
             'lib/gui/EditInfoMarker.js',
             'lib/gui/HyperlinkTooltipView.js',
+            'lib/gui/OdfFieldView.js',
             'lib/gui/ShadowCursor.js',
             'lib/gui/SelectionView.js',
             'lib/gui/SelectionViewManager.js',

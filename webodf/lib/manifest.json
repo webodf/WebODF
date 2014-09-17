@@ -160,6 +160,9 @@
         "odf.OdfNodeFilter",
         "odf.TextSerializer"
     ],
+    "gui.OdfFieldView": [
+        "odf.OdfCanvas"
+    ],
     "gui.OdfTextBodyNodeFilter": [
         "odf.OdfUtils"
     ],
