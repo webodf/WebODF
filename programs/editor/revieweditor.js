@@ -77,14 +77,14 @@ function createReviewEditor() {
 
     function enhanceRuntime() {
         var openedFiles = {},
-            read = runtime.read;
-        runtime.read = function (path, offset, length, callback) {
+            readFile = runtime.readFile;
+        runtime.readFile = function (path, encoding, callback) {
             var array;
             if (openedFiles.hasOwnProperty(path)) {
-                array = new Uint8Array(openedFiles[path], offset, length);
+                array = new Uint8Array(openedFiles[path]);
                 callback(undefined, array);
             } else {
-                return read(path, offset, length, callback);
+                return readFile(path, encoding, callback);
             }
         };
         runtime.registerFile = function (path, data) {

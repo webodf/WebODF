@@ -694,17 +694,17 @@ function LoadingFile(file) {
         reader.readAsBinaryString(file);
     }
     this.file = file;
-    this.read = function (offset, length, callback) {
-        function read() {
+    this.readFile = function (callback) {
+        function readFile() {
             if (error) {
                 return callback(error);
             }
             if (data) {
-                return callback(error, data.subarray(offset, offset + length));
+                return callback(error, data);
             }
-            readRequests.push(read);
+            readRequests.push(readFile);
         }
-        read();
+        readFile();
     };
     this.load = load;
 }
@@ -783,12 +783,12 @@ function Docnosis(element) {
     }
 
     function enhanceRuntime() {
-        var read = runtime.read;
-        runtime.read = function (path, offset, length, callback) {
+        var readFile = runtime.readFile;
+        runtime.readFile = function (path, encoding, callback) {
             if (openedFiles.hasOwnProperty(path)) {
-                return openedFiles[path].read(offset, length, callback);
+                return openedFiles[path].readFile(callback);
             } else {
-                return read(path, offset, length, callback);
+                return readFile(path, encoding, callback);
             }
         };
     }
