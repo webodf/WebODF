@@ -57,25 +57,16 @@ Ext.define('WebODFApp.view.OdfView', (function () {
         }
     }
     function initCanvas() {
-        var cmp;
         if (globalreadfunction === undefined) {
             // overload the global read function with one that only reads
             // the data from this canvas
-            globalreadfunction = runtime.read;
-            globalfilesizefunction = runtime.getFileSize;
-            runtime.read = function (path, offset, length, callback) {
+            globalreadfunction = runtime.readFile;
+            runtime.readFile = function (path, encoding, callback) {
                 if (path !== overridePath) {
                     globalreadfunction.apply(runtime,
-                        [path, offset, length, callback]);
+                        [path, encoding, callback]);
                 } else {
-                    callback(null, data.subarray(offset, offset + length));
-                }
-            };
-            runtime.getFileSize = function (path, callback) {
-                if (path !== overridePath) {
-                    globalfilesizefunction.apply(runtime, [path, callback]);
-                } else {
-                    callback(data.length);
+                    callback(null, data);
                 }
             };
             dom = Ext.getCmp('webodf').element.dom;
