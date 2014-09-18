@@ -36,6 +36,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
         position,
         /**@type {number}*/
         length,
+        /**@type{!odf.Formatting.StyleData}*/
         setProperties,
         odfUtils = odf.OdfUtils,
         domUtils = core.DomUtils;
@@ -123,7 +124,7 @@ ops.OpApplyDirectStyling = function OpApplyDirectStyling() {
     timestamp:number,
     position:number,
     length:number,
-    setProperties:!Object
+    setProperties:!odf.Formatting.StyleData
 }}*/
 ops.OpApplyDirectStyling.Spec;
 /**@typedef{{
@@ -131,6 +132,6 @@ ops.OpApplyDirectStyling.Spec;
     timestamp:(number|undefined),
     position:number,
     length:number,
-    setProperties:!Object
+    setProperties:!odf.Formatting.StyleData
 }}*/
 ops.OpApplyDirectStyling.InitSpec;

@@ -33,7 +33,7 @@ ops.OpAddStyle = function OpAddStyle() {
 
     var memberid, timestamp,
         styleName, styleFamily, isAutomaticStyle,
-        /**@type{Object}*/setProperties,
+        /**@type{!odf.Formatting.StyleData}*/setProperties,
         /** @const */stylens = odf.Namespaces.stylens;
 
     /**
@@ -110,7 +110,7 @@ ops.OpAddStyle = function OpAddStyle() {
     styleName:string,
     styleFamily:string,
     isAutomaticStyle:boolean,
-    setProperties:Object
+    setProperties:odf.Formatting.StyleData
 }}*/
 ops.OpAddStyle.Spec;
 /**@typedef{{
@@ -119,6 +119,6 @@ ops.OpAddStyle.Spec;
     styleName:string,
     styleFamily:string,
     isAutomaticStyle:(boolean|string),
-    setProperties:Object
+    setProperties:odf.Formatting.StyleData
 }}*/
 ops.OpAddStyle.InitSpec;
