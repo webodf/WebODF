@@ -2135,7 +2135,7 @@
     <office:text><text:p>A<office:annotation office:name="a"><dc:creator e:memberid="Alice">Alice</dc:creator><dc:date>2013-08-05T12:34:07.061Z</dc:date><text:list><text:list-item><text:p/></text:list-item></text:list></office:annotation><text:span text:style-name="auto63350368_0"><c:anchor c:memberId="Alice"/>B<c:cursor c:memberId="Alice"/></text:span><office:annotation-end office:name="a"/>C</text:p></office:text>
   </after>
  </test>
- <test name="RemoveText_AnnotatedRange_MaintainsCorrectCursorPosition" isFailing="true">
+ <test name="RemoveText_AnnotatedRange_MaintainsCorrectCursorPosition">
   <before>
     <office:text><text:p>AB<html:span class="webodf-annotationHighlight"/>CD</text:p></office:text>
   </before>

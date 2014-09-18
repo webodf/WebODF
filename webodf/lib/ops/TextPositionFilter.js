@@ -37,12 +37,26 @@ ops.TextPositionFilter = function TextPositionFilter() {
         /**@const*/FILTER_REJECT = core.PositionFilter.FilterResult.FILTER_REJECT;
 
     /**
+     * Find the previous sibling of the specified node that passes the node filter.
+     * @param {?Node} node
+     * @param {!function(?Node):!number} nodeFilter
+     * @return {?Node}
+     */
+    function previousSibling(node, nodeFilter) {
+        while (node && nodeFilter(node) !== FILTER_ACCEPT) {
+            node = node.previousSibling;
+        }
+        return node;
+    }
+
+    /**
      * @param {!Node} container
      * @param {?Node} leftNode
      * @param {?Node} rightNode
+     * @param {!function(?Node):!number} nodeFilter
      * @return {!core.PositionFilter.FilterResult}
      */
-    function checkLeftRight(container, leftNode, rightNode) {
+    function checkLeftRight(container, leftNode, rightNode, nodeFilter) {
         var r, firstPos, rightOfChar;
         // accept if there is a character immediately to the left
         if (leftNode) {
@@ -62,9 +76,7 @@ ops.TextPositionFilter = function TextPositionFilter() {
                 return FILTER_ACCEPT;
             }
         } else {
-            // Note, cant use OdfUtils.previousNode here as that function automatically dives to the previous
-            // elements first child (if it has one)
-            if (odfUtils.isInlineRoot(container.previousSibling) && odfUtils.isGroupingElement(container)) {
+            if (odfUtils.isGroupingElement(container) && odfUtils.isInlineRoot(previousSibling(container.previousSibling, nodeFilter))) {
                 // Move first position after inline root inside trailing grouping element (part 2)
                 // Allow the first position inside the first grouping element trailing an annotation
                 return FILTER_ACCEPT;
@@ -167,13 +179,13 @@ ops.TextPositionFilter = function TextPositionFilter() {
             leftNode = iterator.leftNode();
             rightNode = container;
             container = /**@type{!Node}*/(container.parentNode);
-            r = checkLeftRight(container, leftNode, rightNode);
+            r = checkLeftRight(container, leftNode, rightNode, iterator.getNodeFilter());
         } else if (!odfUtils.isGroupingElement(container)) {
             r = FILTER_REJECT;
         } else {
             leftNode = iterator.leftNode();
             rightNode = iterator.rightNode();
-            r = checkLeftRight(container, leftNode, rightNode);
+            r = checkLeftRight(container, leftNode, rightNode, iterator.getNodeFilter());
         }
         return r;
     };
