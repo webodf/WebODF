@@ -32,6 +32,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     "use strict";
 
     var memberid, timestamp, styleName,
+        /**@type{!odf.Formatting.StyleData}*/
         setProperties,
         /**@type{{attributes:string}}*/
         removedProperties,
@@ -147,7 +148,7 @@ ops.OpUpdateParagraphStyle = function OpUpdateParagraphStyle() {
     memberid:string,
     timestamp:number,
     styleName:string,
-    setProperties:Object,
+    setProperties:!odf.Formatting.StyleData,
     removedProperties:{attributes:string}
 }}*/
 ops.OpUpdateParagraphStyle.Spec;
@@ -155,7 +156,7 @@ ops.OpUpdateParagraphStyle.Spec;
     memberid:string,
     timestamp:(number|undefined),
     styleName:string,
-    setProperties:Object,
+    setProperties:!odf.Formatting.StyleData,
     removedProperties:{attributes:string}
 }}*/
 ops.OpUpdateParagraphStyle.InitSpec;

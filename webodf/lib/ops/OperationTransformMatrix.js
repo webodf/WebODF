@@ -60,8 +60,8 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * Returns a list with all attributes in setProperties that refer to styleName
-     * @param {Object} setProperties
-     * @param {string} styleName
+     * @param {?odf.Formatting.StyleData} setProperties
+     * @param {!string} styleName
      * @return {!Array.<!string>}
      */
     function getStyleReferencingAttributes(setProperties, styleName) {
@@ -80,8 +80,9 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return attributes;
     }
     /**
-     * @param {Object} setProperties
-     * @param {string} deletedStyleName
+     * @param {?odf.Formatting.StyleData} setProperties
+     * @param {!string} deletedStyleName
+     * @return {undefined}
      */
     function dropStyleReferencingAttributes(setProperties, deletedStyleName) {
         /**
@@ -194,7 +195,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * Estimates if there are any properties set in the given properties object.
-     * @param {!Object} properties
+     * @param {!odf.Formatting.StyleData} properties
      * @return {!boolean}
      */
     function hasProperties(properties) {
@@ -230,20 +231,21 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
-     * @param {Object.<string,Object.<string,*>>} minorSet
-     * @param {Object.<string,{attributes:string}>} minorRem
-     * @param {Object.<string,Object.<string,*>>} majorSet
-     * @param {Object.<string,{attributes:string}>} majorRem
-     * @param {string} propertiesName
+     * @param {?odf.Formatting.StyleData} minorSet
+     * @param {?Object.<string,{attributes:string}>} minorRem
+     * @param {?odf.Formatting.StyleData} majorSet
+     * @param {?Object.<string,{attributes:string}>} majorRem
+     * @param {!string} propertiesName
      * @return {?{majorChanged:boolean,minorChanged:boolean}}
      */
     function dropOverruledAndUnneededProperties(minorSet, minorRem, majorSet, majorRem, propertiesName) {
-        var minorSP = minorSet ? minorSet[propertiesName] : null,
+        var minorSP = /**@type{?odf.Formatting.StyleData}*/(minorSet ? minorSet[propertiesName] : null),
             minorRP = minorRem ? minorRem[propertiesName] : null,
-            majorSP = majorSet ? majorSet[propertiesName] : null,
+            majorSP = /**@type{?odf.Formatting.StyleData}*/(majorSet ? majorSet[propertiesName] : null),
             majorRP = majorRem ? majorRem[propertiesName] : null,
             result;
 
+        // TODO: also care for nested properties, like there can be e.g. with text:paragraph-properties
         result = dropOverruledAndUnneededAttributes(minorSP, minorRP, majorSP, majorRP);
 
         // remove empty setProperties
