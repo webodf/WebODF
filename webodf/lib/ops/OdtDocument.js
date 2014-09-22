@@ -108,12 +108,6 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     this.getDocumentElement = function () {
         return odfCanvas.odfContainer().rootElement;
     };
-    /**
-     * @return {!Document}
-     */
-    this.getDOMDocument = function () {
-        return /**@type{!Document}*/(this.getDocumentElement().ownerDocument);
-    };
 
     this.cloneDocumentElement = function () {
         var rootElement = self.getDocumentElement(),
