@@ -138,9 +138,7 @@ ops.OdtStepsTranslatorTests = function OdtStepsTranslatorTests(runner) {
         t = {
             filter: new CallCountedPositionFilter(new ops.TextPositionFilter())
         };
-        t.translator = new ops.OdtStepsTranslator(function() { return testarea; },
-            createPositionIterator,
-            t.filter, CACHE_STEP_SIZE);
+        t.translator = new ops.OdtStepsTranslator(testarea, createPositionIterator(testarea), t.filter, CACHE_STEP_SIZE);
     };
     this.tearDown = function () {
         t = {};
