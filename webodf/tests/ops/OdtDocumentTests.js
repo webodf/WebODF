@@ -158,11 +158,12 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             documentRoot;
 
         serializer.filter = new OdfOrCursorNodeFilter();
-        runtime.log("Scenario: " + documentString);
         t.segmentCount = segments.length;
+        t.expectedCursorPositionsCount = segments.length - 1; // e.g., <a>|</a> has two segments, but only one cursor position
         r.shouldBe(t, "t.segmentCount > 1", "true");
         documentRoot = createOdtDocument(segments.join(""));
         t.documentLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length, PREVIOUS);
+        r.shouldBe(t, "t.expectedCursorPositionsCount", "(t.documentLength+1)");
 
         // Test iteration forward
         for (position = 1; position < segments.length; position += 1) {
@@ -186,6 +187,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         // Test iteration backward
         for (position = segments.length - 1; position > 0; position -= 1) {
             setCursorPosition(step);
+            t.currentDocLength = t.odtDocument.convertDomPointToCursorStep(documentRoot, documentRoot.childNodes.length, PREVIOUS);
             r.shouldBe(t, "t.currentDocLength", "t.documentLength");
             t.expected = "<office:text>" +
                 segments.slice(0, position).join("") + "|" + segments.slice(position, segments.length).join("") +
@@ -362,76 +364,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.cursorInDiv", "false");
         r.shouldBe(t, "t.rootToFocus", "1");
     }
-
-    function testAvailablePositions_EmptyParagraph() {
-        // Examples from README_cursorpositions.txt
-        testCursorPositions("<text:p>|</text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p><text:span>|</text:span></text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p><text:span>|</text:span><text:span></text:span></text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p><text:span>|<text:span></text:span></text:span></text:p>");
-        testCursorPositions("<text:p>|  </text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p>  <text:span>|  </text:span>  </text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p>  <text:span>|  </text:span> <text:span>  <text:span>  </text:span>  </text:span>  </text:p>");
-    }
-    function testAvailablePositions_SimpleTextNodes() {
-        // Examples from README_cursorpositions.txt
-        testCursorPositions("<text:p>|A|B|C|</text:p>");
-    }
-    function testAvailablePositions_MixedSpans() {
-        // Examples from README_cursorpositions.txt
-        testCursorPositions("<text:p><text:span>|A|B|</text:span>C|</text:p>");
-        testCursorPositions("<text:p>|A|<text:span>B|</text:span>C|</text:p>");
-        testCursorPositions("<text:p>|A|<text:span>B|C|</text:span></text:p>");
-        testCursorPositions("<text:p><text:span>|A|<text:span>B|</text:span></text:span>C|</text:p>");
-        testCursorPositions("<text:p>|A|<text:span><text:span>B|</text:span>C|</text:span></text:p>");
-    }
-    function testAvailablePositions_Whitespace() {
-        // Examples from README_cursorpositions.txt
-        testCursorPositions("<text:p>|A| |B|C|</text:p>");
-        testCursorPositions("<text:p>   |A|  </text:p>");
-        testCursorPositions("<text:p>|A| |B|</text:p>");
-        testCursorPositions("<text:p>  |A| | B|  </text:p>");
-        testCursorPositions("<text:p>  <text:span>  |a|  </text:span>  </text:p>");
-        testCursorPositions("<text:p>  <text:span>|a| | </text:span> <text:span>  b|</text:span>  </text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p>  <text:span>  |a<text:span>|</text:span>  </text:span>  </text:p>");
-        testCursorPositions("<text:p>  <text:span>  |a|<text:span></text:span>  </text:span>  </text:p>");
-        testCursorPositions("<text:p><text:span></text:span>  |a|</text:p>");
-    }
-    function testAvailablePositions_SpaceElements() {
-        // Examples from README_cursorpositions.txt
-        testCursorPositions("<text:p>|A|<text:s> </text:s>|B|C|</text:p>");
-        // Unexpanded spaces - Not really supported, but interesting to test
-        testCursorPositions("<text:p>|A|<text:s></text:s>|B|C|</text:p>");
-        // Slight span nesting and positioning
-        testCursorPositions("<text:p><text:span>|<text:s> </text:s>|</text:span></text:p>");
-        // TODO behaviour is different from README_cursorpositions
-        // cursorPositionsTest("<text:p> <text:span>|A| |</text:span> <text:s></text:s>| <text:span><text:s> </text:s>|B|</text:span> </text:p>");
-        testCursorPositions("<text:p>|<text:tab>    </text:tab>|<text:s> </text:s>|<text:s> </text:s>|</text:p>");
-        testCursorPositions("<text:p>|<text:tab>    </text:tab>| |<text:s> </text:s>|</text:p>");
-        testCursorPositions("<text:p>|a| | <text:s> </text:s>|   </text:p>");
-        testCursorPositions("<text:p><e:editinfo></e:editinfo><text:span></text:span>|a|<text:s> </text:s>|<text:s> </text:s>|<text:span></text:span><text:span></text:span></text:p>");
-    }
-    function testAvailablePositions_DrawElements() {
-        testCursorPositions("<text:p>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:p>");
-        testCursorPositions("<text:p><text:span>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:span></text:p>");
-    }
-    function testAvailablePositions_Annotations() {
-        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>|c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>');
-        testCursorPositions('<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|c|<office:annotation-end></office:annotation-end>1|2|</text:p>');
-        testCursorPositions('<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|<office:annotation-end></office:annotation-end>1|2|</text:p>');
-    }
-    function testAvailablePositions_BetweenAnnotationAndSpan() {
-        testCursorPositions('<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>|c|d|</text:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
-        testCursorPositions('<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|c|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
-        testCursorPositions('<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>');
-    }
-
 
     function getTextNodeAtStep_BeginningOfTextNode() {
         var doc = createOdtDocument("<text:p>ABCD</text:p>");
@@ -624,6 +556,89 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
         r.shouldBe(t, "t.domPosition.textNode.previousSibling.localName", "'cursor'");
     }
 
+    function cursorPositionTests() {
+        // Examples from README_cursorpositions.txt
+        
+        return [
+            // *************** Empty Paragraph *************** //
+            // Examples from README_cursorpositions.txt
+            "<text:p>|</text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // "<text:p><text:span>|</text:span></text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // "<text:p><text:span>|</text:span><text:span></text:span></text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // "<text:p><text:span>|<text:span></text:span></text:span></text:p>",
+            "<text:p>|  </text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // "<text:p>  <text:span>|  </text:span>  </text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // "<text:p>  <text:span>|  </text:span> <text:span>  <text:span>  </text:span>  </text:span>  </text:p>",
+
+            
+            // *************** Simple Text Nodes *************** //
+            "<text:p>|A|B|C|</text:p>",
+
+
+            // *************** Mixed spans *************** //
+            "<text:p><text:span>|A|B|</text:span>C|</text:p>",
+            "<text:p>|A|<text:span>B|</text:span>C|</text:p>",
+            "<text:p>|A|<text:span>B|C|</text:span></text:p>",
+            "<text:p><text:span>|A|<text:span>B|</text:span></text:span>C|</text:p>",
+            "<text:p>|A|<text:span><text:span>B|</text:span>C|</text:span></text:p>",
+
+
+            // *************** Whitespace *************** //
+            "<text:p>|A| |B|C|</text:p>",
+            "<text:p>   |A|  </text:p>",
+            "<text:p>|A| |B|</text:p>",
+            "<text:p>  |A| | B|  </text:p>",
+            "<text:p>  <text:span>  |a|  </text:span>  </text:p>",
+            "<text:p>  <text:span>|a| | </text:span> <text:span>  b|</text:span>  </text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // cursorPositionsTest("<text:p>  <text:span>  |a<text:span>|</text:span>  </text:span>  </text:p>",
+            "<text:p>  <text:span>  |a|<text:span></text:span>  </text:span>  </text:p>",
+            "<text:p><text:span></text:span>  |a|</text:p>",
+
+
+            // *************** Space elements *************** //
+            "<text:p>|A|<text:s> </text:s>|B|C|</text:p>",
+            // Unexpanded spaces - Not really supported, but interesting to test
+            "<text:p>|A|<text:s></text:s>|B|C|</text:p>",
+            // Slight span nesting and positioning
+            "<text:p><text:span>|<text:s> </text:s>|</text:span></text:p>",
+            // TODO behaviour is different from README_cursorpositions
+            // cursorPositionsTest("<text:p> <text:span>|A| |</text:span> <text:s></text:s>| <text:span><text:s> </text:s>|B|</text:span> </text:p>",
+            "<text:p>|<text:tab>    </text:tab>|<text:s> </text:s>|<text:s> </text:s>|</text:p>",
+            "<text:p>|<text:tab>    </text:tab>| |<text:s> </text:s>|</text:p>",
+            "<text:p>|a| | <text:s> </text:s>|   </text:p>",
+            "<text:p><e:editinfo></e:editinfo><text:span></text:span>|a|<text:s> </text:s>|<text:s> </text:s>|<text:span></text:span><text:span></text:span></text:p>",
+
+
+            // *************** Draw elements *************** //
+            "<text:p>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:p>",
+            "<text:p><text:span>|<draw:frame text:anchor-type=\"as-char\"><draw:image><office:binary-data>data</office:binary-data></draw:image></draw:frame>|</text:span></text:p>",
+
+
+            // *************** Annotations *************** //
+            '<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation>|c|d|<office:annotation-end></office:annotation-end>1|2|</text:p>',
+            '<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|c|<office:annotation-end></office:annotation-end>1|2|</text:p>',
+            '<text:p>|a|<office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation>|<office:annotation-end></office:annotation-end>1|2|</text:p>',
+
+
+            // *************** Annotations with highlighting *************** //
+            '<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>|c|d|</text:span><office:annotation-end></office:annotation-end>1|2|</text:p>',
+            '<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|c|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>',
+            '<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>'
+            
+        ].map(function(testInput) {
+                return {
+                    name: "cursorPositions " + testInput,
+                    f: testCursorPositions.bind(undefined, testInput)
+                };
+            });
+    }
+
     this.setUp = function () {
         var doc, stylesElement;
         testarea = core.UnitTest.provideTestAreaDiv();
@@ -656,15 +671,6 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             testFixCursorPositions_CursorNearParagraphStart_ForwardSelection,
             testFixCursorPositions_CursorNearParagraphStart_ReverseSelection,
 
-            testAvailablePositions_EmptyParagraph,
-            testAvailablePositions_SimpleTextNodes,
-            testAvailablePositions_MixedSpans,
-            testAvailablePositions_Whitespace,
-            testAvailablePositions_SpaceElements,
-            testAvailablePositions_DrawElements,
-            testAvailablePositions_Annotations,
-            testAvailablePositions_BetweenAnnotationAndSpan,
-
             getTextNodeAtStep_BeginningOfTextNode,
             getTextNodeAtStep_EndOfTextNode,
             getTextNodeAtStep_PositionWithNoTextNode_AddsNewNode_Front,
@@ -680,7 +686,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             getTextNodeAtStep_At4_PutsTargetMemberCursor_BeforeTextNode,
             getTextNodeAtStep_AfterNonText_PutsTargetMemberCursor_BeforeTextNode,
             getTextNodeAtStep_EmptyP_MovesAllCursors_BeforeTextNode
-        ]);
+        ]).concat(cursorPositionTests());
     };
     this.asyncTests = function () {
         return [

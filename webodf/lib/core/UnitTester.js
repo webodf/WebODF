@@ -568,8 +568,13 @@ core.UnitTester = function UnitTester() {
      * @return {!string}
      **/
     function link(text, code) {
+        // NASTY HACK, DO NOT RE-USE. String concatenation with uncontrolled user input is a bad idea for building DOM
+        // fragments everyone. If you feel tempted to extract the HTML escape thing from here, please force yourself to
+        // visit http://shebang.brandonmintern.com/foolproof-html-escaping-in-javascript/ first, and learn a better
+        // approach to take.
+
         return "<span style='color:blue;cursor:pointer' onclick='" + code + "'>"
-            + text + "</span>";
+            + text.replace(/</g, "&lt;") + "</span>";
     }
     /**
      * @type {function(!{description:string,suite:!Array.<string>,success:boolean,log:!Array.<{category:string,message:string}>,time:number})}
@@ -634,7 +639,7 @@ core.UnitTester = function UnitTester() {
                 + link(testName, "runSuite(\"" + testName + "\");")
                 + ": " + test.description() + "</span>");
         } else {
-            runtime.log("Running " + testName + ": " + test.description);
+            runtime.log("Running " + testName + ": " + test.description());
         }
         tests = test.tests();
         for (i = 0; i < tests.length; i += 1) {
