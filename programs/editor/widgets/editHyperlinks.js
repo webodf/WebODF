@@ -88,7 +88,7 @@ define("webodf/editor/widgets/editHyperlinks", [
 
                 // Enable to disable all widgets initially
                 widget.children.forEach(function (element) {
-                    element.set('disabled', controllerEnabled === false, false);
+                    element.set('disabled', controllerEnabled !== true, false);
                 });
                 if (controllerEnabled) {
                     // Specifically enable the remove hyperlink button only if there are links in the current selection
