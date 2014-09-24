@@ -1,3 +1,17 @@
+# Changes between 0.5.4 and 0.5.5
+
+## WebODF
+
+
+
+## Wodo.TextEditor
+See also section about WebODF
+
+### Fixes
+
+* Fix wrongly enabled hyperlink tools with no document loaded ([#833](https://github.com/kogmbh/WebODF/pull/833))
+
+
 # Changes between 0.5.3 and 0.5.4
 
 ## WebODF
