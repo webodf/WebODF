@@ -84,7 +84,7 @@ define("webodf/editor/widgets/editHyperlinks", [
 
             function updateHyperlinkButtons() {
                 var controllerEnabled = hyperlinkController && hyperlinkController.isEnabled(),
-                    linksInSelection = controllerEnabled && editorSession.getSelectedHyperlinks();
+                    linksInSelection;
 
                 // Enable to disable all widgets initially
                 widget.children.forEach(function (element) {
