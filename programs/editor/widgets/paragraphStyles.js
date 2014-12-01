@@ -26,9 +26,10 @@
 
 define("webodf/editor/widgets/paragraphStyles", [
     "dijit/form/Select",
+    "dojox/html/entities",
     "webodf/editor/EditorSession"],
 
-    function (Select, EditorSession) {
+    function (Select, htmlEntities, EditorSession) {
     "use strict"
 
     /**
@@ -83,7 +84,7 @@ define("webodf/editor/widgets/paragraphStyles", [
 
             for (i = 0; i < availableStyles.length; i += 1) {
                 selectionList.push({
-                    label: availableStyles[i].displayName || availableStyles[i].name,
+                    label: htmlEntities.encode(availableStyles[i].displayName) || htmlEntities.encode(availableStyles[i].name),
                     value: availableStyles[i].name
                 });
             }
@@ -102,8 +103,8 @@ define("webodf/editor/widgets/paragraphStyles", [
 
             newStyleElement = editorSession.getParagraphStyleElement(styleInfo.name);
             select.addOption({
-                value: styleInfo.name,
-                label: newStyleElement.getAttributeNS(stylens, 'display-name')
+                label: htmlEntities.encode(newStyleElement.getAttributeNS(stylens, 'display-name')),
+                value: styleInfo.name
             });
 
             if (self.onAdd) {
