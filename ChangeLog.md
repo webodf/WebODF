@@ -10,7 +10,7 @@ See also section about WebODF
 ### Fixes
 
 * Fix wrongly enabled hyperlink tools with no document loaded ([#833](https://github.com/kogmbh/WebODF/pull/833))
-
+* Prevent Cross-Site Scripting from style names and font names ([#849](https://github.com/kogmbh/WebODF/pull/849)))
 
 # Changes between 0.5.3 and 0.5.4
 

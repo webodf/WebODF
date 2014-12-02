@@ -71,6 +71,7 @@ var profile = {
 				"dojo/dom-construct",
 				"dojo/_base/NodeList",
 				"dojo/_base/browser",
+				"dojox/html/entities",
 				'dijit/layout/BorderContainer',
 				'dijit/layout/ContentPane',
 				'dojox/layout/ExpandoPane',

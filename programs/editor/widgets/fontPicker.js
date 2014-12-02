@@ -23,9 +23,10 @@
  */
 /*global define,require,document */
 define("webodf/editor/widgets/fontPicker", [
-    "dijit/form/Select"],
+    "dijit/form/Select",
+    "dojox/html/entities"],
 
-    function (Select) {
+    function (Select, htmlEntities) {
         "use strict";
 
         /**
@@ -91,7 +92,7 @@ define("webodf/editor/widgets/fontPicker", [
                     name = documentFonts[i].name;
                     family = documentFonts[i].family || name;
                     selectionList.push({
-                        label: '<span style="font-family: ' + family + ';">' + name + '</span>',
+                        label: '<span style="font-family: ' + htmlEntities.encode(family) + ';">' + htmlEntities.encode(name)+ '</span>',
                         value: name
                     });
                 }
@@ -104,7 +105,7 @@ define("webodf/editor/widgets/fontPicker", [
                 // Lastly populate the fonts provided by the editor
                 for (i = 0; i < editorFonts.length; i += 1) {
                     selectionList.push({
-                        label: '<span style="font-family: ' + editorFonts[i] + ';">' + editorFonts[i] + '</span>',
+                        label: '<span style="font-family: ' + htmlEntities.encode(editorFonts[i]) + ';">' + htmlEntities.encode(editorFonts[i]) + '</span>',
                         value: editorFonts[i]
                     });
                 }
