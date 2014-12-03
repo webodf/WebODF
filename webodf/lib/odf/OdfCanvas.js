@@ -1195,7 +1195,8 @@
             // FIXME: We need to support parametrized strings, because
             // drop-in word replacements are inadequate for translations;
             // see http://techbase.kde.org/Development/Tutorials/Localization/i18n_Mistakes#Pitfall_.232:_Word_Puzzles
-            element.innerHTML = runtime.tr('Loading') + ' ' + url + '...';
+            element.innerHTML = "";
+            element.appendChild(element.ownerDocument.createTextNode(runtime.tr('Loading') + url + '...'));
             element.removeAttribute('style');
             // open the odf container
             odfcontainer = new odf.OdfContainer(url, function (container) {
