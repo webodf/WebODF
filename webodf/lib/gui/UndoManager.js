@@ -110,6 +110,19 @@ gui.UndoManager.prototype.moveBackward = function (states) {"use strict"; };
  */
 gui.UndoManager.prototype.onOperationExecuted = function (op) {"use strict"; };
 
+/**
+ * Returns if the current state matches the unmodified state.
+ * @return {!boolean}
+ */
+gui.UndoManager.prototype.isModified = function () {"use strict"; };
+
+/**
+ * Sets the current state to be the unmodified state.
+ * @return {undefined}
+ */
+gui.UndoManager.prototype.setUnmodified = function() {"use strict"; };
+
 /**@const*/gui.UndoManager.signalUndoStackChanged = "undoStackChanged";
 /**@const*/gui.UndoManager.signalUndoStateCreated = "undoStateCreated";
 /**@const*/gui.UndoManager.signalUndoStateModified = "undoStateModified";
+/**@const*/gui.UndoManager.signalModifiedChanged = "modifiedChanged";

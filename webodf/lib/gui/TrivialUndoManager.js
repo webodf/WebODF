@@ -42,6 +42,14 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         playFunc,
         /**@type{!ops.Document}*/
         document,
+        /**@type {!number}*/
+        branch = 0,
+        /**@type {!number}*/
+        unmodifiedBranch = 0,
+        /**@type {!number}*/
+        unmodifiedUndoStatesCount = 0,
+        /**@type {!number}*/
+        unmodifiedLastUndoStateEditOpCount = 0,
         /**@type{!Array.<!ops.Operation>}*/
         currentUndoState = [],
         /**@type{!Array.<!Array.<!ops.Operation>>}*/
@@ -52,6 +60,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             gui.UndoManager.signalUndoStackChanged,
             gui.UndoManager.signalUndoStateCreated,
             gui.UndoManager.signalUndoStateModified,
+            gui.UndoManager.signalModifiedChanged,
             gui.TrivialUndoManager.signalDocumentRootReplaced
         ]),
         undoRules = defaultRules || new gui.UndoStateRules(),
@@ -195,6 +204,51 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         eventNotifier.unsubscribe(signal, callback);
     };
 
+
+    /**
+     * @return {!number}
+     */
+    function currentUndoStateEditOpCount() {
+        /**
+         * @param {!number} count
+         * @param {!ops.Operation} op
+         * @return {!number}
+         */
+        function countEditOps(count, op) {
+            return count + (undoRules.isEditOperation(op) ? 1 : 0);
+        }
+        return currentUndoState.reduce(countEditOps, 0);
+    }
+
+    /**
+     * @return {!boolean}
+     */
+    function isModified() {
+        return (unmodifiedBranch !== branch) ||
+            (unmodifiedUndoStatesCount !== undoStates.length) ||
+            (unmodifiedLastUndoStateEditOpCount !== currentUndoStateEditOpCount());
+    }
+    /**
+     * @return {!boolean}
+     */
+    this.isModified = isModified;
+
+    /**
+     * @return {undefined}
+     */
+    this.setUnmodified = function() {
+        // current state is already tagged as unmodified state?
+        if (!isModified()) {
+            return;
+        }
+
+        unmodifiedBranch = branch;
+        unmodifiedUndoStatesCount = undoStates.length;
+        unmodifiedLastUndoStateEditOpCount = currentUndoStateEditOpCount();
+
+        eventNotifier.emit(gui.UndoManager.signalModifiedChanged, false);
+    };
+
     /**
      * Returns true if there are one or more undo states available
      * @return {boolean}
@@ -227,6 +281,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         redoStates.length = 0;
         initialState.length = 0;
         currentUndoState.length = 0;
+        branch = 0;
         initialDoc = null;
         emitStackChange();
     };
@@ -242,6 +297,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         currentUndoState = initialState = extractCursorStates([initialState].concat(undoStates));
         undoStates.length = 0;
         redoStates.length = 0;
+        branch = 0;
         emitStackChange();
     }
 
@@ -277,12 +333,19 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             return; // Ignore new operations generated whilst performing an undo/redo
         }
 
+        var oldModified = isModified(),
+            newModified;
+
         // An edit operation is assumed to indicate the end of the initial state. The user can manually
         // reset the initial state later with setInitialState if desired.
         // Additionally, an edit operation received when in the middle of the undo stack should also create a new state,
         // as the current undo state is effectively "sealed" and shouldn't gain additional document modifications.
         if ((undoRules.isEditOperation(op) && (currentUndoState === initialState || redoStates.length > 0))
                 || !undoRules.isPartOfOperationSet(op, currentUndoState)) {
+            // if current redo states are dropped, increase branch number
+            if (redoStates.length > 0) {
+                branch += 1;
+            }
             redoStates.length = 0; // Creating a new undo state should always reset the redo stack
             completeCurrentUndoState();
             currentUndoState = [op];
@@ -293,6 +356,11 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         } else {
             currentUndoState.push(op);
             eventNotifier.emit(gui.UndoManager.signalUndoStateModified, { operations: currentUndoState });
+        }
+
+        newModified = isModified();
+        if (oldModified !== newModified) {
+            eventNotifier.emit(gui.UndoManager.signalModifiedChanged, newModified);
         }
     };
 
