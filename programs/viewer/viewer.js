@@ -259,7 +259,9 @@ function Viewer(viewerPlugin) {
         url = location;
         filename = url.replace(/^.*[\\\/]/, '');
         document.title = filename;
-        document.getElementById('documentName').innerHTML = document.title;
+        var documentName = document.getElementById('documentName');
+        documentName.innerHTML = "";
+        documentName.appendChild(documentName.ownerDocument.createTextNode(document.title));
 
         viewerPlugin.onLoad = function () {
             document.getElementById('pluginVersion').innerHTML = viewerPlugin.getPluginVersion();

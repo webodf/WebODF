@@ -19,7 +19,7 @@ See also section about WebODF
 ### Fixes
 
 * Only highlight ODF fields in edit mode ([#816](https://github.com/kogmbh/WebODF/issues/816))
-
+* Prevent Cross-Site Scripting from file names ([#851](https://github.com/kogmbh/WebODF/pull/851)))
 
 ## Wodo.TextEditor
 See also section about WebODF
