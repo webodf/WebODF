@@ -234,19 +234,26 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     this.isModified = isModified;
 
     /**
+     * @param {!boolean} modified
      * @return {undefined}
      */
-    this.setUnmodified = function() {
-        // current state is already tagged as unmodified state?
-        if (!isModified()) {
+    this.setModified = function(modified) {
+        // current state is already matching the new state?
+        if (isModified() === modified) {
             return;
         }
 
-        unmodifiedBranch = branch;
-        unmodifiedUndoStatesCount = undoStates.length;
-        unmodifiedLastUndoStateEditOpCount = currentUndoStateEditOpCount();
+        if (modified) {
+            // remove unmodified flag from current state and thus any state
+            // done by setting the branch to a non-existing value, so it will never match
+            unmodifiedBranch = -1;
+        } else {
+            unmodifiedBranch = branch;
+            unmodifiedUndoStatesCount = undoStates.length;
+            unmodifiedLastUndoStateEditOpCount = currentUndoStateEditOpCount();
+        }
 
-        eventNotifier.emit(gui.UndoManager.signalModifiedChanged, false);
+        eventNotifier.emit(gui.UndoManager.signalModifiedChanged, modified);
     };
 
     /**

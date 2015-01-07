@@ -136,7 +136,7 @@ function createEditor() {
                 blob = new Blob([data.buffer], {type: mimetype});
             saveAs(blob, filename);
             // TODO: hm, saveAs could fail or be cancelled
-            editor.setDocumentUnmodified();
+            editor.setDocumentModified(false);
         }
 
         editor.getDocumentAsByteArray(saveByteArrayLocally);

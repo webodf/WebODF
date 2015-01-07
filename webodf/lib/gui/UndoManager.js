@@ -117,10 +117,12 @@ gui.UndoManager.prototype.onOperationExecuted = function (op) {"use strict"; };
 gui.UndoManager.prototype.isModified = function () {"use strict"; };
 
 /**
- * Sets the current state to be the unmodified state.
+ * Sets the current state of the document to be either the unmodified state
+ * or a modified state.
+ * @param {!boolean} modified
  * @return {undefined}
  */
-gui.UndoManager.prototype.setUnmodified = function() {"use strict"; };
+gui.UndoManager.prototype.setModified = function(modified) {"use strict"; };
 
 /**@const*/gui.UndoManager.signalUndoStackChanged = "undoStackChanged";
 /**@const*/gui.UndoManager.signalUndoStateCreated = "undoStateCreated";
