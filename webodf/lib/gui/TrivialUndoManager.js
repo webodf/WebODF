@@ -54,7 +54,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             gui.UndoManager.signalUndoStackChanged,
             gui.UndoManager.signalUndoStateCreated,
             gui.UndoManager.signalUndoStateModified,
-            gui.UndoManager.signalModifiedChanged,
+            gui.UndoManager.signalDocumentModifiedChanged,
             gui.TrivialUndoManager.signalDocumentRootReplaced
         ]),
         undoRules = defaultRules || new gui.UndoStateRules(),
@@ -292,13 +292,13 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     /**
      * @return {!boolean}
      */
-    this.isModified = isModified;
+    this.isDocumentModified = isModified;
 
     /**
      * @param {!boolean} modified
      * @return {undefined}
      */
-    this.setModified = function(modified) {
+    this.setDocumentModified = function(modified) {
         // current state is already matching the new state?
         if (isModified() === modified) {
             return;
@@ -311,7 +311,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             unmodifiedStateId = currentUndoStateTransition.getNextStateId();
         }
 
-        eventNotifier.emit(gui.UndoManager.signalModifiedChanged, modified);
+        eventNotifier.emit(gui.UndoManager.signalDocumentModifiedChanged, modified);
     };
 
     /**
@@ -420,7 +420,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
         newModified = isModified();
         if (oldModified !== newModified) {
-            eventNotifier.emit(gui.UndoManager.signalModifiedChanged, newModified);
+            eventNotifier.emit(gui.UndoManager.signalDocumentModifiedChanged, newModified);
         }
     };
 

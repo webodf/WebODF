@@ -149,7 +149,7 @@ var Wodo = Wodo || (function () {
         EVENT_UNKNOWNERROR = "unknownError",
         /** @inner @const
             @type {!string} */
-        EVENT_MODIFIEDCHANGED = "modifiedChanged",
+        EVENT_DOCUMENTMODIFIEDCHANGED = "documentModifiedChanged",
         /** @inner @const
             @type {!string} */
         EVENT_METADATACHANGED = "metadataChanged";
@@ -301,7 +301,7 @@ var Wodo = Wodo || (function () {
             //
             eventNotifier = new core.EventNotifier([
                 EVENT_UNKNOWNERROR,
-                EVENT_MODIFIEDCHANGED,
+                EVENT_DOCUMENTMODIFIEDCHANGED,
                 EVENT_METADATACHANGED
             ]);
 
@@ -349,7 +349,7 @@ var Wodo = Wodo || (function () {
             });
             if (undoRedoEnabled) {
                 editorSession.sessionController.setUndoManager(new gui.TrivialUndoManager());
-                editorSession.sessionController.getUndoManager().subscribe(gui.UndoManager.signalModifiedChanged, relayModifiedSignal);
+                editorSession.sessionController.getUndoManager().subscribe(gui.UndoManager.signalDocumentModifiedChanged, relayModifiedSignal);
             }
 
             // Relay any metadata changes to the Editor's consumer as an event
@@ -558,7 +558,7 @@ var Wodo = Wodo || (function () {
             runtime.assert(editorSession, "editorSession should exist here.");
 
             if (undoRedoEnabled) {
-                editorSession.sessionController.getUndoManager().setModified(modified);
+                editorSession.sessionController.getUndoManager().setDocumentModified(modified);
             }
         };
 
@@ -572,7 +572,7 @@ var Wodo = Wodo || (function () {
             runtime.assert(editorSession, "editorSession should exist here.");
 
             if (undoRedoEnabled) {
-                return editorSession.sessionController.getUndoManager().isModified();
+                return editorSession.sessionController.getUndoManager().isDocumentModified();
             }
 
             return false;
@@ -823,8 +823,8 @@ var Wodo = Wodo || (function () {
         // flags
         /** Id of event for an unkown error */
         EVENT_UNKNOWNERROR: EVENT_UNKNOWNERROR,
-        /** Id of event if modified state changes */
-        EVENT_MODIFIEDCHANGED: EVENT_MODIFIEDCHANGED,
+        /** Id of event if documentModified state changes */
+        EVENT_DOCUMENTMODIFIEDCHANGED: EVENT_DOCUMENTMODIFIEDCHANGED,
         /** Id of event if metadata changes */
         EVENT_METADATACHANGED: EVENT_METADATACHANGED
     };
