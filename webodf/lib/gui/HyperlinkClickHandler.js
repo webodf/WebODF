@@ -115,8 +115,13 @@ gui.HyperlinkClickHandler = function HyperlinkClickHandler(getContainer, keyDown
                 bookmarks[0].scrollIntoView(true);
             }
         } else {
-            // Ask the browser to open the link in a new window.
-            window.open(url);
+            // Ask the browser to open the link in a new window. `javascript` and `data` URIs are disabled for
+            // security reasons.
+            if(/^\s*(javascript|data):/.test(url)) {
+                runtime.log("WARN:", "potentially malicious URL ignored");
+            } else {
+                window.open(url);
+            }
         }
 
         if (e.preventDefault) {
