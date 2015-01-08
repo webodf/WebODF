@@ -111,6 +111,7 @@
         "core.PositionFilterChain",
         "core.UnitTester",
         "gui.TrivialUndoManager",
+        "gui.UndoManager",
         "ops.Document",
         "ops.OpAddCursor",
         "ops.OpInsertText",

@@ -82,6 +82,32 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         };
     }
 
+    /**
+     * @param {!gui.TrivialUndoManager} undoManager
+     * @constructor
+     */
+    function DocumentModifiedChangeListener(undoManager) {
+        var documentModified = null;
+
+        /**
+         * @param {!boolean} modified
+         * @return {undefined}
+         */
+        function onDocumentModifiedChanged(modified) {
+            documentModified = modified;
+        }
+
+        /**
+         * @return {?boolean}
+         */
+        this.getDocumentModified = function() {
+            return documentModified;
+        };
+
+        // init
+        undoManager.subscribe(gui.UndoManager.signalDocumentModifiedChanged, onDocumentModifiedChanged);
+    }
+
     this.setUp = function () {
         testarea = core.UnitTest.provideTestAreaDiv();
         t = {
@@ -363,6 +389,116 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         r.shouldBe(t, "t.ops", "[]");
     }
 
+    function documentModified_NonEditOp() {
+        t.modifiedChangeListener = new DocumentModifiedChangeListener(t.manager);
+        t.manager.initialize();
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+
+        t.manager.onOperationExecuted(create(new ops.OpAddCursor(), {timestamp: 1, memberid: 1}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+        t.manager.moveBackward(1); // back to initial state which was false
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+    }
+
+    function documentModified_EditOp() {
+        t.modifiedChangeListener = new DocumentModifiedChangeListener(t.manager);
+        t.manager.initialize();
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 5}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+        t.manager.moveBackward(1); // back to initial state which was false
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+    }
+
+    function setDocumentModified() {
+        t.modifiedChangeListener = new DocumentModifiedChangeListener(t.manager);
+        t.manager.initialize();
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+
+        t.manager.setDocumentModified(true);
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+
+        t.manager.setDocumentModified(false);
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+
+        // noedit op after setDocumentModified
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+
+        // edit op after setDocumentModified
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 3}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+
+        t.manager.setDocumentModified(false);
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+    }
+
+    function setDocumentModified_forwardBackwardToUnmodified() {
+        t.modifiedChangeListener = new DocumentModifiedChangeListener(t.manager);
+        t.manager.initialize();
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 1}));
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 3}));
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 4}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+
+        t.manager.setDocumentModified(false);
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+
+        t.manager.moveBackward(1); // back one state
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+
+        t.manager.moveForward(1); // for one state
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+    }
+
+    function setDocumentModified_branchingBeforeUnmodified() {
+        t.modifiedChangeListener = new DocumentModifiedChangeListener(t.manager);
+        t.manager.initialize();
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "null");
+
+        // create two states
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 1}));
+        t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 3}));
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 4}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+
+        t.manager.setDocumentModified(false);
+        r.shouldBe(t, "t.manager.isDocumentModified()", "false");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "false");
+
+         // back one state
+        t.manager.moveBackward(1);
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+
+        // create another second state
+        t.manager.onOperationExecuted(create(new ops.OpInsertText(), {timestamp: 6}));
+        r.shouldBe(t, "t.manager.isDocumentModified()", "true");
+        r.shouldBe(t, "t.modifiedChangeListener.getDocumentModified()", "true");
+    }
+
     this.tests = function () {
         return r.name([
             hasUndoStates_OnlyMovesBackValidStates,
@@ -377,7 +513,12 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
             moveBackward_NextOperationNonEdit_LeavesRedoInTact,
             moveBackward_BoundaryCheck_InitialDocumentState,
             moveBackward_ResetsMostRecentCursorState_ForVisibleCursors,
-            undoState_ConsumesTrailingNonEditOps
+            undoState_ConsumesTrailingNonEditOps,
+            documentModified_NonEditOp,
+            documentModified_EditOp,
+            setDocumentModified,
+            setDocumentModified_forwardBackwardToUnmodified,
+            setDocumentModified_branchingBeforeUnmodified
         ]);
     };
     this.asyncTests = function () {
