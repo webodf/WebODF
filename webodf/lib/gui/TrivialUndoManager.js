@@ -141,6 +141,13 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     }
 
     /**
+     * @return {!boolean}
+     */
+    function isModified() {
+        return currentUndoStateTransition.isNextStateId(unmodifiedStateId) !== true;
+    }
+
+    /**
      * Execute all operations in the supplied state transition
      * @param {!StateTransition} stateTransition
      * @return {undefined}
@@ -160,6 +167,17 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             undoAvailable: self.hasUndoStates(),
             redoAvailable: self.hasRedoStates()
         });
+    }
+
+    /**
+     * @param {!boolean} oldModified
+     * @return {undefined}
+     */
+    function emitDocumentModifiedChange(oldModified) {
+        var newModified = isModified();
+        if (oldModified !== newModified) {
+            eventNotifier.emit(gui.UndoManager.signalDocumentModifiedChanged, newModified);
+        }
     }
 
     /**
@@ -286,12 +304,6 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     /**
      * @return {!boolean}
      */
-    function isModified() {
-        return currentUndoStateTransition.isNextStateId(unmodifiedStateId) !== true;
-    }
-    /**
-     * @return {!boolean}
-     */
     this.isDocumentModified = isModified;
 
     /**
@@ -342,15 +354,20 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * @inheritDoc
      */
     this.purgeInitialState = function () {
+        var oldModified = isModified();
+
         undoStateTransitions.length = 0;
         redoStateTransitions.length = 0;
         currentUndoStateTransition = initialStateTransition = new StateTransition();
         unmodifiedStateId = currentUndoStateTransition.getNextStateId();
         initialDoc = null;
         emitStackChange();
+        emitDocumentModifiedChange(oldModified);
     };
 
     function setInitialState() {
+        var oldModified = isModified();
+
         initialDoc = document.cloneDocumentElement();
         // The current state may contain cursors if the initial state is modified whilst the document is in edit mode.
         // To prevent this issue, immediately purge all cursor nodes after cloning
@@ -361,8 +378,12 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         currentUndoStateTransition = initialStateTransition = extractCursorStates([initialStateTransition].concat(undoStateTransitions));
         undoStateTransitions.length = 0;
         redoStateTransitions.length = 0;
-        unmodifiedStateId = currentUndoStateTransition.getNextStateId();
+        // update unmodifiedStateId if needed
+        if (!oldModified) {
+            unmodifiedStateId = currentUndoStateTransition.getNextStateId();
+        }
         emitStackChange();
+        emitDocumentModifiedChange(oldModified);
     }
 
     /**
@@ -397,8 +418,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             return; // Ignore new operations generated whilst performing an undo/redo
         }
 
-        var oldModified = isModified(),
-            newModified;
+        var oldModified = isModified();
 
         // An edit operation is assumed to indicate the end of the initial state. The user can manually
         // reset the initial state later with setInitialState if desired.
@@ -418,10 +438,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             eventNotifier.emit(gui.UndoManager.signalUndoStateModified, { operations: currentUndoStateTransition.getOperations() });
         }
 
-        newModified = isModified();
-        if (oldModified !== newModified) {
-            eventNotifier.emit(gui.UndoManager.signalDocumentModifiedChanged, newModified);
-        }
+        emitDocumentModifiedChange(oldModified);
     };
 
     /**
@@ -432,6 +449,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      */
     this.moveForward = function (states) {
         var moved = 0,
+            oldModified = isModified(),
             redoOperations;
 
         while (states && redoStateTransitions.length) {
@@ -448,6 +466,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             currentUndoStateTransition = mostRecentUndoStateTransition();
             // Only report the stack has modified if moveForward actually did something
             emitStackChange();
+            emitDocumentModifiedChange(oldModified);
         }
         return moved;
     };
@@ -459,7 +478,8 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
      * @return {!number} Returns the number of states actually moved
      */
     this.moveBackward = function (states) {
-        var moved = 0;
+        var moved = 0,
+            oldModified = isModified();
 
         while (states && undoStateTransitions.length) {
             redoStateTransitions.push(undoStateTransitions.pop());
@@ -485,6 +505,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             // back to the start of the document
             currentUndoStateTransition = mostRecentUndoStateTransition() || initialStateTransition;
             emitStackChange();
+            emitDocumentModifiedChange(oldModified);
         }
         return moved;
     };
