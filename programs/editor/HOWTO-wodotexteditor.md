@@ -69,6 +69,20 @@ Once the editing should be done, the current state of the document can be retrie
 
 See the example file "localfileeditor.js" how the above can be applied.
 
+To track if the user has edited the document after it was loaded or since it has been synchronized the last time, the editor has a property "documentModified".
+The current state of the document can be set as unmodified by calling
+
+    editor.setDocumentModified(false);
+
+e.g. when the document has been synchronized somewhere. To query if the document is modified call "isDocumentModified()" on the editor object,
+
+    if (editor.isDocumentModified()) {
+        // ask the user if the changes should be discarded
+    }
+
+See the example file "localfileeditor.js" how the above can be applied.
+
+
 ### Examples
 
 There are two example included how to use the editor for inspiration.
