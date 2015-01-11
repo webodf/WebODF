@@ -43,12 +43,12 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
 add_custom_command(
-    OUTPUT WebODF/config.xml
+    OUTPUT WebODF/merges/config.xml
     COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/www ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www
     COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/merges ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
-    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/config.xml ${CMAKE_CURRENT_BINARY_DIR}/WebODF
+    COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/config.xml ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/manifest.webapp ${CMAKE_CURRENT_BINARY_DIR}/WebODF/merges/firefoxos/manifest.webapp
     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_BINARY_DIR}/webodf/webodf.js ${CMAKE_CURRENT_BINARY_DIR}/WebODF/www/webodf.js
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/WebODF/hooks/README.md
@@ -69,7 +69,7 @@ if(BUILD_APK)
         COMMAND ${CMAKE_COMMAND} ARGS -E remove_directory ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
         COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/src/org/webodf/ ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/android/src/org/webodf/
         COMMAND ${CORDOVA} build android
-        DEPENDS WebODF/config.xml
+        DEPENDS WebODF/merges/config.xml
                 ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/android.json
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
     )
@@ -84,7 +84,7 @@ add_custom_command(
         ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/www/
         ${CMAKE_CURRENT_BINARY_DIR}/WebODF/platforms/firefoxos/build/package.zip
         notopdir
-    DEPENDS WebODF/config.xml
+    DEPENDS WebODF/merges/config.xml
             ${CMAKE_CURRENT_BINARY_DIR}/WebODF/plugins/firefoxos.json
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/WebODF
 )
