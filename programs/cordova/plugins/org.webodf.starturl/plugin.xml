@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+xmlns:android="http://schemas.android.com/apk/res/android"
+           id="org.webodf.starturl"
+      version="0.9.0">
+    <name>Start URL</name>
+    <description>Access to a url provided by the operationg system to start the app with</description>
+  <js-module src="www/starturl.js" name="starturl">
+    <clobbers target="device" />
+  </js-module>
+
+    <!-- android -->
+  <platform name="android">
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="StartURL">
+        <param name="android-package" value="org.webodf.starturl.StartURL"/>
+        <param name="onload" value="true"/>
+      </feature>
+    </config-file>
+    <source-file src="android/StartURL.java" target-dir="src/org/webodf/starturl" />
+  </platform>
+</plugin>

@@ -1,0 +1,21 @@
+{
+    "name": "WebODF",
+    "version": "@WEBODF_VERSION@",
+    "description": "A viewer for OpenDocument Format files.",
+    "launch_path": "/index.html",
+    "developer": {
+        "name": "Jos van den Oever",
+        "url": "http://webodf.org"
+    },
+    "permissions": {
+        "device-storage:sdcard": {
+            "description": "To read files in the SD card file system",
+            "access": "readonly"
+        }
+    },
+    "icons": {
+        "128": "/img/icon-128.png"
+    },
+    "default_locale": "en",
+    "type": "privileged"
+}

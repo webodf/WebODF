@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="org.webodf" version="@WEBODF_VERSION@" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>WebODF</name>
+    <description>
+        A viewer for OpenDocument Format files.
+    </description>
+    <author email="jos.van.den.oever@kogmbh.com" href="http://webodf.org">
+        Jos van den Oever
+    </author>
+    <content src="index.html" />
+    <access origin="" />
+</widget>
