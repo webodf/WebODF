@@ -244,10 +244,35 @@ function Viewer(viewerPlugin) {
         delayedRefresh(300);
     }
 
-    
+    function readZoomParameter(zoom) {
+        var validZoomStrings = ["auto", "page-actual", "page-width"],
+            number;
+
+        if (validZoomStrings.indexOf(zoom) !== -1) {
+            return zoom;
+        }
+        number = parseFloat(zoom);
+        if (number && kMinScale <= number && number <= kMaxScale) {
+            return zoom;
+        }
+        return kDefaultScale;
+    }
+
+    function parseSearchParameters(location) {
+        var parameters = {},
+            search = location.search || "?";
+        search.substr(1).split('&').forEach(function (q) {
+            var s = q.split('=', 2);
+            parameters[s[0]] = s[1];
+        });
+        return parameters;
+    }
+
     this.initialize = function () {
         var location = String(document.location),
+            parameters = parseSearchParameters(document.location),
             pos = location.indexOf('#'),
+            initialScale,
             element;
 
         location = location.substr(pos + 1);
@@ -255,6 +280,8 @@ function Viewer(viewerPlugin) {
             console.log('Could not parse file path argument.');
             return;
         }
+
+        initialScale = readZoomParameter(parameters['zoom']);
 
         url = location;
         filename = url.replace(/^.*[\\\/]/, '');
@@ -288,7 +315,7 @@ function Viewer(viewerPlugin) {
             self.showPage(1);
 
             // Set default scale
-            parseScale(kDefaultScale);
+            parseScale(initialScale);
 
             canvasContainer.onscroll = onScroll;
             delayedRefresh();
