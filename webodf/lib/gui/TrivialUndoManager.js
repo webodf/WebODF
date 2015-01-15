@@ -24,14 +24,106 @@
 
 /*global gui,ops,core,runtime*/
 
+(function() {
+"use strict";
+
+var/**
+    * Base for generating unique state ids
+    * @type {!number}
+    */
+    stateIdBase = 0;
+
+/**
+ * Id for a document state in the Undo/Redo history
+ * @constructor
+ * @param {!number=} mainId
+ * @param {!number=} subId
+ */
+function StateId(mainId, subId) {
+    /**@type{!number}*/
+    this.mainId = mainId !== undefined ? mainId : -1;
+
+    /**@type{!number}*/
+    this.subId = subId !== undefined ? subId : -1;
+}
+
+/**
+ * Contains all operations done between two document states
+ * in the Undo/Redo history.
+ * Possible TODO: create a context for sharing the undoRules,
+ * instead of passing them to all StateTransition instances
+ * @constructor
+ * @param {gui.UndoStateRules=} undoRules
+ * @param {!Array.<!ops.Operation>=} initialOps
+ * @param {!boolean=} editOpsPossible  Set to @true if the initialOps could contain edit ops.
+ */
+function StateTransition(undoRules, initialOps, editOpsPossible) {
+    var /**@type{!number}*/
+        nextStateId,
+        /**@type{!Array.<!ops.Operation>}*/
+        operations,
+        /**@type{!number}*/
+        editOpsCount;
+
+    /**
+     * @param {!ops.Operation} op
+     * @return {undefined}
+     */
+    this.addOperation = function (op) {
+        if (undoRules.isEditOperation(op)) {
+            editOpsCount += 1;
+        }
+        operations.push(op);
+    };
+
+    /**
+     * @param {!StateId} stateId
+     * @return {!boolean}
+     */
+    this.isNextStateId = function (stateId) {
+        return (stateId.mainId === nextStateId) && (stateId.subId === editOpsCount);
+    };
+
+    /**
+     * @return {!StateId}
+     */
+    this.getNextStateId = function () {
+        return new StateId(nextStateId, editOpsCount);
+    };
+
+    /**
+     * @return {!Array.<!ops.Operation>}
+     */
+    this.getOperations = function () {
+        return operations;
+    };
+
+    /**
+     * @param {!number} count
+     * @param {!ops.Operation} op
+     * @return {!number}
+     */
+    function addEditOpsCount(count, op) {
+        return count + (undoRules.isEditOperation(op) ? 1 : 0);
+    }
+
+    function init() {
+        stateIdBase += 1;
+        nextStateId = stateIdBase;
+
+        operations = initialOps || [];
+
+        editOpsCount = (initialOps && editOpsPossible) ? initialOps.reduce(addEditOpsCount, 0) : 0;
+    }
+    init();
+}
+
 /**
  * @param {gui.UndoStateRules=} defaultRules
  * @constructor
  * @implements gui.UndoManager
  */
 gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
-    "use strict";
-
     var self = this,
         cursorns = 'urn:webodf:names:cursor',
         domUtils = core.DomUtils,
@@ -58,87 +150,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             gui.TrivialUndoManager.signalDocumentRootReplaced
         ]),
         undoRules = defaultRules || new gui.UndoStateRules(),
-        isExecutingOps = false,
-        /**
-        * Base for generating unique state ids
-        * @type {!number}
-        */
-        stateIdBase = 0;
-
-    /**
-     * @constructor
-     * @param {!number=} mainId
-     * @param {!number=} subId
-     */
-    function StateId(mainId, subId) {
-        /**@type{!number}*/
-        this.mainId = mainId !== undefined ? mainId : -1;
-
-        /**@type{!number}*/
-        this.subId = subId !== undefined ? subId : -1;
-    }
-
-    /**
-     * @constructor
-     * @param {!Array.<!ops.Operation>=} initialOps
-     * @param {!boolean=} editOpsPossible
-     */
-    function StateTransition(initialOps, editOpsPossible) {
-        var /**@type{!number}*/
-            nextStateId,
-            /**@type{!Array.<!ops.Operation>}*/
-            operations,
-            /**@type{!number}*/
-            editOpsCount;
-
-        /**
-         * @param {!ops.Operation} op
-         * @return {undefined}
-         */
-        this.addOperation = function (op) {
-            if (undoRules.isEditOperation(op)) {
-                editOpsCount += 1;
-            }
-            operations.push(op);
-        };
-
-        /**
-         * @param {!StateId} stateId
-         * @return {!boolean}
-         */
-        this.isNextStateId = function (stateId) {
-            return (stateId.mainId === nextStateId) && (stateId.subId === editOpsCount);
-        };
-
-        /** @return {!StateId}*/
-        this.getNextStateId = function () {
-            return new StateId(nextStateId, editOpsCount);
-        };
-
-        /** @return {!Array.<!ops.Operation>} */
-        this.getOperations = function () {
-            return operations;
-        };
-
-        /**
-         * @param {!number} count
-         * @param {!ops.Operation} op
-         * @return {!number}
-         */
-        function addEditOpsCount(count, op) {
-            return count + (undoRules.isEditOperation(op) ? 1 : 0);
-        }
-
-        function init() {
-            stateIdBase += 1;
-            nextStateId = stateIdBase;
-
-            operations = initialOps || [];
-
-            editOpsCount = (initialOps && editOpsPossible) ? initialOps.reduce(addEditOpsCount, 0) : 0;
-        }
-        init();
-    }
+        isExecutingOps = false;
 
     /**
      * @return {!boolean}
@@ -279,7 +291,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
             stateTransition = undoStateTransitions.pop();
         }
 
-        return new StateTransition(values(addCursor).concat(values(moveCursor)));
+        return new StateTransition(undoRules, values(addCursor).concat(values(moveCursor)));
     }
 
     /**
@@ -358,7 +370,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 
         undoStateTransitions.length = 0;
         redoStateTransitions.length = 0;
-        currentUndoStateTransition = initialStateTransition = new StateTransition();
+        currentUndoStateTransition = initialStateTransition = new StateTransition(undoRules);
         unmodifiedStateId = currentUndoStateTransition.getNextStateId();
         initialDoc = null;
         emitStackChange();
@@ -428,7 +440,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
                 || !undoRules.isPartOfOperationSet(op, currentUndoStateTransition.getOperations())) {
             redoStateTransitions.length = 0; // Creating a new undo state should always reset the redo stack
             completeCurrentUndoState();
-            currentUndoStateTransition = new StateTransition([op], true);
+            currentUndoStateTransition = new StateTransition(undoRules, [op], true);
             // Every undo state *MUST* contain an edit for it to be valid for undo or redo
             undoStateTransitions.push(currentUndoStateTransition);
             eventNotifier.emit(gui.UndoManager.signalUndoStateCreated, { operations: currentUndoStateTransition.getOperations() });
@@ -511,7 +523,7 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
     };
 
     function init() {
-        currentUndoStateTransition = initialStateTransition = new StateTransition();
+        currentUndoStateTransition = initialStateTransition = new StateTransition(undoRules);
         unmodifiedStateId = currentUndoStateTransition.getNextStateId();
     }
 
@@ -519,3 +531,5 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
 };
 
 /**@const*/ gui.TrivialUndoManager.signalDocumentRootReplaced = "documentRootReplaced";
+
+}());
