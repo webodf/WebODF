@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012-2014 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2015 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * This file is part of WebODF.
@@ -44,7 +44,7 @@
 
 /*global document, window*/
 
-function Viewer(viewerPlugin) {
+function Viewer(viewerPlugin, parameters) {
     "use strict";
 
     var self = this,
@@ -69,7 +69,6 @@ function Viewer(viewerPlugin) {
         dialogOverlay = document.getElementById('dialogOverlay'),
         toolbarRight = document.getElementById('toolbarRight'),
         aboutDialog,
-        filename,
         pages = [],
         currentPage,
         scaleChangeTimer,
@@ -258,37 +257,17 @@ function Viewer(viewerPlugin) {
         return kDefaultScale;
     }
 
-    function parseSearchParameters(location) {
-        var parameters = {},
-            search = location.search || "?";
-        search.substr(1).split('&').forEach(function (q) {
-            var s = q.split('=', 2);
-            parameters[s[0]] = s[1];
-        });
-        return parameters;
-    }
-
     this.initialize = function () {
-        var location = String(document.location),
-            parameters = parseSearchParameters(document.location),
-            pos = location.indexOf('#'),
-            initialScale,
+        var initialScale,
             element;
 
-        location = location.substr(pos + 1);
-        if (pos === -1 || location.length === 0) {
-            console.log('Could not parse file path argument.');
-            return;
-        }
+        initialScale = readZoomParameter(parameters.zoom);
 
-        initialScale = readZoomParameter(parameters['zoom']);
-
-        url = location;
-        filename = url.replace(/^.*[\\\/]/, '');
-        document.title = filename;
+        url = parameters.documentUrl;
+        document.title = parameters.title;
         var documentName = document.getElementById('documentName');
         documentName.innerHTML = "";
-        documentName.appendChild(documentName.ownerDocument.createTextNode(document.title));
+        documentName.appendChild(documentName.ownerDocument.createTextNode(parameters.title));
 
         viewerPlugin.onLoad = function () {
             document.getElementById('pluginVersion').innerHTML = viewerPlugin.getPluginVersion();
@@ -321,7 +300,7 @@ function Viewer(viewerPlugin) {
             delayedRefresh();
         };
 
-        viewerPlugin.initialize(canvasContainer, location);
+        viewerPlugin.initialize(canvasContainer, url);
     };
 
     /**
