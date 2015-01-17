@@ -68,6 +68,11 @@ ops.OpUpdateMetadata = function OpUpdateMetadata() {
 
         odfContainer.setMetadata(setProperties, removedPropertiesArray);
 
+        odtDocument.emit(ops.OdtDocument.signalMetadataUpdated, {
+            setProperties: setProperties !== null ? setProperties : {},
+            removedProperties: removedPropertiesArray !== null ? removedPropertiesArray : []
+        });
+
         return true;
     };
 

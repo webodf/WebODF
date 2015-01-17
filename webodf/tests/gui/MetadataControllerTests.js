@@ -114,7 +114,21 @@ gui.MetadataControllerTests = function MetadataControllerTests(runner) {
         var changedMetadata = null;
 
         function onMetadataChanged(changes) {
-            changedMetadata = changes;
+            if (changedMetadata === null) {
+                changedMetadata = changes;
+            } else {
+                // merge signal data
+                Object.keys(changes.setProperties).forEach(function (key) {
+                    changedMetadata.setProperties[key] = changes.setProperties[key];
+                });
+                changes.removedProperties.forEach(function (key) {
+                    delete changedMetadata.setProperties[key];
+                    if (changedMetadata.removedProperties.indexOf(key) !== -1) {
+                        changedMetadata.removedProperties.push(key);
+                    }
+                });
+            }
+
             // remove automatic updated metadata
             internalMetadataTagnames.forEach(function(internalTagName) {
                 if (changedMetadata.setProperties && changedMetadata.setProperties[internalTagName]) {
@@ -125,6 +139,10 @@ gui.MetadataControllerTests = function MetadataControllerTests(runner) {
 
         this.getChangedMetadata = function() {
             return changedMetadata;
+        };
+
+        this.reset = function() {
+            changedMetadata = null;
         };
 
         // init
@@ -222,6 +240,7 @@ gui.MetadataControllerTests = function MetadataControllerTests(runner) {
         var metaDataProperties = {};
 
         createOdtDocument(oldData ? tagged(metadataName, oldData) : "");
+        t.metadataChangeListener.reset();
 
         metaDataProperties[metadataName] = newData;
         t.metadataController.setMetadata(metaDataProperties);
@@ -256,6 +275,7 @@ gui.MetadataControllerTests = function MetadataControllerTests(runner) {
      */
     function removeMetaData(metadataName, oldData, shouldBeRemoved) {
         createOdtDocument(oldData ? tagged(metadataName, oldData) : "");
+        t.metadataChangeListener.reset();
 
         t.metadataController.setMetadata(null, [metadataName]);
 

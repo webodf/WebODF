@@ -442,32 +442,25 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
             date = new Date(opspec.timestamp).toISOString(),
             odfContainer = odfCanvas.odfContainer(),
             /**@type{!{setProperties: !Object, removedProperties: ?Array.<!string>}}*/
-            changedMetadata = {
-                setProperties: {},
-                removedProperties: []
-            },
+            changedMetadata,
             fullName;
 
         // If the operation is an edit (that changes the
         // ODF that will be saved), then update metadata.
         if (op.isEdit) {
-            if (opspec.optype === "UpdateMetadata") {
-                // HACK: Cannot typecast this to OpUpdateMetadata's spec because that would be a cyclic dependency,
-                // therefore forcibly typecast this to advertise the two required properties. Also, deep clone to avoid
-                // unintended modification of the op spec.
-                changedMetadata.setProperties = /**@type{!Object}*/(JSON.parse(JSON.stringify(/**@type{!{setProperties: !Object}}*/(opspec).setProperties)));
-                if (/**@type{!{removedProperties: ?{attributes: !string}}}*/(opspec).removedProperties) {
-                    changedMetadata.removedProperties = /**@type{!{removedProperties: ?{attributes: !string}}}*/(opspec).removedProperties.attributes.split(',');
-                }
-            }
-
             fullName = self.getMember(memberId).getProperties().fullName;
             odfContainer.setMetadata({
                 "dc:creator": fullName,
                 "dc:date": date
             }, null);
-            changedMetadata.setProperties["dc:creator"] = fullName;
-            changedMetadata.setProperties["dc:date"] = date;
+
+            changedMetadata = {
+                setProperties: {
+                    "dc:creator": fullName,
+                    "dc:date": date
+                },
+                removedProperties: []
+            };
 
             // If no previous op was found in this session,
             // then increment meta:editing-cycles by 1.
