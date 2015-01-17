@@ -64,12 +64,15 @@ function createEditor() {
             }
         }
         if (files && files.length === 1) {
-            editor.closeDocument(function() {
-                file = files[0];
-                reader = new FileReader();
-                reader.onloadend = onLoadEnd;
-                reader.readAsArrayBuffer(file);
-            });
+            if (!editor.isDocumentModified() ||
+                window.confirm("There are unsaved changes to the file. Do you want to discard them?")) {
+                editor.closeDocument(function() {
+                    file = files[0];
+                    reader = new FileReader();
+                    reader.onloadend = onLoadEnd;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
         } else {
             alert("File could not be opened in this browser.");
         }
@@ -132,6 +135,8 @@ function createEditor() {
                 filename = loadedFilename || "doc.odt",
                 blob = new Blob([data.buffer], {type: mimetype});
             saveAs(blob, filename);
+            // TODO: hm, saveAs could fail or be cancelled
+            editor.setDocumentModified(false);
         }
 
         editor.getDocumentAsByteArray(saveByteArrayLocally);
@@ -156,6 +161,17 @@ function createEditor() {
         editor.setUserData({
             fullName: "WebODF-Curious",
             color:    "black"
+        });
+
+        window.addEventListener("beforeunload", function (e) {
+            var confirmationMessage = "There are unsaved changes to the file.";
+
+            if (editor.isDocumentModified()) {
+                // Gecko + IE
+                (e || window.event).returnValue = confirmationMessage;
+                // Webkit, Safari, Chrome etc.
+                return confirmationMessage;
+            }
         });
 
         if (docUrl) {
