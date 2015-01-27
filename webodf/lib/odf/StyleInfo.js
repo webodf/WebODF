@@ -345,8 +345,8 @@ odf.StyleInfo = function StyleInfo() {
             styleName = styleElement.getAttributeNS(stylens, 'name'),
             styleFamily = styleElement.getAttributeNS(stylens, 'family');
 
-        xp = "//style:*[@style:parent-style-name='" + styleName
-            + "'][@style:family='" + styleFamily + "']";
+        xp = '//style:*[@style:parent-style-name="' + styleName
+            + '"][@style:family="' + styleFamily + '"]';
         nodes = xpath.getODFElementsWithXPath(odfbody, xp, nsResolver);
         if (nodes.length) {
             return true;

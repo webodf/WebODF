@@ -784,7 +784,7 @@ odf.Style2CSS = function Style2CSS() {
                 rule;
             controlledFrameClasses.forEach(function(frameClass) {
                 styleNames.forEach(function(styleName) {
-                    selectors.push("draw|page[webodfhelper|page-style-name='"+styleName+"'] draw|frame[presentation|class='"+frameClass+"']");
+                    selectors.push('draw|page[webodfhelper|page-style-name="'+styleName+'"] draw|frame[presentation|class="'+frameClass+'"]');
                 });
             });
             if (selectors.length > 0) {
@@ -909,8 +909,8 @@ odf.Style2CSS = function Style2CSS() {
                             === stylename) {
                     masterStyleName = e.getAttributeNS(stylens, 'name');
 
-                    contentLayoutRule = 'draw|page[draw|master-page-name=' + masterStyleName + '] {' + rule + '}';
-                    pageSizeRule = 'office|body, draw|page[draw|master-page-name=' + masterStyleName + '] {'
+                    contentLayoutRule = 'draw|page[draw|master-page-name="' + masterStyleName + '"] {' + rule + '}';
+                    pageSizeRule = 'office|body, draw|page[draw|master-page-name="' + masterStyleName + '"] {'
                             + applySimpleMapping(props, pageSizePropertySimpleMapping)
                             + ' }';
 
