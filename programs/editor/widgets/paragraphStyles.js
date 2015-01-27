@@ -156,6 +156,11 @@ define("webodf/editor/widgets/paragraphStyles", [
                     width: '100px'
                 }
             });
+            // prevent browser translation service messing up ids
+            select.domNode.setAttribute("translate", "no");
+            select.domNode.classList.add("notranslate");
+            select.dropDown.domNode.setAttribute("translate", "no");
+            select.dropDown.domNode.classList.add("notranslate");
 
             populateStyles();
 

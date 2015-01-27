@@ -46,6 +46,11 @@ define("webodf/editor/widgets/fontPicker", [
                     width: '150px'
                 }
             });
+            // prevent browser translation service messing up ids
+            select.domNode.setAttribute("translate", "no");
+            select.domNode.classList.add("notranslate");
+            select.dropDown.domNode.setAttribute("translate", "no");
+            select.dropDown.domNode.classList.add("notranslate");
 
             this.widget = function () {
                 return select;
