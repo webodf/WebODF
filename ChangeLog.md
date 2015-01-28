@@ -2,10 +2,21 @@
 
 ## WebODF
 
+### Improvements
+
+* Add a "documentModified" state with change signal to UndoManager classes ([#857](https://github.com/kogmbh/WebODF/pull/857)))
+
+### Fixes
+
+* No longer fail on "draw:master-page-name" attributes values with non-alphabetic chars ([#742](https://github.com/kogmbh/WebODF/pull/742)))
 
 
 ## Wodo.TextEditor
 See also section about WebODF
+
+### Improvements
+
+* Add a "documentModified" state with change signal ([#857](https://github.com/kogmbh/WebODF/pull/857)))
 
 ### Fixes
 
@@ -13,6 +24,7 @@ See also section about WebODF
 * Prevent Cross-Site Scripting from style names and font names ([#849](https://github.com/kogmbh/WebODF/pull/849)))
 * Avoid badly rendered toolbar element with subsets of tools ([#855](https://github.com/kogmbh/WebODF/pull/855)))
 * Prevent Cross-Site Scripting from links ([#850](https://github.com/kogmbh/WebODF/pull/850)))
+* Prevent browser translation service breaking the editor logic ([#862](https://github.com/kogmbh/WebODF/pull/862)))
 
 # Changes between 0.5.3 and 0.5.4
 
