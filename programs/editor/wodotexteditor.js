@@ -689,6 +689,11 @@ var Wodo = Wodo || (function () {
             // to style also all dialogs, which are attached directly to body
             document.body.classList.add("claro");
 
+            // prevent browser translation service messing up internal address system
+            // TODO: this should be done more centrally, but where exactly?
+            canvasElement.setAttribute("translate", "no");
+            canvasElement.classList.add("notranslate");
+
             // create widgets
             mainContainer = new BorderContainer({}, mainContainerElementId);
 
