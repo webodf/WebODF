@@ -320,7 +320,7 @@ var Wodo = Wodo || (function () {
          * @return {undefined}
          */
         function relayModifiedSignal(modified) {
-            eventNotifier.emit(EVENT_MODIFIEDCHANGED, modified);
+            eventNotifier.emit(EVENT_DOCUMENTMODIFIEDCHANGED, modified);
         }
 
         /**
