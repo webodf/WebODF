@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
 <!--
   Copyright (C) 2012-2014 KO GmbH <copyright@kogmbh.com>
@@ -45,21 +48,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<html dir="ltr" lang="en-US">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
         <title>ViewerJS</title>
         <!-- If you want to use custom CSS (@font-face rules, for example) you should uncomment
              the following reference and use a local.css file for that. See the example.local.css
              file for a sample.
         <link rel="stylesheet" type="text/css" href="local.css" media="screen"/>
         -->
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
         <link rel="stylesheet" type="text/css" href="viewer.css" media="screen"/>
         <script src="viewer.js" type="text/javascript" charset="utf-8"></script>
         <script src="PluginLoader.js" type="text/javascript" charset="utf-8"></script>
         <script>
-            loadDocument(window.location.hash);
+            loadDocument();
         </script>
     </head>
 

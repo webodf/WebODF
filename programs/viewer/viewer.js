@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012-2014 KO GmbH <copyright@kogmbh.com>
+ * Copyright (C) 2012-2015 KO GmbH <copyright@kogmbh.com>
  *
  * @licstart
  * This file is part of WebODF.
@@ -44,7 +44,7 @@
 
 /*global document, window*/
 
-function Viewer(viewerPlugin) {
+function Viewer(viewerPlugin, parameters) {
     "use strict";
 
     var self = this,
@@ -69,7 +69,6 @@ function Viewer(viewerPlugin) {
         dialogOverlay = document.getElementById('dialogOverlay'),
         toolbarRight = document.getElementById('toolbarRight'),
         aboutDialog,
-        filename,
         pages = [],
         currentPage,
         scaleChangeTimer,
@@ -244,24 +243,31 @@ function Viewer(viewerPlugin) {
         delayedRefresh(300);
     }
 
-    
+    function readZoomParameter(zoom) {
+        var validZoomStrings = ["auto", "page-actual", "page-width"],
+            number;
+
+        if (validZoomStrings.indexOf(zoom) !== -1) {
+            return zoom;
+        }
+        number = parseFloat(zoom);
+        if (number && kMinScale <= number && number <= kMaxScale) {
+            return zoom;
+        }
+        return kDefaultScale;
+    }
+
     this.initialize = function () {
-        var location = String(document.location),
-            pos = location.indexOf('#'),
+        var initialScale,
             element;
 
-        location = location.substr(pos + 1);
-        if (pos === -1 || location.length === 0) {
-            console.log('Could not parse file path argument.');
-            return;
-        }
+        initialScale = readZoomParameter(parameters.zoom);
 
-        url = location;
-        filename = url.replace(/^.*[\\\/]/, '');
-        document.title = filename;
+        url = parameters.documentUrl;
+        document.title = parameters.title;
         var documentName = document.getElementById('documentName');
         documentName.innerHTML = "";
-        documentName.appendChild(documentName.ownerDocument.createTextNode(document.title));
+        documentName.appendChild(documentName.ownerDocument.createTextNode(parameters.title));
 
         viewerPlugin.onLoad = function () {
             document.getElementById('pluginVersion').innerHTML = viewerPlugin.getPluginVersion();
@@ -288,13 +294,13 @@ function Viewer(viewerPlugin) {
             self.showPage(1);
 
             // Set default scale
-            parseScale(kDefaultScale);
+            parseScale(initialScale);
 
             canvasContainer.onscroll = onScroll;
             delayedRefresh();
         };
 
-        viewerPlugin.initialize(canvasContainer, location);
+        viewerPlugin.initialize(canvasContainer, url);
     };
 
     /**
