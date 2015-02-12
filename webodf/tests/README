@@ -1,3 +1,5 @@
+General notes
+=============
 There are three different ways to do testing:
 
 * two makefile targets: "nodetest" & "qtjsruntimetest"
@@ -13,9 +15,20 @@ Some tests expect to be run with a DOM document and use an empty div in it.
 They need to get that div in the setUp() method by calling core.UnitTest.provideTestAreaDiv,
 and should release it in the tearDown() method by calling core.UnitTest.cleanupTestAreaDiv.
 
-TODO: each test case should be ideally run in a completely fresh setup, not using a random setup
-by reusing the DOM and the global variables from the previous tests
-(defending that with "but it's fuzzying tests!" is just a nice try ;) )
+
+Running tests in the browser
+============================
+To run the tests in the browser(s) of your interest, you should use nodejs and the
+custom webserver implemented in webodf/httpserver.js. This webserver implements a certain
+handling of "PUT" requests, as expected by some tests.
+Using another webserver also works, but it will result in a few tests failing.
+
+From the toplevel directory of the sources run
+    node webodf/httpserver.js
+and open
+    http://127.0.0.1:8124/webodf/tests/tests.html
+with the browsers you want to run the tests in.
+
 
 How to add a new test class
 ===========================
@@ -31,8 +44,9 @@ test types (node, qt & browser). In each of these (including the browser)
 there should be no classpath failures. The browser often masks these because
 the order loading is slightly more forgiving.
 
+
 Common issues
--------------
+=============
 qtjsruntimetest throws a "undefined is not an object error"
 -----------------------------------------------
 - Ensure tests.js has the appropriate runtime.loadClass entry
@@ -50,6 +64,3 @@ wildly incorrect. The fix is to ensure the required classes are listed in
 build/webodf/simplecompilex.js BEFORE any runtime.loadClass lines that use them.
 - Ensure the tests are listed *after* their dependencies in all files
 - Ensure any new classes are listed *after* their dependencies in all files
-
-
-
