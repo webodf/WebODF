@@ -161,7 +161,7 @@ function Viewer(viewerPlugin, parameters) {
         return viewerPlugin.getPages();
     }
 
-    function setScale(val, resetAutoSettings, noScroll) {
+    function setScale(val, resetAutoSettings) {
         if (val === self.getZoomLevel()) {
             return;
         }
@@ -197,7 +197,7 @@ function Viewer(viewerPlugin, parameters) {
         }, milliseconds);
     }
 
-    function parseScale(value, resetAutoSettings, noScroll) {
+    function parseScale(value, resetAutoSettings) {
         var scale,
             maxWidth,
             maxHeight;
@@ -209,7 +209,7 @@ function Viewer(viewerPlugin, parameters) {
         }
 
         if (scale) {
-            setScale(scale, true, noScroll);
+            setScale(scale, true);
             delayedRefresh(300);
             return;
         }
@@ -219,7 +219,7 @@ function Viewer(viewerPlugin, parameters) {
 
         switch (value) {
         case 'page-actual':
-            setScale(1, resetAutoSettings, noScroll);
+            setScale(1, resetAutoSettings);
             break;
         case 'page-width':
             viewerPlugin.fitToWidth(maxWidth);
