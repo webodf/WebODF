@@ -30,19 +30,16 @@
     /**
      *
      * @constructor
-     * @param {!function():!Element} getRootNode
-     * @param {!function(!Node):!core.PositionIterator} newIterator
+     * @param {!Element} rootNode
+     * @param {!core.PositionIterator} iterator
      * @param {!core.PositionFilter} filter
      * @param {!number} bucketSize  Minimum number of steps between cache points
      */
-    ops.OdtStepsTranslator = function OdtStepsTranslator(getRootNode, newIterator, filter, bucketSize) {
-        var rootNode,
-            /**@type{!ops.StepsCache}*/
+    ops.OdtStepsTranslator = function OdtStepsTranslator(rootNode, iterator, filter, bucketSize) {
+        var /**@type{!ops.StepsCache}*/
             stepsCache,
             odfUtils = odf.OdfUtils,
             domUtils = core.DomUtils,
-            /**@type{!core.PositionIterator}*/
-            iterator,
             /**@const*/
             FILTER_ACCEPT = core.PositionFilter.FilterResult.FILTER_ACCEPT,
             /**@const*/
@@ -95,29 +92,6 @@
         }
 
         /**
-         * This evil little check is necessary because someone, not mentioning any names *cough*
-         * added an extremely hacky undo manager that replaces the root node in order to go back
-         * to a prior document state.
-         * This makes things very sad, and kills baby kittens.
-         * Unfortunately, no-one has had time yet to write a *real* undo stack... so we just need
-         * to cope with it for now.
-         * @return {undefined}
-         */
-        function verifyRootNode() {
-            // TODO Remove when a proper undo manager arrives
-            var currentRootNode = getRootNode();
-            if (currentRootNode !== rootNode) {
-                if (rootNode) {
-                    // verifyRootNode is called during init. Don't log misleading messages in this case
-                    runtime.log("Undo detected. Resetting steps cache");
-                }
-                rootNode = currentRootNode;
-                stepsCache = new ops.StepsCache(rootNode, bucketSize, roundUpToStep);
-                iterator = newIterator(rootNode);
-            }
-        }
-
-        /**
          * Convert the requested steps from root into the equivalent DOM node & offset pair. If the
          * requested step is before the start or past the end of the document, a RangeError will be thrown.
          * @param {!number} steps
@@ -134,7 +108,6 @@
             if (steps < 0) {
                 throw new RangeError("Requested steps is negative (" + steps + ")");
             }
-            verifyRootNode();
             stepsFromRoot = stepsCache.setToClosestStep(steps, iterator);
 
             while (stepsFromRoot < steps && iterator.nextPosition()) {
@@ -204,7 +177,6 @@
                 rounding = 0,
                 isStep;
 
-            verifyRootNode();
             if (!domUtils.containsNode(rootNode, node)) {
                 beforeRoot = domUtils.comparePoints(rootNode, 0, node, offset) < 0;
                 node = /**@type{!Node}*/(rootNode);
@@ -249,7 +221,6 @@
             var stepsFromRoot,
                 isStep;
 
-            verifyRootNode();
             stepsFromRoot = stepsCache.setToClosestStep(0, iterator);
             while (iterator.nextPosition()) {
                 isStep = filter.acceptPosition(iterator) === FILTER_ACCEPT;
@@ -265,7 +236,6 @@
          * @return {undefined}
          */
         this.handleStepsInserted = function (eventArgs) {
-            verifyRootNode();
             // Old position = position
             // New position = position + length
             // E.g., {position: 10, length: 1} indicates 10 => 10, New => 11, 11 => 12, 12 => 13
@@ -277,7 +247,6 @@
          * @return {undefined}
          */
         this.handleStepsRemoved = function (eventArgs) {
-            verifyRootNode();
             // Old position = position + length
             // New position = position
             // E.g., {position: 10, length: 1} indicates 10 => 10, 11 => 10, 12 => 11
@@ -290,7 +259,7 @@
         };
 
         function init() {
-            verifyRootNode();
+            stepsCache = new ops.StepsCache(rootNode, bucketSize, roundUpToStep);
         }
         init();
     };
