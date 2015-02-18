@@ -50,11 +50,12 @@ define("webodf/editor/Tools", [
                 onToolDone = args.onToolDone,
                 loadOdtFile = args.loadOdtFile,
                 saveOdtFile = args.saveOdtFile,
+                saveAsOdtFile = args.saveAsOdtFile,
                 downloadOdtFile = args.downloadOdtFile,
                 close = args.close,
                 toolbar,
                 loadButton, saveButton, closeButton, aboutButton,
-                downloadButton,
+                saveAsButton, downloadButton,
                 formatDropDownMenu, formatMenuButton,
                 paragraphStylesMenuItem, paragraphStylesDialog, simpleStyles, currentStyle,
                 zoomSlider,
@@ -183,6 +184,20 @@ define("webodf/editor/Tools", [
                         }
                     });
                     saveButton.placeAt(toolbar);
+                }
+
+                // SaveAs
+                if (saveAsOdtFile) {
+                    saveAsButton = new Button({
+                        label: tr('Save as...'),
+                        showLabel: false,
+                        iconClass: 'webodfeditor-dijitSaveAsIcon',
+                        onClick: function () {
+                            saveAsOdtFile();
+                            onToolDone();
+                        }
+                    });
+                    saveAsButton.placeAt(toolbar);
                 }
 
                 // Download

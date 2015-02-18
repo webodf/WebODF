@@ -283,6 +283,7 @@ var Wodo = Wodo || (function () {
             //
             loadOdtFile = editorOptions.loadCallback,
             saveOdtFile = editorOptions.saveCallback,
+            saveAsOdtFile = editorOptions.saveAsCallback,
             downloadOdtFile = editorOptions.downloadCallback,
             close =       editorOptions.closeCallback,
             //
@@ -709,6 +710,7 @@ var Wodo = Wodo || (function () {
                 onToolDone: setFocusToOdfCanvas,
                 loadOdtFile: loadOdtFile,
                 saveOdtFile: saveOdtFile,
+                saveAsOdtFile: saveAsOdtFile,
                 downloadOdtFile: downloadOdtFile,
                 close: close,
                 directTextStylingEnabled: directTextStylingEnabled,
@@ -780,6 +782,7 @@ var Wodo = Wodo || (function () {
      * @param editorOptions options to configure the features of the editor. All entries are optional
      * @param [editorOptions.loadCallback] parameter-less callback method, adds a "Load" button to the toolbar which triggers this method
      * @param [editorOptions.saveCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
+     * @param [editorOptions.saveAsCallback] parameter-less callback method, adds a "Save as" button to the toolbar which triggers this method
      * @param [editorOptions.downloadCallback] parameter-less callback method, adds a "Download" button to the right of the toolbar which triggers this method
      * @param [editorOptions.closeCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
      * @param [editorOptions.allFeaturesEnabled=false] if set to 'true', switches the default for all features from 'false' to 'true'
