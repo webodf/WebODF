@@ -283,6 +283,7 @@ var Wodo = Wodo || (function () {
             //
             loadOdtFile = editorOptions.loadCallback,
             saveOdtFile = editorOptions.saveCallback,
+            downloadOdtFile = editorOptions.downloadCallback,
             close =       editorOptions.closeCallback,
             //
             directTextStylingEnabled = isEnabled(editorOptions.directTextStylingEnabled),
@@ -708,6 +709,7 @@ var Wodo = Wodo || (function () {
                 onToolDone: setFocusToOdfCanvas,
                 loadOdtFile: loadOdtFile,
                 saveOdtFile: saveOdtFile,
+                downloadOdtFile: downloadOdtFile,
                 close: close,
                 directTextStylingEnabled: directTextStylingEnabled,
                 directParagraphStylingEnabled: directParagraphStylingEnabled,
@@ -778,6 +780,7 @@ var Wodo = Wodo || (function () {
      * @param editorOptions options to configure the features of the editor. All entries are optional
      * @param [editorOptions.loadCallback] parameter-less callback method, adds a "Load" button to the toolbar which triggers this method
      * @param [editorOptions.saveCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
+     * @param [editorOptions.downloadCallback] parameter-less callback method, adds a "Download" button to the right of the toolbar which triggers this method
      * @param [editorOptions.closeCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
      * @param [editorOptions.allFeaturesEnabled=false] if set to 'true', switches the default for all features from 'false' to 'true'
      * @param [editorOptions.directTextStylingEnabled=false] if set to 'true', enables the direct styling of text (e.g. bold/italic or font)
