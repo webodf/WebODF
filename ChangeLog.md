@@ -1,3 +1,15 @@
+# Changes between 0.5.5 and 0.5.6
+
+## WebODF
+
+## Wodo.TextEditor
+See also section about WebODF
+
+### Improvements
+
+* Add options for "Save as" and "Download" buttons in Wodo.TextEditor ([#865](https://github.com/kogmbh/WebODF/pull/865)))
+
+
 # Changes between 0.5.4 and 0.5.5
 
 ## WebODF
