@@ -112,6 +112,7 @@ http.createServer(function (request, response) {
                 {ext: [".ods"],         type: "application/vnd.oasis.opendocument.spreadsheet"},
                 {ext: [".fods"],        type: "application/vnd.oasis.opendocument.spreadsheet-flat-xml"},
                 {ext: [".ots"],         type: "application/vnd.oasis.opendocument.spreadsheet-template"},
+                {ext: [".json"],        type: "application/json"},
                 {ext: [".txt"],         type: "text/plain; charset=utf-8"},
                 {ext: [".html"],        type: "text/html; charset=utf-8"},
                 {ext: [".xhtml"],       type: "application/xhtml+xml; charset=utf-8"},
