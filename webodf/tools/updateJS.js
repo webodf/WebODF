@@ -630,7 +630,7 @@ function main(f) {
     "use strict";
     var pathModule = require("path");
     // recursively read all the files in the lib and tests directories
-    f.readFiles(["lib", "tests", "../programs/editor"], function (name, isfile) {
+    f.readFiles(["lib", "tests", "../programs/editor", "../programs/docnosis"], function (name, isfile) {
         if (name.indexOf("/dojo-deps/") !== -1) {
             return false;
         }
