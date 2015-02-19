@@ -11,6 +11,7 @@ SET(ALONE_EDITOR_ONLY_FILES
     wodotexteditor.js
     images/kogmbh.png
     images/webodf.png
+    images/saveas.png
 )
 SET(ALONE_EDITOR_EXAMPLE_FILES
     FileSaver.js
