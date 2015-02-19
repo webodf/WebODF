@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, ops*/
+/*global define, runtime, core, ops*/
 
 define("webodf/editor/backend/jsglobal/OperationRouter", [], function () {
     "use strict";
@@ -44,8 +44,7 @@ define("webodf/editor/backend/jsglobal/OperationRouter", [], function () {
      * @constructor
      * @implements ops.OperationRouter
      */
-    return function JsGlobalOperationRouter(sessionId, memberId, server, odfContainer, errorCallback) {
-        "use strict";
+    return function JsGlobalOperationRouter(sessionId, memberId, server, errorCallback) {
 
         var events = new core.EventNotifier([
                 ops.OperationRouter.signalProcessingBatchStart,
@@ -264,7 +263,7 @@ define("webodf/editor/backend/jsglobal/OperationRouter", [], function () {
                     break;
                 default:
                     isConnected = false;
-                    console.log(e);
+                    runtime.log(e);
                     break;
             }
             completeSyncRequest(isConnected);

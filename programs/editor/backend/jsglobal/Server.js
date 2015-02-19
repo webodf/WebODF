@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, core*/
+/*global define, window, runtime, core*/
 
 define("webodf/editor/backend/jsglobal/Server", [], function () {
     "use strict";
@@ -33,12 +33,11 @@ define("webodf/editor/backend/jsglobal/Server", [], function () {
     /**
      * @constructor
      * @implements ops.Server
-     * @param {{url:string}} args
      */
-    return function JsGlobalServer(args) {
+    return function JsGlobalServer() {
         var jsGlobalInstance;
 
-        this.getGenesisUrl = function (sessionId) {
+        this.getGenesisUrl = function () {
             return "welcome.odt";
         };
 
@@ -46,6 +45,7 @@ define("webodf/editor/backend/jsglobal/Server", [], function () {
             return jsGlobalInstance;
         };
 
+        /*jslint unparam: true*/
         /**
          * @param {!number} timeout in milliseconds
          * @param {!function(!string)} callback
@@ -61,6 +61,7 @@ define("webodf/editor/backend/jsglobal/Server", [], function () {
                 // TODO properly timeout
             }, 100);
         };
+        /*jslint unparam: false*/
 
         /**
          * @return {!string}

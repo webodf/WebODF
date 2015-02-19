@@ -22,6 +22,8 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global require, define, document, window, runtime, alert, Wodo*/
+
 /**
  * @param {!{sessionId: string, username: string, backend: string, sessionListElementId: string, editorContainerElementId: string}} args
  */
@@ -80,9 +82,19 @@ function createEditor(args) {
     /**
      * @return {undefined}
      */
+    function showSessions() {
+        switchToPage(args.sessionListElementId, true);
+        sessionList.setUpdatesEnabled(true);
+    }
+
+    /*jslint emptyblock: true*/
+    /**
+     * @return {undefined}
+     */
     function onEditingStarted() {
         // nothing to do right now
     }
+    /*jslint emptyblock: false*/
 
     /**
      * @param {!boolean=} ignoreError
@@ -110,14 +122,6 @@ function createEditor(args) {
     }
 
     /**
-     * @return {undefined}
-     */
-    function showSessions() {
-        switchToPage(args.sessionListElementId, true);
-        sessionList.setUpdatesEnabled(true);
-    }
-
-    /**
      * @param {!string} sessionId
      * @return {undefined}
      */
@@ -132,6 +136,10 @@ function createEditor(args) {
                 editorOptions.networkSecurityToken = token;
                 editorOptions.closeCallback = closeEditing;
                 Wodo.createCollabTextEditor(args.editorContainerElementId, editorOptions, function(err, e) {
+                    if (err) {
+                        runtime.log(err);
+                        return;
+                    }
                     var canvasContainerElement;
 
                     editor = e;
@@ -161,8 +169,9 @@ function createEditor(args) {
             } else {
                 editor.joinSession(serverFactory.createSessionBackend(sessionId, memberId, server), onEditingStarted);
             }
-        }, function() {
+        }, function(err) {
             // TODO: handle error
+            runtime.log(err);
         });
     }
 
@@ -189,12 +198,10 @@ function createEditor(args) {
                 } else {
                     switchToPage(args.sessionListElementId, true);
                 }
+                // only done to make jslint see the var used
+                return sessionListView;
             }
         );
-    }
-
-    function loginFail(result) {
-        alert("Login failed: " + result);
     }
 
     // start the editor with network
@@ -209,7 +216,7 @@ function createEditor(args) {
         // values: "unavailable", "timeout", "ready"
         server.connect(8000, function (state) {
             if (state === "ready") {
-                server.login(args.username, undefined, loginSuccess, loginFail);
+                server.login(args.username, loginSuccess);
             }
         });
     });
@@ -362,12 +369,10 @@ window.JsGlobalServer = (function() {
          * NB: this currently performs no checks of any sort, and is just meant for demonstration.
          *
          * @param {!string} login
-         * @param {!string} password
          * @param {!function(!string):undefined} successCb
-         * @param {!function(!string):undefined} failCb
          * @return {undefined}
          */
-        this.login = function (login, password, successCb, failCb) {
+        this.login = function (login, successCb) {
             users[login] = true;
             processCallback(successCb, {
                 full_name: login,
@@ -382,10 +387,9 @@ window.JsGlobalServer = (function() {
          * @param {!string} sessionId
          * @param {!string} memberId
          * @param {!function(!string):undefined} successCb
-         * @param {!function(!string):undefined} failCb
          * @return {undefined}
          */
-        this.joinSession = function (memberId, sessionId, successCb, failCb) {
+        this.joinSession = function (memberId, sessionId, successCb) {
             var session = sessions[sessionId];
             if (!session) {
                 session = sessions[sessionId] = new JsGlobalSession("Split screen session #" + sessionsCount);
@@ -443,10 +447,9 @@ window.JsGlobalServer = (function() {
             try {
                 if (inhibited) {
                     throw createServiceError("SERVICE_UNAVAILABLE", "Service is unavailable");
-                } else {
-                    var remoteChanges = sessions[sessionId].getRemoteChanges(memberId);
-                    processCallback(successCb, remoteChanges);
                 }
+                var remoteChanges = sessions[sessionId].getRemoteChanges(memberId);
+                processCallback(successCb, remoteChanges);
             } catch (e) {
                 processCallback(failCb, e);
             }
@@ -470,7 +473,7 @@ window.JsGlobalServer = (function() {
                     throw createServiceError("SERVICE_UNAVAILABLE", "Service is unavailable");
                 }
                 var pushResult = sessions[sessionId].push(memberId, sequenceId, opSpecs);
-                processCallback(successCb, pushResult)
+                processCallback(successCb, pushResult);
             } catch (e) {
                 processCallback(failCb, e);
             }

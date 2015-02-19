@@ -80,7 +80,7 @@ function (IdMangler) {
             }
         };
 
-        this.setEditorSession = function(session) {
+        this.setEditorSession = function (session) {
             editorSession = session;
         };
 
@@ -88,25 +88,24 @@ function (IdMangler) {
             require([
                 "dojo",
                 "dojo/ready",
-                "dojo/dom-construct",
                 "dijit/layout/ContentPane"],
-                function (dojo, ready, domConstruct, ContentPane) {
+                function (dojo, ready, ContentPane) {
                     var editorBase = dojo.config && dojo.config.paths &&
                             dojo.config.paths['webodf/editor'];
-                runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
-                ready(function () {
-                    contentPane = new ContentPane({
-                        title: runtime.tr("Alignment"),
-                        href: editorBase+"/widgets/dialogWidgets/alignmentPane.html",
-                        preload: true,
-                        ioMethod: idMangler.ioMethod
+                    runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
+                    ready(function () {
+                        contentPane = new ContentPane({
+                            title: runtime.tr("Alignment"),
+                            href: editorBase+"/widgets/dialogWidgets/alignmentPane.html",
+                            preload: true,
+                            ioMethod: idMangler.ioMethod
+                        });
+                        contentPane.onLoad = function () {
+                            form = idMangler.byId('alignmentPaneForm');
+                            runtime.translateContent(form.domNode);
+                        };
+                        return cb();
                     });
-                    contentPane.onLoad = function () {
-                        form = idMangler.byId('alignmentPaneForm');
-                        runtime.translateContent(form.domNode);
-                    };
-                    return cb();
-                });
             });
         }
 

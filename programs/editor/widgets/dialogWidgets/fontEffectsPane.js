@@ -106,22 +106,22 @@ function (IdMangler) {
 
         };
 
+        /*jslint unparam: true*/
         function init(cb) {
             require([
                 "dojo",
                 "dojo/ready",
-                "dojo/dom-construct",
                 "dijit/layout/ContentPane",
-                "dojox/widget/ColorPicker",
+                "dojox/widget/ColorPicker", // referenced in fontEffectsPane.html
                 "webodf/editor/widgets/fontPicker"
-            ], function (dojo, ready, domConstruct, ContentPane, ColorPicker, FontPicker) {
+            ], function (dojo, ready, ContentPane, ColorPicker, FontPicker) {
                 var editorBase = dojo.config && dojo.config.paths &&
                             dojo.config.paths['webodf/editor'];
                 runtime.assert(editorBase, "webodf/editor path not defined in dojoConfig");
                 ready(function () {
                     contentPane = new ContentPane({
                         title: runtime.tr("Font Effects"),
-                        href: editorBase+"/widgets/dialogWidgets/fontEffectsPane.html",
+                        href: editorBase + "/widgets/dialogWidgets/fontEffectsPane.html",
                         preload: true,
                         ioMethod: idMangler.ioMethod
                     });
@@ -181,6 +181,7 @@ function (IdMangler) {
                 });
             });
         }
+        /*jslint unparam: false*/
 
         this.setEditorSession = function(session) {
             editorSession = session;

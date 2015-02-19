@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, ops*/
+/*global define, runtime, core, ops*/
 
 define("webodf/editor/backend/pullbox/OperationRouter", [], function () {
     "use strict";
@@ -54,7 +54,6 @@ define("webodf/editor/backend/pullbox/OperationRouter", [], function () {
      * @implements ops.OperationRouter
      */
     return function PullBoxOperationRouter(sessionId, memberId, server, odfContainer, errorCallback) {
-        "use strict";
 
         var operationFactory,
             /**@type{function(!ops.Operation):boolean}*/
@@ -81,12 +80,8 @@ define("webodf/editor/backend/pullbox/OperationRouter", [], function () {
             unplayedServerOpspecQueue = [],
             /** @type {!Array.<!Function>} sync request callbacks which should be called after the received ops have been applied server */
             uncalledSyncRequestCallbacksQueue = [],
-            /** @type {!Array.<!function(!boolean):undefined>} ops created since the last sync call to the server */
-            hasLocalUnsyncedOpsStateSubscribers = [],
             /**@type{!boolean}*/
             hasLocalUnsyncedOps = false,
-            /** @type {!Array.<!function(!boolean):undefined>} */
-            hasSessionHostConnectionStateSubscribers = [],
             /**@type{!boolean}*/
             hasSessionHostConnection = true,
             eventNotifier = new core.EventNotifier([
@@ -108,8 +103,7 @@ define("webodf/editor/backend/pullbox/OperationRouter", [], function () {
          * @return {undefined}
          */
         function updateHasLocalUnsyncedOpsState() {
-            var i,
-                hasLocalUnsyncedOpsNow = (unsyncedClientOpspecQueue.length > 0);
+            var hasLocalUnsyncedOpsNow = (unsyncedClientOpspecQueue.length > 0);
 
             // no change?
             if (hasLocalUnsyncedOps === hasLocalUnsyncedOpsNow) {
@@ -125,8 +119,6 @@ define("webodf/editor/backend/pullbox/OperationRouter", [], function () {
          * @return {undefined}
          */
         function updateHasSessionHostConnectionState(hasConnection) {
-            var i;
-
             // no change?
             if (hasSessionHostConnection === hasConnection) {
                 return;
@@ -365,11 +357,12 @@ runtime.log("OperationRouter: sending sync_ops call");
                         response.error === "ENOMEMBER" ?  "notMemberOfSession":
                                                           "unknownServerReply"
                     );
-                    return;
                 } else {
                     hasError = true;
                     runtime.log("Unexpected result on sync-ops call: "+response.result);
                     errorCallback("unknownServerReply");
+                }
+                if (hasError) {
                     return;
                 }
 
@@ -452,7 +445,7 @@ runtime.log("OperationRouter: opsSync requested for pushing");
 runtime.log("OperationRouter: instant opsSync requested");
             isInstantSyncRequested = true;
             syncOps();
-        };
+        }
 
         this.requestReplay = function (done_cb) {
             requestInstantOpsSync(done_cb);
@@ -505,7 +498,7 @@ runtime.log("OperationRouter: instant opsSync requested");
                 op = operations[i];
                 opspec = op.spec();
 
-                // note if any local ops modified 
+                // note if any local ops modified
                 hasPushedModificationOps = hasPushedModificationOps || op.isEdit;
 
                 // add timestamp TODO: improve the useless recreation of the op

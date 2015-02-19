@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,document,require,ops */
+/*global define, document, dijit, dojo, runtime, ops*/
 
 define("webodf/editor/Tools", [
     "dojo/ready",
@@ -57,14 +57,8 @@ define("webodf/editor/Tools", [
                 loadButton, saveButton, closeButton, aboutButton,
                 saveAsButton, downloadButton,
                 formatDropDownMenu, formatMenuButton,
-                paragraphStylesMenuItem, paragraphStylesDialog, simpleStyles, currentStyle,
-                zoomSlider,
-                undoRedoMenu,
+                paragraphStylesMenuItem, paragraphStylesDialog,
                 editorSession,
-                paragraphAlignment,
-                imageInserter,
-                annotationControl,
-                editHyperlinks,
                 aboutDialog,
                 sessionSubscribers = [];
 
@@ -239,34 +233,34 @@ define("webodf/editor/Tools", [
                         dropDown: formatDropDownMenu,
                         disabled: true,
                         label: tr('Format'),
-                        iconClass: "dijitIconEditTask",
+                        iconClass: "dijitIconEditTask"
                     });
                     formatMenuButton.placeAt(toolbar);
                 }
 
                 // Undo/Redo
-                undoRedoMenu = createTool(UndoRedoMenu, args.undoRedoEnabled);
+                createTool(UndoRedoMenu, args.undoRedoEnabled);
 
                 // Add annotation
-                annotationControl = createTool(AnnotationControl, args.annotationsEnabled);
+                createTool(AnnotationControl, args.annotationsEnabled);
 
                 // Simple Style Selector [B, I, U, S]
-                simpleStyles = createTool(SimpleStyles, args.directTextStylingEnabled);
+                createTool(SimpleStyles, args.directTextStylingEnabled);
 
                 // Paragraph direct alignment buttons
-                paragraphAlignment = createTool(ParagraphAlignment, args.directParagraphStylingEnabled);
+                createTool(ParagraphAlignment, args.directParagraphStylingEnabled);
 
                 // Paragraph Style Selector
-                currentStyle = createTool(CurrentStyle, args.paragraphStyleSelectingEnabled);
+                createTool(CurrentStyle, args.paragraphStyleSelectingEnabled);
 
                 // Zoom Level Selector
-                zoomSlider = createTool(ZoomSlider, args.zoomingEnabled);
+                createTool(ZoomSlider, args.zoomingEnabled);
 
                 // hyper links
-                editHyperlinks = createTool(EditHyperlinks, args.hyperlinkEditingEnabled);
+                createTool(EditHyperlinks, args.hyperlinkEditingEnabled);
 
                 // image insertion
-                imageInserter = createTool(ImageInserter, args.imageInsertingEnabled);
+                createTool(ImageInserter, args.imageInsertingEnabled);
 
                 // close button
                 if (close) {

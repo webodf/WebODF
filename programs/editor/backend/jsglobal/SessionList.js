@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define, ops, runtime */
+/*global define, ops, runtime, core */
 
 define("webodf/editor/backend/jsglobal/SessionList", [], function () {
     "use strict";
