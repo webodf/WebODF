@@ -22,6 +22,8 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global XMLHttpRequest, runtime*/
+
 var xhr = new XMLHttpRequest(),
     path = "../../webodf/lib",
     runtimeFilePath = path + "/runtime.js",
@@ -31,12 +33,16 @@ xhr.open("GET", runtimeFilePath, false);
 xhr.send(null);
 code = xhr.responseText;
 code += "\n//# sourceURL=" + runtimeFilePath;
+/*jslint evil: true*/
 eval(code);
+/*jslint evil: false*/
 
 // adapt for out-of-sources run
 runtime.currentDirectory = function () {
+    "use strict";
     return path;
 };
 runtime.libraryPaths = function () {
+    "use strict";
     return [path];
 };

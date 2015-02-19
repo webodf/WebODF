@@ -22,7 +22,9 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-define(function() {
+/*global define, document*/
+
+define(function () {
         "use strict";
 
         /**
@@ -37,7 +39,7 @@ define(function() {
                 statusCell = document.createElement('td'),
                 elapsedMsCell = document.createElement('td'),
                 speedCell  = document.createElement('td'),
-                pagesPerHr  = document.createElement('td');
+                pagesPerHrCell  = document.createElement('td');
 
             function formatNumber(number) {
                 if (number > 1000000) {
@@ -74,8 +76,8 @@ define(function() {
                     speedCell.textContent = pxPerMsToKmPerHr(state.horizontalTravelPx / state.elapsedTime);
                 }
                 if (state.travelledSteps !== undefined) {
-                    pagesPerHr.classList.add("active");
-                    pagesPerHr.textContent = toPagesPerMin(state.travelledSteps / state.elapsedTime);
+                    pagesPerHrCell.classList.add("active");
+                    pagesPerHrCell.textContent = toPagesPerMin(state.travelledSteps / state.elapsedTime);
                 }
             }
 
@@ -86,9 +88,9 @@ define(function() {
                 statusCell.className = "status";
                 elapsedMsCell.className = "elapsed";
                 speedCell.className = "speed";
-                pagesPerHr.className = "pages";
+                pagesPerHrCell.className = "pages";
 
-                [descriptionCell, statusCell, elapsedMsCell, speedCell, pagesPerHr].forEach(function(cell) {
+                [descriptionCell, statusCell, elapsedMsCell, speedCell, pagesPerHrCell].forEach(function(cell) {
                     tr.appendChild(cell);
                 });
 
