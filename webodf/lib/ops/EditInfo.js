@@ -34,14 +34,14 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
     "use strict";
     var /**@type {!Element}*/
         editInfoNode,
-        /**@type {!Object.<string,{time:Date}>}*/
+        /**@type {!Object.<!string,{time:!Date}>}*/
         editHistory = {};
 
     /**
-     * @return {!Array.<{memberid:string,time:Date}>}
+     * @return {!Array.<{memberid:!string,time:!Date}>}
      */
     function sortEdits() {
-        var /**@type {!Array.<{memberid:string,time:Date}>}*/
+        var /**@type {!Array.<{memberid:!string,time:!Date}>}*/
             arr = [],
             /**@type{string}*/
             memberid;
@@ -76,7 +76,7 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
     };
 
     /**
-     * @return {!Object.<string,{time:Date}>}
+     * @return {!Object.<!string,{time:!Date}>}
      */
     this.getEdits = function () {
         return editHistory;
@@ -84,7 +84,7 @@ ops.EditInfo = function EditInfo(container, odtDocument) {
 
     /**
      * Returns the sorted list of memberid/time pairs, with oldest first.
-     * @return {!Array.<{memberid:string,time:Date}>}
+     * @return {!Array.<{memberid:!string,time:!Date}>}
      */
     this.getSortedEdits = function () {
         return sortEdits();

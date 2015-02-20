@@ -32,7 +32,7 @@
 gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     "use strict";
 
-    var /**@type{!Array.<{memberid:string,time:Date}>}*/
+    var /**@type{!Array.<{memberid:!string,time:!Date}>}*/
         edits = [],
         /**@type{!HTMLDivElement}*/
         handle,
@@ -68,7 +68,7 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
     }
 
     /**
-     * @param {!Array.<{memberid:string,time:Date}>} editArray
+     * @param {!Array.<{memberid:!string,time:!Date}>} editArray
      */
     this.setEdits = function (editArray) {
         edits = editArray;

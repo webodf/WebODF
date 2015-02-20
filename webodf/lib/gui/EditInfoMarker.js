@@ -61,21 +61,21 @@ gui.EditInfoMarker = function EditInfoMarker(editInfo, initialVisibility) {
 
     /**
      * Stops the specified timer
-     * @param {number} timerId
+     * @param {!number} timerId
      */
     function deleteDecay(timerId) {
         runtime.clearTimeout(timerId);
     }
 
     /**
-     * @param {string} memberid
+     * @param {!string} memberid
      */
     function setLastAuthor(memberid) {
         marker.setAttributeNS(editinfons, 'editinfo:memberid', memberid);
     }
 
     /**
-     * @param {string} memberid
+     * @param {!string} memberid
      * @param {!Date} timestamp
      */
     this.addEdit = function (memberid, timestamp) {
