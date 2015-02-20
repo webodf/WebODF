@@ -58,7 +58,7 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
             timeSpan = document.createElementNS(htmlns, 'span');
             timeSpan.className = "editInfoTime";
             timeSpan.setAttributeNS(editinfons, 'editinfo:memberid', edits[i].memberid);
-            timeSpan.innerHTML = edits[i].time;
+            timeSpan.appendChild(document.createTextNode(edits[i].time.toString()));
 
             infoDiv.appendChild(colorSpan);
             infoDiv.appendChild(authorSpan);
