@@ -421,7 +421,7 @@ gui.SessionViewOptions = function () {
 
             // TODO: Move such handling into AnnotationViewManager
             if (annotationConstraintStyles.hasChildNodes()) {
-                annotationConstraintStyles.innerHTML = "";
+                core.DomUtils.removeAllChildNodes(annotationConstraintStyles);
             }
 
             if (sessionConstraints.getState(gui.CommonConstraints.EDIT.ANNOTATIONS.ONLY_DELETE_OWN) === true) {

@@ -600,6 +600,18 @@
         this.removeUnwantedNodes = removeUnwantedNodes;
 
         /**
+         * Removes all child nodes from the given node.
+         * To be used instead of e.g. `node.innerHTML = "";`
+         * @param {!Node} node
+         * @return {undefined}
+         */
+        this.removeAllChildNodes = function (node) {
+            while (node.firstChild) {
+                node.removeChild(node.firstChild);
+            }
+        };
+
+        /**
          * Get an array of nodes below the specified node with the specific namespace and tag name.
          *
          * Use this function instead of node.getElementsByTagNameNS when modifications are going to be made

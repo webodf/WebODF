@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, odf*/
+/*global runtime, core, odf*/
 
 /**
  * @constructor
@@ -60,9 +60,7 @@ odf.CommandLineTools = function CommandLineTools() {
     this.render = function (inputfilepath, document, callback) {
         var body = document.getElementsByTagName("body")[0],
             odfcanvas;
-        while (body.firstChild) {
-            body.removeChild(body.firstChild);
-        }
+        core.DomUtils.removeAllChildNodes(body);
         odfcanvas = new odf.OdfCanvas(body);
         odfcanvas.addListener("statereadychange", function (err) {
             callback(err);
