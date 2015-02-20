@@ -420,7 +420,7 @@ gui.SessionViewOptions = function () {
                 localMember;
 
             // TODO: Move such handling into AnnotationViewManager
-            if (annotationConstraintStyles.innerHTML !== "") {
+            if (annotationConstraintStyles.hasChildNodes()) {
                 annotationConstraintStyles.innerHTML = "";
             }
 
