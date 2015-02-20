@@ -546,6 +546,32 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.parent.firstChild.childNodes[2].firstChild.textContent", "'test'");
     }
 
+    function removeAllChildNodes_None() {
+        var p = document.createElement("p");
+        t.doc.appendChild(p);
+        t.utils.removeAllChildNodes(p);
+        r.shouldBe(t, "t.doc.firstChild.localName", "'p'");
+        r.shouldBe(t, "t.doc.firstChild.childNodes.length", "0");
+    }
+
+    function removeAllChildNodes_ElementAndTextNodes() {
+        var p = document.createElement("p"),
+            span1 = document.createElement("span"),
+            text1 = document.createTextNode("t1"),
+            span2 = document.createElement("br"),
+            text2 = document.createTextNode("t2"),
+            span3 = document.createElement("span");
+        p.appendChild(span1);
+        p.appendChild(text1);
+        p.appendChild(span2);
+        p.appendChild(text2);
+        p.appendChild(span3);
+        t.doc.appendChild(p);
+        t.utils.removeAllChildNodes(p);
+        r.shouldBe(t, "t.doc.firstChild.localName", "'p'");
+        r.shouldBe(t, "t.doc.firstChild.childNodes.length", "0");
+    }
+
     function getNodesInRange_EndContainerSkippedByFilter_CompletesIteration() {
         var range = document.createRange();
         createNodes("before<span/>middle<span/>after");
@@ -792,6 +818,9 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
 
             removeUnwantedNodes_DiscardAll,
             removeUnwantedNodes_DiscardSpanOnly,
+
+            removeAllChildNodes_None,
+            removeAllChildNodes_ElementAndTextNodes,
 
             getNodesInRange_EndContainerSkippedByFilter_CompletesIteration,
             getNodesInRange_NodeStartToNodeEnd_ReturnsNode,

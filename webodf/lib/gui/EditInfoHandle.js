@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global gui*/
+/*global core, gui*/
 
 /**
  * @constructor
@@ -42,7 +42,7 @@ gui.EditInfoHandle = function EditInfoHandle(parentElement) {
 
     function renderEdits() {
         var i, infoDiv, colorSpan, authorSpan, timeSpan;
-        handle.innerHTML = '';
+        core.DomUtils.removeAllChildNodes(handle);
         for (i = 0; i < edits.length; i += 1) {
             infoDiv = document.createElementNS(htmlns, 'div');
             infoDiv.className = "editInfo";

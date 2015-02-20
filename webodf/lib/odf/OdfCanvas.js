@@ -177,15 +177,6 @@
         domUtils = core.DomUtils;
 
     /**
-     * @param {!Element} element
-     * @return {undefined}
-     */
-    function clear(element) {
-        while (element.firstChild) {
-            element.removeChild(element.firstChild);
-        }
-    }
-    /**
      * @param {!HTMLStyleElement} style
      * @return {undefined}
      */
@@ -297,7 +288,7 @@
 
         containerList = domUtils.getElementsByTagNameNS(rootElement, ns, localName);
         for (i = 0; i < containerList.length; i += 1) {
-            clear(containerList[i]);
+            domUtils.removeAllChildNodes(containerList[i]);
             if (value) {
                 e = /**@type{!Element}*/(containerList[i]);
                 e.appendChild(document.createTextNode(value));
@@ -499,9 +490,7 @@
             var j, count;
             // If the space has any children, remove them and put a " " text
             // node in place.
-            while (space.firstChild) {
-                space.removeChild(space.firstChild);
-            }
+            domUtils.removeAllChildNodes(space);
             space.appendChild(doc.createTextNode(" "));
 
             count = parseInt(space.getAttributeNS(textns, "c"), 10);
@@ -1013,7 +1002,7 @@
         function handleContent(container, odfnode) {
             var css = /**@type{!CSSStyleSheet}*/(positioncss.sheet);
             // only append the content at the end
-            clear(element);
+            domUtils.removeAllChildNodes(element);
 
             sizer = /**@type{!HTMLDivElement}*/(doc.createElementNS(element.namespaceURI, 'div'));
             sizer.style.display = "inline-block";
@@ -1107,7 +1096,7 @@
                 clearCSSStyleSheet(stylesxmlcss);
                 clearCSSStyleSheet(positioncss);
 
-                clear(element);
+                domUtils.removeAllChildNodes(element);
 
                 // setup
                 element.style.display = "inline-block";
@@ -1195,7 +1184,7 @@
             // FIXME: We need to support parametrized strings, because
             // drop-in word replacements are inadequate for translations;
             // see http://techbase.kde.org/Development/Tutorials/Localization/i18n_Mistakes#Pitfall_.232:_Word_Puzzles
-            element.innerHTML = "";
+            domUtils.removeAllChildNodes(element);
             element.appendChild(element.ownerDocument.createTextNode(runtime.tr('Loading') + url + '...'));
             element.removeAttribute('style');
             // open the odf container

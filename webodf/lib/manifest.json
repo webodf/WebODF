@@ -105,7 +105,8 @@
         "gui.StyleSummary"
     ],
     "gui.EditInfoHandle": [
-        "core.Destroyable"
+        "core.Destroyable",
+        "core.DomUtils"
     ],
     "gui.EditInfoMarker": [
         "gui.EditInfoHandle",
