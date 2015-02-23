@@ -43,14 +43,16 @@ define("webodf/editor/backend/jsglobal/SessionBackend", [
                 return memberId;
             };
 
+            /*jslint unparam: true*/
             /**
              * @param {!odf.OdfContainer} odfContainer
              * @param {!function(!Object)} errorCallback
              * @return {!ops.OperationRouter}
              */
             this.createOperationRouter = function (odfContainer, errorCallback) {
-                return new JsGlobalOperationRouter(sessionId, memberId, server, odfContainer, errorCallback);
+                return new JsGlobalOperationRouter(sessionId, memberId, server, errorCallback);
             };
+            /*jslint unparam: false*/
 
             /**
              * @return {!string}

@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global dojo, dijit */
+/*global define, document, dojo, dijit */
 
 define("webodf/editor/widgets/dialogWidgets/idMangler", ["dojo", "dijit"], function (dojo, dijit) {
     "use strict";
@@ -43,7 +43,10 @@ define("webodf/editor/widgets/dialogWidgets/idMangler", ["dojo", "dijit"], funct
          * @return {!string}
          */
         function mangleIds(text) {
-            return text.replace(/((id|for|data-dojo-id)\s*=\s*["'][^"']+)/g, "$1" + suffix);
+            /*jslint regexp: true*/
+            var newText = text.replace(/((id|for|data-dojo-id)\s*=\s*["'][^"']+)/g, "$1" + suffix);
+            /*jslint regexp: false*/
+            return newText;
         }
         this.mangleIds = mangleIds;
 

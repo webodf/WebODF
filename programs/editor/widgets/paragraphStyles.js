@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define,require */
+/*global define, require, runtime, ops */
 
 define("webodf/editor/widgets/paragraphStyles", [
     "dijit/form/Select",
@@ -30,7 +30,7 @@ define("webodf/editor/widgets/paragraphStyles", [
     "webodf/editor/EditorSession"],
 
     function (Select, htmlEntities, EditorSession) {
-    "use strict"
+    "use strict";
 
     /**
      * @constructor
@@ -70,7 +70,9 @@ define("webodf/editor/widgets/paragraphStyles", [
         // events
         this.onAdd = null;
         this.onRemove = null;
+        /*jslint emptyblock: true*/
         this.onChange = function () {};
+        /*jslint emptyblock: false*/
 
         function populateStyles() {
             var i, selectionList, availableStyles;

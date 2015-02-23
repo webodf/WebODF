@@ -22,6 +22,8 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global document, window, runtime, FileReader, alert, Uint8Array, Blob, saveAs, Wodo*/
+
 function createEditor() {
     "use strict";
 
@@ -29,11 +31,13 @@ function createEditor() {
         editorOptions,
         loadedFilename;
 
+    /*jslint emptyblock: true*/
     /**
      * @return {undefined}
      */
-     function startEditing() {
-     }
+    function startEditing() {
+    }
+    /*jslint emptyblock: false*/
 
     /**
      * extract document url from the url-fragment

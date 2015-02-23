@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define, runtime, core, gui, ops, document */
+/*global runtime, define, document, core, odf, gui, ops*/
 
 define("webodf/editor/EditorSession", [
     "dojo/text!resources/fonts/fonts.css"
@@ -99,7 +99,9 @@ define("webodf/editor/EditorSession", [
 
             availableFonts = {};
 
+            /*jslint regexp: true*/
             regex =  /font-family *: *(?:\'([^']*)\'|\"([^"]*)\")/gm;
+            /*jslint regexp: false*/
             matches = regex.exec(fontsCSS);
 
             while (matches) {
@@ -153,7 +155,7 @@ define("webodf/editor/EditorSession", [
                 i;
 
             // encode
-            for (i = 0; i < name.length; i++) {
+            for (i = 0; i < name.length; i += 1) {
                 letter = name[i];
                 // simple approach, can be improved to not skip other allowed chars
                 if (letter.match(/[a-zA-Z0-9.-_]/) !== null) {
@@ -182,7 +184,7 @@ define("webodf/editor/EditorSession", [
             // then loop until result is really unique
             while (formatting.hasParagraphStyle(result)) {
                 result = ncName + "_" + i + "_" + ncMemberId;
-                i++;
+                i += 1;
             }
 
             return result;
@@ -422,7 +424,6 @@ define("webodf/editor/EditorSession", [
         this.cloneParagraphStyle = function (styleName, newStyleDisplayName) {
             var newStyleName = uniqueParagraphStyleNCName(newStyleDisplayName),
                 styleNode = getParagraphStyleElement(styleName),
-                formatting = odtDocument.getFormatting(),
                 op, setProperties, attributes, i;
 
             setProperties = formatting.getStyleAttributes(styleNode);
