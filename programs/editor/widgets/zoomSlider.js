@@ -57,19 +57,6 @@ define("webodf/editor/widgets/zoomSlider", [
                 slider.setAttribute('disabled', !editorSession);
             };
 
-            this.setEditorSession = function (session) {
-                var zoomHelper;
-                if (editorSession) {
-                    editorSession.getOdfCanvas().getZoomHelper().unsubscribe(gui.ZoomHelper.signalZoomChanged, updateSlider);
-                }
-                editorSession = session;
-                if (editorSession) {
-                    zoomHelper = editorSession.getOdfCanvas().getZoomHelper();
-                    zoomHelper.subscribe(gui.ZoomHelper.signalZoomChanged, updateSlider);
-                    updateSlider(zoomHelper.getZoomLevel());
-                }
-            };
-
             /*jslint emptyblock: true*/
             this.onToolDone = function () {};
             /*jslint emptyblock: false*/
