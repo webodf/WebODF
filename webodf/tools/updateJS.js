@@ -650,6 +650,7 @@ function main(f) {
         delete contents[pathModule.normalize("lib/runtime.js")];
         delete contents[pathModule.normalize("lib/core/JSLint.js")];
         delete contents[pathModule.normalize("tests/tests.js")];
+        delete contents[pathModule.normalize("tests/testruntimeadaption.js")];
         Object.keys(contents).forEach(function (name) {
             if (typeof contents[name] === "string") {
                 files[name] = contents[name];
