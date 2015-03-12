@@ -32,7 +32,7 @@
  */
 ops.TransformationTests = function TransformationTests(runner) {
     "use strict";
-    var r = runner, t, tests,
+    var self = this, r = runner, t, tests,
         opsTestHelper = new ops.OperationTestHelper();
 
     function serialize(element) {
@@ -308,14 +308,16 @@ ops.TransformationTests = function TransformationTests(runner) {
     /**
      * @param {!string} name
      * @param {!Element} element
-     * @return {!{before, opspecsA, opspecsB, after}}
+     * @return {!{isFailing, setup, before, opspecsA, opspecsB, after}}
      */
     function parseTest(name, element) {
         var before = element.getElementsByTagName("before")[0],
             opsAElement = element.getElementsByTagName("opsA")[0],
             opsBElement = element.getElementsByTagName("opsB")[0],
             after = element.getElementsByTagName("after")[0],
-            isFailing = element.getAttribute("isFailing") === "true";
+            hasSetup = element.getAttribute("hasSetup") === "true",
+            isFailing = element.getAttribute("isFailing") === "true",
+            setup;
 
         runtime.assert(Boolean(before), "Expected <before/> in " + name + ".");
         runtime.assert(checkWhitespace(before), "Unexpanded test:s element or text:c attribute found in " + name + ".");
@@ -324,8 +326,13 @@ ops.TransformationTests = function TransformationTests(runner) {
         runtime.assert(Boolean(after), "Expected <after/> in " + name + ".");
         runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
         opsTestHelper.removeInsignificantTextNodes(element);
+        setup = self.setUps.hasOwnProperty(name) ? self.setUps[name]() : null;
+        if (hasSetup) {
+            runtime.assert(Boolean(setup), "Required setup for " + name + " was not found.");
+        }
         return {
             isFailing: isFailing,
+            setup : setup,
             before: before,
             opspecsA:   parseOpspecs(name, opsAElement),
             opspecsB:   parseOpspecs(name, opsBElement),
@@ -396,9 +403,16 @@ ops.TransformationTests = function TransformationTests(runner) {
         return getOfficeNSElement(element, "meta");
     }
 
-    function compareOpsExecution(opspecs, transformedOpspecs, before, after) {
-        var odfContainer,
-            odtDocument,
+    /**
+     * @param {!Array.<!Object>} opspecs
+     * @param {!Array.<!Object>} transformedOpspecs
+     * @param {!Element} before
+     * @param {!Element} after
+     * @param {?{setUp:!function(), tearDown:!function()}} setup
+     * @return {undefined}
+     */
+    function compareOpsExecution(opspecs, transformedOpspecs, before, after, setup) {
+        var odtDocument,
             text,
             textbefore = getOfficeTextElement(before),
             textafter = getOfficeTextElement(after),
@@ -412,12 +426,12 @@ ops.TransformationTests = function TransformationTests(runner) {
             i,
             op;
 
-        odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
-        t.odfcanvas.setOdfContainer(odfContainer);
+        t.odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
+        t.odfcanvas.setOdfContainer(t.odfContainer);
         odtDocument = new ops.OdtDocument(t.odfcanvas);
         text = odtDocument.getRootNode();
-        styles = odfContainer.rootElement.styles;
-        meta = /**@type{!Element}*/(odfContainer.rootElement.meta);
+        styles = t.odfContainer.rootElement.styles;
+        meta = /**@type{!Element}*/(t.odfContainer.rootElement.meta);
         runtime.assert(Boolean(meta), "Missing <office:meta>!");
 
         // inject test data
@@ -428,6 +442,9 @@ ops.TransformationTests = function TransformationTests(runner) {
             copyChildNodes(meta, metabefore);
         }
         copyChildNodes(text, textbefore);
+        if (setup) {
+            setup.setUp();
+        }
 
         // execute opspecs
         for (i = 0; i < opspecs.length; i += 1) {
@@ -489,6 +506,9 @@ ops.TransformationTests = function TransformationTests(runner) {
             t.text = t.after = "OK";
         }
         r.shouldBe(t, "t.text", "t.after");
+        if (setup) {
+            setup.tearDown();
+        }
     }
 
     function runTest(test) {
@@ -497,8 +517,8 @@ ops.TransformationTests = function TransformationTests(runner) {
         t.transformResult = transformer.transform(cloneSpecs(test.opspecsA), cloneSpecs(test.opspecsB));
         r.shouldBeNonNull(t, "t.transformResult");
         if (t.transformResult) {
-            compareOpsExecution(test.opspecsA, t.transformResult.opSpecsB, test.before, test.after);
-            compareOpsExecution(test.opspecsB, t.transformResult.opSpecsA, test.before, test.after);
+            compareOpsExecution(test.opspecsA, t.transformResult.opSpecsB, test.before, test.after, test.setup);
+            compareOpsExecution(test.opspecsB, t.transformResult.opSpecsA, test.before, test.after, test.setup);
         }
     }
 
@@ -568,6 +588,11 @@ ops.TransformationTests = function TransformationTests(runner) {
         return [
         ];
     };
+
+    /*jslint emptyblock: true*/
+    this.setUps = {
+    };
+    /*jslint emptyblock: false*/
 };
 
 ops.TransformationTests.prototype.description = function () {
