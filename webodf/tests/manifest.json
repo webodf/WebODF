@@ -31,6 +31,8 @@
         "core.StepIterator",
         "core.UnitTester"
     ],
+    "core.UnitTester": [
+    ],
     "core.ZipTests": [
         "core.UnitTester",
         "core.Zip"

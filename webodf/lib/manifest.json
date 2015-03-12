@@ -52,8 +52,6 @@
     "core.Task": [
         "core.ScheduledTask"
     ],
-    "core.UnitTester": [
-    ],
     "core.Utils": [
     ],
     "core.Zip": [

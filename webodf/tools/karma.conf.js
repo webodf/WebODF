@@ -42,7 +42,6 @@ module.exports = function (config) {
             'lib/core/RawInflate.js',
             'lib/core/enums.js',
             'lib/core/StepIterator.js',
-            'lib/core/UnitTester.js',
             'lib/core/Utils.js',
             'lib/core/Zip.js',
             'lib/core/typedefs.js',

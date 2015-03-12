@@ -13,7 +13,9 @@ include(${CMAKE_BINARY_DIR}/jsfileslist.txt)
 
 configure_file(webodfversion.js.in ${CMAKE_CURRENT_BINARY_DIR}/webodfversion.js)
 
-set(TESTJSFILES tests/core/ZipTests.js
+set(TESTJSFILES
+    tests/core/UnitTester.js
+    tests/core/ZipTests.js
     tests/core/Base64Tests.js
     tests/core/CursorTests.js
     tests/core/DomUtilsTests.js
