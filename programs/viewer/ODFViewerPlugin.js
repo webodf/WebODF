@@ -144,14 +144,6 @@ function ODFViewerPlugin() {
 
     this.onLoad = function () {};
 
-    this.getWidth = function () {
-        return odfElement.clientWidth;
-    };
-
-    this.getHeight = function () {
-        return odfElement.clientHeight;
-    };
-
     this.fitToWidth = function (width) {
         odfCanvas.fitToWidth(width);
     };
