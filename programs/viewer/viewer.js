@@ -522,6 +522,15 @@ function Viewer(viewerPlugin, parameters) {
         toggleToolbars();
     }
 
+    function setButtonClickHandler(buttonId, handler) {
+        var button = document.getElementById(buttonId);
+
+        button.addEventListener('click', function () {
+            handler();
+            button.blur();
+        });
+    }
+
     function init() {
 
         initializeAboutInformation();
@@ -534,9 +543,9 @@ function Viewer(viewerPlugin, parameters) {
                 document.getElementById('presentation').style.visibility = 'hidden';
             }
 
-            document.getElementById('overlayCloseButton').addEventListener('click', self.toggleFullScreen);
-            document.getElementById('fullscreen').addEventListener('click', self.toggleFullScreen);
-            document.getElementById('presentation').addEventListener('click', function () {
+            setButtonClickHandler('overlayCloseButton', self.toggleFullScreen);
+            setButtonClickHandler('fullscreen', self.toggleFullScreen);
+            setButtonClickHandler('presentation', function () {
                 if (!isFullScreen) {
                     self.toggleFullScreen();
                 }
@@ -548,33 +557,16 @@ function Viewer(viewerPlugin, parameters) {
             document.addEventListener('mozfullscreenchange', handleFullScreenChange);
             document.addEventListener('MSFullscreenChange', handleFullScreenChange);
 
-            document.getElementById('download').addEventListener('click', function () {
-                self.download();
-            });
+            setButtonClickHandler('download', self.download);
 
-            document.getElementById('zoomOut').addEventListener('click', function () {
-                self.zoomOut();
-            });
+            setButtonClickHandler('zoomOut', self.zoomOut);
+            setButtonClickHandler('zoomIn', self.zoomIn);
 
-            document.getElementById('zoomIn').addEventListener('click', function () {
-                self.zoomIn();
-            });
+            setButtonClickHandler('previous', self.showPreviousPage);
+            setButtonClickHandler('next', self.showNextPage);
 
-            document.getElementById('previous').addEventListener('click', function () {
-                self.showPreviousPage();
-            });
-
-            document.getElementById('next').addEventListener('click', function () {
-                self.showNextPage();
-            });
-
-            document.getElementById('previousPage').addEventListener('click', function () {
-                self.showPreviousPage();
-            });
-
-            document.getElementById('nextPage').addEventListener('click', function () {
-                self.showNextPage();
-            });
+            setButtonClickHandler('previousPage', self.showPreviousPage);
+            setButtonClickHandler('nextPage', self.showNextPage);
 
             document.getElementById('pageNumber').addEventListener('change', function () {
                 self.showPage(this.value);
