@@ -40,6 +40,8 @@ define("webodf/editor/Translator", [], function () {
                 newLocale = "de-DE";
             } else if (newLocale.split('-')[0] === "nl" || newLocale.split('_')[0] === "nl") {
                 newLocale = "nl-NL";
+            } else if (newLocale.split('-')[0] === "fr" || newLocale.split('_')[0] === "fr") {
+                newLocale = "fr-FR";
             } else if (newLocale.split('-')[0] === "it" || newLocale.split('_')[0] === "it") {
                 newLocale = "it-IT";
             } else if (newLocale.split('-')[0] === "eu" || newLocale.split('_')[0] === "eu") {
