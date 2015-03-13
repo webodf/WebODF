@@ -149,9 +149,9 @@
 						process.stdout.write("/* FAILED TO READ NLS BUNDLE ENTRY ["+x+"] */\n");
 					} else {
 						log("writing: "+x);
-						process.stdout.write("/* START OF NLS BUNDLE ENTRY ["+x+"] */\n");
+						// process.stdout.write("/* START OF NLS BUNDLE ENTRY ["+x+"] */\n");
 						process.stdout.write(data);
-						process.stdout.write("\n/* END OF NLS BUNDLE ENTRY ["+x+"] */\n");
+						// process.stdout.write("\n/* END OF NLS BUNDLE ENTRY ["+x+"] */\n");
 					}
 				}
 			);

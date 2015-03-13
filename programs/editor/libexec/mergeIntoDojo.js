@@ -105,9 +105,9 @@
 
     // merge the modules here
     for (i=0; i<mergees.length; i+=1) {
-        process.stdout.write("\n// START OF "+mergees[i]+"\n");
+        // process.stdout.write("\n// START OF "+mergees[i]+"\n");
         process.stdout.write(fs.readFileSync(mergees[i]));
-        process.stdout.write("\n// END OF "+mergees[i]+"\n");
+        // process.stdout.write("\n// END OF "+mergees[i]+"\n");
     }
 
     process.stdout.write(dojo_build.slice(idx));
