@@ -655,7 +655,7 @@ function Viewer(viewerPlugin, parameters) {
                         }
                         break;
                     case 36: // key 'Home' goes to first page
-                        self.showPage(0);
+                        self.showPage(1);
                         break;
                     case 35: // key 'End' goes to last page
                         self.showPage(pages.length);
