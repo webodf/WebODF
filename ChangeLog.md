@@ -2,6 +2,11 @@
 
 ## WebODF
 
+### Fixes
+
+* No longer fail due to possible Byte Order Marks in ODF-internal XML files with Chromium ([#872](https://github.com/kogmbh/WebODF/issues/872)))
+
+
 ## Wodo.TextEditor
 See also section about WebODF
 

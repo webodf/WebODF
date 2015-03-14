@@ -210,11 +210,18 @@ Runtime.byteArrayToString = function (bytearray, encoding) {
      * @return {!string}
      */
     function utf8ByteArrayToString(bytearray) {
-        var s = "", i, l = bytearray.length,
+        var s = "", startPos, i, l = bytearray.length,
             chars = [],
             c0, c1, c2, c3, codepoint;
 
-        for (i = 0; i < l; i += 1) {
+        // skip a possible UTF-8 BOM
+        if (l >= 3 && bytearray[0] === 0xef && bytearray[1] === 0xbb && bytearray[2] === 0xbf) {
+            startPos = 3;
+        } else {
+            startPos = 0;
+        }
+
+        for (i = startPos; i < l; i += 1) {
             c0 = /**@type{!number}*/(bytearray[i]);
             if (c0 < 0x80) {
                 chars.push(c0);

@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global core, runtime, Runtime*/
+/*global core, runtime, Runtime, ArrayBuffer, Uint8Array*/
 
 /*jslint bitwise: true*/
 
@@ -102,21 +102,78 @@ core.RuntimeTests = function RuntimeTests(runner) {
         });
     }
 
-    function testUtf8ByteArrayToString(callback) {
-        var pre = r.resourcePrefix();
-        runtime.read(pre + "utf8.txt", 14, 4, function (err, data) {
-            t.err = err;
-            r.shouldBeNull(t, "t.err");
-            t.data = data;
-            r.shouldBe(t, "t.data.length", "4");
-            if (data) {
-                // we want to test the actual Runtime implementation rather than the nodejs runtime
-                t.data = Runtime.byteArrayToString(data, "utf8");
-            }
-            r.shouldBe(t, "t.data.charCodeAt(0)", "55378");
-            r.shouldBe(t, "t.data.charCodeAt(1)", "57186");
-            callback();
-        });
+    function testUtf8ByteArrayToString_hello_withBOM() {
+        var bytearray = new Uint8Array(new ArrayBuffer(8));
+
+        bytearray[0] = 0xef;
+        bytearray[1] = 0xbb;
+        bytearray[2] = 0xbf;
+        bytearray[3] = 0x68;
+        bytearray[4] = 0x65;
+        bytearray[5] = 0x6C;
+        bytearray[6] = 0x6C;
+        bytearray[7] = 0x6F;
+
+        // we want to test the actual Runtime implementation rather than the nodejs runtime
+        t.data = Runtime.byteArrayToString(bytearray, "utf8");
+
+        r.shouldBe(t, "t.data.charCodeAt(0)", "0x68");
+        r.shouldBe(t, "t.data.charCodeAt(1)", "0x65");
+        r.shouldBe(t, "t.data.charCodeAt(2)", "0x6C");
+        r.shouldBe(t, "t.data.charCodeAt(3)", "0x6C");
+        r.shouldBe(t, "t.data.charCodeAt(4)", "0x6F");
+    }
+
+    function testUtf8ByteArrayToString_hello_noBOM() {
+        var bytearray = new Uint8Array(new ArrayBuffer(5));
+
+        bytearray[0] = 0x68;
+        bytearray[1] = 0x65;
+        bytearray[2] = 0x6C;
+        bytearray[3] = 0x6C;
+        bytearray[4] = 0x6F;
+
+        // we want to test the actual Runtime implementation rather than the nodejs runtime
+        t.data = Runtime.byteArrayToString(bytearray, "utf8");
+
+        r.shouldBe(t, "t.data.charCodeAt(0)", "0x68");
+        r.shouldBe(t, "t.data.charCodeAt(1)", "0x65");
+        r.shouldBe(t, "t.data.charCodeAt(2)", "0x6C");
+        r.shouldBe(t, "t.data.charCodeAt(3)", "0x6C");
+        r.shouldBe(t, "t.data.charCodeAt(4)", "0x6F");
+    }
+
+    function testUtf8ByteArrayToString_surrogates_withBOM() {
+        var bytearray = new Uint8Array(new ArrayBuffer(7));
+
+        bytearray[0] = 0xef;
+        bytearray[1] = 0xbb;
+        bytearray[2] = 0xbf;
+        bytearray[3] = 0xf0;
+        bytearray[4] = 0xa4;
+        bytearray[5] = 0xad;
+        bytearray[6] = 0xa2;
+
+        // we want to test the actual Runtime implementation rather than the nodejs runtime
+        t.data = Runtime.byteArrayToString(bytearray, "utf8");
+
+        r.shouldBe(t, "t.data.charCodeAt(0)", "55378");
+        r.shouldBe(t, "t.data.charCodeAt(1)", "57186");
+    }
+
+    function testUtf8ByteArrayToString_surrogates_noBOM() {
+        var bytearray = new Uint8Array(new ArrayBuffer(4));
+
+        bytearray[0] = 0xf0;
+        bytearray[1] = 0xa4;
+        bytearray[2] = 0xad;
+        bytearray[3] = 0xa2;
+
+        // we want to test the actual Runtime implementation rather than the nodejs runtime
+        t.data = Runtime.byteArrayToString(bytearray, "utf8");
+
+        r.shouldBe(t, "t.data.charCodeAt(0)", "55378");
+        r.shouldBe(t, "t.data.charCodeAt(1)", "57186");
     }
 
     function testLoadXML(callback) {
@@ -137,14 +194,17 @@ core.RuntimeTests = function RuntimeTests(runner) {
         t = {};
     };
     this.tests = function () {
-        return [
-        ];
+        return r.name([
+            testUtf8ByteArrayToString_hello_withBOM,
+            testUtf8ByteArrayToString_hello_noBOM,
+            testUtf8ByteArrayToString_surrogates_withBOM,
+            testUtf8ByteArrayToString_surrogates_noBOM
+        ]);
     };
     this.asyncTests = function () {
         return r.name([
             testRead,
             testWrite,
-            testUtf8ByteArrayToString,
             testLoadXML
         ]);
     };
