@@ -340,9 +340,8 @@ Runtime.assert = function (condition, message) {
  * @constructor
  * @augments Runtime
  * @implements {Runtime}
- * @param {Element} logoutput
  */
-function BrowserRuntime(logoutput) {
+function BrowserRuntime() {
     "use strict";
     var self = this;
 
@@ -490,32 +489,13 @@ function BrowserRuntime(logoutput) {
      * @return {undefined}
      */
     function log(msgOrCategory, msg) {
-        var node, doc, category;
+        var category;
         if (msg !== undefined) {
             category = msgOrCategory;
         } else {
             msg = msgOrCategory;
         }
-        if (logoutput) {
-            doc = logoutput.ownerDocument;
-            if (category) {
-                node = doc.createElement("span");
-                node.className = category;
-                node.appendChild(doc.createTextNode(category));
-                logoutput.appendChild(node);
-                logoutput.appendChild(doc.createTextNode(" "));
-            }
-            node = doc.createElement("span");
-            if (msg.length > 0 && msg[0] === "<") {
-                node.innerHTML = msg;
-            } else {
-                node.appendChild(doc.createTextNode(msg));
-            }
-            logoutput.appendChild(node);
-            logoutput.appendChild(doc.createElement("br"));
-        } else if (console) {
-            console.log(msg);
-        }
+        console.log(msg);
         if (self.enableAlerts && category === "alert") {
             alert(msg);
         }
@@ -1492,7 +1472,7 @@ Runtime.create = function create() {
     var /**@type{!Runtime}*/
         result;
     if (String(typeof window) !== "undefined") {
-        result = new BrowserRuntime(window.document.getElementById("logoutput"));
+        result = new BrowserRuntime();
     } else if (String(typeof require) !== "undefined") {
         result = new NodeJSRuntime();
     } else {

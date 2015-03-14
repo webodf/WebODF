@@ -24,6 +24,7 @@
 
 /*global runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
 
+runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.Base64Tests");
 runtime.loadClass("core.CursorTests");
 runtime.loadClass("core.DomUtilsTests");
@@ -31,7 +32,6 @@ runtime.loadClass("core.EventSubscriptionsTests");
 runtime.loadClass("core.PositionIteratorTests");
 runtime.loadClass("core.RuntimeTests");
 runtime.loadClass("core.StepIteratorTests");
-runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.ZipTests");
 runtime.loadClass("gui.DirectFormattingControllerTests");
 runtime.loadClass("gui.GuiStepUtilsTests");
