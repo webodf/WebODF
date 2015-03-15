@@ -257,6 +257,11 @@ function Viewer(viewerPlugin, parameters) {
         return kDefaultScale;
     }
 
+    function readStartPageParameter(startPage) {
+        var result = parseInt(startPage, 10);
+        return (result != NaN) ? result : 1;
+    }
+
     this.initialize = function () {
         var initialScale,
             element;
@@ -291,7 +296,7 @@ function Viewer(viewerPlugin, parameters) {
             pages = getPages();
             document.getElementById('numPages').innerHTML = 'of ' + pages.length;
 
-            self.showPage(1);
+            self.showPage(readStartPageParameter(parameters.startpage));
 
             // Set default scale
             parseScale(initialScale);
