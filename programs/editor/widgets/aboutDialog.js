@@ -46,10 +46,11 @@ define("webodf/editor/widgets/aboutDialog", ["dijit/Dialog"], function (Dialog) 
             // Dialog
             dialog = new Dialog({
                 style: "width: 400px",
-                title: "WebODF Text Editor",
+                title: "Wodo.TextEditor",
                 autofocus: false,
-                content: "<p>The WebODF Text Editor is an easy to use Javascript-based plugin for webpages. " +
-                            "It provides a stand-alone editor for text documents in the OpenDocument Format.</p>" +
+                content: "<p>Wodo.TextEditor is an easy to use Javascript-based plugin for webpages. " +
+                            "It provides a stand-alone editor for text documents in the OpenDocument Format. " +
+                            "Done with WebODF.</p>" +
                             //TODO: add proper link directly to page about the component
                             "<p>Learn more on the <a href=\"http://webodf.org/\" target=\"_blank\">WebODF website</a>.</p>" +
                             "<p>Version " + webodf.Version + "</p>" +
