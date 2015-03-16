@@ -259,7 +259,7 @@ function Viewer(viewerPlugin, parameters) {
 
     function readStartPageParameter(startPage) {
         var result = parseInt(startPage, 10);
-        return (result != NaN) ? result : 1;
+        return isNaN(result) ? 1 : result;
     }
 
     this.initialize = function () {
