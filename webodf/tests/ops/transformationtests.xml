@@ -2262,6 +2262,902 @@
    </office:text>
   </after>
  </test>
+ <test name="AddAnnotationMoveCursor_$|_[__]">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$|_[_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$_|[__]">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$_|[_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$_[_|_]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$_[__|]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$_[__]_|">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$_[_|">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$|[__]_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$|[_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$[_|_]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$[__|]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$[__]_|">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_$[_|">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[_$|_]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[_$_|]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:anchor c:memberId="Bob"/>c<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[_$_]_|">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:anchor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|[_$_]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:anchor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|_[_$_]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="-2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:anchor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[__$|]_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[__$]_|">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:anchor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>c<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[_|_$]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/>c<c:anchor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|[__$]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="-2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<c:anchor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|_[__$]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="-3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<c:anchor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[__]_$|>">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[_$|">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[__|]_$>">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/><office:annotation-end office:name="alice_1"/>c<c:anchor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_[_|_]_$>">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<c:cursor c:memberId="Bob"/>c<office:annotation-end office:name="alice_1"/>d<c:anchor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|[__]_$>">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d<c:anchor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|[_$>">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<c:anchor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|_[__]_$>">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d<c:anchor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMoveCursor_|_[_$>">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<c:anchor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
  <test name="AddAnnotationRemoveCursor">
   <before>
    <office:text>

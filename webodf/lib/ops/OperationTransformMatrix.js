@@ -298,6 +298,33 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationMoveCursor(addAnnotationSpec, moveCursorSpec) {
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec);
+
+        // adapt movecursor spec to inserted positions
+        if (addAnnotationSpec.position < moveCursorSpec.position) {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            moveCursorSpec.position += 2;
+        } else if (addAnnotationSpec.position < moveCursorSpec.position + moveCursorSpec.length) {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            moveCursorSpec.length += 2;
+        }
+
+        if (isMoveCursorSpecRangeInverted) {
+            invertMoveCursorSpecRange(moveCursorSpec);
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [moveCursorSpec]
+        };
+    }
+
+    /**
      * @param {!ops.OpAddStyle.Spec} addStyleSpec
      * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -1520,7 +1547,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 //             "ApplyDirectStyling":   passUnchanged,
             "InsertText":           transformAddAnnotationInsertText,
 //             "MergeParagraph":       passUnchanged,
-//             "MoveCursor":           passUnchanged,
+            "MoveCursor":           transformAddAnnotationMoveCursor,
 //             "RemoveAnnotation":     passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
