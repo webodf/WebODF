@@ -590,9 +590,27 @@ ops.TransformationTests = function TransformationTests(runner) {
     };
 
     /*jslint emptyblock: true*/
-    this.setUps = {
-    };
+    function linkAnnotationEndToStart() {
+        return {
+            setUp: function () {
+                var rootElement = t.odfContainer.rootElement,
+                    annotation = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation")[0],
+                    annotationEnd = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation-end")[0];
+                annotation.annotationEndElement = annotationEnd;
+            },
+            tearDown: function () {}
+        };
+    }
     /*jslint emptyblock: false*/
+
+    this.setUps = {
+        "RemoveAnnotationAddCursor" : linkAnnotationEndToStart,
+        "RemoveAnnotationAddStyle" : linkAnnotationEndToStart,
+        "RemoveAnnotationRemoveCursor" : linkAnnotationEndToStart,
+        "RemoveAnnotationRemoveStyle" : linkAnnotationEndToStart,
+        "RemoveAnnotationUpdateMetadata" : linkAnnotationEndToStart,
+        "RemoveAnnotationUpdateParagraphStyle" : linkAnnotationEndToStart
+    };
 };
 
 ops.TransformationTests.prototype.description = function () {
