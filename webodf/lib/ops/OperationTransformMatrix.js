@@ -274,6 +274,30 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /* Transformation methods */
 
     /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationInsertText(addAnnotationSpec, insertTextSpec) {
+        if (insertTextSpec.position <= addAnnotationSpec.position) {
+            addAnnotationSpec.position += insertTextSpec.text.length;
+        } else {
+            if (addAnnotationSpec.length) {
+                if (insertTextSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
+                    addAnnotationSpec.length += 1;
+                }
+            }
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            insertTextSpec.position += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [insertTextSpec]
+        };
+    }
+
+    /**
      * @param {!ops.OpAddStyle.Spec} addStyleSpec
      * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -1494,7 +1518,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "AddMember":            passUnchanged,
             "AddStyle":             passUnchanged,
 //             "ApplyDirectStyling":   passUnchanged,
-//             "InsertText":           passUnchanged,
+            "InsertText":           transformAddAnnotationInsertText,
 //             "MergeParagraph":       passUnchanged,
 //             "MoveCursor":           passUnchanged,
 //             "RemoveAnnotation":     passUnchanged,
@@ -1623,7 +1647,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
 //             "RemoveText":           passUnchanged,
-            "SetParagraphStyle":    passUnchanged,
+//             "SetParagraphStyle":    passUnchanged,
 //             "SplitParagraph":       passUnchanged,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,

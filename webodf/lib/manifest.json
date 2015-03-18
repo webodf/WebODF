@@ -505,6 +505,7 @@
         "ops.OperationFactory"
     ],
     "ops.OperationTransformMatrix": [
+        "ops.OpAddAnnotation",
         "ops.OpAddStyle",
         "ops.OpApplyDirectStyling",
         "ops.OpInsertText",

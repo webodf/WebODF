@@ -2046,6 +2046,222 @@
    </office:text>
   </after>
  </test>
+ <test name="AddAnnotationInsertText_V_[__]">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>Va<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_V_[_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="0" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>Va<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_V[__]">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>aV<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_V[_">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="1" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>aV<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_[_V_]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bVc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_[__V]">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="2" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bV<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_[__]_V">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="3" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>cV</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationInsertText_[_V">
+  <before>
+   <office:text>
+    <text:p>abc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="InsertText" memberid="Bob" position="3" text="V"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcV</text:p>
+   </office:text>
+  </after>
+ </test>
  <test name="AddAnnotationRemoveCursor">
   <before>
    <office:text>
