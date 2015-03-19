@@ -326,6 +326,22 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationSetParagraphStyle(addAnnotationSpec, setParagraphStyleSpec) {
+        if (addAnnotationSpec.position < setParagraphStyleSpec.position) {
+            setParagraphStyleSpec.position += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [setParagraphStyleSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1581,7 +1597,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
 //             "RemoveText":           passUnchanged,
-//             "SetParagraphStyle":    passUnchanged,
+            "SetParagraphStyle":    transformAddAnnotationSetParagraphStyle,
             "SplitParagraph":       transformAddAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,

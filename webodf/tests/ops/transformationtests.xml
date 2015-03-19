@@ -2017,6 +2017,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationAddStyle">
   <before>
    <office:styles></office:styles>
@@ -2046,6 +2047,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationInsertText_V_[__]">
   <before>
    <office:text>
@@ -2262,6 +2264,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationMoveCursor_$|_[__]">
   <before>
    <office:text>
@@ -2934,7 +2937,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_[__]_$|>">
+ <test name="AddAnnotationMoveCursor_[__]_$|">
   <before>
    <office:text>
     <text:p>abc</text:p>
@@ -2990,7 +2993,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_[__|]_$>">
+ <test name="AddAnnotationMoveCursor_[__|]_$">
   <before>
    <office:text>
     <text:p>abc</text:p>
@@ -3018,7 +3021,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_[_|_]_$>">
+ <test name="AddAnnotationMoveCursor_[_|_]_$">
   <before>
    <office:text>
     <text:p>abcd</text:p>
@@ -3046,7 +3049,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_|[__]_$>">
+ <test name="AddAnnotationMoveCursor_|[__]_$">
   <before>
    <office:text>
     <text:p>abcd</text:p>
@@ -3074,7 +3077,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_|[_$>">
+ <test name="AddAnnotationMoveCursor_|[_$">
   <before>
    <office:text>
     <text:p>abcd</text:p>
@@ -3102,7 +3105,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_|_[__]_$>">
+ <test name="AddAnnotationMoveCursor_|_[__]_$">
   <before>
    <office:text>
     <text:p>abcd</text:p>
@@ -3130,7 +3133,7 @@
    </office:text>
   </after>
  </test>
- <test name="AddAnnotationMoveCursor_|_[_$>">
+ <test name="AddAnnotationMoveCursor_|_[_$">
   <before>
    <office:text>
     <text:p>abcd</text:p>
@@ -3158,6 +3161,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationRemoveCursor">
   <before>
    <office:text>
@@ -3186,6 +3190,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationRemoveStyle">
   <before>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
@@ -3215,6 +3220,192 @@
    </office:text>
   </after>
  </test>
+
+ <test name="AddAnnotationSetParagraphStyle_S_[__]_">
+  <before>
+   <office:text><text:p>abc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="0" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="S">a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_S_[_">
+  <before>
+   <office:text><text:p>abc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="0" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="S">a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_S[__]_">
+  <before>
+   <office:text><text:p>abc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="0" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="S"><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>a<office:annotation-end office:name="alice_1"/>bc</text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_S[_">
+  <before>
+   <office:text><text:p>abc</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="0" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p text:style-name="S"><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>abc</text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_[_S_]_">
+  <before>
+   <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="3" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b</text:p><text:p text:style-name="S">c<office:annotation-end office:name="alice_1"/></text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_[_S]_">
+  <before>
+   <office:text><text:p>ab</text:p><text:p></text:p><text:p></text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="3" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b</text:p><text:p text:style-name="S"><office:annotation-end office:name="alice_1"/></text:p><text:p></text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_[_]_S">
+  <before>
+   <office:text><text:p>ab</text:p><text:p></text:p><text:p></text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b</text:p><text:p><office:annotation-end office:name="alice_1"/></text:p><text:p text:style-name="S"></text:p></office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationSetParagraphStyle_[_S">
+  <before>
+   <office:text><text:p>ab</text:p><text:p></text:p><text:p></text:p></office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="4" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text><text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b</text:p><text:p></text:p><text:p text:style-name="S"></text:p></office:text>
+  </after>
+ </test>
+
  <test name="AddAnnotationSplitParagraph_V_[__]">
   <before>
    <office:text>
@@ -3431,6 +3622,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationUpdateMetadata">
   <before>
    <office:meta><meta:initial-creator>Eve</meta:initial-creator><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta>
@@ -3460,6 +3652,7 @@
    </office:text>
   </after>
  </test>
+
  <test name="AddAnnotationUpdateParagraphStyle">
   <before>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="12pt"/></style:style></office:styles>
