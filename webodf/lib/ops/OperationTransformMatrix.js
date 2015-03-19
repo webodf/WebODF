@@ -275,6 +275,24 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationApplyDirectStyling(addAnnotationSpec, applyDirectStylingSpec) {
+        if (addAnnotationSpec.position <= applyDirectStylingSpec.position) {
+            applyDirectStylingSpec.position += 2;
+        } else if (addAnnotationSpec.position <= applyDirectStylingSpec.position + applyDirectStylingSpec.length) {
+            applyDirectStylingSpec.length += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [applyDirectStylingSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
      * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1588,7 +1606,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "AddCursor":            passUnchanged,
             "AddMember":            passUnchanged,
             "AddStyle":             passUnchanged,
-//             "ApplyDirectStyling":   passUnchanged,
+            "ApplyDirectStyling":   transformAddAnnotationApplyDirectStyling,
             "InsertText":           transformAddAnnotationInsertText,
 //             "MergeParagraph":       passUnchanged,
             "MoveCursor":           transformAddAnnotationMoveCursor,
