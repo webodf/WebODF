@@ -302,7 +302,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         } else {
             if (addAnnotationSpec.length) {
                 if (insertTextSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
-                    addAnnotationSpec.length += 1;
+                    addAnnotationSpec.length += insertTextSpec.text.length;
                 }
             }
             // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
