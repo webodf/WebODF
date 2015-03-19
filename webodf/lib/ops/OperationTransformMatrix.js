@@ -325,6 +325,34 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationSplitParagraph(addAnnotationSpec, splitParagraphSpec) {
+        if (addAnnotationSpec.position < splitParagraphSpec.sourceParagraphPosition) {
+            splitParagraphSpec.sourceParagraphPosition += 2;
+        }
+
+        if (splitParagraphSpec.position <= addAnnotationSpec.position) {
+            addAnnotationSpec.position += 1;
+        } else {
+            if (addAnnotationSpec.length) {
+                if (splitParagraphSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
+                    addAnnotationSpec.length += 1;
+                }
+            }
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            splitParagraphSpec.position += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [splitParagraphSpec]
+        };
+    }
+
+    /**
      * @param {!ops.OpAddStyle.Spec} addStyleSpec
      * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -1554,7 +1582,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveStyle":          passUnchanged,
 //             "RemoveText":           passUnchanged,
 //             "SetParagraphStyle":    passUnchanged,
-//             "SplitParagraph":       passUnchanged,
+            "SplitParagraph":       transformAddAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
