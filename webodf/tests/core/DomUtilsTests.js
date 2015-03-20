@@ -515,7 +515,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         p.appendChild(span3);
         t.doc.appendChild(p);
         t.parent = t.utils.removeUnwantedNodes(p, function (node) {
-            return node !== null;
+            return (node !== null) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
         });
         r.shouldBe(t, "t.parent", "t.doc");
         r.shouldBe(t, "t.parent.childNodes.length", "0");
@@ -536,7 +536,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         p.appendChild(span3);
         t.doc.appendChild(p);
         t.parent = t.utils.removeUnwantedNodes(p, function (node) {
-            return node.localName === 'span';
+            return node.localName === 'span' ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
         });
         r.shouldBe(t, "t.parent", "t.doc");
         r.shouldBe(t, "t.parent.firstChild.localName", "'p'");
@@ -544,6 +544,32 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
         r.shouldBe(t, "t.parent.firstChild.childNodes[1].textContent", "'world'");
         r.shouldBe(t, "t.parent.firstChild.childNodes[2].localName", "'b'");
         r.shouldBe(t, "t.parent.firstChild.childNodes[2].firstChild.textContent", "'test'");
+    }
+
+    function removeUnwantedNodes_SkipDiv() {
+        var p = document.createElement("p"),
+            span1 = document.createElement("span"),
+            div = document.createElement("div"),
+            divspan = document.createElement("span"),
+            span3 = document.createElement("span"),
+            b = document.createElement("b");
+        b.textContent = "test";
+        span1.textContent = "hello";
+        divspan.textContent = "world";
+        span3.appendChild(b);
+        p.appendChild(span1);
+        p.appendChild(div);
+        div.appendChild(divspan);
+        p.appendChild(span3);
+        t.doc.appendChild(p);
+        t.parent = t.utils.removeUnwantedNodes(p, function (node) {
+            return (node.localName === "div") ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_REJECT;
+        });
+        r.shouldBe(t, "t.parent", "t.doc");
+        r.shouldBe(t, "t.parent.childNodes.length", "1");
+        r.shouldBe(t, "t.parent.firstChild.localName", "'div'");
+        r.shouldBe(t, "t.parent.firstChild.childNodes.length", "1");
+        r.shouldBe(t, "t.parent.firstChild.firstChild.localName", "'span'");
     }
 
     function removeAllChildNodes_None() {
@@ -818,6 +844,7 @@ core.DomUtilsTests = function DomUtilsTests(runner) {
 
             removeUnwantedNodes_DiscardAll,
             removeUnwantedNodes_DiscardSpanOnly,
+            removeUnwantedNodes_SkipDiv,
 
             removeAllChildNodes_None,
             removeAllChildNodes_ElementAndTextNodes,

@@ -579,20 +579,29 @@
 
         /**
          * Removes all unwanted nodes from targetNode includes itself.
+         * The nodeFilter defines which nodes should be removed (NodeFilter.FILTER_REJECT),
+         * should be skipped including the subtree (NodeFilter.FILTER_SKIP) or should be kept
+         * and their subtree checked further (NodeFilter.FILTER_ACCEPT).
          * @param {!Node} targetNode
-         * @param {function(!Node):!boolean} shouldRemove check whether a node should be removed or not
+         * @param {!function(!Node) : !number} nodeFilter
          * @return {?Node} parent of targetNode
          */
-        function removeUnwantedNodes(targetNode, shouldRemove) {
+        function removeUnwantedNodes(targetNode, nodeFilter) {
             var parent = targetNode.parentNode,
                 node = targetNode.firstChild,
+                filterResult = nodeFilter(targetNode),
                 next;
+
+            if (filterResult === NodeFilter.FILTER_SKIP) {
+                return parent;
+            }
+
             while (node) {
                 next = node.nextSibling;
-                removeUnwantedNodes(node, shouldRemove);
+                removeUnwantedNodes(node, nodeFilter);
                 node = next;
             }
-            if (parent && shouldRemove(targetNode)) {
+            if (parent && (filterResult === NodeFilter.FILTER_REJECT)) {
                 mergeIntoParent(targetNode);
             }
             return parent;
