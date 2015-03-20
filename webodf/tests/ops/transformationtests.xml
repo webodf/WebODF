@@ -2755,6 +2755,304 @@
   </after>
  </test>
 
+ <test name="AddAnnotationMergeParagraph_M_[__]">
+  <before>
+   <office:text>
+    <text:p>a</text:p><text:p>bcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+  <test name="AddAnnotationMergeParagraph_M_[_">
+  <before>
+   <office:text>
+    <text:p>a</text:p><text:p>bcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_M[__]">
+  <before>
+   <office:text>
+    <text:p>a</text:p><text:p>bc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_M[_">
+  <before>
+   <office:text>
+    <text:p>a</text:p><text:p>bc</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[M_]">
+  <before>
+   <office:text>
+    <text:p>a</text:p><text:p>bcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[M_">
+  <before>
+   <office:text>
+    <text:p>a</text:p><text:p>bcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[_M_]">
+  <before>
+   <office:text>
+    <text:p>ab</text:p><text:p>cd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[_M_">
+  <before>
+   <office:text>
+    <text:p>ab</text:p><text:p>cd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[__M]">
+  <before>
+   <office:text>
+    <text:p>ab</text:p><text:p>c</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[__]M">
+  <before>
+   <office:text>
+    <text:p>ab</text:p><text:p>c</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>c</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationMergeParagraph_[__]_M">
+  <before>
+   <office:text>
+    <text:p>abc</text:p><text:p>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="MergeParagraph" memberid="Bob" destinationStartPosition="0" sourceStartPosition="4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="AddAnnotationMoveCursor_$|_[__]">
   <before>
    <office:text>

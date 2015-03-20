@@ -317,6 +317,35 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationMergeParagraph(addAnnotationSpec, mergeParagraphSpec) {
+        if (mergeParagraphSpec.sourceStartPosition <= addAnnotationSpec.position) {
+            addAnnotationSpec.position -= 1;
+        } else {
+            if (addAnnotationSpec.length) {
+                if (mergeParagraphSpec.sourceStartPosition <= addAnnotationSpec.position + addAnnotationSpec.length) {
+                    addAnnotationSpec.length -= 1;
+                }
+            }
+
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            mergeParagraphSpec.sourceStartPosition += 2;
+
+            if (addAnnotationSpec.position < mergeParagraphSpec.destinationStartPosition) {
+                mergeParagraphSpec.destinationStartPosition += 2;
+            }
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [mergeParagraphSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
      * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1608,7 +1637,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "AddStyle":             passUnchanged,
             "ApplyDirectStyling":   transformAddAnnotationApplyDirectStyling,
             "InsertText":           transformAddAnnotationInsertText,
-//             "MergeParagraph":       passUnchanged,
+            "MergeParagraph":       transformAddAnnotationMergeParagraph,
             "MoveCursor":           transformAddAnnotationMoveCursor,
 //             "RemoveAnnotation":     passUnchanged,
             "RemoveCursor":         passUnchanged,
