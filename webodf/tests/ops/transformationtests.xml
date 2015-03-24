@@ -4009,6 +4009,493 @@
   </after>
  </test>
 
+ <test name="AddAnnotationRemoveText_XX_[__]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>b<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_XX_[_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>b<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_XX[__]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_XX[_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_X[X__]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>d<office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_X[X_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_X[XX]_">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_X[XX]X">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[X__]">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[X_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[XX]_">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[XX]X">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="1" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[_X_]_">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[_X_">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bde</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[_X]_">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[_X]X">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="2" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[_]X">
+  <before>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="3" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveText_[_]_X">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveText" memberid="Bob" position="4" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="AddAnnotationSetParagraphStyle_S_[__]_">
   <before>
    <office:text><text:p>abc</text:p></office:text>

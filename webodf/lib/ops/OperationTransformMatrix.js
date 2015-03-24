@@ -300,7 +300,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         if (insertTextSpec.position <= addAnnotationSpec.position) {
             addAnnotationSpec.position += insertTextSpec.text.length;
         } else {
-            if (addAnnotationSpec.length) {
+            if (addAnnotationSpec.length !== undefined) {
                 if (insertTextSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
                     addAnnotationSpec.length += insertTextSpec.text.length;
                 }
@@ -324,7 +324,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         if (mergeParagraphSpec.sourceStartPosition <= addAnnotationSpec.position) {
             addAnnotationSpec.position -= 1;
         } else {
-            if (addAnnotationSpec.length) {
+            if (addAnnotationSpec.length !== undefined) {
                 if (mergeParagraphSpec.sourceStartPosition <= addAnnotationSpec.position + addAnnotationSpec.length) {
                     addAnnotationSpec.length -= 1;
                 }
@@ -373,6 +373,61 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationRemoveText(addAnnotationSpec, removeTextSpec) {
+        var removeTextSpecPosition = removeTextSpec.position,
+            removeTextSpecEnd = removeTextSpec.position + removeTextSpec.length,
+            annotationSpecEnd,
+            helperOpspec,
+            addAnnotationSpecResult = [addAnnotationSpec],
+            removeTextSpecResult = [removeTextSpec];
+
+        // adapt removeTextSpec
+        if (addAnnotationSpec.position <= removeTextSpec.position) {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            removeTextSpec.position += 2;
+        } else if (addAnnotationSpec.position < removeTextSpecEnd) {
+            // we have to split the removal into two ops, before and after the annotation start
+            removeTextSpec.length = addAnnotationSpec.position - removeTextSpec.position;
+            helperOpspec = {
+                optype: "RemoveText",
+                memberid: removeTextSpec.memberid,
+                timestamp: removeTextSpec.timestamp,
+                position: addAnnotationSpec.position + 2,
+                length: removeTextSpecEnd - addAnnotationSpec.position
+            };
+            removeTextSpecResult.unshift(helperOpspec); // helperOp first, so its position is not affected by the real op
+        }
+
+        // adapt addAnnotationSpec (using already changed removeTextSpec and new helperOpspec, be aware)
+        if (removeTextSpec.position + removeTextSpec.length <= addAnnotationSpec.position) {
+            addAnnotationSpec.position -= removeTextSpec.length;
+            if ((addAnnotationSpec.length !== undefined) && helperOpspec) {
+                if (helperOpspec.length >= addAnnotationSpec.length) {
+                    addAnnotationSpec.length = 0;
+                } else {
+                    addAnnotationSpec.length -= helperOpspec.length;
+                }
+            }
+        } else if (addAnnotationSpec.length !== undefined) {
+            annotationSpecEnd = addAnnotationSpec.position + addAnnotationSpec.length;
+            if (removeTextSpecEnd <= annotationSpecEnd) {
+                addAnnotationSpec.length -= removeTextSpec.length;
+            } else if (removeTextSpecPosition < annotationSpecEnd) {
+                addAnnotationSpec.length = removeTextSpecPosition - addAnnotationSpec.position;
+            }
+        }
+
+        return {
+            opSpecsA:  addAnnotationSpecResult,
+            opSpecsB:  removeTextSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
      * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -400,7 +455,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         if (splitParagraphSpec.position <= addAnnotationSpec.position) {
             addAnnotationSpec.position += 1;
         } else {
-            if (addAnnotationSpec.length) {
+            if (addAnnotationSpec.length !== undefined) {
                 if (splitParagraphSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
                     addAnnotationSpec.length += 1;
                 }
@@ -1643,7 +1698,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
-//             "RemoveText":           passUnchanged,
+            "RemoveText":           transformAddAnnotationRemoveText,
             "SetParagraphStyle":    transformAddAnnotationSetParagraphStyle,
             "SplitParagraph":       transformAddAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
