@@ -6919,6 +6919,111 @@
   </after>
  </test>
 
+ <test name="RemoveAnnotationSetParagraphStyle_S_[_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="0" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p text:style-name="S">abcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationSetParagraphStyle_S[_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>abc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="1" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="0" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p text:style-name="S">abcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationSetParagraphStyle_[S_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation></text:p><text:p>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="6" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a</text:p><text:p text:style-name="S">bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationSetParagraphStyle_[_S_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b</text:p><text:p>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="SetParagraphStyle" position="7" styleName="S"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab</text:p><text:p text:style-name="S">cd</text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="RemoveAnnotationSplitParagraph_V_[_]" setup="linkAnnotationEndToStart">
   <before>
    <office:text>

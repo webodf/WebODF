@@ -1526,6 +1526,32 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationSetParagraphStyle(removeAnnotationSpec, setParagraphStyleSpec) {
+        var setParagraphStyleSpecPosition = setParagraphStyleSpec.position,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            removeAnnotationSpecResult = [removeAnnotationSpec],
+            setParagraphStyleSpecResult = [setParagraphStyleSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= setParagraphStyleSpecPosition && setParagraphStyleSpecPosition <= removeAnnotationEnd) {
+            setParagraphStyleSpecResult = [];
+        } else {
+            if (removeAnnotationEnd < setParagraphStyleSpecPosition) {
+                setParagraphStyleSpec.position -= removeAnnotationSpec.length + 2;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecResult,
+            opSpecsB:  setParagraphStyleSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
      * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1979,7 +2005,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
 //             "RemoveText":           passUnchanged,
-//             "SetParagraphStyle":    passUnchanged,
+            "SetParagraphStyle":    transformRemoveAnnotationSetParagraphStyle,
             "SplitParagraph":       transformRemoveAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
