@@ -1526,6 +1526,38 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationRemoveText(removeAnnotationSpec, removeTextSpec) {
+        var removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            removeTextSpecEnd = removeTextSpec.position + removeTextSpec.length,
+            removeAnnotationSpecResult = [removeAnnotationSpec],
+            removeTextSpecResult = [removeTextSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= removeTextSpec.position && removeTextSpecEnd <= removeAnnotationEnd) {
+            removeTextSpecResult = [];
+            removeAnnotationSpec.length -= removeTextSpec.length;
+        } else {
+            if (removeTextSpecEnd < removeAnnotationSpec.position) {
+                removeAnnotationSpec.position -= removeTextSpec.length;
+            } else if (removeTextSpec.position < removeAnnotationSpec.position) {
+                removeAnnotationSpec.position = removeTextSpec.position + 1;
+                removeTextSpec.length -= removeAnnotationSpec.length + 2;
+            } else {
+                removeTextSpec.position -= removeAnnotationSpec.length + 2;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecResult,
+            opSpecsB:  removeTextSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
      * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -2004,7 +2036,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
-//             "RemoveText":           passUnchanged,
+            "RemoveText":           transformRemoveAnnotationRemoveText,
             "SetParagraphStyle":    transformRemoveAnnotationSetParagraphStyle,
             "SplitParagraph":       transformRemoveAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
