@@ -5012,6 +5012,518 @@
    </office:text>
   </after>
  </test>
+
+ <test name="RemoveAnnotationApplyDirectStyling_{_}_[_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="0" length="1">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto66965_0">a</text:span>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{_}[_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="0" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto66965_0">ab</text:span>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{_[}_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="0" length="6">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto66965_0">ab</text:span>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{_[_}_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="0" length="6">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto66965_0">ab</text:span>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{_[_}]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="0" length="7">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto66965_0">abc</text:span>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{_[_]_}" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="0" length="8">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p><text:span text:style-name="auto66965_0">abcd</text:span></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{[}_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="4">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>abcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{[_}_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="5">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>a<text:span text:style-name="auto66965_0">b</text:span>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{[_}]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="6">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>a<text:span text:style-name="auto66965_0">bc</text:span>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_{[_]_}" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="7">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>a<text:span text:style-name="auto66965_0">bcd</text:span>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[{_}_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="5">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>a<text:span text:style-name="auto66965_0">b</text:span>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[{_}]_" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="6">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>a<text:span text:style-name="auto66965_0">bc</text:span>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[{_]_}" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="1" length="7">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>a<text:span text:style-name="auto66965_0">bcd</text:span></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[_{_}_]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="6" length="1">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>ab<text:span text:style-name="auto66965_0">c</text:span>de</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[_{_}]" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="6" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>ab<text:span text:style-name="auto66965_0">cd</text:span>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[_{_]_}" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="6" length="2">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>ab<text:span text:style-name="auto66965_0">cd</text:span>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationApplyDirectStyling_[_{]_}" hasSetup="true">
+  <before>
+   <office:automatic-styles></office:automatic-styles>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="ApplyDirectStyling" memberid="Bob" position="7" length="1">
+    <setProperties><style:text-properties fo:font-weight="bold" /></setProperties>
+   </op>
+  </opsB>
+  <after>
+   <office:automatic-styles><style:style style:name="auto66965_0" ws:scope="document-content" style:family="text"><style:text-properties fo:font-weight="bold"/></style:style></office:automatic-styles>
+   <office:text>
+    <text:p>abc<text:span text:style-name="auto66965_0">d</text:span>e</text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="RemoveAnnotationRemoveCursor" hasSetup="true">
   <before>
    <office:text>

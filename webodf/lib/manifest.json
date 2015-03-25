@@ -511,6 +511,7 @@
         "ops.OpInsertText",
         "ops.OpMergeParagraph",
         "ops.OpMoveCursor",
+        "ops.OpRemoveAnnotation",
         "ops.OpRemoveCursor",
         "ops.OpRemoveStyle",
         "ops.OpRemoveText",

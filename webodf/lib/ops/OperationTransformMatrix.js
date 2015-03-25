@@ -662,6 +662,39 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingRemoveAnnotation(applyDirectStylingSpec, removeAnnotationSpec) {
+        var pointA = applyDirectStylingSpec.position,
+            pointB = applyDirectStylingSpec.position + applyDirectStylingSpec.length,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            applyDirectStylingSpecResult = [applyDirectStylingSpec],
+            removeAnnotationSpecResult = [removeAnnotationSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= pointA && pointB <= removeAnnotationEnd) {
+            applyDirectStylingSpecResult = [];
+        } else {
+            // adapt applyDirectStyling spec to removed annotation content
+            if (removeAnnotationEnd < pointA) {
+                pointA -= removeAnnotationSpec.length + 2;
+            }
+            if (removeAnnotationEnd < pointB) {
+                pointB -= removeAnnotationSpec.length + 2;
+            }
+            applyDirectStylingSpec.position = pointA;
+            applyDirectStylingSpec.length = pointB - pointA;
+        }
+
+        return {
+            opSpecsA:  applyDirectStylingSpecResult,
+            opSpecsB:  removeAnnotationSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1761,7 +1794,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           transformApplyDirectStylingInsertText,
             "MergeParagraph":       transformApplyDirectStylingMergeParagraph,
             "MoveCursor":           passUnchanged,
-//             "RemoveAnnotation":     passUnchanged,
+            "RemoveAnnotation":     transformApplyDirectStylingRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
