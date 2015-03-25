@@ -1525,6 +1525,38 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationSplitParagraph(removeAnnotationSpec, splitParagraphSpec) {
+        var splitParagraphSpecPosition = splitParagraphSpec.position,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            removeAnnotationSpecResult = [removeAnnotationSpec],
+            splitParagraphSpecResult = [splitParagraphSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= splitParagraphSpecPosition && splitParagraphSpecPosition <= removeAnnotationEnd) {
+            splitParagraphSpecResult = [];
+            removeAnnotationSpec.length += 1;
+        } else {
+            if (removeAnnotationEnd < splitParagraphSpec.sourceParagraphPosition) {
+                splitParagraphSpec.sourceParagraphPosition -= removeAnnotationSpec.length + 2;
+            }
+            if (removeAnnotationEnd < splitParagraphSpecPosition) {
+                splitParagraphSpec.position -= removeAnnotationSpec.length + 2;
+            } else {
+                removeAnnotationSpec.position += 1;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecResult,
+            opSpecsB:  splitParagraphSpecResult
+        };
+    }
+
+    /**
      * @param {!ops.OpRemoveCursor.Spec} removeCursorSpecA
      * @param {!ops.OpRemoveCursor.Spec} removeCursorSpecB
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -1948,7 +1980,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "RemoveStyle":          passUnchanged,
 //             "RemoveText":           passUnchanged,
 //             "SetParagraphStyle":    passUnchanged,
-//             "SplitParagraph":       passUnchanged,
+            "SplitParagraph":       transformRemoveAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged
