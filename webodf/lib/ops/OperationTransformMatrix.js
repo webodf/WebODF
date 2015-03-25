@@ -1057,6 +1057,39 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphRemoveAnnotation(mergeParagraphSpec, removeAnnotationSpec) {
+        var removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            mergeParagraphSpecResult = [mergeParagraphSpec],
+            removeAnnotationSpecResult = [removeAnnotationSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= mergeParagraphSpec.destinationStartPosition && mergeParagraphSpec.sourceStartPosition <= removeAnnotationEnd) {
+            mergeParagraphSpecResult = [];
+            removeAnnotationSpec.length -= 1;
+        } else {
+            if (mergeParagraphSpec.sourceStartPosition < removeAnnotationSpec.position) {
+                removeAnnotationSpec.position -= 1;
+            } else {
+                if (removeAnnotationEnd < mergeParagraphSpec.destinationStartPosition) {
+                    mergeParagraphSpec.destinationStartPosition -= removeAnnotationSpec.length + 2;
+                }
+                if (removeAnnotationEnd < mergeParagraphSpec.sourceStartPosition) {
+                    mergeParagraphSpec.sourceStartPosition -= removeAnnotationSpec.length + 2;
+                }
+            }
+        }
+
+        return {
+            opSpecsA:  mergeParagraphSpecResult,
+            opSpecsB:  removeAnnotationSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1853,7 +1886,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         "MergeParagraph": {
             "MergeParagraph":       transformMergeParagraphMergeParagraph,
             "MoveCursor":           transformMergeParagraphMoveCursor,
-//             "RemoveAnnotation":     passUnchanged,
+            "RemoveAnnotation":     transformMergeParagraphRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
