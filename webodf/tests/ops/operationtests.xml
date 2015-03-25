@@ -528,6 +528,29 @@
   </ops>
   <after><office:text><text:p text:style-name="A">abcdefgh</text:p></office:text></after>
  </test>
+ <test name="MergeParagraphWithEmptyAnnotationText inside">
+  <before><office:text><text:p text:style-name="A">ab</text:p><text:p text:style-name="B">c<office:annotation office:name="alice_1">
+    <dc:creator e:memberid="Alice">Alice</dc:creator>
+    <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+    <text:list>
+     <text:list-item>
+      <text:p></text:p>
+     </text:list-item>
+    </text:list>
+   </office:annotation>d</text:p></office:text></before>
+  <ops>
+   <op optype="MergeParagraph" destinationStartPosition="0" sourceStartPosition="3" paragraphStyleName="A"/>
+  </ops>
+  <after><office:text><text:p text:style-name="A">abc<office:annotation office:name="alice_1">
+    <dc:creator e:memberid="Alice">Alice</dc:creator>
+    <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+    <text:list>
+     <text:list-item>
+      <text:p></text:p>
+     </text:list-item>
+    </text:list>
+   </office:annotation>d</text:p></office:text></after>
+ </test>
  <test name="RemoveAndMerge">
   <before><office:text><text:p text:style-name="A">abc<text:span text:style-name="B">d</text:span></text:p><text:p text:style-name="C"><text:span text:style-name="D">efgh</text:span></text:p></office:text></before>
   <ops>

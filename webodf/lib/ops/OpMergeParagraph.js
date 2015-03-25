@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global ops, runtime, odf, core, Node*/
+/*global ops, runtime, odf, core, Node, NodeFilter*/
 
 /**
  * Merges two adjacent paragraphs together into the first paragraph. The destination paragraph
@@ -68,10 +68,13 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
     /**
      * Returns true if the supplied node is an ODF grouping element with no content
      * @param {!Node} element
-     * @return {!boolean}
+     * @return {!number}
      */
-    function isEmptyGroupingElement(element) {
-        return odfUtils.isGroupingElement(element) && odfUtils.hasNoODFContent(element);
+    function filterEmptyGroupingElementToRemove(element) {
+        if (odf.OdfUtils.isInlineRoot(element)) {
+            return NodeFilter.FILTER_SKIP;
+        }
+        return odfUtils.isGroupingElement(element) && odfUtils.hasNoODFContent(element) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
     }
 
     /**
@@ -93,7 +96,7 @@ ops.OpMergeParagraph = function OpMergeParagraph() {
                 // Empty spans need to be cleaned up on merge, as remove text only removes things that contain text content
                 // Child is moved across before collapsing so any foreign sub-elements are collapsed up the chain next to
                 // the destination location
-                domUtils.removeUnwantedNodes(child, isEmptyGroupingElement);
+                domUtils.removeUnwantedNodes(child, filterEmptyGroupingElementToRemove);
             }
             child = source.firstChild;
         }

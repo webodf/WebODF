@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global odf, core, Node*/
+/*global odf, core, Node, NodeFilter*/
 
 /**
  * Defines a set of rules for how elements can be collapsed based on whether they contain ODT content (e.g.,
@@ -36,14 +36,15 @@ odf.CollapsingRules = function CollapsingRules(rootNode) {
         domUtils = core.DomUtils;
 
     /**
-     * Returns true if a given node is odf node or a text node that has a odf parent.
+     * Returns NodeFilter value if a given node is odf node or a text node that has a odf parent.
      * @param {!Node} node
-     * @return {!boolean}
+     * @return {!number}
      */
-    function shouldRemove(node) {
-        return odfUtils.isODFNode(node)
+    function filterOdfNodesToRemove(node) {
+        var isToRemove = odfUtils.isODFNode(node)
             || (node.localName === "br" && odfUtils.isLineBreak(node.parentNode))
             || (node.nodeType === Node.TEXT_NODE && odfUtils.isODFNode(/** @type {!Node}*/(node.parentNode)));
+        return isToRemove ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
     }
 
     /**
@@ -69,7 +70,7 @@ odf.CollapsingRules = function CollapsingRules(rootNode) {
             parent.removeChild(targetNode);
         } else {
             // removes all odf nodes
-            parent = domUtils.removeUnwantedNodes(targetNode, shouldRemove);
+            parent = domUtils.removeUnwantedNodes(targetNode, filterOdfNodesToRemove);
         }
         if (parent && isCollapsibleContainer(parent)) {
             return mergeChildrenIntoParent(parent);
