@@ -315,7 +315,7 @@ ops.TransformationTests = function TransformationTests(runner) {
             opsAElement = element.getElementsByTagName("opsA")[0],
             opsBElement = element.getElementsByTagName("opsB")[0],
             after = element.getElementsByTagName("after")[0],
-            hasSetup = element.getAttribute("hasSetup") === "true",
+            setupName = element.getAttribute("setup"),
             isFailing = element.getAttribute("isFailing") === "true",
             setup;
 
@@ -326,8 +326,8 @@ ops.TransformationTests = function TransformationTests(runner) {
         runtime.assert(Boolean(after), "Expected <after/> in " + name + ".");
         runtime.assert(checkWhitespace(after), "Unexpanded test:s element or text:c attribute found in " + name + ".");
         opsTestHelper.removeInsignificantTextNodes(element);
-        setup = self.setUps.hasOwnProperty(name) ? self.setUps[name]() : null;
-        if (hasSetup) {
+        setup = self.setUps.hasOwnProperty(setupName) ? self.setUps[setupName]() : null;
+        if (setupName) {
             runtime.assert(Boolean(setup), "Required setup for " + name + " was not found.");
         }
         return {
@@ -604,29 +604,7 @@ ops.TransformationTests = function TransformationTests(runner) {
     /*jslint emptyblock: false*/
 
     this.setUps = {
-        "RemoveAnnotationAddCursor" : linkAnnotationEndToStart,
-        "RemoveAnnotationAddStyle" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{_}_[_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{_}[_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{_[}_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{_[_}_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{_[_}]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{_[_]_}" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{[}_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{[_}_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{[_}]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_{[_]_}" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[{_}_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[{_}]_" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[{_]_}" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[_{_}_]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[_{_}]" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[_{_]_}" : linkAnnotationEndToStart,
-        "RemoveAnnotationApplyDirectStyling_[_{]_}" : linkAnnotationEndToStart,
-        "RemoveAnnotationRemoveCursor" : linkAnnotationEndToStart,
-        "RemoveAnnotationRemoveStyle" : linkAnnotationEndToStart,
-        "RemoveAnnotationUpdateMetadata" : linkAnnotationEndToStart,
-        "RemoveAnnotationUpdateParagraphStyle" : linkAnnotationEndToStart
+        "linkAnnotationEndToStart" : linkAnnotationEndToStart
     };
 };
 

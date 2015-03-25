@@ -4958,7 +4958,7 @@
   </after>
  </test>
 
- <test name="RemoveAnnotationAddCursor" hasSetup="true">
+ <test name="RemoveAnnotationAddCursor" setup="linkAnnotationEndToStart">
   <before>
    <office:text>
     <text:p><office:annotation office:name="alice_1">
@@ -4984,7 +4984,8 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationAddStyle" hasSetup="true">
+
+ <test name="RemoveAnnotationAddStyle" setup="linkAnnotationEndToStart">
   <before>
    <office:styles></office:styles>
    <office:text>
@@ -5013,7 +5014,7 @@
   </after>
  </test>
 
- <test name="RemoveAnnotationApplyDirectStyling_{_}_[_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{_}_[_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5043,7 +5044,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{_}[_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{_}[_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5073,7 +5074,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{_[}_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{_[}_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5103,7 +5104,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{_[_}_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{_[_}_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5133,7 +5134,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{_[_}]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{_[_}]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5163,7 +5164,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{_[_]_}" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{_[_]_}" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5193,7 +5194,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{[}_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{[}_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5223,7 +5224,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{[_}_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{[_}_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5253,7 +5254,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{[_}]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{[_}]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5283,7 +5284,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_{[_]_}" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_{[_]_}" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5313,7 +5314,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[{_}_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[{_}_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5343,7 +5344,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[{_}]_" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[{_}]_" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5373,7 +5374,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[{_]_}" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[{_]_}" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5403,7 +5404,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[_{_}_]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[_{_}_]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5433,7 +5434,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[_{_}]" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[_{_}]" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5463,7 +5464,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[_{_]_}" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[_{_]_}" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5493,7 +5494,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationApplyDirectStyling_[_{]_}" hasSetup="true">
+ <test name="RemoveAnnotationApplyDirectStyling_[_{]_}" setup="linkAnnotationEndToStart">
   <before>
    <office:automatic-styles></office:automatic-styles>
    <office:text>
@@ -5524,7 +5525,7 @@
   </after>
  </test>
 
- <test name="RemoveAnnotationRemoveCursor" hasSetup="true">
+ <test name="RemoveAnnotationRemoveCursor" setup="linkAnnotationEndToStart">
   <before>
    <office:text>
     <text:p><office:annotation office:name="alice_1">
@@ -5551,7 +5552,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationRemoveStyle" hasSetup="true">
+ <test name="RemoveAnnotationRemoveStyle" setup="linkAnnotationEndToStart">
   <before>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"/></office:styles>
    <office:text>
@@ -5579,7 +5580,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationUpdateMetadata" hasSetup="true">
+ <test name="RemoveAnnotationUpdateMetadata" setup="linkAnnotationEndToStart">
   <before>
    <office:meta><meta:initial-creator>Eve</meta:initial-creator><meta:creation-date>2013-08-05T12:34:07.061Z</meta:creation-date></office:meta>
    <office:text>
@@ -5607,7 +5608,7 @@
    </office:text>
   </after>
  </test>
- <test name="RemoveAnnotationUpdateParagraphStyle" hasSetup="true">
+ <test name="RemoveAnnotationUpdateParagraphStyle" setup="linkAnnotationEndToStart">
   <before>
    <office:styles><style:style style:name="S" style:family="paragraph" style:class="text"><style:text-properties fo:font-size="12pt"/></style:style></office:styles>
    <office:text>
