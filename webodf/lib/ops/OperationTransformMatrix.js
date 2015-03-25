@@ -835,6 +835,36 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformInsertTextRemoveAnnotation(insertTextSpec, removeAnnotationSpec) {
+        var insertTextSpecPosition = insertTextSpec.position,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            insertTextSpecResult = [insertTextSpec],
+            removeAnnotationSpecResult = [removeAnnotationSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= insertTextSpecPosition && insertTextSpecPosition <= removeAnnotationEnd) {
+            insertTextSpecResult = [];
+            removeAnnotationSpec.length += insertTextSpec.text.length;
+        } else {
+            // adapt insertText spec to removed annotation content
+            if (removeAnnotationEnd < insertTextSpec.position) {
+                insertTextSpec.position -= removeAnnotationSpec.length + 2;
+            } else {
+                removeAnnotationSpec.position += insertTextSpec.text.length;
+            }
+        }
+
+        return {
+            opSpecsA:  insertTextSpecResult,
+            opSpecsB:  removeAnnotationSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1809,7 +1839,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           transformInsertTextInsertText,
             "MergeParagraph":       transformInsertTextMergeParagraph,
             "MoveCursor":           transformInsertTextMoveCursor,
-//             "RemoveAnnotation":     passUnchanged,
+            "RemoveAnnotation":     transformInsertTextRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
