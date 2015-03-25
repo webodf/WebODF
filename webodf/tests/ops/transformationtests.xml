@@ -5943,6 +5943,925 @@
   </after>
  </test>
 
+ <test name="RemoveAnnotationMoveCursor_$|_[__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>abcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$_|_[__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>a<c:cursor c:memberId="Bob"/>bcde</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$_|[__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>ab<c:cursor c:memberId="Bob"/>cde</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$_[|__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="6"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>ab<c:cursor c:memberId="Bob"/>cde</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$_[_|_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="7"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>abc<c:cursor c:memberId="Bob"/>de</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$_[_|]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="8"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>abcd<c:cursor c:memberId="Bob"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$_[_]_|" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="3" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="0" length="9"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:anchor c:memberId="Bob"/>abcde<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_|_$[__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<c:anchor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$|[__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$[|__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$[_|_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="5"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/>b<c:cursor c:memberId="Bob"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$[_|]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="6"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/>bc<c:cursor c:memberId="Bob"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_$[_]_|" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="1" length="7"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/>bcd<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[($|_)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[($_|_)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[($_|)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[(|_$_)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[(_$|_)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[(_$_|)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="3" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[(|_$)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[(_|_$)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[(_$|)_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="4" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_|_[$__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5" length="-5"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>a<c:anchor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_|[$__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5" length="-4"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[$|__]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>bcd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[$_|_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/>b<c:cursor c:memberId="Bob"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[$_|]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/>bc<c:cursor c:memberId="Bob"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[$_]_|" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="5" length="3"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:anchor c:memberId="Bob"/>bcd<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_|_[_$_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6" length="-6"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><c:cursor c:memberId="Bob"/>ab<c:anchor c:memberId="Bob"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_|[_$_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6" length="-5"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>b<c:anchor c:memberId="Bob"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[|_$_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6" length="-1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<c:cursor c:memberId="Bob"/>b<c:anchor c:memberId="Bob"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[_$|_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6" length="0"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<c:cursor c:memberId="Bob"/>cd</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[_$_|]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6" length="1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<c:anchor c:memberId="Bob"/>c<c:cursor c:memberId="Bob"/>d</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="RemoveAnnotationMoveCursor_[_$_]_|" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>d</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="RemoveAnnotation" memberid="Alice" position="2" length="2"/>
+  </opsA>
+  <opsB>
+   <op optype="AddCursor" memberid="Bob"/>
+   <op optype="MoveCursor" memberid="Bob" position="6" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<c:anchor c:memberId="Bob"/>cd<c:cursor c:memberId="Bob"/></text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="RemoveAnnotationRemoveCursor" setup="linkAnnotationEndToStart">
   <before>
    <office:text>

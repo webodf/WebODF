@@ -1407,6 +1407,37 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMoveCursorRemoveAnnotation(moveCursorSpec, removeAnnotationSpec) {
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec),
+            moveCursorSpecEnd = moveCursorSpec.position + moveCursorSpec.length,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length;
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= moveCursorSpec.position && moveCursorSpecEnd <= removeAnnotationEnd) {
+            moveCursorSpec.position = removeAnnotationSpec.position - 1;
+            moveCursorSpec.length = 0;
+        } else {
+            if (removeAnnotationEnd < moveCursorSpec.position) {
+                moveCursorSpec.position -= removeAnnotationSpec.length + 2;
+            } else if (removeAnnotationEnd < moveCursorSpecEnd) {
+                moveCursorSpec.length -= removeAnnotationSpec.length + 2;
+            }
+            if (isMoveCursorSpecRangeInverted) {
+                invertMoveCursorSpecRange(moveCursorSpec);
+            }
+        }
+
+        return {
+            opSpecsA:  [moveCursorSpec],
+            opSpecsB:  [removeAnnotationSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @param {!ops.OpRemoveCursor.Spec} removeCursorSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1899,7 +1930,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "MoveCursor": {
             "MoveCursor":           passUnchanged,
-//             "RemoveAnnotation":     passUnchanged,
+            "RemoveAnnotation":     transformMoveCursorRemoveAnnotation,
             "RemoveCursor":         transformMoveCursorRemoveCursor,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
