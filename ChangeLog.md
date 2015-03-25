@@ -1,3 +1,12 @@
+# Changes between 0.5.6 and 0.5.7
+
+## WebODF
+
+### Fixes
+
+* Fix breaking all empty annotations on merging the paragraph they are contained in with the one before ([#877](https://github.com/kogmbh/WebODF/pull/877)))
+
+
 # Changes between 0.5.5 and 0.5.6
 
 ## WebODF
