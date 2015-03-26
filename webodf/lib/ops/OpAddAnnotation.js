@@ -34,7 +34,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
     var memberid, timestamp,
         /**@type{number}*/
         position,
-        /**@type{number}*/
+        /**@type{!number|undefined}*/
         length,
         /**@type{string}*/
         name,
@@ -48,7 +48,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
         memberid = data.memberid;
         timestamp = parseInt(data.timestamp, 10);
         position = parseInt(data.position, 10);
-        length = parseInt(data.length, 10) || 0;
+        length = (data.length !== undefined) ? (parseInt(data.length, 10) || 0) : undefined;
         name = data.name;
     };
 
@@ -149,7 +149,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
 
         annotation = createAnnotationNode(odtDocument, new Date(timestamp));
 
-        if (length) {
+        if (length !== undefined) {
             annotationEnd = createAnnotationEnd();
             // link annotation end to start
             annotation.annotationEndElement = annotationEnd;
@@ -197,7 +197,7 @@ ops.OpAddAnnotation = function OpAddAnnotation() {
     memberid:string,
     timestamp:number,
     position:number,
-    length:number,
+    length:(!number|undefined),
     name:string
 }}*/
 ops.OpAddAnnotation.Spec;
@@ -205,7 +205,7 @@ ops.OpAddAnnotation.Spec;
     memberid:string,
     timestamp:(number|undefined),
     position:number,
-    length:number,
+    length:(!number|undefined),
     name:string
 }}*/
 ops.OpAddAnnotation.InitSpec;
