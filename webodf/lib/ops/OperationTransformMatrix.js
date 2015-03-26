@@ -274,6 +274,37 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /* Transformation methods */
 
     /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpecA
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpecB
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationAddAnnotation(addAnnotationSpecA, addAnnotationSpecB, hasAPriority) {
+        var firstAnnotationSpec, secondAnnotationSpec;
+
+        if (addAnnotationSpecA.position < addAnnotationSpecB.position) {
+            firstAnnotationSpec = addAnnotationSpecA;
+            secondAnnotationSpec = addAnnotationSpecB;
+        } else if (addAnnotationSpecB.position < addAnnotationSpecA.position) {
+            firstAnnotationSpec = addAnnotationSpecB;
+            secondAnnotationSpec = addAnnotationSpecA;
+        } else {
+            firstAnnotationSpec = hasAPriority ? addAnnotationSpecA : addAnnotationSpecB;
+            secondAnnotationSpec = hasAPriority ? addAnnotationSpecB : addAnnotationSpecA;
+        }
+
+        if (secondAnnotationSpec.position < firstAnnotationSpec.position + firstAnnotationSpec.length) {
+            firstAnnotationSpec.length += 2;
+        }
+        secondAnnotationSpec.position += 2;
+
+        return {
+            opSpecsA:  [addAnnotationSpecA],
+            opSpecsB:  [addAnnotationSpecB]
+        };
+    }
+
+    /**
      * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
      * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -1903,7 +1934,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         transformations;
     transformations = {
         "AddAnnotation": {
-//             "AddAnnotation":        passUnchanged,
+            "AddAnnotation":        transformAddAnnotationAddAnnotation,
             "AddCursor":            passUnchanged,
             "AddMember":            passUnchanged,
             "AddStyle":             passUnchanged,

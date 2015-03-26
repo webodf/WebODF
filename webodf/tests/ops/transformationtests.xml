@@ -1990,6 +1990,283 @@
   </after>
  </test>
 
+ <test name="AddAnnotationAddAnnotation_{_}_[_]">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="0" length="2" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p><office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>ab<office:annotation-end office:name="bob_1"/>c<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>de<office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{_}[_]" isFailing="true">
+  <comment>Order of office:annotation and office:annotation-end at same position not defined</comment>
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="1" length="2" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="bob_1"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>de<office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{_[_}_]">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="2" length="2" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>d<office:annotation-end office:name="bob_1"/>e<office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{_[_}]" isFailing="true">
+  <comment>Order of multiple office:annotation-end at same position not defined</comment>
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="2" length="3" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>de<office:annotation-end office:name="bob_1"/><office:annotation-end office:name="alice_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{_[_]_}">
+  <before>
+   <office:text>
+    <text:p>abcdef</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="2" length="4" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>de<office:annotation-end office:name="alice_1"/>f<office:annotation-end office:name="bob_1"/></text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{}[_]" isFailing="true">
+  <comment>Order of office:annotation and office:annotation-end at same position not defined</comment>
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="2" length="0" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="bob_1"/><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{[_}_]">
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="2" length="1" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="bob_1"/>d<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationAddAnnotation_{[_]}" isFailing="true">
+  <comment>Order of multiple office:annotation-end at same position not defined</comment>
+  <before>
+   <office:text>
+    <text:p>abcde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="AddAnnotation" memberid="Bob" timestamp="1375706047061" position="2" length="2" name="bob_1"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="bob_1"/><office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="AddAnnotationAddCursor">
   <before>
    <office:text>
