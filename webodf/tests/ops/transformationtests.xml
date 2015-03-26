@@ -1997,7 +1997,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2026,7 +2025,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2054,7 +2052,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2081,7 +2078,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2108,7 +2104,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2135,7 +2130,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2162,7 +2156,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2189,7 +2182,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2217,7 +2209,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2244,7 +2235,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2271,7 +2261,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2298,7 +2287,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2326,7 +2314,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2353,7 +2340,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2380,7 +2366,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2407,7 +2392,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2435,7 +2419,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2462,7 +2445,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2489,7 +2471,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2516,7 +2497,6 @@
    <office:text><text:p>abcd</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2545,7 +2525,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2572,7 +2551,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2599,7 +2577,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2626,7 +2603,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2653,7 +2629,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2680,7 +2655,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2707,7 +2681,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2734,7 +2707,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2762,7 +2734,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2789,7 +2760,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2816,7 +2786,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2843,7 +2812,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2870,7 +2838,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2897,7 +2864,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2924,7 +2890,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2951,7 +2916,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -2978,7 +2942,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3005,7 +2968,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3032,7 +2994,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3060,7 +3021,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3088,7 +3048,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3116,7 +3075,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3144,7 +3102,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3172,7 +3129,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3200,7 +3156,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3228,7 +3183,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3256,7 +3210,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3284,7 +3237,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3312,7 +3264,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3340,7 +3291,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3368,7 +3318,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3396,7 +3345,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3424,7 +3372,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3452,7 +3399,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3480,7 +3426,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3508,7 +3453,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3536,7 +3480,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3564,7 +3507,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3592,7 +3534,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3620,7 +3561,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3648,7 +3588,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3676,7 +3615,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3704,7 +3642,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3732,7 +3669,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3760,7 +3696,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3788,7 +3723,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3816,7 +3750,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3844,7 +3777,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3872,7 +3804,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3900,7 +3831,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3928,7 +3858,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3957,7 +3886,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -3987,7 +3915,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4016,7 +3943,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4043,7 +3969,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4070,7 +3995,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4097,7 +4021,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4124,7 +4047,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4151,7 +4073,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4178,7 +4099,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4205,7 +4125,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4232,7 +4151,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4259,7 +4177,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4286,7 +4203,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4313,7 +4229,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4340,7 +4255,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4367,7 +4281,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4394,7 +4307,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4421,7 +4333,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4448,7 +4359,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4475,7 +4385,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4501,7 +4410,6 @@
    <office:text><text:p>abc</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4524,7 +4432,6 @@
    <office:text><text:p>abc</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4547,7 +4454,6 @@
    <office:text><text:p>abc</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4570,7 +4476,6 @@
    <office:text><text:p>abc</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4593,7 +4498,6 @@
    <office:text><text:p>ab</text:p><text:p>c</text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="3" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4616,7 +4520,6 @@
    <office:text><text:p>ab</text:p><text:p></text:p><text:p></text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4639,7 +4542,6 @@
    <office:text><text:p>ab</text:p><text:p></text:p><text:p></text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4662,7 +4564,6 @@
    <office:text><text:p>ab</text:p><text:p></text:p><text:p></text:p></office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4688,7 +4589,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4715,7 +4615,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4742,7 +4641,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4769,7 +4667,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4796,7 +4693,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="2" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4823,7 +4719,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4850,7 +4745,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4877,7 +4771,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4906,7 +4799,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>
@@ -4936,7 +4828,6 @@
    </office:text>
   </before>
   <opsA>
-   <op optype="AddMember" memberid="Alice"><setProperties fullName="Alice"/></op>
    <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="0" length="1" name="alice_1"/>
   </opsA>
   <opsB>

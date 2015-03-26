@@ -245,6 +245,7 @@
         "odf.Namespaces",
         "odf.OdfCanvas",
         "odf.OdfContainer",
+        "ops.Member",
         "ops.OdtDocument",
         "ops.Operation",
         "ops.OperationFactory",

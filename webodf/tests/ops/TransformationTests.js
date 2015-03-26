@@ -429,6 +429,13 @@ ops.TransformationTests = function TransformationTests(runner) {
         t.odfContainer = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         t.odfcanvas.setOdfContainer(t.odfContainer);
         odtDocument = new ops.OdtDocument(t.odfcanvas);
+        ["Alice", "Bob"].forEach(function(name) {
+            var properties = new ops.MemberProperties();
+            properties.color = "black";
+            properties.fullName = name;
+            properties.imageUrl = "";
+            odtDocument.addMember(new ops.Member(name, properties));
+        });
         text = odtDocument.getRootNode();
         styles = t.odfContainer.rootElement.styles;
         meta = /**@type{!Element}*/(t.odfContainer.rootElement.meta);
