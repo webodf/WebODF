@@ -601,9 +601,18 @@ ops.TransformationTests = function TransformationTests(runner) {
         return {
             setUp: function () {
                 var rootElement = t.odfContainer.rootElement,
-                    annotation = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation")[0],
-                    annotationEnd = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation-end")[0];
-                annotation.annotationEndElement = annotationEnd;
+                    annotationElements = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation"),
+                    annotationEndElements = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation-end"),
+                    annotations = {},
+                    i, name;
+                for (i = 0; i < annotationElements.length; i += 1) {
+                    name = annotationElements[i].getAttributeNS(odf.Namespaces.officens, "name");
+                    annotations[name] = annotationElements[i];
+                }
+                for (i = 0; i < annotationEndElements.length; i += 1) {
+                    name = annotationEndElements[i].getAttributeNS(odf.Namespaces.officens, "name");
+                    annotations[name].annotationEndElement = annotationEndElements[i];
+                }
             },
             tearDown: function () {}
         };
