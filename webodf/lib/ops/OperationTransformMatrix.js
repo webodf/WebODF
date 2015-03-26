@@ -1556,6 +1556,33 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     }
 
     /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpecA
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpecB
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationRemoveAnnotation(removeAnnotationSpecA, removeAnnotationSpecB) {
+        var removeAnnotationSpecAResult = [removeAnnotationSpecA],
+            removeAnnotationSpecBResult = [removeAnnotationSpecB];
+
+        // check if removing the same annotation
+        if (removeAnnotationSpecA.position === removeAnnotationSpecB.position && removeAnnotationSpecA.length === removeAnnotationSpecB.length) {
+            removeAnnotationSpecAResult = [];
+            removeAnnotationSpecBResult = [];
+        } else {
+            if (removeAnnotationSpecA.position < removeAnnotationSpecB.position) {
+                removeAnnotationSpecB.position -= removeAnnotationSpecA.length + 2;
+            } else {
+                removeAnnotationSpecA.position -= removeAnnotationSpecB.length + 2;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecAResult,
+            opSpecsB:  removeAnnotationSpecBResult
+        };
+    }
+
+    /**
      * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -2063,7 +2090,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "UpdateParagraphStyle": passUnchanged
         },
         "RemoveAnnotation": {
-//             "RemoveAnnotation":     passUnchanged,
+            "RemoveAnnotation":     transformRemoveAnnotationRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
