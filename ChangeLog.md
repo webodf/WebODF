@@ -6,6 +6,18 @@
 
 * Fix breaking all empty annotations on merging the paragraph they are contained in with the one before ([#877](https://github.com/kogmbh/WebODF/pull/877)))
 
+### Improvements
+
+* In OpAddAnnotation support annotated ranges with 0 length ([#879](https://github.com/kogmbh/WebODF/pull/879)))
+
+### Breaking changes
+
+* OpAddAnnotation spec changed: length=0 no longer means unranged annotation, but a range of 0 length. For unranged annotations now use length=undefined.
+
+
+## Wodo.TextEditor
+See also section about WebODF
+
 
 # Changes between 0.5.5 and 0.5.6
 

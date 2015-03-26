@@ -109,8 +109,12 @@ gui.AnnotationController = function AnnotationController(session, sessionConstra
             return;
         }
 
-        position = length >= 0 ? position : position + length;
-        length = Math.abs(length);
+        if (length === 0) {
+            length = undefined;
+        } else {
+            position = length >= 0 ? position : position + length;
+            length = Math.abs(length);
+        }
 
         op.init({
             memberid: inputMemberId,

@@ -437,6 +437,18 @@ ops.OperationTests = function OperationTests(runner) {
     };
 
     /*jslint emptyblock: true*/
+    function linkAnnotationEndToStart() {
+            return {
+                setUp: function () {
+                    var rootElement = t.odfContainer.rootElement,
+                        annotation = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation")[0],
+                        annotationEnd = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation-end")[0];
+                    annotation.annotationEndElement = annotationEnd;
+                },
+                tearDown: function () {}
+            };
+    }
+
     this.setUps = {
         "ApplyDirectStyling_FixesCursorPositions" : function () {
             // Test specifically requires the cursor node to have a child element of some sort to
@@ -450,17 +462,8 @@ ops.OperationTests = function OperationTests(runner) {
                 tearDown: function () {t.odtDocument.unsubscribe(ops.Document.signalCursorAdded, appendToCursor); }
             };
         },
-        "RemoveAnnotation_ranged" : function () {
-            return {
-                setUp: function () {
-                    var rootElement = t.odfContainer.rootElement,
-                        annotation = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation")[0],
-                        annotationEnd = rootElement.getElementsByTagNameNS(odf.Namespaces.officens, "annotation-end")[0];
-                    annotation.annotationEndElement = annotationEnd;
-                },
-                tearDown: function () {}
-            };
-        },
+        "RemoveAnnotation_ranged" : linkAnnotationEndToStart,
+        "RemoveAnnotation_rangedZero" : linkAnnotationEndToStart,
         "RemoveText_CopesWithEmptyTextNodes" : function () {
             return {
                 setUp: function () {
