@@ -4213,6 +4213,551 @@
   </after>
  </test>
 
+ <test name="AddAnnotationRemoveAnnotation_{_}_[_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="bob_1"/>cde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="7" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>abc<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>d<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{_}[_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="bob_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="7" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>abc<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>d<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{_[_}_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="bob_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{_[_}]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<office:annotation-end office:name="bob_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{_[_]_}" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>a<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<office:annotation-end office:name="bob_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="2" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{}[_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="bob_1"/>cde</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{[_}_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="bob_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{[_]}" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="bob_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_{[_]_}" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cde<office:annotation-end office:name="bob_1"/></text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="6" length="2" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_{}_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>abc<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="bob_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="2" length="6" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="4" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>ab<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_{_}_]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>c<office:annotation-end office:name="bob_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="7" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_{_}]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="bob_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="7" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bcd<office:annotation-end office:name="alice_1"/>e</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_{_]_}" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>ab<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>cd<office:annotation-end office:name="bob_1"/>e</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="6" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="3" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_{}]" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>abc<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation><office:annotation-end office:name="bob_1"/>de</text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="6" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="4" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_{]_}" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>abc<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>de<office:annotation-end office:name="bob_1"/></text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="6" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="4" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>bc<office:annotation-end office:name="alice_1"/>de</text:p>
+   </office:text>
+  </after>
+ </test>
+ <test name="AddAnnotationRemoveAnnotation_[_]_{_}" setup="linkAnnotationEndToStart">
+  <before>
+   <office:text>
+    <text:p>abc<office:annotation office:name="bob_1">
+     <dc:creator e:memberid="Bob">Bob</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p>AA</text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>de<office:annotation-end office:name="bob_1"/></text:p>
+   </office:text>
+  </before>
+  <opsA>
+   <op optype="AddAnnotation" memberid="Alice" timestamp="1375706047061" position="1" length="1" name="alice_1"/>
+  </opsA>
+  <opsB>
+   <op optype="RemoveAnnotation" memberid="Bob" position="4" length="2"/>
+  </opsB>
+  <after>
+   <office:text>
+    <text:p>a<office:annotation office:name="alice_1">
+     <dc:creator e:memberid="Alice">Alice</dc:creator>
+     <dc:date>2013-08-05T12:34:07.061Z</dc:date>
+     <text:list>
+      <text:list-item>
+       <text:p></text:p>
+      </text:list-item>
+     </text:list>
+    </office:annotation>b<office:annotation-end office:name="alice_1"/>cde</text:p>
+   </office:text>
+  </after>
+ </test>
+
  <test name="AddAnnotationRemoveText_XX_[__]">
   <before>
    <office:text>

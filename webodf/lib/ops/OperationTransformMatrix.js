@@ -404,6 +404,30 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationRemoveAnnotation(addAnnotationSpec, removeAnnotationSpec) {
+        // adapt movecursor spec to inserted positions
+        if (addAnnotationSpec.position < removeAnnotationSpec.position) {
+            if (removeAnnotationSpec.position < addAnnotationSpec.position + addAnnotationSpec.length) {
+                addAnnotationSpec.length -= removeAnnotationSpec.length + 2;
+            }
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            removeAnnotationSpec.position += 2;
+        } else {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            addAnnotationSpec.position -= removeAnnotationSpec.length + 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [removeAnnotationSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1969,7 +1993,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           transformAddAnnotationInsertText,
             "MergeParagraph":       transformAddAnnotationMergeParagraph,
             "MoveCursor":           transformAddAnnotationMoveCursor,
-//             "RemoveAnnotation":     passUnchanged,
+            "RemoveAnnotation":     transformAddAnnotationRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
