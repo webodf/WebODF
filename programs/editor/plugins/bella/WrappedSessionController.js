@@ -8,6 +8,7 @@ define("webodf/plugins/bella/WrappedSessionController", function() {
             sessionContext = new webodf.gui.SessionContext(session, inputMemberId),
             objectNameGenerator = new webodf.odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
             directFormattingController = new webodf.gui.DirectFormattingController(session, constraints, sessionContext, inputMemberId, objectNameGenerator, args.directTextStylingEnabled,  args.directParagraphStylingEnabled),
+            annotationController = new webodf.gui.AnnotationController(session, constraints, inputMemberId),
             createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
             createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),
             textController = new webodf.gui.TextController(session, constraints, sessionContext, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
@@ -22,6 +23,7 @@ define("webodf/plugins/bella/WrappedSessionController", function() {
         this.getTextController = function() { return textController; };
         this.getSelectionController = function() { return selectionController; };
         this.getDirectFormattingController = function() { return directFormattingController; };
+        this.getAnnotationController = function () { return annotationController; };
         this.getEventManager = sessionController.getEventManager;
 
         this.simulateCopy = function(range) {

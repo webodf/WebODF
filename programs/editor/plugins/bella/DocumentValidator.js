@@ -79,6 +79,13 @@ define("webodf/plugins/bella/DocumentValidator", function() {
                     case "MergeParagraph":
                         predictedDocumentLength -= 1;
                         break;
+                    case "AddAnnotation":
+                        predictedDocumentLength += 2;
+                        break;
+                    case "RemoveAnnotation":
+                        // Don't have any easy way to tell how much data was added or removed here
+                        predictedDocumentLength = undefined;
+                        break;
                     case "RemoveText":
                         // Don't have any easy way to tell how much data was added or removed here
                         predictedDocumentLength = undefined;

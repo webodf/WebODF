@@ -12,6 +12,7 @@ define("webodf/plugins/bella/Actions", function() {
             selectionController = controllers.getSelectionController(),
             textController = controllers.getTextController(),
             directFormattingController = controllers.getDirectFormattingController(),
+            annotationController = controllers.getAnnotationController(),
             pasteboard = [],
             MAX_PASTEBOARD_SIZE = 1000;
 
@@ -177,6 +178,17 @@ define("webodf/plugins/bella/Actions", function() {
         this.alignParagraphJustified = directFormattingController.alignParagraphJustified;
         this.indent = directFormattingController.indent;
         this.outdent = directFormattingController.outdent;
+
+        this.createAnnotation = annotationController.addAnnotation;
+        this.removeAnnotation = function() {
+            var container = odtDocument.getRootNode(),// TODO use canvas.getElement or even document.body instead
+                annotations = container.getElementsByTagNameNS(odf.Namespaces.officens, "annotation"),
+                index;
+            if (annotations.length > 0) {
+                index = random.getInt(0, annotations.length);
+                annotationController.removeAnnotation(annotations[index]);
+            }
+        };
 
         this.pretendCut = reducedDestruction(function () {
             var range = getCursor().getSelectedRange(),
