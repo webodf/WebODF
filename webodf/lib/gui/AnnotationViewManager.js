@@ -341,26 +341,33 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
     this.getMinimumHeightForAnnotationPane = getMinimumHeightForAnnotationPane;
 
     /**
-     * Adds an annotation to track, and wraps and highlights it
-     * @param {!odf.AnnotationElement} annotation
+     * Adds annotations to track, and wraps and highlights them
+     * @param {!Array.<!odf.AnnotationElement>} annotationElements
      * @return {undefined}
      */
-    function addAnnotation(annotation) {
+    function addAnnotations(annotationElements) {
+        if (annotationElements.length === 0) {
+            return;
+        }
+
         showAnnotationsPane(true);
 
-        // TODO: make use of the fact that current list is already sorted
-        // instead just iterate over the list until the right index to insert is found
-        annotations.push(annotation);
+        annotationElements.forEach(function (annotation) {
+            // TODO: make use of the fact that current list is already sorted
+            // instead just iterate over the list until the right index to insert is found
+            annotations.push(annotation);
+
+            wrapAnnotation(annotation);
+            if (annotation.annotationEndElement) {
+                highlightAnnotation(annotation);
+            }
+        });
 
         sortAnnotations();
 
-        wrapAnnotation(annotation);
-        if (annotation.annotationEndElement) {
-            highlightAnnotation(annotation);
-        }
         rerenderAnnotations();
     }
-    this.addAnnotation = addAnnotation;
+    this.addAnnotations = addAnnotations;
 
     /**
      * Unhighlights, unwraps, and ejects an annotation from the tracking

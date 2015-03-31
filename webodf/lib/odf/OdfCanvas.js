@@ -1054,8 +1054,7 @@
         function modifyAnnotations(odffragment) {
             var annotationNodes = /**@type{!Array.<!odf.AnnotationElement>}*/(domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'));
 
-            annotationNodes.forEach(annotationViewManager.addAnnotation);
-            annotationViewManager.rerenderAnnotations();
+            annotationViewManager.addAnnotations(annotationNodes);
         }
 
         /**
@@ -1286,7 +1285,7 @@
          */
         this.addAnnotation = function (annotation) {
             if (annotationViewManager) {
-                annotationViewManager.addAnnotation(annotation);
+                annotationViewManager.addAnnotations([annotation]);
                 fixContainerSize();
             }
         };
