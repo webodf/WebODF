@@ -119,6 +119,8 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         }
         initialDoc = rootElement.cloneNode(true);
         odfCanvas.refreshAnnotations();
+        // workaround AnnotationViewManager not fixing up cursor positions after creating the highlighting
+        self.fixCursorPositions();
         return initialDoc;
     };
 
