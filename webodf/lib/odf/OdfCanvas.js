@@ -1047,22 +1047,13 @@
         }
 
         /**
-        * Wraps all annotations and renders them using the Annotation View Manager.
-        * @param {!Element} odffragment
-        * @return {undefined}
-        */
-        function modifyAnnotations(odffragment) {
-            var annotationNodes = /**@type{!Array.<!odf.AnnotationElement>}*/(domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'));
-
-            annotationViewManager.addAnnotations(annotationNodes);
-        }
-
-        /**
          * This should create an annotations pane if non existent, and then populate it with annotations
          * If annotations are disallowed, it should remove the pane and all annotations
          * @param {!odf.ODFDocumentElement} odfnode
          */
         function handleAnnotations(odfnode) {
+            var annotationNodes;
+
             if (allowAnnotations) {
                 if (!annotationsPane.parentNode) {
                     sizer.appendChild(annotationsPane);
@@ -1071,7 +1062,9 @@
                     annotationViewManager.forgetAnnotations();
                 }
                 annotationViewManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane, showAnnotationRemoveButton);
-                modifyAnnotations(odfnode.body);
+                annotationNodes = /**@type{!Array.<!odf.AnnotationElement>}*/(domUtils.getElementsByTagNameNS(odfnode.body, officens, 'annotation'));
+                annotationViewManager.addAnnotations(annotationNodes);
+
                 fixContainerSize();
             } else {
                 if (annotationsPane.parentNode) {
