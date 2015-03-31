@@ -72,7 +72,7 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         annotationEnd = annotationNode.annotationEndElement;
 
         // Untrack and unwrap annotation
-        odtDocument.getOdfCanvas().forgetAnnotations();
+        odtDocument.getOdfCanvas().forgetAnnotation(annotationNode);
 
         /**
          * @param {!Node} node

@@ -1291,12 +1291,13 @@
         };
 
         /**
-         * Stops annotations and unwraps it
+         * Stops an annotation and unwraps it
+         * @param {!odf.AnnotationElement} annotation
          * @return {undefined}
          */
-        this.forgetAnnotations = function () {
+        this.forgetAnnotation = function (annotation) {
             if (annotationViewManager) {
-                annotationViewManager.forgetAnnotations();
+                annotationViewManager.forgetAnnotation(annotation);
                 fixContainerSize();
             }
         };

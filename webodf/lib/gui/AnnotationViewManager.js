@@ -385,6 +385,7 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
             showAnnotationsPane(false);
         }
     }
+    this.forgetAnnotation = forgetAnnotation;
 
     /**
      * Untracks, unwraps, and unhighlights all annotations
