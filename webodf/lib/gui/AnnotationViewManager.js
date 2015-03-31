@@ -243,6 +243,8 @@ gui.AnnotationViewManager = function AnnotationViewManager(canvas, odfFragment, 
             } else {
                 annotationNote.style.top = '0px';
             }
+        } else {
+            annotationNote.style.top = '0px';
         }
 
         connectorAngular.style.left = connectorHorizontal.getBoundingClientRect().width / zoomLevel + 'px';
