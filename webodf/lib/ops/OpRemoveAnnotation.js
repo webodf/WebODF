@@ -72,7 +72,7 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         annotationEnd = annotationNode.annotationEndElement;
 
         // Untrack and unwrap annotation
-        odtDocument.getOdfCanvas().forgetAnnotations();
+        odtDocument.getOdfCanvas().forgetAnnotation(annotationNode);
 
         /**
          * @param {!Node} node
@@ -92,8 +92,8 @@ ops.OpRemoveAnnotation = function OpRemoveAnnotation() {
         // The specified position is the first walkable step in the annotation. The position is always just before the first point of change
         odtDocument.emit(ops.OdtDocument.signalStepsRemoved, {position: position > 0 ? position - 1 : position});
 
+        odtDocument.getOdfCanvas().rerenderAnnotations();
         odtDocument.fixCursorPositions();
-        odtDocument.getOdfCanvas().refreshAnnotations();
         return true;
     };
 

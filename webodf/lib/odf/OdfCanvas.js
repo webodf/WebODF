@@ -1047,23 +1047,13 @@
         }
 
         /**
-        * Wraps all annotations and renders them using the Annotation View Manager.
-        * @param {!Element} odffragment
-        * @return {undefined}
-        */
-        function modifyAnnotations(odffragment) {
-            var annotationNodes = /**@type{!Array.<!odf.AnnotationElement>}*/(domUtils.getElementsByTagNameNS(odffragment, officens, 'annotation'));
-
-            annotationNodes.forEach(annotationViewManager.addAnnotation);
-            annotationViewManager.rerenderAnnotations();
-        }
-
-        /**
          * This should create an annotations pane if non existent, and then populate it with annotations
          * If annotations are disallowed, it should remove the pane and all annotations
          * @param {!odf.ODFDocumentElement} odfnode
          */
         function handleAnnotations(odfnode) {
+            var annotationNodes;
+
             if (allowAnnotations) {
                 if (!annotationsPane.parentNode) {
                     sizer.appendChild(annotationsPane);
@@ -1072,7 +1062,9 @@
                     annotationViewManager.forgetAnnotations();
                 }
                 annotationViewManager = new gui.AnnotationViewManager(self, odfnode.body, annotationsPane, showAnnotationRemoveButton);
-                modifyAnnotations(odfnode.body);
+                annotationNodes = /**@type{!Array.<!odf.AnnotationElement>}*/(domUtils.getElementsByTagNameNS(odfnode.body, officens, 'annotation'));
+                annotationViewManager.addAnnotations(annotationNodes);
+
                 fixContainerSize();
             } else {
                 if (annotationsPane.parentNode) {
@@ -1286,18 +1278,19 @@
          */
         this.addAnnotation = function (annotation) {
             if (annotationViewManager) {
-                annotationViewManager.addAnnotation(annotation);
+                annotationViewManager.addAnnotations([annotation]);
                 fixContainerSize();
             }
         };
 
         /**
-         * Stops annotations and unwraps it
+         * Stops an annotation and unwraps it
+         * @param {!odf.AnnotationElement} annotation
          * @return {undefined}
          */
-        this.forgetAnnotations = function () {
+        this.forgetAnnotation = function (annotation) {
             if (annotationViewManager) {
-                annotationViewManager.forgetAnnotations();
+                annotationViewManager.forgetAnnotation(annotation);
                 fixContainerSize();
             }
         };
