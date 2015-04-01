@@ -5,6 +5,7 @@
 ### Fixes
 
 * Fix breaking all empty annotations on merging the paragraph they are contained in with the one before ([#877](https://github.com/kogmbh/WebODF/pull/877)))
+* Fix error message popup on deleting an annotation starting at the end of a paragraph or styled range ([#880](https://github.com/kogmbh/WebODF/pull/880)))
 
 ### Improvements
 
