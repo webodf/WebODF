@@ -130,6 +130,12 @@ window.Wodo = window.Wodo || (function () {
         BorderContainer, ContentPane, FullWindowZoomHelper, EditorSession, Tools,
         /** @inner @const
             @type{!string} */
+        MODUS_FULLEDITING = "fullediting",
+        /** @inner @const
+            @type{!string} */
+        MODUS_REVIEW = "review",
+        /** @inner @const
+            @type{!string} */
         EVENT_UNKNOWNERROR = "unknownError",
         /** @inner @const
             @type {!string} */
@@ -291,13 +297,13 @@ window.Wodo = window.Wodo || (function () {
             downloadOdtFile = editorOptions.downloadCallback,
             close =       editorOptions.closeCallback,
             //
+            reviewModeEnabled = (editorOptions.modus === MODUS_REVIEW),
             directTextStylingEnabled = isEnabled(editorOptions.directTextStylingEnabled),
             directParagraphStylingEnabled = isEnabled(editorOptions.directParagraphStylingEnabled),
-            paragraphStyleSelectingEnabled = isEnabled(editorOptions.paragraphStyleSelectingEnabled),
-            paragraphStyleEditingEnabled = isEnabled(editorOptions.paragraphStyleEditingEnabled),
-            imageEditingEnabled = isEnabled(editorOptions.imageEditingEnabled),
+            paragraphStyleSelectingEnabled = (!reviewModeEnabled) && isEnabled(editorOptions.paragraphStyleSelectingEnabled),
+            paragraphStyleEditingEnabled =   (!reviewModeEnabled) && isEnabled(editorOptions.paragraphStyleEditingEnabled),
+            imageEditingEnabled =            (!reviewModeEnabled) && isEnabled(editorOptions.imageEditingEnabled),
             hyperlinkEditingEnabled = isEnabled(editorOptions.hyperlinkEditingEnabled),
-            reviewModeEnabled = Boolean(editorOptions.reviewModeEnabled), // needs to be explicitly enabled
             annotationsEnabled = reviewModeEnabled || isEnabled(editorOptions.annotationsEnabled),
             undoRedoEnabled = isEnabled(editorOptions.undoRedoEnabled),
             zoomingEnabled = isEnabled(editorOptions.zoomingEnabled),
@@ -784,6 +790,7 @@ window.Wodo = window.Wodo || (function () {
      * @function
      * @param {!string} editorContainerElementId id of the existing div element which will contain the editor (should be empty before)
      * @param editorOptions options to configure the features of the editor. All entries are optional
+     * @param [editorOptions.modus=Wodo.MODUS_FULLEDITING] set the editing modus. Current options: Wodo.MODUS_FULLEDITING, Wodo.MODUS_REVIEW
      * @param [editorOptions.loadCallback] parameter-less callback method, adds a "Load" button to the toolbar which triggers this method
      * @param [editorOptions.saveCallback] parameter-less callback method, adds a "Save" button to the toolbar which triggers this method
      * @param [editorOptions.saveAsCallback] parameter-less callback method, adds a "Save as" button to the toolbar which triggers this method
@@ -836,6 +843,10 @@ window.Wodo = window.Wodo || (function () {
     return {
         createTextEditor: createTextEditor,
         // flags
+        /** Id of full editing modus */
+        MODUS_FULLEDITING: MODUS_FULLEDITING,
+        /** Id of review modus */
+        MODUS_REVIEW: MODUS_REVIEW,
         /** Id of event for an unkown error */
         EVENT_UNKNOWNERROR: EVENT_UNKNOWNERROR,
         /** Id of event if documentModified state changes */
