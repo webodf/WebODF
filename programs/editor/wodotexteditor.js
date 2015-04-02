@@ -27,6 +27,7 @@
 /**
  * Namespace of the Wodo.TextEditor
  * @namespace
+ * @name Wodo
  */
 window.Wodo = window.Wodo || (function () {
     "use strict";
