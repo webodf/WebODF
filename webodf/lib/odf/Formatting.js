@@ -370,7 +370,8 @@ odf.Formatting = function Formatting() {
             /**@type{string}*/
             chainKey = '',
             foundContainer = false;
-        while (parent) {
+
+        while (parent && (!odfUtils.isInlineRoot(parent)) && (parent.parentNode !== odfContainer.rootElement)) {
             if (!foundContainer && odfUtils.isGroupingElement(parent)) {
                 foundContainer = true;
             }
