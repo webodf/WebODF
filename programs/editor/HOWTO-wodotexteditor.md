@@ -26,7 +26,7 @@ In the body of the HTML there needs to be set a div element which should hold th
     <!-- ... -->
     </body>
 
-An instance of the editor is created in JavaScript by calling "Wodo.createTextEditor()":
+An instance of the editor is created in JavaScript by calling `Wodo.createTextEditor()`:
 
     <script type="text/javascript">
     // ...
@@ -82,10 +82,12 @@ e.g. when the document has been synchronized somewhere. To query if the document
 
 See the example file "localfileeditor.js" how the above can be applied.
 
+When calling `Wodo.createTextEditor()`, the second parameter allows to configure the editor. See the included API dox for the possible parameters.
+
 
 ### Examples
 
-There are two example included how to use the editor for inspiration.
+For inspiration there are three examples included how to use the Wodo.TextEditor component.
 
 #### Simple Editor
 
@@ -98,6 +100,13 @@ The file "localeditor.html" extends the simple editor example above by adding tw
 support for loading files from the local filesystem into the editor and support for storing the current state of the edited document using the "saveAs" feature of browsers.
 
 The example consists of the files "localfileeditor.js" and "localeditor.html". Additionally it uses "FileSaver.js", which is a polyfill for browsers not yet supporting "saveAs".
+
+#### Editor which lets user review files from local filesystem
+
+The file "revieweditor.html" is a variant of the editor for files of the local filesystem:
+it sets the editing modus to "review", which limits the user to only add, edit and remove own annotations, but not change anything else in the document.
+
+The example consists of the files "revieweditor.js" and "revieweditor.html". Additionally it uses "FileSaver.js", which is a polyfill for browsers not yet supporting "saveAs".
 
 
 ## External Resources
