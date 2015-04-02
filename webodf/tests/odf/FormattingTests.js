@@ -437,7 +437,6 @@ odf.FormattingTests = function FormattingTests(runner) {
                 "dr3d:scene",
                 "text:note-body",
                 "text:ruby-text",
-                "office:annotation",
                 "office:binary-data",
                 "office:event-listeners",
                 "editinfo"

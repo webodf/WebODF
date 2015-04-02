@@ -167,6 +167,24 @@ gui.DirectFormattingControllerTests = function DirectFormattingControllerTests(r
         r.shouldBe(t, "t.isBold", "false");
     }
 
+    function getSelectionInfo_ReportedStyleSummaryStaysInAnnotationScope() {
+        createOdtDocument(
+                "<style:style style:name='simple' style:family='paragraph'>" +
+                    "<style:text-properties fo:font-weight='bold'/>" +
+                "</style:style>",
+            "<text:p text:style-name='simple'><office:annotation office:name=\"alice_1\">" +
+                "<text:list><text:list-item><text:p>[]</text:p></text:list-item></text:list>" +
+            "</office:annotation></text:p>");
+
+        t.isBold = t.formattingController.isBold();
+        r.shouldBe(t, "t.isBold", "false");
+
+        t.formattingController.setBold(true);
+        t.isBold = t.formattingController.isBold();
+
+        r.shouldBe(t, "t.isBold", "true");
+    }
+
     function createCursorStyleOp_UseCachedStyle_ReturnsSetOpForCachedStyle() {
         createOdtDocument(
                 "<style:style style:name='simple' style:family='paragraph'>" +
@@ -282,6 +300,7 @@ gui.DirectFormattingControllerTests = function DirectFormattingControllerTests(r
     this.tests = function () {
         return r.name([
             getSelectionInfo_ReportedStyleSummaryIncludesCursorStyling,
+            getSelectionInfo_ReportedStyleSummaryStaysInAnnotationScope,
             createCursorStyleOp_UseCachedStyle_ReturnsSetOpForCachedStyle,
             createParagraphStyleOp_OnLastStepInParagraph_CreatesParagraphStyleForNewParagraph,
             createParagraphStyleOp_NoSelectedText_ReturnsEmptyArray,
