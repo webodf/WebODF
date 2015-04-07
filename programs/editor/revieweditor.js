@@ -149,13 +149,8 @@ function createReviewEditor() {
     editorOptions = {
         loadCallback: load,
         saveCallback: save,
-        allFeaturesEnabled: true,
-        reviewModeEnabled: true,
-        directParagraphStylingEnabled: false,
-        hyperlinkEditingEnabled: false,
-        imageEditingEnabled: false,
-        paragraphStyleSelectingEnabled: false,
-        paragraphStyleEditingEnabled: false
+        modus: Wodo.MODUS_REVIEW,
+        allFeaturesEnabled: true
     };
 
     function onEditorCreated(err, e) {
@@ -169,7 +164,7 @@ function createReviewEditor() {
 
         editor = e;
         editor.setUserData({
-            fullName: "WebODF-Curious",
+            fullName: "Curious WebODF-Reviewer",
             color:    "black"
         });
 

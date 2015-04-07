@@ -20,6 +20,10 @@
 ## Wodo.TextEditor
 See also section about WebODF
 
+### Improvements
+
+* Add a "review" modus where users can add, edit and remove own annotations, but not modify the actual document content ([#883](https://github.com/kogmbh/WebODF/pull/883)))
+
 
 # Changes between 0.5.5 and 0.5.6
 
