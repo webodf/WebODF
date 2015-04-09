@@ -65,9 +65,9 @@ See also section about WebODF
 ### Fixes
 
 * Fix wrongly enabled hyperlink tools with no document loaded ([#833](https://github.com/kogmbh/WebODF/pull/833))
-* Prevent Cross-Site Scripting from style names and font names ([#849](https://github.com/kogmbh/WebODF/pull/849)))
+* Prevent Cross-Site Scripting from style names and font names ([#849](https://github.com/kogmbh/WebODF/pull/849)) (CVE-2015-3012)
 * Avoid badly rendered toolbar element with subsets of tools ([#855](https://github.com/kogmbh/WebODF/pull/855)))
-* Prevent Cross-Site Scripting from links ([#850](https://github.com/kogmbh/WebODF/pull/850)))
+* Prevent Cross-Site Scripting from links ([#850](https://github.com/kogmbh/WebODF/pull/850)) (CVE-2015-3012)
 * Prevent browser translation service breaking the editor logic ([#862](https://github.com/kogmbh/WebODF/pull/862)))
 
 # Changes between 0.5.3 and 0.5.4
@@ -77,7 +77,7 @@ See also section about WebODF
 ### Fixes
 
 * Only highlight ODF fields in edit mode ([#816](https://github.com/kogmbh/WebODF/issues/816))
-* Prevent Cross-Site Scripting from file names ([#851](https://github.com/kogmbh/WebODF/pull/851)))
+* Prevent Cross-Site Scripting from file names ([#851](https://github.com/kogmbh/WebODF/pull/851)) (CVE-2014-9716)
 
 ## Wodo.TextEditor
 See also section about WebODF
