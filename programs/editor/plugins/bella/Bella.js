@@ -1,10 +1,35 @@
-define("webodf/plugins/bella/Bella", [
-        "webodf/plugins/bella/Actions",
-        "webodf/plugins/bella/CatHerder",
-        "webodf/plugins/bella/DocumentValidator",
-        "webodf/plugins/bella/Random",
-        "webodf/plugins/bella/SimpleStatusReporter",
-        "webodf/plugins/bella/WrappedSessionController"
+/**
+ * Copyright (C) 2014-2015 KO GmbH <copyright@kogmbh.com>
+ *
+ * @licstart
+ * This file is part of WebODF.
+ *
+ * WebODF is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License (GNU AGPL)
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * WebODF is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with WebODF.  If not, see <http://www.gnu.org/licenses/>.
+ * @licend
+ *
+ * @source: http://www.webodf.org/
+ * @source: https://github.com/kogmbh/WebODF/
+ */
+
+
+define("webodf/editor/plugins/bella/Bella", [
+        "webodf/editor/plugins/bella/Actions",
+        "webodf/editor/plugins/bella/CatHerder",
+        "webodf/editor/plugins/bella/DocumentValidator",
+        "webodf/editor/plugins/bella/Random",
+        "webodf/editor/plugins/bella/SimpleStatusReporter",
+        "webodf/editor/plugins/bella/WrappedSessionController"
     ],
     function(Actions, CatHerder, DocumentValidator, Random, SimpleStatusReporter, WrappedSessionController) {
     "use strict";
@@ -15,15 +40,13 @@ define("webodf/plugins/bella/Bella", [
      * @constructor
      * @implements {core.Destroyable}
      * @param {!Object=} config Configuration options to pass to fuzzer
-     * @param {!string=} inputMemberId Member id to re-use when fuzzing. If undefined, a unique id will be
      *      automatically generated
      */
-    function Bella(config, inputMemberId) {
+    function Bella(config) {
         var self = this,
             MAX_UNDO_STATES = 1000,
             seed,
             random,
-            memberId,
             currentSessionController,
             actionSources = [],
             scheduledTask,
@@ -167,38 +190,18 @@ define("webodf/plugins/bella/Bella", [
          * @return {undefined}
          */
         this.addToDocument = function (newSessionController) {
-            if (!config.enabled) {
-                return;
-            }
-
             var session,
-                wrappedSession,
-                addMember = new webodf.ops.OpAddMember(),
-                addCursor = new webodf.ops.OpAddCursor();
+                wrappedSession;
 
             removeFromDocument();
             currentSessionController = newSessionController;
             session = newSessionController.getSession();
-            wrappedSession = new WrappedSessionController(session, memberId, newSessionController, newSessionController.getConfiguration());
+            wrappedSession = new WrappedSessionController(newSessionController);
             documentValidator = new DocumentValidator(wrappedSession, config.lengthCheck);
             actionSources.push(new Actions(wrappedSession, random));
             session.getOdtDocument().subscribe(webodf.ops.OdtDocument.signalOperationEnd, countOperations);
             session.getOdtDocument().subscribe(webodf.ops.OdtDocument.signalOperationEnd, documentValidator.check);
             session.getOdtDocument().subscribe(webodf.ops.OdtDocument.signalOperationStart, errorHandler.onBeforeOperationExecuted);
-
-            if (!session.getOdtDocument().getCursor(memberId)) {
-                // Avatar is from http://pixabay.com/en/cat-animal-feline-kitty-orange-161284/
-                addMember.init({
-                    memberid: memberId,
-                    setProperties: {
-                        fullName: runtime.tr("Bella, the playful cat"),
-                        color: "BlueViolet",
-                        imageUrl: "avatar-bella.png"
-                    }
-                });
-                addCursor.init({memberid: memberId});
-                session.enqueue([addMember, addCursor]);
-            }
 
             self.play(config.actionTime);
         };
@@ -209,36 +212,12 @@ define("webodf/plugins/bella/Bella", [
             seed = config.seed || Math.floor(Math.random() * 1e10 + (1e10 * instanceCount)).toString();
             state.seed = seed;
             random = new Random(seed);
-            memberId = inputMemberId || "bellaTheCat" + random.getInt(0, 1e10);
             errorHandler = new CatHerder(self, config.autoDrive);
             webodf.runtime.enableAlerts = false;
         }
 
         init();
     }
-
-    function parseQueryString(str) {
-        var objURL = {};
-        str.replace(
-            new RegExp("([^?=&]+)(=([^&]*))?", "g"),
-            function ($0, $1, $2, $3) {
-                objURL[ $1 ] = $3;
-            }
-        );
-        return objURL;
-    }
-
-    Bella.parseConfig = function (search) {
-        var queryParams = parseQueryString(search);
-        return {
-            seed: queryParams["bella.seed"] || undefined,
-            autoDrive: queryParams["bella.mode"] === "exploration",
-            debug: queryParams["bella.debug"] === "true",
-            enabled: queryParams["bella.enabled"] !== "false",
-            actionTime: parseInt(queryParams["bella.actionTime"], 10) || 50, // Sleep time between actions in ms
-            lengthCheck: (queryParams["bella.lengthCheck"] && parseInt(queryParams["bella.lengthCheck"], 10)) || 10
-        };
-    };
 
     return Bella;
 });

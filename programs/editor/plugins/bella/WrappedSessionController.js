@@ -1,29 +1,48 @@
-define("webodf/plugins/bella/WrappedSessionController", function() {
+/**
+ * Copyright (C) 2014-2015 KO GmbH <copyright@kogmbh.com>
+ *
+ * @licstart
+ * This file is part of WebODF.
+ *
+ * WebODF is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License (GNU AGPL)
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * WebODF is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with WebODF.  If not, see <http://www.gnu.org/licenses/>.
+ * @licend
+ *
+ * @source: http://www.webodf.org/
+ * @source: https://github.com/kogmbh/WebODF/
+ */
+
+
+define("webodf/editor/plugins/bella/WrappedSessionController", function() {
     "use strict";
     var webodf = window;
 
-    function WrappedSessionController(session, inputMemberId, sessionController, args) {
-        var odtDocument = session.getOdtDocument(),
+    function WrappedSessionController(sessionController) {
+        var session = sessionController.getSession(),
+            inputMemberId = sessionController.getInputMemberId(),
             constraints = sessionController.getSessionConstraints(),
             sessionContext = new webodf.gui.SessionContext(session, inputMemberId),
-            objectNameGenerator = new webodf.odf.ObjectNameGenerator(odtDocument.getOdfCanvas().odfContainer(), inputMemberId),
-            directFormattingController = new webodf.gui.DirectFormattingController(session, constraints, sessionContext, inputMemberId, objectNameGenerator, args.directTextStylingEnabled,  args.directParagraphStylingEnabled),
-            annotationController = new webodf.gui.AnnotationController(session, constraints, inputMemberId),
-            createCursorStyleOp = /**@type {function (!number, !number, !boolean):ops.Operation}*/ (directFormattingController.createCursorStyleOp),
-            createParagraphStyleOps = /**@type {function (!number):!Array.<!ops.Operation>}*/ (directFormattingController.createParagraphStyleOps),
-            textController = new webodf.gui.TextController(session, constraints, sessionContext, inputMemberId, createCursorStyleOp, createParagraphStyleOps),
-            selectionController = new webodf.gui.SelectionController(session, inputMemberId),
             mimeDataExporter = new webodf.gui.MimeDataExporter(),
-            pasteHandler = new webodf.gui.PasteController(session, constraints, sessionContext , inputMemberId);
+            pasteHandler = new webodf.gui.PasteController(session, constraints, sessionContext, inputMemberId);
 
         this.undo = sessionController.undo;
         this.redo = sessionController.redo;
-        this.getSession = function() { return session; };
-        this.getInputMemberId = function() { return inputMemberId; };
-        this.getTextController = function() { return textController; };
-        this.getSelectionController = function() { return selectionController; };
-        this.getDirectFormattingController = function() { return directFormattingController; };
-        this.getAnnotationController = function () { return annotationController; };
+        this.getSession = sessionController.getSession;
+        this.getInputMemberId = sessionController.getInputMemberId;
+        this.getTextController = sessionController.getTextController;
+        this.getSelectionController = sessionController.getSelectionController;
+        this.getDirectFormattingController = sessionController.getDirectFormattingController;
+        this.getAnnotationController = sessionController.getAnnotationController;
         this.getEventManager = sessionController.getEventManager;
 
         this.simulateCopy = function(range) {
