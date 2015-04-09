@@ -162,8 +162,10 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.removeTextByDeleteKey = reducedDestruction(textController.removeTextByDeleteKey);
         this.removeTextByBackspaceKey = reducedDestruction(textController.removeTextByBackspaceKey);
 
+        if (config.undo) {
         this.undo = controllers.undo;
         this.redo = controllers.redo;
+        }
 
         function runWithRandomBool(func) {
             return function () {

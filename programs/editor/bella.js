@@ -60,6 +60,7 @@ function createEditor() {
         var queryParams = parseSearchParameters(window.location);
         return {
             annotations: queryParams["bella.annotations"] !== "false",
+            undo: queryParams["bella.undo"] !== "false",
             seed: queryParams["bella.seed"] || undefined,
             autoDrive: queryParams["bella.mode"] === "exploration",
             debug: queryParams["bella.debug"] === "true",
