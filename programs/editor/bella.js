@@ -59,6 +59,7 @@ function createEditor() {
     function parseBellaConfigFromLocation() {
         var queryParams = parseSearchParameters(window.location);
         return {
+            annotations: queryParams["bella.annotations"] !== "false",
             seed: queryParams["bella.seed"] || undefined,
             autoDrive: queryParams["bella.mode"] === "exploration",
             debug: queryParams["bella.debug"] === "true",

@@ -198,7 +198,7 @@ define("webodf/editor/plugins/bella/Bella", [
             session = newSessionController.getSession();
             wrappedSession = new WrappedSessionController(newSessionController);
             documentValidator = new DocumentValidator(wrappedSession, config.lengthCheck);
-            actionSources.push(new Actions(wrappedSession, random));
+            actionSources.push(new Actions(wrappedSession, random, config));
             session.getOdtDocument().subscribe(webodf.ops.OdtDocument.signalOperationEnd, countOperations);
             session.getOdtDocument().subscribe(webodf.ops.OdtDocument.signalOperationEnd, documentValidator.check);
             session.getOdtDocument().subscribe(webodf.ops.OdtDocument.signalOperationStart, errorHandler.onBeforeOperationExecuted);

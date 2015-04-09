@@ -30,7 +30,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
      * @constructor
      * @param {!gui.SessionController} controllers
      */
-    function Actions(controllers, random) {
+    function Actions(controllers, random, config) {
         var session,
             odtDocument,
             canvas,
@@ -204,6 +204,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.indent = directFormattingController.indent;
         this.outdent = directFormattingController.outdent;
 
+        if (config.annotations) {
         this.createAnnotation = annotationController.addAnnotation;
         this.removeAnnotation = function() {
             var container = odtDocument.getRootNode(),// TODO use canvas.getElement or even document.body instead
@@ -214,6 +215,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
                 annotationController.removeAnnotation(annotations[index]);
             }
         };
+        }
 
         this.pretendCut = reducedDestruction(function () {
             var range = getCursor().getSelectedRange(),
