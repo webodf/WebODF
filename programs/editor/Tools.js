@@ -41,9 +41,8 @@ define("webodf/editor/Tools", [
     "webodf/editor/widgets/paragraphStylesDialog",
     "webodf/editor/widgets/zoomSlider",
     "webodf/editor/widgets/aboutDialog",
-    "webodf/editor/EditorSession",
-    "webodf/plugins/bella/BellaControl"],
-    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, EditHyperlinks, ImageInserter, ParagraphStylesDialog, ZoomSlider, AboutDialog, EditorSession, BellaControl) {
+    "webodf/editor/EditorSession"],
+    function (ready, MenuItem, DropDownMenu, Button, DropDownButton, Toolbar, ParagraphAlignment, SimpleStyles, UndoRedoMenu, CurrentStyle, AnnotationControl, EditHyperlinks, ImageInserter, ParagraphStylesDialog, ZoomSlider, AboutDialog, EditorSession) {
         "use strict";
 
         return function Tools(toolbarElementId, args) {
@@ -63,24 +62,32 @@ define("webodf/editor/Tools", [
                 aboutDialog,
                 sessionSubscribers = [];
 
+            function placeAndStartUpWidget(widget) {
+                widget.placeAt(toolbar);
+                widget.startup();
+            }
+
             /**
              * Creates a tool and installs it, if the enabled flag is set to true.
              * Only supports tool classes whose constructor has a single argument which
              * is a callback to pass the created widget object to.
              * @param {!function(new:Object, function(!Object):undefined)} Tool  constructor method of the tool
              * @param {!boolean} enabled
+             * @param {!Object|undefined=} config
              * @return {?Object}
              */
-            function createTool(Tool, enabled) {
+            function createTool(Tool, enabled, config) {
                 var tool = null;
 
                 if (enabled) {
-                    tool = new Tool(function (widget) {
-                        widget.placeAt(toolbar);
-                        widget.startup();
-                    });
+                    if (config) {
+                        tool = new Tool(config, placeAndStartUpWidget);
+                    } else {
+                        tool = new Tool(placeAndStartUpWidget);
+                    }
                     sessionSubscribers.push(tool);
                     tool.onToolDone = onToolDone;
+                    tool.setEditorSession(editorSession);
                 }
 
                 return tool;
@@ -286,7 +293,16 @@ define("webodf/editor/Tools", [
                     closeButton.placeAt(toolbar);
                 }
 
-                createTool(BellaControl, true);
+                if (args.plugins) {
+                    args.plugins.forEach(function (plugin) {
+                        runtime.log("Creating plugin: "+plugin.id);
+                        require([plugin.id], function (Plugin) {
+                            runtime.log("Creating as tool now: "+plugin.id);
+                            createTool(Plugin, true, plugin.config);
+                        });
+                    });
+
+                }
 
                 setEditorSession(editorSession);
             });
