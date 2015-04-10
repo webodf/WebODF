@@ -151,9 +151,10 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.extendSelectionToEntireDocument = selectionController.extendSelectionToEntireDocument;
 
         this.sayMeow = reducedDestruction(function () {
-            var meows = random.getInt(0, 10);
+            var meows = random.getInt(0, 10),
+                text = config.utterance || "meow";
             while (meows) {
-                textController.insertText("  meow!  ");
+                textController.insertText("  " + text + "!  ");
                 meows -= 1;
             }
         });
@@ -183,9 +184,10 @@ define("webodf/editor/plugins/bella/Actions", function() {
         };
 
         function toggleAndInsertText(func) {
+            var text = config.utteranceLoud || "MeOW";
             return reducedDestruction(function () {
                 func(random.getBool());
-                textController.insertText(" !!!! MeOW!");
+                textController.insertText(" !!!! " + text + "!");
             });
         }
 
