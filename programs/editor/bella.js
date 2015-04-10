@@ -59,6 +59,9 @@ function createEditor() {
     function parseBellaConfigFromLocation() {
         var queryParams = parseSearchParameters(window.location);
         return {
+            typing: queryParams["bella.typing"] !== "false",
+            directTextStyling: queryParams["bella.directTextStyling"] !== "false",
+            directParagraphStyling: queryParams["bella.directParagraphStyling"] !== "false",
             annotations: queryParams["bella.annotations"] !== "false",
             undo: queryParams["bella.undo"] !== "false",
             seed: queryParams["bella.seed"] || undefined,

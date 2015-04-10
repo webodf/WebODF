@@ -150,6 +150,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.extendSelectionToDocumentEnd = selectionController.extendSelectionToDocumentEnd;
         this.extendSelectionToEntireDocument = selectionController.extendSelectionToEntireDocument;
 
+        if (config.typing) {
         this.sayMeow = reducedDestruction(function () {
             var meows = random.getInt(0, 10),
                 text = config.utterance || "meow";
@@ -162,6 +163,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.enqueueParagraphSplittingOps = reducedDestruction(textController.enqueueParagraphSplittingOps);
         this.removeTextByDeleteKey = reducedDestruction(textController.removeTextByDeleteKey);
         this.removeTextByBackspaceKey = reducedDestruction(textController.removeTextByBackspaceKey);
+        }
 
         if (config.undo) {
         this.undo = controllers.undo;
@@ -174,6 +176,15 @@ define("webodf/editor/plugins/bella/Actions", function() {
             };
         }
 
+        function toggleAndInsertText(func) {
+            var text = config.utteranceLoud || "MeOW";
+            return reducedDestruction(function () {
+                func(random.getBool());
+                textController.insertText(" !!!! " + text + "!");
+            });
+        }
+
+        if (config.directTextStyling) {
         this.setBold = runWithRandomBool(directFormattingController.setBold);
         this.setItalic = runWithRandomBool(directFormattingController.setItalic);
         this.setHasUnderline = runWithRandomBool(directFormattingController.setHasUnderline);
@@ -183,30 +194,27 @@ define("webodf/editor/plugins/bella/Actions", function() {
             directFormattingController.setFontSize(random.getInt(7, 120));
         };
 
-        function toggleAndInsertText(func) {
-            var text = config.utteranceLoud || "MeOW";
-            return reducedDestruction(function () {
-                func(random.getBool());
-                textController.insertText(" !!!! " + text + "!");
-            });
-        }
-
-        this.setBoldAndAddText = toggleAndInsertText(directFormattingController.setBold);
-        this.setItalicAndAddText = toggleAndInsertText(directFormattingController.setItalic);
-        this.setHasUnderlineAndAddText = toggleAndInsertText(directFormattingController.setHasUnderline);
-        this.setHasStrikethroughAndAddText = toggleAndInsertText(directFormattingController.setHasStrikethrough);
-
         this.toggleBold = directFormattingController.toggleBold;
         this.toggleItalic = directFormattingController.toggleItalic;
         this.toggleUnderline = directFormattingController.toggleUnderline;
         this.toggleStrikethrough = directFormattingController.toggleStrikethrough;
+        }
 
+        if (config.directTextStyling && config.typing) {
+        this.setBoldAndAddText = toggleAndInsertText(directFormattingController.setBold);
+        this.setItalicAndAddText = toggleAndInsertText(directFormattingController.setItalic);
+        this.setHasUnderlineAndAddText = toggleAndInsertText(directFormattingController.setHasUnderline);
+        this.setHasStrikethroughAndAddText = toggleAndInsertText(directFormattingController.setHasStrikethrough);
+        }
+
+        if (config.directParagraphStyling) {
         this.alignParagraphLeft = directFormattingController.alignParagraphLeft;
         this.alignParagraphCenter = directFormattingController.alignParagraphCenter;
         this.alignParagraphRight = directFormattingController.alignParagraphRight;
         this.alignParagraphJustified = directFormattingController.alignParagraphJustified;
         this.indent = directFormattingController.indent;
         this.outdent = directFormattingController.outdent;
+        }
 
         if (config.annotations) {
         this.createAnnotation = annotationController.addAnnotation;
@@ -221,6 +229,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         };
         }
 
+        if (config.typing) {
         this.pretendCut = reducedDestruction(function () {
             var range = getCursor().getSelectedRange(),
                 data = controllers.simulateCopy(range);
@@ -249,6 +258,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
                 controllers.simulatePaste(data);
             }
         });
+        }
 
         function init() {
             session = controllers.getSession();
