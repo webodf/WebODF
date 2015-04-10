@@ -63,6 +63,7 @@ define("webodf/editor/plugins/bella/CatHerder", function() {
         function createReport(e) {
             var bellaState = bellaInstance.getState();
             return {
+                name: bellaState.name,
                 startedAt: bellaState.startedAt,
                 actionsCount: bellaState.actions,
                 operationsCount: bellaState.executedOperations,

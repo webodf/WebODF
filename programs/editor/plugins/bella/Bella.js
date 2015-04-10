@@ -55,6 +55,7 @@ define("webodf/editor/plugins/bella/Bella", [
             reporter,
             errorHandler,
             state = {
+                name: config.name,
                 startedAt: undefined,
                 actions: 0,
                 executedOperations: 0,
