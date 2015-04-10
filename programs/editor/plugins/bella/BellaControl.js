@@ -24,26 +24,84 @@
 
 
 define("webodf/editor/plugins/bella/BellaControl", [
-        "webodf/editor/plugins/bella/Bella"
+        "webodf/editor/plugins/bella/Bella", "dijit/form/Button"
     ],
-    function(Bella) {
+    function(Bella, Button) {
     "use strict";
 
     function BellaControl(config, onInitialise) {
-        var bella;
+        var self = this,
+            bella,
+            editorSession,
+            startButton,
+            stopButton,
+            widget = {};
 
-        this.setEditorSession = function(editorSession) {
+        startButton = new Button({
+            label: runtime.tr('Start'),
+            showLabel: true,
+            disabled: true,
+            onClick: function () {
+                if (bella) {
+                    bella.addToDocument(editorSession.sessionController);
+                    editorSession.sessionView.showCaretAvatars();
+                    editorSession.sessionView.showEditInfoMarkers();
+                    startButton.set('disabled', true);
+                    stopButton.set('disabled', false);
+                    self.onToolDone();
+                }
+            }
+        });
+
+        stopButton = new Button({
+            label: runtime.tr('Stop'),
+            showLabel: true,
+            disabled: true,
+            onClick: function () {
+                if (bella) {
+                    bella.removeFromDocument();
+                    startButton.set('disabled', false);
+                    stopButton.set('disabled', true);
+                    self.onToolDone();
+                }
+            }
+        });
+
+        widget.children = [startButton, stopButton];
+        widget.startup = function () {
+            widget.children.forEach(function (element) {
+                element.startup();
+            });
+        };
+
+        widget.placeAt = function (container) {
+            widget.children.forEach(function (element) {
+                element.placeAt(container);
+            });
+            return widget;
+        };
+
+        this.setEditorSession = function(session) {
             if (bella) {
                 bella.destroy();
                 bella = undefined;
             }
+
+            editorSession = session;
+
             if (editorSession) {
                 bella = new Bella(config);
-                bella.addToDocument(editorSession.sessionController);
-                editorSession.sessionView.showCaretAvatars();
-                editorSession.sessionView.showEditInfoMarkers();
             }
+            startButton.set('disabled', bella === undefined);
+            stopButton.set('disabled', true);
         };
+
+        /*jslint emptyblock: true*/
+        this.onToolDone = function () {};
+        /*jslint emptyblock: false*/
+
+        // init
+        onInitialise(widget);
     }
 
     return BellaControl;
