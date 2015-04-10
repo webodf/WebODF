@@ -27,7 +27,7 @@ define("webodf/editor/plugins/bella/SimpleStatusReporter", function() {
     "use strict";
     var webodf = window; // WebODF doesn't support AMD yet...
 
-    function SimpleStatusReporter(bellaInstance) {
+    function SimpleStatusReporter(bellaInstance, statusContainer) {
         var container, updateIntervalId;
 
         function updateState() {
@@ -44,12 +44,14 @@ define("webodf/editor/plugins/bella/SimpleStatusReporter", function() {
         };
 
         function init() {
-            var doc = webodf.runtime.getWindow().document;
+            var doc = webodf.runtime.getWindow().document,
+                parent = statusContainer || doc.body;
+
             container = doc.createElement("pre");
-            container.style.position = "fixed";
+            container.style.position = "absolute";
             container.style.bottom = "0";
             container.style.right = "0";
-            doc.body.appendChild(container);
+            parent.appendChild(container);
             updateIntervalId = window.setInterval(updateState, 100);
         }
 

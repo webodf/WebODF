@@ -156,7 +156,7 @@ define("webodf/editor/plugins/bella/Bella", [
         this.play = function (newInterval) {
             stop();
             state.startedAt = new Date();
-            reporter = new SimpleStatusReporter(self);
+            reporter = new SimpleStatusReporter(self, config.statusContainer);
             scheduledTask = webodf.core.Task.createTimeoutTask(pounceOnComputer, newInterval);
             scheduledTask.triggerImmediate();
         };
