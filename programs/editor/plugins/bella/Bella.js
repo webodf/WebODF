@@ -177,6 +177,7 @@ define("webodf/editor/plugins/bella/Bella", [
                 odtDocument.unsubscribe(webodf.ops.OdtDocument.signalOperationEnd, documentValidator.check);
                 odtDocument.unsubscribe(webodf.ops.OdtDocument.signalOperationStart, errorHandler.onBeforeOperationExecuted);
                 currentSessionController = undefined;
+                ops.StepsCache.ENABLE_CACHE_VERIFICATION = false;
             }
         }
 
@@ -195,6 +196,7 @@ define("webodf/editor/plugins/bella/Bella", [
                 wrappedSession;
 
             removeFromDocument();
+            ops.StepsCache.ENABLE_CACHE_VERIFICATION = true;
             currentSessionController = newSessionController;
             session = newSessionController.getSession();
             wrappedSession = new WrappedSessionController(newSessionController);
