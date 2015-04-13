@@ -167,28 +167,6 @@ NodeJSProcess.prototype.stderr;
  * @namespace
  */
 var JSON;
-/**
- * @namespace
- */
-var now;
-/**
- * @type {function(!Array):Object}
- */
-now.deliverOp = function (spec) { "use strict"; };
-
-/**
- * @type {function(!string):Object}
- */
-now.subscribeUserDetailsUpdates = function (memberId) { "use strict"; };
-/**
- * @type {function(!string):Object}
- */
-now.unsubscribeUserDetailsUpdates = function (memberId) { "use strict"; };
-/**
- * @type {function(!string, !function(!boolean)):Object}
- */
-now.joinSession = function (sessionId, done_cb) { "use strict"; };
-
 
 /**
  * @type {!NodeJSProcess}
