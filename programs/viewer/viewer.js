@@ -56,7 +56,6 @@ function Viewer(viewerPlugin, parameters) {
         presentationMode = false,
         isFullScreen = false,
         initialized = false,
-        isSlideshow = false,
         url,
         viewerElement = document.getElementById('viewer'),
         canvasContainer = document.getElementById('canvasContainer'),
@@ -277,8 +276,7 @@ function Viewer(viewerPlugin, parameters) {
         viewerPlugin.onLoad = function () {
             document.getElementById('pluginVersion').innerHTML = viewerPlugin.getPluginVersion();
 
-            isSlideshow = viewerPlugin.isSlideshow();
-            if (isSlideshow) {
+            if (viewerPlugin.isSlideshow()) {
                 // Slideshow pages should be centered
                 canvasContainer.classList.add("slideshow");
                 // Show page nav controls only for presentations
@@ -398,7 +396,6 @@ function Viewer(viewerPlugin, parameters) {
             titlebar.style.display = toolbar.style.display = 'none';
             overlayCloseButton.style.display = 'block';
             canvasContainer.classList.add('presentationMode');
-            isSlideshow = true;
             canvasContainer.onmousedown = function (event) {
                 event.preventDefault();
             };
@@ -425,7 +422,6 @@ function Viewer(viewerPlugin, parameters) {
             canvasContainer.oncontextmenu = function () {};
             canvasContainer.onmousedown = function () {};
             parseScale('auto');
-            isSlideshow = viewerPlugin.isSlideshow();
         }
 
         presentationMode = !presentationMode;
@@ -482,7 +478,7 @@ function Viewer(viewerPlugin, parameters) {
     }
 
     function showOverlayNavigator() {
-        if (isSlideshow) {
+        if (presentationMode || viewerPlugin.isSlideshow()) {
             overlayNavigator.className = 'viewer-touched';
             window.clearTimeout(touchTimer);
             touchTimer = window.setTimeout(function () {
