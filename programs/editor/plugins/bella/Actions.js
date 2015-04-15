@@ -69,6 +69,47 @@ define("webodf/editor/plugins/bella/Actions", function() {
             return { container: container, offset: offset };
         }
 
+        function getNonRootChildNodesIndizes(container) {
+            var i,
+                nonRootChildNodesIndizes = [];
+            for (i = 0; i < container.childNodes.length; i += 1) {
+                if (!odf.OdfUtils.isInlineRoot(container.childNodes[i]) ) {
+                    nonRootChildNodesIndizes.push(i);
+                }
+            }
+            return nonRootChildNodesIndizes;
+        }
+
+        function getRandomPointInSameRoot(nodeForSameRoot) {
+            var container = odtDocument.getRootElement(/**@type{!Node}*/(nodeForSameRoot)),
+                nonRootChildNodesIndizes,
+                offset = random.getInt(0, container.childNodes.length + 1);
+
+            while (container.childNodes[offset] && random.oneIn(10) === false) { // Should descend?) {
+                // cannot descend into that child?
+                if (odf.OdfUtils.isInlineRoot(container.childNodes[offset])) {
+                    nonRootChildNodesIndizes = getNonRootChildNodesIndizes(container);
+                    // no child to descend into?
+                    if (nonRootChildNodesIndizes.length === 0) {
+                        break;
+                    }
+                    // get index of child to descend into out of non-root indizes
+                    offset = random.getInt(0, nonRootChildNodesIndizes.length);
+                    offset = nonRootChildNodesIndizes[offset];
+                }
+
+                container = container.childNodes[offset];
+                if (container.length) {
+                    // Might be a text node
+                    offset = random.getInt(0, container.length + 1);
+                } else {
+                    offset = random.getInt(0, container.childNodes.length + 1);
+                }
+            }
+
+            return { container: container, offset: offset };
+        }
+
         function moveToPoint() {
             var focusPoint = getRandomPoint(),
                 selection = selectionController.selectionToRange({
@@ -104,7 +145,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.extendToPoint = function () {
             var cursor = getCursor(),
                 currentSelection = selectionController.rangeToSelection(cursor.getSelectedRange(), cursor.hasForwardSelection()),
-                focusPoint = getRandomPoint(),
+                focusPoint = getRandomPointInSameRoot(currentSelection.anchorNode),
                 newSelection;
 
             currentSelection.focusNode = focusPoint.container;
@@ -115,7 +156,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
 
         this.selectByRange = function () {
             var focusPoint = getRandomPoint(),
-                anchorPoint = getRandomPoint(),
+                anchorPoint = getRandomPointInSameRoot(focusPoint.container),
                 selection = selectionController.selectionToRange({
                     anchorNode: anchorPoint.container,
                     anchorOffset: anchorPoint.offset,
