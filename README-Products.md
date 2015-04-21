@@ -43,12 +43,3 @@ With a prepared setup for building, you execute this command:
 This creates a file "firefox-extension-odfviewer-x.y.z.xpi", which can be directly installed as add-on in Firefox browsers.
 
 Download and install the latest officially released version from [Mozilla's Add-on website](https://addons.mozilla.org/firefox/addon/webodf/).
-
-
-### ViewerJS Plugin
-
-This is currently only called automatically during the build of [ViewerJS](http://viewerjs.org), you will not do this yourself.
-
-    make product-viewerjsdir
-
-It creates a folder "viewer", which is then further processed in the build of ViewerJS.

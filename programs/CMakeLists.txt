@@ -10,5 +10,4 @@ add_subdirectory(firefoxextension)
 
 add_subdirectory(benchmark)
 add_subdirectory(editor)
-add_subdirectory(viewer)
 add_subdirectory(cordova)
