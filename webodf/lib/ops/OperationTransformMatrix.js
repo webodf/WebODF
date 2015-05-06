@@ -274,6 +274,258 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
     /* Transformation methods */
 
     /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpecA
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpecB
+     * @param {!boolean} hasAPriority
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationAddAnnotation(addAnnotationSpecA, addAnnotationSpecB, hasAPriority) {
+        var firstAnnotationSpec, secondAnnotationSpec;
+
+        if (addAnnotationSpecA.position < addAnnotationSpecB.position) {
+            firstAnnotationSpec = addAnnotationSpecA;
+            secondAnnotationSpec = addAnnotationSpecB;
+        } else if (addAnnotationSpecB.position < addAnnotationSpecA.position) {
+            firstAnnotationSpec = addAnnotationSpecB;
+            secondAnnotationSpec = addAnnotationSpecA;
+        } else {
+            firstAnnotationSpec = hasAPriority ? addAnnotationSpecA : addAnnotationSpecB;
+            secondAnnotationSpec = hasAPriority ? addAnnotationSpecB : addAnnotationSpecA;
+        }
+
+        if (secondAnnotationSpec.position < firstAnnotationSpec.position + firstAnnotationSpec.length) {
+            firstAnnotationSpec.length += 2;
+        }
+        secondAnnotationSpec.position += 2;
+
+        return {
+            opSpecsA:  [addAnnotationSpecA],
+            opSpecsB:  [addAnnotationSpecB]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationApplyDirectStyling(addAnnotationSpec, applyDirectStylingSpec) {
+        if (addAnnotationSpec.position <= applyDirectStylingSpec.position) {
+            applyDirectStylingSpec.position += 2;
+        } else if (addAnnotationSpec.position <= applyDirectStylingSpec.position + applyDirectStylingSpec.length) {
+            applyDirectStylingSpec.length += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [applyDirectStylingSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationInsertText(addAnnotationSpec, insertTextSpec) {
+        if (insertTextSpec.position <= addAnnotationSpec.position) {
+            addAnnotationSpec.position += insertTextSpec.text.length;
+        } else {
+            if (addAnnotationSpec.length !== undefined) {
+                if (insertTextSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
+                    addAnnotationSpec.length += insertTextSpec.text.length;
+                }
+            }
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            insertTextSpec.position += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [insertTextSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationMergeParagraph(addAnnotationSpec, mergeParagraphSpec) {
+        if (mergeParagraphSpec.sourceStartPosition <= addAnnotationSpec.position) {
+            addAnnotationSpec.position -= 1;
+        } else {
+            if (addAnnotationSpec.length !== undefined) {
+                if (mergeParagraphSpec.sourceStartPosition <= addAnnotationSpec.position + addAnnotationSpec.length) {
+                    addAnnotationSpec.length -= 1;
+                }
+            }
+
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            mergeParagraphSpec.sourceStartPosition += 2;
+
+            if (addAnnotationSpec.position < mergeParagraphSpec.destinationStartPosition) {
+                mergeParagraphSpec.destinationStartPosition += 2;
+            }
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [mergeParagraphSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationMoveCursor(addAnnotationSpec, moveCursorSpec) {
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec);
+
+        // adapt movecursor spec to inserted positions
+        if (addAnnotationSpec.position < moveCursorSpec.position) {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            moveCursorSpec.position += 2;
+        } else if (addAnnotationSpec.position < moveCursorSpec.position + moveCursorSpec.length) {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            moveCursorSpec.length += 2;
+        }
+
+        if (isMoveCursorSpecRangeInverted) {
+            invertMoveCursorSpecRange(moveCursorSpec);
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [moveCursorSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationRemoveAnnotation(addAnnotationSpec, removeAnnotationSpec) {
+        // adapt movecursor spec to inserted positions
+        if (addAnnotationSpec.position < removeAnnotationSpec.position) {
+            if (removeAnnotationSpec.position < addAnnotationSpec.position + addAnnotationSpec.length) {
+                addAnnotationSpec.length -= removeAnnotationSpec.length + 2;
+            }
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            removeAnnotationSpec.position += 2;
+        } else {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            addAnnotationSpec.position -= removeAnnotationSpec.length + 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [removeAnnotationSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationRemoveText(addAnnotationSpec, removeTextSpec) {
+        var removeTextSpecPosition = removeTextSpec.position,
+            removeTextSpecEnd = removeTextSpec.position + removeTextSpec.length,
+            annotationSpecEnd,
+            helperOpspec,
+            addAnnotationSpecResult = [addAnnotationSpec],
+            removeTextSpecResult = [removeTextSpec];
+
+        // adapt removeTextSpec
+        if (addAnnotationSpec.position <= removeTextSpec.position) {
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            removeTextSpec.position += 2;
+        } else if (addAnnotationSpec.position < removeTextSpecEnd) {
+            // we have to split the removal into two ops, before and after the annotation start
+            removeTextSpec.length = addAnnotationSpec.position - removeTextSpec.position;
+            helperOpspec = {
+                optype: "RemoveText",
+                memberid: removeTextSpec.memberid,
+                timestamp: removeTextSpec.timestamp,
+                position: addAnnotationSpec.position + 2,
+                length: removeTextSpecEnd - addAnnotationSpec.position
+            };
+            removeTextSpecResult.unshift(helperOpspec); // helperOp first, so its position is not affected by the real op
+        }
+
+        // adapt addAnnotationSpec (using already changed removeTextSpec and new helperOpspec, be aware)
+        if (removeTextSpec.position + removeTextSpec.length <= addAnnotationSpec.position) {
+            addAnnotationSpec.position -= removeTextSpec.length;
+            if ((addAnnotationSpec.length !== undefined) && helperOpspec) {
+                if (helperOpspec.length >= addAnnotationSpec.length) {
+                    addAnnotationSpec.length = 0;
+                } else {
+                    addAnnotationSpec.length -= helperOpspec.length;
+                }
+            }
+        } else if (addAnnotationSpec.length !== undefined) {
+            annotationSpecEnd = addAnnotationSpec.position + addAnnotationSpec.length;
+            if (removeTextSpecEnd <= annotationSpecEnd) {
+                addAnnotationSpec.length -= removeTextSpec.length;
+            } else if (removeTextSpecPosition < annotationSpecEnd) {
+                addAnnotationSpec.length = removeTextSpecPosition - addAnnotationSpec.position;
+            }
+        }
+
+        return {
+            opSpecsA:  addAnnotationSpecResult,
+            opSpecsB:  removeTextSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationSetParagraphStyle(addAnnotationSpec, setParagraphStyleSpec) {
+        if (addAnnotationSpec.position < setParagraphStyleSpec.position) {
+            setParagraphStyleSpec.position += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [setParagraphStyleSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpAddAnnotation.Spec} addAnnotationSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformAddAnnotationSplitParagraph(addAnnotationSpec, splitParagraphSpec) {
+        if (addAnnotationSpec.position < splitParagraphSpec.sourceParagraphPosition) {
+            splitParagraphSpec.sourceParagraphPosition += 2;
+        }
+
+        if (splitParagraphSpec.position <= addAnnotationSpec.position) {
+            addAnnotationSpec.position += 1;
+        } else {
+            if (addAnnotationSpec.length !== undefined) {
+                if (splitParagraphSpec.position <= addAnnotationSpec.position + addAnnotationSpec.length) {
+                    addAnnotationSpec.length += 1;
+                }
+            }
+            // 2, because 1 for pos inside annotation comment, 1 for new pos before annotated range
+            splitParagraphSpec.position += 2;
+        }
+
+        return {
+            opSpecsA:  [addAnnotationSpec],
+            opSpecsB:  [splitParagraphSpec]
+        };
+    }
+
+    /**
      * @param {!ops.OpAddStyle.Spec} addStyleSpec
      * @param {!ops.OpRemoveStyle.Spec} removeStyleSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
@@ -465,6 +717,39 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformApplyDirectStylingRemoveAnnotation(applyDirectStylingSpec, removeAnnotationSpec) {
+        var pointA = applyDirectStylingSpec.position,
+            pointB = applyDirectStylingSpec.position + applyDirectStylingSpec.length,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            applyDirectStylingSpecResult = [applyDirectStylingSpec],
+            removeAnnotationSpecResult = [removeAnnotationSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= pointA && pointB <= removeAnnotationEnd) {
+            applyDirectStylingSpecResult = [];
+        } else {
+            // adapt applyDirectStyling spec to removed annotation content
+            if (removeAnnotationEnd < pointA) {
+                pointA -= removeAnnotationSpec.length + 2;
+            }
+            if (removeAnnotationEnd < pointB) {
+                pointB -= removeAnnotationSpec.length + 2;
+            }
+            applyDirectStylingSpec.position = pointA;
+            applyDirectStylingSpec.length = pointB - pointA;
+        }
+
+        return {
+            opSpecsA:  applyDirectStylingSpecResult,
+            opSpecsB:  removeAnnotationSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpApplyDirectStyling.Spec} applyDirectStylingSpec
      * @param {!ops.OpRemoveText.Spec} removeTextSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -600,6 +885,36 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  [insertTextSpec],
             opSpecsB:  [moveCursorSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpInsertText.Spec} insertTextSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformInsertTextRemoveAnnotation(insertTextSpec, removeAnnotationSpec) {
+        var insertTextSpecPosition = insertTextSpec.position,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            insertTextSpecResult = [insertTextSpec],
+            removeAnnotationSpecResult = [removeAnnotationSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= insertTextSpecPosition && insertTextSpecPosition <= removeAnnotationEnd) {
+            insertTextSpecResult = [];
+            removeAnnotationSpec.length += insertTextSpec.text.length;
+        } else {
+            // adapt insertText spec to removed annotation content
+            if (removeAnnotationEnd < insertTextSpec.position) {
+                insertTextSpec.position -= removeAnnotationSpec.length + 2;
+            } else {
+                removeAnnotationSpec.position += insertTextSpec.text.length;
+            }
+        }
+
+        return {
+            opSpecsA:  insertTextSpecResult,
+            opSpecsB:  removeAnnotationSpecResult
         };
     }
 
@@ -792,6 +1107,39 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  [mergeParagraphSpec],
             opSpecsB:  [moveCursorSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpMergeParagraph.Spec} mergeParagraphSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMergeParagraphRemoveAnnotation(mergeParagraphSpec, removeAnnotationSpec) {
+        var removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            mergeParagraphSpecResult = [mergeParagraphSpec],
+            removeAnnotationSpecResult = [removeAnnotationSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= mergeParagraphSpec.destinationStartPosition && mergeParagraphSpec.sourceStartPosition <= removeAnnotationEnd) {
+            mergeParagraphSpecResult = [];
+            removeAnnotationSpec.length -= 1;
+        } else {
+            if (mergeParagraphSpec.sourceStartPosition < removeAnnotationSpec.position) {
+                removeAnnotationSpec.position -= 1;
+            } else {
+                if (removeAnnotationEnd < mergeParagraphSpec.destinationStartPosition) {
+                    mergeParagraphSpec.destinationStartPosition -= removeAnnotationSpec.length + 2;
+                }
+                if (removeAnnotationEnd < mergeParagraphSpec.sourceStartPosition) {
+                    mergeParagraphSpec.sourceStartPosition -= removeAnnotationSpec.length + 2;
+                }
+            }
+        }
+
+        return {
+            opSpecsA:  mergeParagraphSpecResult,
+            opSpecsB:  removeAnnotationSpecResult
         };
     }
 
@@ -1114,6 +1462,37 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
 
     /**
      * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformMoveCursorRemoveAnnotation(moveCursorSpec, removeAnnotationSpec) {
+        var isMoveCursorSpecRangeInverted = invertMoveCursorSpecRangeOnNegativeLength(moveCursorSpec),
+            moveCursorSpecEnd = moveCursorSpec.position + moveCursorSpec.length,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length;
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= moveCursorSpec.position && moveCursorSpecEnd <= removeAnnotationEnd) {
+            moveCursorSpec.position = removeAnnotationSpec.position - 1;
+            moveCursorSpec.length = 0;
+        } else {
+            if (removeAnnotationEnd < moveCursorSpec.position) {
+                moveCursorSpec.position -= removeAnnotationSpec.length + 2;
+            } else if (removeAnnotationEnd < moveCursorSpecEnd) {
+                moveCursorSpec.length -= removeAnnotationSpec.length + 2;
+            }
+            if (isMoveCursorSpecRangeInverted) {
+                invertMoveCursorSpecRange(moveCursorSpec);
+            }
+        }
+
+        return {
+            opSpecsA:  [moveCursorSpec],
+            opSpecsB:  [removeAnnotationSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpMoveCursor.Spec} moveCursorSpec
      * @param {!ops.OpRemoveCursor.Spec} removeCursorSpec
      * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
      */
@@ -1197,6 +1576,123 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         return {
             opSpecsA:  [moveCursorSpec],
             opSpecsB:  [splitParagraphSpec]
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpecA
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpecB
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationRemoveAnnotation(removeAnnotationSpecA, removeAnnotationSpecB) {
+        var removeAnnotationSpecAResult = [removeAnnotationSpecA],
+            removeAnnotationSpecBResult = [removeAnnotationSpecB];
+
+        // check if removing the same annotation
+        if (removeAnnotationSpecA.position === removeAnnotationSpecB.position && removeAnnotationSpecA.length === removeAnnotationSpecB.length) {
+            removeAnnotationSpecAResult = [];
+            removeAnnotationSpecBResult = [];
+        } else {
+            if (removeAnnotationSpecA.position < removeAnnotationSpecB.position) {
+                removeAnnotationSpecB.position -= removeAnnotationSpecA.length + 2;
+            } else {
+                removeAnnotationSpecA.position -= removeAnnotationSpecB.length + 2;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecAResult,
+            opSpecsB:  removeAnnotationSpecBResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @param {!ops.OpRemoveText.Spec} removeTextSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationRemoveText(removeAnnotationSpec, removeTextSpec) {
+        var removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            removeTextSpecEnd = removeTextSpec.position + removeTextSpec.length,
+            removeAnnotationSpecResult = [removeAnnotationSpec],
+            removeTextSpecResult = [removeTextSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= removeTextSpec.position && removeTextSpecEnd <= removeAnnotationEnd) {
+            removeTextSpecResult = [];
+            removeAnnotationSpec.length -= removeTextSpec.length;
+        } else {
+            if (removeTextSpecEnd < removeAnnotationSpec.position) {
+                removeAnnotationSpec.position -= removeTextSpec.length;
+            } else if (removeTextSpec.position < removeAnnotationSpec.position) {
+                removeAnnotationSpec.position = removeTextSpec.position + 1;
+                removeTextSpec.length -= removeAnnotationSpec.length + 2;
+            } else {
+                removeTextSpec.position -= removeAnnotationSpec.length + 2;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecResult,
+            opSpecsB:  removeTextSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @param {!ops.OpSetParagraphStyle.Spec} setParagraphStyleSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationSetParagraphStyle(removeAnnotationSpec, setParagraphStyleSpec) {
+        var setParagraphStyleSpecPosition = setParagraphStyleSpec.position,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            removeAnnotationSpecResult = [removeAnnotationSpec],
+            setParagraphStyleSpecResult = [setParagraphStyleSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= setParagraphStyleSpecPosition && setParagraphStyleSpecPosition <= removeAnnotationEnd) {
+            setParagraphStyleSpecResult = [];
+        } else {
+            if (removeAnnotationEnd < setParagraphStyleSpecPosition) {
+                setParagraphStyleSpec.position -= removeAnnotationSpec.length + 2;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecResult,
+            opSpecsB:  setParagraphStyleSpecResult
+        };
+    }
+
+    /**
+     * @param {!ops.OpRemoveAnnotation.Spec} removeAnnotationSpec
+     * @param {!ops.OpSplitParagraph.Spec} splitParagraphSpec
+     * @return {?{opSpecsA:!Array.<!Object>, opSpecsB:!Array.<!Object>}}
+     */
+    function transformRemoveAnnotationSplitParagraph(removeAnnotationSpec, splitParagraphSpec) {
+        var splitParagraphSpecPosition = splitParagraphSpec.position,
+            removeAnnotationEnd = removeAnnotationSpec.position + removeAnnotationSpec.length,
+            removeAnnotationSpecResult = [removeAnnotationSpec],
+            splitParagraphSpecResult = [splitParagraphSpec];
+
+        // check if inside removed annotation
+        if (removeAnnotationSpec.position <= splitParagraphSpecPosition && splitParagraphSpecPosition <= removeAnnotationEnd) {
+            splitParagraphSpecResult = [];
+            removeAnnotationSpec.length += 1;
+        } else {
+            if (removeAnnotationEnd < splitParagraphSpec.sourceParagraphPosition) {
+                splitParagraphSpec.sourceParagraphPosition -= removeAnnotationSpec.length + 2;
+            }
+            if (removeAnnotationEnd < splitParagraphSpecPosition) {
+                splitParagraphSpec.position -= removeAnnotationSpec.length + 2;
+            } else {
+                removeAnnotationSpec.position += 1;
+            }
+        }
+
+        return {
+            opSpecsA:  removeAnnotationSpecResult,
+            opSpecsB:  splitParagraphSpecResult
         };
     }
 
@@ -1488,6 +1984,26 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
          */
         transformations;
     transformations = {
+        "AddAnnotation": {
+            "AddAnnotation":        transformAddAnnotationAddAnnotation,
+            "AddCursor":            passUnchanged,
+            "AddMember":            passUnchanged,
+            "AddStyle":             passUnchanged,
+            "ApplyDirectStyling":   transformAddAnnotationApplyDirectStyling,
+            "InsertText":           transformAddAnnotationInsertText,
+            "MergeParagraph":       transformAddAnnotationMergeParagraph,
+            "MoveCursor":           transformAddAnnotationMoveCursor,
+            "RemoveAnnotation":     transformAddAnnotationRemoveAnnotation,
+            "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
+            "RemoveStyle":          passUnchanged,
+            "RemoveText":           transformAddAnnotationRemoveText,
+            "SetParagraphStyle":    transformAddAnnotationSetParagraphStyle,
+            "SplitParagraph":       transformAddAnnotationSplitParagraph,
+            "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
         "AddCursor": {
             "AddCursor":            passUnchanged,
             "AddMember":            passUnchanged,
@@ -1496,6 +2012,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           passUnchanged,
             "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
+            "RemoveAnnotation":     passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
@@ -1512,6 +2029,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           passUnchanged,
             "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
+            "RemoveAnnotation":     passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           passUnchanged,
@@ -1526,6 +2044,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           passUnchanged,
             "MergeParagraph":       passUnchanged,
             "MoveCursor":           passUnchanged,
+            "RemoveAnnotation":     passUnchanged,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          transformAddStyleRemoveStyle,
@@ -1541,6 +2060,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           transformApplyDirectStylingInsertText,
             "MergeParagraph":       transformApplyDirectStylingMergeParagraph,
             "MoveCursor":           passUnchanged,
+            "RemoveAnnotation":     transformApplyDirectStylingRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
@@ -1555,6 +2075,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
             "InsertText":           transformInsertTextInsertText,
             "MergeParagraph":       transformInsertTextMergeParagraph,
             "MoveCursor":           transformInsertTextMoveCursor,
+            "RemoveAnnotation":     transformInsertTextRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
@@ -1568,6 +2089,7 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         "MergeParagraph": {
             "MergeParagraph":       transformMergeParagraphMergeParagraph,
             "MoveCursor":           transformMergeParagraphMoveCursor,
+            "RemoveAnnotation":     transformMergeParagraphRemoveAnnotation,
             "RemoveCursor":         passUnchanged,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
@@ -1580,12 +2102,25 @@ ops.OperationTransformMatrix = function OperationTransformMatrix() {
         },
         "MoveCursor": {
             "MoveCursor":           passUnchanged,
+            "RemoveAnnotation":     transformMoveCursorRemoveAnnotation,
             "RemoveCursor":         transformMoveCursorRemoveCursor,
             "RemoveMember":         passUnchanged,
             "RemoveStyle":          passUnchanged,
             "RemoveText":           transformMoveCursorRemoveText,
             "SetParagraphStyle":    passUnchanged,
             "SplitParagraph":       transformMoveCursorSplitParagraph,
+            "UpdateMember":         passUnchanged,
+            "UpdateMetadata":       passUnchanged,
+            "UpdateParagraphStyle": passUnchanged
+        },
+        "RemoveAnnotation": {
+            "RemoveAnnotation":     transformRemoveAnnotationRemoveAnnotation,
+            "RemoveCursor":         passUnchanged,
+            "RemoveMember":         passUnchanged,
+            "RemoveStyle":          passUnchanged,
+            "RemoveText":           transformRemoveAnnotationRemoveText,
+            "SetParagraphStyle":    transformRemoveAnnotationSetParagraphStyle,
+            "SplitParagraph":       transformRemoveAnnotationSplitParagraph,
             "UpdateMember":         passUnchanged,
             "UpdateMetadata":       passUnchanged,
             "UpdateParagraphStyle": passUnchanged

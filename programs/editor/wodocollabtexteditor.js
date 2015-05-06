@@ -179,7 +179,7 @@ window.Wodo = window.Wodo || (function () {
             imageEditingEnabled = isEnabled(editorOptions.imageEditingEnabled, true),
             hyperlinkEditingEnabled = isEnabled(editorOptions.hyperlinkEditingEnabled, true),
             reviewModeEnabled = isEnabled(editorOptions.reviewModeEnabled, true),
-            annotationsEnabled = reviewModeEnabled || isEnabled(editorOptions.annotationsEnabled, true),
+            annotationsEnabled = reviewModeEnabled || isEnabled(editorOptions.annotationsEnabled),
             undoRedoEnabled = false, // no proper mechanism yet for collab
             zoomingEnabled = isEnabled(editorOptions.zoomingEnabled),
             //
