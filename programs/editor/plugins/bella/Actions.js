@@ -41,6 +41,10 @@ define("webodf/editor/plugins/bella/Actions", function() {
             pasteboard = [],
             MAX_PASTEBOARD_SIZE = 1000;
 
+        function isEnabled(isActionEnabled) {
+            return (config.allActions !== false) ? (isActionEnabled !== false) : isActionEnabled;
+        }
+
         function shrinkPasteboard() {
             var index;
             if (pasteboard.length > MAX_PASTEBOARD_SIZE) {
@@ -191,7 +195,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.extendSelectionToDocumentEnd = selectionController.extendSelectionToDocumentEnd;
         this.extendSelectionToEntireDocument = selectionController.extendSelectionToEntireDocument;
 
-        if (config.typing) {
+        if (isEnabled(config.typing)) {
         this.sayMeow = reducedDestruction(function () {
             var meows = random.getInt(0, 10),
                 text = config.utterance || "meow";
@@ -206,7 +210,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.removeTextByBackspaceKey = reducedDestruction(textController.removeTextByBackspaceKey);
         }
 
-        if (config.undo) {
+        if (isEnabled(config.undo)) {
         this.undo = controllers.undo;
         this.redo = controllers.redo;
         }
@@ -225,7 +229,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
             });
         }
 
-        if (config.directTextStyling) {
+        if (isEnabled(config.directTextStyling)) {
         this.setBold = runWithRandomBool(directFormattingController.setBold);
         this.setItalic = runWithRandomBool(directFormattingController.setItalic);
         this.setHasUnderline = runWithRandomBool(directFormattingController.setHasUnderline);
@@ -241,14 +245,14 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.toggleStrikethrough = directFormattingController.toggleStrikethrough;
         }
 
-        if (config.directTextStyling && config.typing) {
+        if (isEnabled(config.directTextStyling) && isEnabled(config.typing)) {
         this.setBoldAndAddText = toggleAndInsertText(directFormattingController.setBold);
         this.setItalicAndAddText = toggleAndInsertText(directFormattingController.setItalic);
         this.setHasUnderlineAndAddText = toggleAndInsertText(directFormattingController.setHasUnderline);
         this.setHasStrikethroughAndAddText = toggleAndInsertText(directFormattingController.setHasStrikethrough);
         }
 
-        if (config.directParagraphStyling) {
+        if (isEnabled(config.directParagraphStyling)) {
         this.alignParagraphLeft = directFormattingController.alignParagraphLeft;
         this.alignParagraphCenter = directFormattingController.alignParagraphCenter;
         this.alignParagraphRight = directFormattingController.alignParagraphRight;
@@ -257,7 +261,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.outdent = directFormattingController.outdent;
         }
 
-        if (config.annotations) {
+        if (isEnabled(config.annotations)) {
         this.createAnnotation = annotationController.addAnnotation;
         this.removeAnnotation = function() {
             var container = odtDocument.getRootNode(),// TODO use canvas.getElement or even document.body instead
@@ -270,7 +274,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
         };
         }
 
-        if (config.typing) {
+        if (isEnabled(config.typing)) {
         this.pretendCut = reducedDestruction(function () {
             var range = getCursor().getSelectedRange(),
                 data = controllers.simulateCopy(range);

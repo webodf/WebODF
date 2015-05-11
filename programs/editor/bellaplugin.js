@@ -43,6 +43,7 @@
     function parseBellaConfigFromLocation() {
         var queryParams = parseSearchParameters(window.location);
         return {
+            allActions: queryParams["bella.allActions"] !== "false",
             typing: queryParams["bella.typing"] !== "false",
             directTextStyling: queryParams["bella.directTextStyling"] !== "false",
             directParagraphStyling: queryParams["bella.directParagraphStyling"] !== "false",
