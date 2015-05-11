@@ -297,8 +297,6 @@ window.Wodo = window.Wodo || (function () {
             downloadOdtFile = editorOptions.downloadCallback,
             close =       editorOptions.closeCallback,
             //
-            plugins = editorOptions.plugins,
-            //
             reviewModeEnabled = (editorOptions.modus === MODUS_REVIEW),
             directTextStylingEnabled = isEnabled(editorOptions.directTextStylingEnabled),
             directParagraphStylingEnabled = isEnabled(editorOptions.directParagraphStylingEnabled),
@@ -720,7 +718,6 @@ window.Wodo = window.Wodo || (function () {
 
             tools = new Tools(toolbarElementId, {
                 onToolDone: setFocusToOdfCanvas,
-                plugins: plugins,
                 loadOdtFile: loadOdtFile,
                 saveOdtFile: saveOdtFile,
                 saveAsOdtFile: saveAsOdtFile,

@@ -293,8 +293,14 @@ define("webodf/editor/Tools", [
                     closeButton.placeAt(toolbar);
                 }
 
-                if (args.plugins) {
-                    args.plugins.forEach(function (plugin) {
+                // This is an internal hook for debugging/testing.
+                // Yes, you discovered something interesting. But:
+                // Do NOT rely on it, it will not be supported and can and will change in any version.
+                // It is not officially documented for a reason. A real plugin system is only on the wishlist
+                // so far, please file your suggestions/needs at the official WebODF issue system.
+                // You have been warned.
+                if (window.wodo_plugins) {
+                    window.wodo_plugins.forEach(function (plugin) {
                         runtime.log("Creating plugin: "+plugin.id);
                         require([plugin.id], function (Plugin) {
                             runtime.log("Creating as tool now: "+plugin.id);
