@@ -72,9 +72,9 @@ These commands should be entered from the Visual Studio 2010 command prompt so t
     msbuild WebODF.sln
 
 
-## Building WebODF on OSX 10.7.5 (Lion)
+## Building WebODF on OSX 10.7.5 (Lion) or OSX 10.9.5 (Mavericks)
 
 Qt5 can be installed via homebrew, but will not be linked by default. CMake must be instructed where to find this package by
 specifying the Qt5 location in CMAKE_PATH_PREFIX environment variable:
 
-    cmake -DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.2.1 ../webodf
+    cmake -DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt5/5.4.1 ../webodf
