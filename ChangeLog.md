@@ -1,3 +1,12 @@
+# Changes between 0.5.7 and 0.5.8
+
+## Wodo.TextEditor
+
+### Fixes
+
+* Disable custom buttons save/saveAs/close/download when there is no session ([#893](https://github.com/kogmbh/WebODF/pull/893))
+
+
 # Changes between 0.5.6 and 0.5.7
 
 ## WebODF
