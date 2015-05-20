@@ -105,9 +105,12 @@ define("webodf/editor/Tools", [
                 sessionSubscribers.forEach(function (subscriber) {
                     subscriber.setEditorSession(editorSession);
                 });
-                if (formatMenuButton) {
-                    formatMenuButton.setAttribute('disabled', !editorSession);
-                }
+
+                [saveButton, saveAsButton, downloadButton, closeButton, formatMenuButton].forEach(function (button) {
+                    if (button) {
+                        button.setAttribute('disabled', !editorSession);
+                    }
+                });
             }
 
             this.setEditorSession = setEditorSession;
@@ -171,6 +174,7 @@ define("webodf/editor/Tools", [
                     saveButton = new Button({
                         label: tr('Save'),
                         showLabel: false,
+                        disabled: true,
                         iconClass: 'dijitEditorIcon dijitEditorIconSave',
                         onClick: function () {
                             saveOdtFile();
@@ -185,6 +189,7 @@ define("webodf/editor/Tools", [
                     saveAsButton = new Button({
                         label: tr('Save as...'),
                         showLabel: false,
+                        disabled: true,
                         iconClass: 'webodfeditor-dijitSaveAsIcon',
                         onClick: function () {
                             saveAsOdtFile();
@@ -199,6 +204,7 @@ define("webodf/editor/Tools", [
                     downloadButton = new Button({
                         label: tr('Download'),
                         showLabel: true,
+                        disabled: true,
                         style: {
                             float: 'right'
                         },
@@ -267,6 +273,7 @@ define("webodf/editor/Tools", [
                     closeButton = new Button({
                         label: tr('Close'),
                         showLabel: false,
+                        disabled: true,
                         iconClass: 'dijitEditorIcon dijitEditorIconCancel',
                         style: {
                             float: 'right'
