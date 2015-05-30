@@ -266,5 +266,10 @@
         "core.UnitTester",
         "odf.Namespaces",
         "xmldom.XPath"
+    ],
+    "xmled.ValidationModelTests": [
+        "core.UnitTester",
+        "xmldom.LSSerializer",
+        "xmled.ValidationModel"
     ]
 }

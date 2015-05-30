@@ -1500,6 +1500,10 @@ var gui = {};
  */
 var xmldom = {};
 /**
+ * @namespace The xmled package.
+ */
+var xmled = {};
+/**
  * @namespace The ODF package.
  */
 var odf = {};

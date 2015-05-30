@@ -550,5 +550,29 @@
     "xmldom.RelaxNGParser": [
     ],
     "xmldom.XPath": [
+    ],
+    "xmled.AttributeEditor": [
+        "xmled.ValidationModel"
+    ],
+    "xmled.CrumbBar": [
+        "xmled.ValidationModel"
+    ],
+    "xmled.ValidationModel": [
+        "xmled.XsdChecker"
+    ],
+    "xmled.XmlCanvas": [
+        "xmled.ValidationModel",
+        "xmled.XmlCaret"
+    ],
+    "xmled.XmlCaret": [
+        "core.Cursor"
+    ],
+    "xmled.XmlEditor": [
+        "xmldom.LSSerializer",
+        "xmled.AttributeEditor",
+        "xmled.CrumbBar",
+        "xmled.XmlCanvas"
+    ],
+    "xmled.XsdChecker": [
     ]
 }

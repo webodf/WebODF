@@ -162,7 +162,14 @@ module.exports = function (config) {
             'lib/ops/OperationTransformer.js',
             'lib/xmldom/RelaxNG.js',
             'lib/xmldom/RelaxNG2.js',
-            'lib/xmldom/RelaxNGParser.js', // !
+            'lib/xmldom/RelaxNGParser.js',
+            'lib/xmled/XsdChecker.js',
+            'lib/xmled/ValidationModel.js',
+            'lib/xmled/AttributeEditor.js',
+            'lib/xmled/CrumbBar.js',
+            'lib/xmled/XmlCaret.js',
+            'lib/xmled/XmlCanvas.js',
+            'lib/xmled/XmlEditor.js', // !
             'tests/*/*.js',
             'tests/tests.js',
             { pattern: 'lib/manifest.json', included: false, watched: false, served: true },

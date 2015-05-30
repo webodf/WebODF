@@ -79,6 +79,7 @@ set(TESTJSFILES
     tests/ops/TransformerTests.js
     tests/xmldom/LSSerializerTests.js
     tests/xmldom/XPathTests.js
+    tests/xmled/ValidationModelTests.js
     tests/tests.js
 )
 
