@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global runtime, Runtime, core, gui, xmldom, RuntimeTests, odf, ops, webodf_css: true*/
+/*global runtime, Runtime, core, gui, xmldom, xmled, RuntimeTests, odf, ops, webodf_css: true*/
 
 runtime.loadClass("core.UnitTester");
 runtime.loadClass("core.Base64Tests");
@@ -61,6 +61,7 @@ runtime.loadClass("ops.TransformationTests");
 runtime.loadClass("ops.TransformerTests");
 runtime.loadClass("xmldom.LSSerializerTests");
 runtime.loadClass("xmldom.XPathTests");
+runtime.loadClass("xmled.ValidationModelTests");
 
 
 // The StepsCache verification feature verifies the cache after every modification to ensure it does
@@ -108,6 +109,7 @@ if (runtime.getDOMImplementation() && runtime.parseXML("<a/>").createRange) {
     tests.push(ops.OdtDocumentTests);
     tests.push(ops.OdtStepsTranslatorTests);
     tests.push(ops.TransformerTests);
+    tests.push(xmled.ValidationModelTests);
 }
 // add tests depending on browser runtime
 if (runtime.type() === "BrowserRuntime") {

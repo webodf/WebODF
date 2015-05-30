@@ -161,16 +161,22 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
     /**
      * @param {!string} xsdfile
      * @param {!string} xmlfile
-     * @return {!function(!function():undefined):undefined} callback
+     * @return {!core.AsyncTestData}
      */
     function testValidation(xsdfile, xmlfile) {
         var f = function (callback) {
             var model = new xmled.ValidationModel(xsdfile, function (err) {
                 t.err = err;
                 r.shouldBeNull(t, "t.err");
+                if (err) {
+                    return callback();
+                }
                 runtime.loadXML(xmlfile, function (err, dom) {
                     t.err = err;
                     r.shouldBeNull(t, "t.err");
+                    if (err) {
+                        return callback();
+                    }
                     var e = firstElementChild(dom || null);
                     t.documentElement = e;
                     r.shouldBeNonNull(t, "t.documentElement");
@@ -184,14 +190,22 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             });
         };
         f.functionName = "validation-" + xsdfile + "-" + xmlfile;
-        return f;
+        return {f: f, name: xsdfile, expectFail: false};
     }
 
+    /**
+     * @param {!string} xsd
+     * @param {!Array.<!string>} replacementIds
+     * @return {!core.AsyncTestData}
+     */
     function testRoot(xsd, replacementIds) {
         var f = function (callback) {
             var model = new xmled.ValidationModel(xsd, function (e) {
                 t.err = e;
                 r.shouldBeNull(t, "t.err");
+                if (e) {
+                    return callback();
+                }
                 t.reps = model.getPossibleReplacements(document.documentElement);
                 loadReplacements(function () {
                     checkReplacements(t.reps, replacementIds);
@@ -200,7 +214,7 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             });
         };
         f.functionName = "init-" + xsd;
-        return f;
+        return {f: f, name: xsd, expectFail: false};
     }
 
     /**
@@ -269,13 +283,16 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
      * @param {!Array.<!number>} start
      * @param {!Array.<!number>} end
      * @param {!Array.<!number>} replacementIds
-     * @return {!function(!function():undefined):undefined} callback
+     * @return {!core.AsyncTestData}
      */
     function testReplace(xsd, initId, start, end, replacementIds) {
         var f = function (callback) {
             var model = new xmled.ValidationModel(xsd, function (e) {
                 t.err = e;
                 r.shouldBeNull(t, "t.err");
+                if (e) {
+                    return callback();
+                }
                 loadReplacements(function () {
                     var initial = replacements[initId],
                         range,
@@ -295,7 +312,7 @@ xmled.ValidationModelTests = function ValidationModelTests(runner) {
             });
         };
         f.functionName = "replace-" + xsd + "-" + initId;
-        return f;
+        return {f: f, name: xsd, expectFail: false};
     }
 
     this.setUp = function () {
