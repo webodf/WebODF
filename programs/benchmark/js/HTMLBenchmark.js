@@ -72,7 +72,7 @@ define([
 
     /**
      * Extract supported benchmark options from the url query parameters
-     * @return {!{fileUrl: !string, includeSlow: !boolean, colour: string|undefined}}
+     * @return {!{fileUrl: !string, includeSlow: !boolean, colour: (string|undefined)}}
      */
     function getConfiguration() {
         var params = getQueryParams();
