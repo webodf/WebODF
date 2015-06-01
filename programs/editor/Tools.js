@@ -22,7 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
-/*global define, document, dijit, dojo, runtime, ops*/
+/*global window, define, require, document, dijit, dojo, runtime, ops*/
 
 define("webodf/editor/Tools", [
     "dojo/ready",

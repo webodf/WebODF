@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, window, ops*/
 
 define("webodf/editor/plugins/bella/Bella", [
         "webodf/editor/plugins/bella/Actions",
@@ -132,9 +133,12 @@ define("webodf/editor/plugins/bella/Bella", [
         }
 
         function stop(callback) {
+            /*jslint emptyblock: true*/
+            function noop() {
+            }
+            /*jslint emptyblock: false*/
             if (scheduledTask) {
-                webodf.core.Async.destroyAll([scheduledTask.destroy], callback || function () {
-                });
+                webodf.core.Async.destroyAll([scheduledTask.destroy], callback || noop);
                 if (reporter) {
                     reporter.destroy();
                     reporter = undefined;

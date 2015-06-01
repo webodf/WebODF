@@ -22,12 +22,15 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define*/
 
 define("webodf/editor/plugins/bella/Random", ["./seedrandom"], function(seedrandom) {
     "use strict";
 
     function Random(seed) {
+/*jslint newcap: true */
         var random = new seedrandom(seed);
+/*jslint newcap: false */
 
         /**
          * Return a random number between min (included) & max (excluded)
@@ -46,7 +49,7 @@ define("webodf/editor/plugins/bella/Random", ["./seedrandom"], function(seedrand
         this.getInt = getInt;
 
         function getBool() {
-            return random() < .5;
+            return random() < 0.5;
         }
 
         this.getBool = getBool;

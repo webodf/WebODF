@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, runtime*/
 
 define("webodf/editor/plugins/bella/BellaControl", [
         "webodf/editor/plugins/bella/Bella", "dijit/form/Button"

@@ -22,7 +22,11 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global window*/
+
 (function () {
+    "use strict";
+
     function parseSearchParameters(location) {
         var parameters = {},
             search = location.search || "?";

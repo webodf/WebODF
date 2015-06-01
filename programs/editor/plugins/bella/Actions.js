@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, odf*/
 
 define("webodf/editor/plugins/bella/Actions", function() {
     "use strict";
@@ -33,7 +34,6 @@ define("webodf/editor/plugins/bella/Actions", function() {
     function Actions(controllers, random, config) {
         var session,
             odtDocument,
-            canvas,
             selectionController = controllers.getSelectionController(),
             textController = controllers.getTextController(),
             directFormattingController = controllers.getDirectFormattingController(),
@@ -141,7 +141,7 @@ define("webodf/editor/plugins/bella/Actions", function() {
                     moveToPoint();
                 }
                 callback();
-            }
+            };
         }
 
         this.moveToPoint = moveToPoint;
@@ -308,7 +308,6 @@ define("webodf/editor/plugins/bella/Actions", function() {
         function init() {
             session = controllers.getSession();
             odtDocument = session.getOdtDocument();
-            canvas = odtDocument.getCanvas();
         }
 
         init();

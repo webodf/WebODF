@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, window*/
 
 define("webodf/editor/plugins/bella/SimpleStatusReporter", function() {
     "use strict";

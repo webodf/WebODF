@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, window*/
 
 define("webodf/editor/plugins/bella/WrappedSessionController", function() {
     "use strict";
@@ -47,7 +48,7 @@ define("webodf/editor/plugins/bella/WrappedSessionController", function() {
 
         this.simulateCopy = function(range) {
             var selectedData = "",
-                dataTransfer = { setData: function(ignored, text) { selectedData = text; } };
+                dataTransfer = { setData: function(ignored, text) { selectedData = text; /**Just returning for jslint*/return ignored; } };
 
             mimeDataExporter.exportRangeToDataTransfer(dataTransfer, range);
             return selectedData;

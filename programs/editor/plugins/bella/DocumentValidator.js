@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, window, NodeFilter, ops, runtime*/
 
 define("webodf/editor/plugins/bella/DocumentValidator", function() {
     "use strict";

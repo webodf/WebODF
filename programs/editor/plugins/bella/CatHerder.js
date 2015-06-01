@@ -22,6 +22,7 @@
  * @source: https://github.com/kogmbh/WebODF/
  */
 
+/*global define, window*/
 
 define("webodf/editor/plugins/bella/CatHerder", function() {
     "use strict";
@@ -76,7 +77,7 @@ define("webodf/editor/plugins/bella/CatHerder", function() {
                 errorStack: e && e.stack,
 
                 actions: actionsLog
-            }
+            };
         }
 
         this.onStartAction = function (actionName) {
