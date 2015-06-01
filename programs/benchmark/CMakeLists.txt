@@ -25,7 +25,7 @@ add_custom_command(
      --transform_amd_modules
      --process_common_js_modules
      --common_js_entry_module HTMLBenchmark.js
-     --common_js_module_path_prefix ${CMAKE_CURRENT_SOURCE_DIR}/js
+     --common_js_module_path_prefix ${CMAKE_CURRENT_SOURCE_DIR}/js/
      --compilation_level SIMPLE_OPTIMIZATIONS
      --formatting PRETTY_PRINT
      --js_output_file "benchmark.js-"
