@@ -30,6 +30,15 @@ define("webodf/editor/plugins/bella/Actions", function() {
     /**
      * @constructor
      * @param {!gui.SessionController} controllers
+     * @param {!Random} random
+     * @param {!{allActions:!boolean,
+     *           typing: !boolean,
+     *           undo: !boolean,
+     *           directTextStyling: !boolean,
+     *           directParagraphStyling: !boolean,
+     *           annotations: !boolean,
+     *           utterance: !string,
+     *           utteranceLoud: !string}} config
      */
     function Actions(controllers, random, config) {
         var session,
