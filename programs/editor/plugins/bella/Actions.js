@@ -196,23 +196,23 @@ define("webodf/editor/plugins/bella/Actions", function() {
         this.extendSelectionToEntireDocument = selectionController.extendSelectionToEntireDocument;
 
         if (isEnabled(config.typing)) {
-        this.sayMeow = reducedDestruction(function () {
-            var meows = random.getInt(0, 10),
-                text = config.utterance || "meow";
-            while (meows) {
-                textController.insertText("  " + text + "!  ");
-                meows -= 1;
-            }
-        });
+            this.sayMeow = reducedDestruction(function () {
+                var meows = random.getInt(0, 10),
+                    text = config.utterance || "meow";
+                while (meows) {
+                    textController.insertText("  " + text + "!  ");
+                    meows -= 1;
+                }
+            });
 
-        this.enqueueParagraphSplittingOps = reducedDestruction(textController.enqueueParagraphSplittingOps);
-        this.removeTextByDeleteKey = reducedDestruction(textController.removeTextByDeleteKey);
-        this.removeTextByBackspaceKey = reducedDestruction(textController.removeTextByBackspaceKey);
+            this.enqueueParagraphSplittingOps = reducedDestruction(textController.enqueueParagraphSplittingOps);
+            this.removeTextByDeleteKey = reducedDestruction(textController.removeTextByDeleteKey);
+            this.removeTextByBackspaceKey = reducedDestruction(textController.removeTextByBackspaceKey);
         }
 
         if (isEnabled(config.undo)) {
-        this.undo = controllers.undo;
-        this.redo = controllers.redo;
+            this.undo = controllers.undo;
+            this.redo = controllers.redo;
         }
 
         function runWithRandomBool(func) {
@@ -230,79 +230,79 @@ define("webodf/editor/plugins/bella/Actions", function() {
         }
 
         if (isEnabled(config.directTextStyling)) {
-        this.setBold = runWithRandomBool(directFormattingController.setBold);
-        this.setItalic = runWithRandomBool(directFormattingController.setItalic);
-        this.setHasUnderline = runWithRandomBool(directFormattingController.setHasUnderline);
-        this.setHasStrikethrough = runWithRandomBool(directFormattingController.setHasStrikethrough);
+            this.setBold = runWithRandomBool(directFormattingController.setBold);
+            this.setItalic = runWithRandomBool(directFormattingController.setItalic);
+            this.setHasUnderline = runWithRandomBool(directFormattingController.setHasUnderline);
+            this.setHasStrikethrough = runWithRandomBool(directFormattingController.setHasStrikethrough);
 
-        this.setFontSize = function () {
-            directFormattingController.setFontSize(random.getInt(7, 120));
-        };
+            this.setFontSize = function () {
+                directFormattingController.setFontSize(random.getInt(7, 120));
+            };
 
-        this.toggleBold = directFormattingController.toggleBold;
-        this.toggleItalic = directFormattingController.toggleItalic;
-        this.toggleUnderline = directFormattingController.toggleUnderline;
-        this.toggleStrikethrough = directFormattingController.toggleStrikethrough;
+            this.toggleBold = directFormattingController.toggleBold;
+            this.toggleItalic = directFormattingController.toggleItalic;
+            this.toggleUnderline = directFormattingController.toggleUnderline;
+            this.toggleStrikethrough = directFormattingController.toggleStrikethrough;
         }
 
         if (isEnabled(config.directTextStyling) && isEnabled(config.typing)) {
-        this.setBoldAndAddText = toggleAndInsertText(directFormattingController.setBold);
-        this.setItalicAndAddText = toggleAndInsertText(directFormattingController.setItalic);
-        this.setHasUnderlineAndAddText = toggleAndInsertText(directFormattingController.setHasUnderline);
-        this.setHasStrikethroughAndAddText = toggleAndInsertText(directFormattingController.setHasStrikethrough);
+            this.setBoldAndAddText = toggleAndInsertText(directFormattingController.setBold);
+            this.setItalicAndAddText = toggleAndInsertText(directFormattingController.setItalic);
+            this.setHasUnderlineAndAddText = toggleAndInsertText(directFormattingController.setHasUnderline);
+            this.setHasStrikethroughAndAddText = toggleAndInsertText(directFormattingController.setHasStrikethrough);
         }
 
         if (isEnabled(config.directParagraphStyling)) {
-        this.alignParagraphLeft = directFormattingController.alignParagraphLeft;
-        this.alignParagraphCenter = directFormattingController.alignParagraphCenter;
-        this.alignParagraphRight = directFormattingController.alignParagraphRight;
-        this.alignParagraphJustified = directFormattingController.alignParagraphJustified;
-        this.indent = directFormattingController.indent;
-        this.outdent = directFormattingController.outdent;
+            this.alignParagraphLeft = directFormattingController.alignParagraphLeft;
+            this.alignParagraphCenter = directFormattingController.alignParagraphCenter;
+            this.alignParagraphRight = directFormattingController.alignParagraphRight;
+            this.alignParagraphJustified = directFormattingController.alignParagraphJustified;
+            this.indent = directFormattingController.indent;
+            this.outdent = directFormattingController.outdent;
         }
 
         if (isEnabled(config.annotations)) {
-        this.createAnnotation = annotationController.addAnnotation;
-        this.removeAnnotation = function() {
-            var container = odtDocument.getRootNode(),// TODO use canvas.getElement or even document.body instead
-                annotations = container.getElementsByTagNameNS(odf.Namespaces.officens, "annotation"),
-                index;
-            if (annotations.length > 0) {
-                index = random.getInt(0, annotations.length);
-                annotationController.removeAnnotation(annotations[index]);
-            }
-        };
+            this.createAnnotation = annotationController.addAnnotation;
+            this.removeAnnotation = function() {
+                var container = odtDocument.getRootNode(),// TODO use canvas.getElement or even document.body instead
+                    annotations = container.getElementsByTagNameNS(odf.Namespaces.officens, "annotation"),
+                    index;
+                if (annotations.length > 0) {
+                    index = random.getInt(0, annotations.length);
+                    annotationController.removeAnnotation(annotations[index]);
+                }
+            };
         }
 
         if (isEnabled(config.typing)) {
-        this.pretendCut = reducedDestruction(function () {
-            var range = getCursor().getSelectedRange(),
-                data = controllers.simulateCopy(range);
+            this.pretendCut = reducedDestruction(function () {
+                var range = getCursor().getSelectedRange(),
+                    data = controllers.simulateCopy(range);
 
-            if (data) {
-                pasteboard.push(data);
-                shrinkPasteboard();
-            }
-            textController.removeCurrentSelection();
-        });
-
-        this.pretendCopy = function () {
-            var range = getCursor().getSelectedRange(),
-                data = controllers.simulateCopy(range);
-
-            if (data) {
-                pasteboard.push(data);
-                shrinkPasteboard();
-            }
-        };
-
-        this.pretendPaste = reducedDestruction(function () {
-            var data = random.getElement(pasteboard);
-            if (data) {
+                if (data) {
+                    pasteboard.push(data);
+                    shrinkPasteboard();
+                }
                 textController.removeCurrentSelection();
-                controllers.simulatePaste(data);
-            }
-        });
+            });
+
+            this.pretendCopy = function () {
+                var range = getCursor().getSelectedRange(),
+                    data = controllers.simulateCopy(range);
+
+                if (data) {
+                    pasteboard.push(data);
+                    shrinkPasteboard();
+                }
+            };
+
+            this.pretendPaste = reducedDestruction(function () {
+                var data = random.getElement(pasteboard);
+                if (data) {
+                    textController.removeCurrentSelection();
+                    controllers.simulatePaste(data);
+                }
+            });
         }
 
         function init() {
