@@ -63,13 +63,20 @@ define("webodf/editor/plugins/bella/Bella", [
                 seed: undefined
             };
 
+        /**
+         * @return {undefined}
+         */
         function countOperations() {
             undoStateCount += 1; // TODO count states NOT operations
             state.executedOperations += 1;
         }
 
         /**
-         * Workaround a TrivialUndoManager bug with cursor positions not being correctly restored
+         * Workaround a TrivialUndoManager bug with cursor positions not being
+         * correctly restored. It's done by adding OpMoveCursors for all cursors
+         * with the current cursor state as the very last operations.
+         * (see also https://github.com/kogmbh/WebODF/issues/903)
+         * @return {undefined}
          */
         function saveCurrentCursorPositions() {
             var odtDocument = currentSessionController.getSession().getOdtDocument(),
@@ -91,6 +98,12 @@ define("webodf/editor/plugins/bella/Bella", [
             currentSessionController.getSession().enqueue(ops);
         }
 
+        /**
+         * Prevents undostack eating all memory by the time.
+         * Drops the current undostack if a certain size has been reached
+         * (based on number of states) and resets undomanager to a fresh stack.
+         * @return {undefined}
+         */
         function maintainUndoStackSize() {
             var undoManager = currentSessionController.getUndoManager();
             if (undoManager && undoStateCount > MAX_UNDO_STATES) {
@@ -101,6 +114,10 @@ define("webodf/editor/plugins/bella/Bella", [
             }
         }
 
+        /**
+         * Have Bella do one random action.
+         * @return {undefined}
+         */
         function pounceOnComputer() {
             var actionSource = random.getElement(actionSources),
                 actionName = random.getElement(Object.keys(actionSource)),
@@ -132,6 +149,10 @@ define("webodf/editor/plugins/bella/Bella", [
             scheduledTask.trigger();
         }
 
+        /**
+         * @param {!function():undefined=} callback
+         * @return {undefined}
+         */
         function stop(callback) {
             /*jslint emptyblock: true*/
             function noop() {
@@ -149,6 +170,7 @@ define("webodf/editor/plugins/bella/Bella", [
 
         /**
          * @param {!Object.<!string, !function():undefined>} newActions
+         * @return {undefined}
          */
         this.addActionSource = function (newActions) {
             actionSources.push(newActions);
@@ -156,6 +178,7 @@ define("webodf/editor/plugins/bella/Bella", [
 
         /**
          * @param {!number} newInterval Time (in milliseconds) between actions
+         * @return {undefined}
          */
         this.play = function (newInterval) {
             stop();
