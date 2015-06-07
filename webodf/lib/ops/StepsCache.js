@@ -93,8 +93,7 @@
              * @const
              * @type {!number}
              */
-            DOCUMENT_POSITION_PRECEDING = Node.DOCUMENT_POSITION_PRECEDING,
-            verifyCache;
+            DOCUMENT_POSITION_PRECEDING = Node.DOCUMENT_POSITION_PRECEDING;
 
         /**
          * Bookmark tied to a specific node
@@ -180,7 +179,11 @@
          * caching problems
          * @return {undefined}
          */
-        function verifyCacheImpl() {
+        function verifyCache() {
+            if (ops.StepsCache.ENABLE_CACHE_VERIFICATION !== true) {
+                return;
+            }
+
             var bookmark = basePoint,
                 previousBookmark,
                 nextBookmark,
@@ -641,9 +644,6 @@
         function init() {
             var rootElementId = getNodeId(rootElement) || setNodeId(rootElement);
             basePoint = new RootBookmark(rootElementId, 0, rootElement);
-            /*jslint emptyblock:true*/
-            verifyCache = ops.StepsCache.ENABLE_CACHE_VERIFICATION ? verifyCacheImpl : function() { };
-            /*jslint emptyblock:false*/
         }
         init();
     };

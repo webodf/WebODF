@@ -577,12 +577,14 @@ function Main(cmakeListPath) {
             license,
             licenses = {},
             // files for which jslint is not run
-            jslintExceptions = ["lib/core/RawInflate.js"].map(pathModule.normalize),
+            jslintExceptions = ["lib/core/RawInflate.js",
+                "../programs/editor/plugins/bella/seedrandom.js"].map(pathModule.normalize),
             // files for which the license is not checked
             licenseExceptions = [
                 "lib/HeaderCompiled.js",
                 "lib/core/JSLint.js",
-                "lib/core/RawInflate.js"].map(pathModule.normalize),
+                "lib/core/RawInflate.js",
+                "../programs/editor/plugins/bella/seedrandom.js"].map(pathModule.normalize),
             commonLicense;
         // load JSLint
         /*jslint evil: true*/
