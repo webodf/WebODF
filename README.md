@@ -35,12 +35,13 @@ For more details about preparing the build of webodf.js , e.g. on Windows or OSX
 
 This repository not only contains code for the library webodf.js, but also a few products based on it. Here is the complete list:
 
-build target             | output location (in build/)           | description | download/packages
--------------------------|---------------------------------------|---------------|-----
-webodf.js-target         | webodf/webodf.js                      | the library                        | (see product-library)
-product-library          | webodf.js-x.y.z.zip                   | zip file with library and API docs | [WebODF homepage](http://webodf.org/download)
-product-wodotexteditor   | wodotexteditor-x.y.z.zip              | simple to use editor component     | [WebODF homepage](http://webodf.org/download)
-product-firefoxextension | firefox-extension-odfviewer-x.y.z.xpi | ODF viewer Firefox add-on          | [Mozilla's Add-on website](https://addons.mozilla.org/firefox/addon/webodf/)
+build target                 | output location (in build/)           | description                        | download/packages
+-----------------------------|---------------------------------------|------------------------------------|-----
+webodf.js-target             | webodf/webodf.js                      | the library                        | (see product-library)
+product-library              | webodf.js-x.y.z.zip                   | zip file with library and API docs | [WebODF homepage](http://webodf.org/download)
+product-wodotexteditor       | wodotexteditor-x.y.z.zip              | simple to use editor component     | [WebODF homepage](http://webodf.org/download)
+product-wodocollabtexteditor | wodocollabtexteditor-x.y.z.zip        | collaborative editor component     | [WebODF homepage](http://webodf.org/download)
+product-firefoxextension     | firefox-extension-odfviewer-x.y.z.xpi | ODF viewer Firefox add-on          | [Mozilla's Add-on website](https://addons.mozilla.org/firefox/addon/webodf/)
 
 ("x.y.z" is a placeholder for the actual version number)
 
