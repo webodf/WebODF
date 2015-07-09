@@ -30,7 +30,7 @@
      * of the given memberid, or a given node
      * @constructor
      * @implements {core.PositionFilter}
-     * @param {!string|!Node} anchor 
+     * @param {!string|!Node} anchor
      * @param {Object.<!ops.OdtCursor>} cursors
      * @param {function(!Node):!Node} getRoot
      */
@@ -186,7 +186,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
         return /**@type{!Document}*/(self.getDocumentElement().ownerDocument);
     }
     this.getDOMDocument = getDOMDocument;
-    
+
     /**
      * @param {!Node} node
      * @return {!boolean}
@@ -818,15 +818,7 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
      * @return {!Array.<string>}
      */
     this.getMemberIds = function () {
-        var list = [],
-            /**@type{string}*/
-            i;
-        for (i in cursors) {
-            if (cursors.hasOwnProperty(i)) {
-                list.push(cursors[i].getMemberId());
-            }
-        }
-        return list;
+        return Object.keys(members);
     };
 
     /**
