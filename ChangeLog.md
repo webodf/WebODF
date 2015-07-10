@@ -5,7 +5,7 @@
 ### Fixes
 
 * Disable custom buttons save/saveAs/close/download when there is no session ([#893](https://github.com/kogmbh/WebODF/pull/893))
-
+* Fix chrome selections that cannot be collapsd by clicking inside them ([#905](https://github.com/kogmbh/WebODF/issues/905))
 
 # Changes between 0.5.6 and 0.5.7
 

@@ -981,7 +981,7 @@
             var e = Object.create(null);
 
             // copy over all direct properties
-            Object.keys(/**@type{!Object}*/(event)).forEach(function (x) {
+            Object.keys(event.constructor.prototype).forEach(function (x) {
                 e[x] = event[x];
             });
             // only now set the prototype (might set properties read-only)
