@@ -84,6 +84,10 @@ define("webodf/editor/plugins/bella/Bella", [
                 ops = [];
 
             members.forEach(function (memberId) {
+                if (!odtDocument.getCursor(memberId)) {
+                    return;
+                }
+
                 var selection = odtDocument.getCursorSelection(memberId),
                     selectionType = odtDocument.getCursor(memberId).getSelectionType(),
                     op = new webodf.ops.OpMoveCursor();

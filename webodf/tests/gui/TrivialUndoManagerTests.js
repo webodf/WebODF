@@ -32,11 +32,13 @@
 gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     "use strict";
     var t, testarea,
-        r = runner;
+        r = runner,
+        member,
+        cursor;
 
-    function cursor(id) {
-        return { getMemberId: function () { return id; } };
-    }
+        cursor = member = function (id) {
+            return { getMemberId: function () { return id; } };
+        };
 
     /**
      * @param rootElement
@@ -61,10 +63,20 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         this.setRootElement = noOp;
         this.setOdfContainer = noOp;
         this.cursors = [cursor("1")];
+        this.members = [member("1")];
         this.getMemberIds = function () {
-            return self.cursors.map(function (cursor) {
-                return cursor.getMemberId();
+            return self.members.map(function (member) {
+                return member.getMemberId();
             });
+        };
+        this.hasCursor = function (memberid) {
+            var i;
+            for (i = 0; i < self.cursors.length; i += 1) {
+                if (self.cursors[i].getMemberId() === memberid) {
+                    return true;
+                }
+            }
+            return false;
         };
         this.getDocumentElement = function () { return rootElement; };
         this.getRootNode = function () { return rootElement; };
@@ -195,6 +207,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
     }
 
     function setInitialState_AllCursorsMaintainedWhenCalledMultipleTimes() {
+        t.mock.members.push(member(2));
         t.mock.cursors.push(cursor(2));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 1, memberid: 1}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 2, memberid: 2}));
@@ -362,6 +375,7 @@ gui.TrivialUndoManagerTests = function TrivialUndoManagerTests(runner) {
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 5, memberid: 1}));
         t.manager.onOperationExecuted(create(new ops.OpMoveCursor(), {timestamp: 6, memberid: 2}));
 
+        t.mock.members = [member(2)];
         t.mock.cursors = [cursor(2)];
         t.manager.initialize();
 

@@ -504,7 +504,9 @@ gui.TrivialUndoManager = function TrivialUndoManager(defaultRules) {
         if (moved) {
             // Need to reset the odt document cursor list back to nil so new cursors are correctly re-registered
             document.getMemberIds().forEach(function (memberid) {
-                document.removeCursor(memberid);
+                if (document.hasCursor(memberid)) {
+                    document.removeCursor(memberid);
+                }
             });
             // Only do actual work if moveBackward does something to the undo stacks
             document.setDocumentElement(/**@type{!Element}*/(initialDoc.cloneNode(true)));

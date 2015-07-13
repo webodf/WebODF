@@ -815,6 +815,13 @@ ops.OdtDocument = function OdtDocument(odfCanvas) {
     };
 
     /**
+     * @param {!string} memberid
+     * @return {!boolean}
+     */
+    this.hasCursor = function (memberid) {
+        return cursors.hasOwnProperty(memberid);
+    };
+    /**
      * @return {!Array.<string>}
      */
     this.getMemberIds = function () {
