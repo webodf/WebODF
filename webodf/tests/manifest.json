@@ -63,6 +63,21 @@
         "gui.GuiStepUtils",
         "gui.VisualStepScanner"
     ],
+    "gui.ImageControllerTests": [
+        "core.UnitTester",
+        "gui.ImageController",
+        "gui.SessionConstraints",
+        "gui.SessionContext",
+        "odf.Formatting",
+        "odf.Namespaces",
+        "odf.ObjectNameGenerator",
+        "odf.OdfCanvas",
+        "odf.OdfNodeFilter",
+        "ops.OdtCursor",
+        "ops.OdtDocument",
+        "ops.Session",
+        "xmldom.LSSerializer"
+    ],
     "gui.MetadataControllerTests": [
         "core.UnitTester",
         "gui.MetadataController",

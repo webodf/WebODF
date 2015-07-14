@@ -288,7 +288,8 @@ gui.ImageController = function ImageController(
         var paragraphElement,
             styleName,
             pageContentSize,
-            imageSize;
+            imageSize,
+            cssUnits = new core.CSSUnits();
 
         runtime.assert(widthInPx > 0 && heightInPx > 0, "Both width and height of the image should be greater than 0px.");
         imageSize = {
@@ -304,7 +305,13 @@ gui.ImageController = function ImageController(
             imageSize = scaleToAvailableContentSize(imageSize, pageContentSize);
         }
 
-        insertImageInternal(mimetype, content, imageSize.width + "px", imageSize.height + "px");
+        /* LO seems to be unable to digest px width and heights for image frames, and instead shows such
+           images as being 0.22" squares. To avoid that, let's use cm dimensions.
+         */
+        insertImageInternal(mimetype, content,
+            cssUnits.convert(imageSize.width, "px", "cm") + "cm",
+            cssUnits.convert(imageSize.height, "px", "cm") + "cm"
+        );
     };
 
     /**
