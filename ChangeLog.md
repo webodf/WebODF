@@ -1,12 +1,18 @@
 # Changes between 0.5.7 and 0.5.8
 
+## WebODF
+
+### Fixes
+
+* Fix chrome selections that cannot be collapsd by clicking inside them ([#905](https://github.com/kogmbh/WebODF/issues/905))
+* Fix Inserted images being 1cm by 1cm in LibreOffice/OO ([#904](https://github.com/kogmbh/WebODF/issues/904))
+* Fix exported zip file being uncompressed ([#21]https://github.com/kogmbh/WebODF/issues/21)
+
 ## Wodo.TextEditor
 
 ### Fixes
 
 * Disable custom buttons save/saveAs/close/download when there is no session ([#893](https://github.com/kogmbh/WebODF/pull/893))
-* Fix chrome selections that cannot be collapsd by clicking inside them ([#905](https://github.com/kogmbh/WebODF/issues/905))
-* Fix Inserted images being 1cm by 1cm in LibreOffice/OO ([#904](https://github.com/kogmbh/WebODF/issues/904))
 
 # Changes between 0.5.6 and 0.5.7
 
