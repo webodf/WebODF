@@ -23,7 +23,7 @@
  */
 
  /*global define*/
- 
+
 define(["BenchmarkAction"], function(BenchmarkAction) {
     "use strict";
 
@@ -54,7 +54,7 @@ define(["BenchmarkAction"], function(BenchmarkAction) {
         this.start = function(context) {
             action.start();
             context.odfCanvas.odfContainer().createByteArray(onSuccess, onError);
-        }
+        };
     }
 
     return SaveDocument;
