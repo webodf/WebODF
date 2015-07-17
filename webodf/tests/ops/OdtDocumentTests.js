@@ -558,7 +558,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
 
     function cursorPositionTests() {
         // Examples from README_cursorpositions.txt
-        
+
         return [
             // *************** Empty Paragraph *************** //
             // Examples from README_cursorpositions.txt
@@ -575,7 +575,7 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             // TODO behaviour is different from README_cursorpositions
             // "<text:p>  <text:span>|  </text:span> <text:span>  <text:span>  </text:span>  </text:span>  </text:p>",
 
-            
+
             // *************** Simple Text Nodes *************** //
             "<text:p>|A|B|C|</text:p>",
 
@@ -632,13 +632,23 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             '<text:p>|a|b|<office:annotation><text:list><text:list-item><text:p>|</text:p></text:list-item></text:list></office:annotation><text:span>|c|d|</text:span><office:annotation-end></office:annotation-end>1|2|</text:p>',
             '<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|c|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>',
             '<text:p>|a|<html:div class="annotationWrapper"><office:annotation><text:list><text:list-item><text:p>|b|</text:p></text:list-item></text:list></office:annotation></html:div><html:span class="webodf-annotationHighlight">|</html:span><office:annotation-end></office:annotation-end>1|2|</text:p>'
-            
+
         ].map(function(testInput) {
                 return {
                     name: "cursorPositions " + testInput,
                     f: testCursorPositions.bind(undefined, testInput)
                 };
             });
+    }
+
+    function testMemberIds() {
+        createOdtDocument('<text:p></text:p>');
+
+        t.odtDocument.addMember(new ops.Member('alice', /**@type{!ops.MemberProperties}*/({ fullName: 'Alice' })));
+        t.odtDocument.addMember(new ops.Member('bob', /**@type{!ops.MemberProperties}*/({ fullName: 'Bob' })));
+        t.odtDocument.addMember(new ops.Member('eve', /**@type{!ops.MemberProperties}*/({ fullName: 'Eve' })));
+
+        r.shouldBe(t, 't.odtDocument.getMemberIds().join()', '"alice,bob,eve"');
     }
 
     this.setUp = function () {
@@ -687,7 +697,9 @@ ops.OdtDocumentTests = function OdtDocumentTests(runner) {
             getTextNodeAtStep_At1_PutsTargetMemberCursor_BeforeTextNode,
             getTextNodeAtStep_At4_PutsTargetMemberCursor_BeforeTextNode,
             getTextNodeAtStep_AfterNonText_PutsTargetMemberCursor_BeforeTextNode,
-            getTextNodeAtStep_EmptyP_MovesAllCursors_BeforeTextNode
+            getTextNodeAtStep_EmptyP_MovesAllCursors_BeforeTextNode,
+
+            testMemberIds
         ]).concat(cursorPositionTests());
     };
     this.asyncTests = function () {

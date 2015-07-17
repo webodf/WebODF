@@ -62,6 +62,7 @@ define("webodf/editor/plugins/bella/DocumentValidator", function() {
             var root = odtDocument.getRootNode(),
                 stepIterator = odtDocument.createStepIterator(root, 0, [odtDocument.getPositionFilter()], root);
 
+            // In a Bella environment each memberid has a cursor
             odtDocument.getMemberIds().forEach(function (memberId) {
                 var cursor = odtDocument.getCursor(memberId);
                 stepIterator.setPosition(cursor.getNode(), 0);
