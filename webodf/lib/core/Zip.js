@@ -148,7 +148,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @return {undefined}
      */
     function save(filename, data, compressed, date) {
-        zip.file(filename, data, {date: date, compression: compressed ? null : "STORE"});
+        zip.file(filename, data, {date: date, compression: compressed ? "DEFLATE" : "STORE"});
     }
     /**
      * Removes entry from the zip.
@@ -168,7 +168,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function createByteArray(successCallback, errorCallback) {
         try {
-            successCallback(/**@type{!Uint8Array}*/(zip.generate({type: "uint8array", compression: "DEFLATE"})));
+            successCallback(/**@type{!Uint8Array}*/(zip.generate({type: "uint8array", compression: "STORE"})));
         } catch(/**@type{!Error}*/e) {
             errorCallback(e.message);
         }
