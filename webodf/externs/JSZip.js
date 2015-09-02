@@ -36,6 +36,9 @@ function ZipObject() { "use strict"; }
  */
 ZipObject.prototype.asUint8Array = function() { "use strict"; };
 
+/**@type{!Date}*/
+ZipObject.prototype.date;
+
 /**
  * @constructor
  */

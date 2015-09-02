@@ -205,10 +205,16 @@ core.Zip = function Zip(url, entriesReadCallback) {
     this.loadAsDataURL = loadAsDataURL;
 
     /**
-     * @return {!Array.<!{filename: !string}>}
+     * @return {!Array.<!{filename: !string,date: !Date}>}
      */
     this.getEntries = function () {
-        return Object.keys(zip.files).map(function(filename) { return { filename: filename }; });
+        return Object.keys(zip.files).map(function(filename) {
+            var e = zip.files[filename];
+            return {
+                filename: filename,
+                date: e.date
+            };
+        });
     };
 
     zip = new externs.JSZip();
