@@ -154,16 +154,31 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
+    /**
+     * Check that the first part of the ODF container has the mimetype stored
+     * correctly.
+     */
+    function checkMimeType(t, path, callback) {
+        runtime.readFile(path, "binary", function (err, bytes) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            t.mimetype = runtime.byteArrayToString(bytes.subarray(30, 73), "utf8");
+            r.shouldBe(t, "t.mimetype", "'mimetypeapplication/vnd.oasis.opendocument.'");
+            callback();
+        });
+    }
+
     function createNewSaveAsAndLoad(callback) {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-        t.odf.saveAs("test.odt", function (err) {
+        var path = "test.odt";
+        t.odf.saveAs(path, function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
-            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -172,17 +187,18 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.rootElement.settings = null;
+        var path = "test.odt";
         t.odf.saveAs("test.odt", function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             r.shouldBeNull(t, "t.odf.rootElement.settings");
-            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
                 // The value would only become null if it was a node. By default, random unspecified
                 // attributes on anything are undefined.
                 r.shouldBe(t, "t.odf.rootElement.settings", "undefined");
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -191,16 +207,17 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.rootElement.meta = null;
-        t.odf.saveAs("test.odt", function (err) {
+        var path = "test.odt";
+        t.odf.saveAs(path, function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             // Metadata is always created when the generator string is updated to webodf
             r.shouldBeNonNull(t, "t.odf.rootElement.meta");
-            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
                 r.shouldBeNonNull(t, "t.odf.rootElement.meta");
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -225,7 +242,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
                 r.shouldBeNonNull(t, "t.odf.rootElement.fontFaceDecls");
                 r.shouldBe(t, "t.fontFaceDecls", "t.fontFaceDeclsAfter");
 
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
