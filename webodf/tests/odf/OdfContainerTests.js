@@ -154,16 +154,31 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         });
     }
 
+    /**
+     * Check that the first part of the ODF container has the mimetype stored
+     * correctly.
+     */
+    function checkMimeType(t, path, callback) {
+        runtime.readFile(path, "binary", function (err, bytes) {
+            t.err = err;
+            r.shouldBeNull(t, "t.err");
+            t.mimetype = runtime.byteArrayToString(bytes.subarray(30, 73), "utf8");
+            r.shouldBe(t, "t.mimetype", "'mimetypeapplication/vnd.oasis.opendocument.'");
+            callback();
+        });
+    }
+
     function createNewSaveAsAndLoad(callback) {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-        t.odf.saveAs("test.odt", function (err) {
+        var path = "test.odt";
+        t.odf.saveAs(path, function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
-            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -172,17 +187,18 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.rootElement.settings = null;
+        var path = "test.odt";
         t.odf.saveAs("test.odt", function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             r.shouldBeNull(t, "t.odf.rootElement.settings");
-            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
                 // The value would only become null if it was a node. By default, random unspecified
                 // attributes on anything are undefined.
                 r.shouldBe(t, "t.odf.rootElement.settings", "undefined");
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -191,16 +207,17 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         t.odf = new odf.OdfContainer(odf.OdfContainer.DocumentType.TEXT, null);
         r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
         t.odf.rootElement.meta = null;
-        t.odf.saveAs("test.odt", function (err) {
+        var path = "test.odt";
+        t.odf.saveAs(path, function (err) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
             // Metadata is always created when the generator string is updated to webodf
             r.shouldBeNonNull(t, "t.odf.rootElement.meta");
-            t.odf = new odf.OdfContainer("test.odt", function (odf) {
+            t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
                 r.shouldBeNonNull(t, "t.odf.rootElement.meta");
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -225,7 +242,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
                 r.shouldBeNonNull(t, "t.odf.rootElement.fontFaceDecls");
                 r.shouldBe(t, "t.fontFaceDecls", "t.fontFaceDeclsAfter");
 
-                callback();
+                checkMimeType(t, path, callback);
             });
         });
     }
@@ -307,16 +324,13 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         );
     }
 
-
-/*
     function compareZipEntryList(odf1path, odf2path, callback) {
-        var z1 = new core.Zip(odf1path, function (err, z1) {
+        var dummy = new core.Zip(odf1path, function (err, z1) {
             t.err = err;
             r.shouldBeNull(t, "t.err");
-            var z2 = new core.Zip(odf2path, function (err, z2) {
+            dummy = new core.Zip(odf2path, function (err, z2) {
                 t.err = err;
                 r.shouldBeNull(t, "t.err");
-                r.shouldBe(t, "t.e1", "t.e2.length");
                 t.e1 = z1.getEntries();
                 t.e2 = z2.getEntries();
                 r.shouldBe(t, "t.e1.length", "t.e2.length");
@@ -340,18 +354,17 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
                     t.allPresent = j !== t.e2.length;
                 }
                 r.shouldBe(t, "t.allPresent", "true");
-                callback();
+                checkMimeType(t, odf2path, callback);
             });
-            return z2;
         });
-        return z1;
+        return dummy;
     }
-    function compare(odf1, odf2, odf1path, odf2path, callback) {
+    function compare(odf1path, odf2path, callback) {
         compareZipEntryList(odf1path, odf2path, callback);
     }
     function loadAndSave(callback) {
-        var path = "odf/styletest.odt",
-            newpath = "odf/newstyletest.odt";
+        var path = "odf/loadsave.odt",
+            newpath = "odf/newloadsave.odt";
         t.odf = new odf.OdfContainer(path, function (o1) {
             t.odf = o1;
             r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
@@ -361,12 +374,12 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
                 t.odf2 = new odf.OdfContainer(newpath, function (o2) {
                     t.odf2 = o2;
                     r.shouldBe(t, "t.odf2.state", "odf.OdfContainer.DONE");
-                    compare(o1, o2, path, newpath, callback);
+                    compare(path, newpath, callback);
                 });
             });
         });
     }
-*/
+
     this.tests = function () {
         return r.name([
             createNewText,
@@ -387,8 +400,8 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             testDefaultStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testAutomaticStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
-            testMultiStylesFontFaceDeclsSaveAsAndLoadRoundTrip
-            //loadAndSave
+            testMultiStylesFontFaceDeclsSaveAsAndLoadRoundTrip,
+            loadAndSave
         ]);
     };
 };

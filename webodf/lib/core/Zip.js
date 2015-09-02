@@ -148,7 +148,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
      * @return {undefined}
      */
     function save(filename, data, compressed, date) {
-        zip.file(filename, data, {date: date, compression: compressed ? null : "STORE"});
+        zip.file(filename, data, {date: date, compression: compressed ? "DEFLATE" : "STORE"});
     }
     /**
      * Removes entry from the zip.
@@ -168,7 +168,7 @@ core.Zip = function Zip(url, entriesReadCallback) {
      */
     function createByteArray(successCallback, errorCallback) {
         try {
-            successCallback(/**@type{!Uint8Array}*/(zip.generate({type: "uint8array", compression: "DEFLATE"})));
+            successCallback(/**@type{!Uint8Array}*/(zip.generate({type: "uint8array", compression: "STORE"})));
         } catch(/**@type{!Error}*/e) {
             errorCallback(e.message);
         }
@@ -205,10 +205,16 @@ core.Zip = function Zip(url, entriesReadCallback) {
     this.loadAsDataURL = loadAsDataURL;
 
     /**
-     * @return {!Array.<!{filename: !string}>}
+     * @return {!Array.<!{filename: !string,date: !Date}>}
      */
     this.getEntries = function () {
-        return Object.keys(zip.files).map(function(filename) { return { filename: filename }; });
+        return Object.keys(zip.files).map(function(filename) {
+            var e = zip.files[filename];
+            return {
+                filename: filename,
+                date: e.date
+            };
+        });
     };
 
     zip = new externs.JSZip();
