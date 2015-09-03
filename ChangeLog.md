@@ -1,3 +1,11 @@
+# Changes between 0.5.8 and 0.5.9
+
+## WebODF
+
+## Fixes
+
+* Fix an issue where ODF zip files were incorrectly generated ([#917](https://github.com/kogmbh/WebODF/pull/917))
+
 # Changes between 0.5.7 and 0.5.8
 
 ## WebODF
