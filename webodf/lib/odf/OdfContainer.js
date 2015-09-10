@@ -993,18 +993,15 @@
          * @return {!string}
          */
         function serializeSettingsXml() {
-            var serializer,
+            var serializer = new xmldom.LSSerializer(),
                 /**@type{!string}*/
-                s = "";
+                s = createDocumentElement("document-settings");
             // <office:settings/> is optional, but if present must have at least one child element
             if (self.rootElement.settings && self.rootElement.settings.firstElementChild) {
-                serializer = new xmldom.LSSerializer();
-                s = createDocumentElement("document-settings");
                 serializer.filter = new odf.OdfNodeFilter();
                 s += serializer.writeToString(self.rootElement.settings, odf.Namespaces.namespaceMap);
-                s += "</office:document-settings>";
             }
-            return s;
+            return s + "</office:document-settings>";
         }
         /**
          * @return {!string}
@@ -1306,8 +1303,8 @@
                 date = new Date(),
                 settings;
 
-            settings = serializeSettingsXml();
-            if (settings) {
+            if (partMimetypes["settings.xml"]) {
+                settings = serializeSettingsXml();
                 // Optional according to package spec
                 // See http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__440346_826425813
                 data = runtime.byteArrayFromString(settings, "utf8");
