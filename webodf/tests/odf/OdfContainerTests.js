@@ -195,9 +195,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             t.odf = new odf.OdfContainer(path, function (odf) {
                 t.odf = odf;
                 r.shouldBe(t, "t.odf.state", "odf.OdfContainer.DONE");
-                // The value would only become null if it was a node. By default, random unspecified
-                // attributes on anything are undefined.
-                r.shouldBe(t, "t.odf.rootElement.settings", "undefined");
+                r.shouldBe(t, "t.odf.rootElement.settings", "null");
                 checkMimeType(t, path, callback);
             });
         });
