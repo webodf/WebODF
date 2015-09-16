@@ -126,7 +126,8 @@ odf.Style2CSS = function Style2CSS() {
             [ fons, 'font-weight', 'font-weight' ],
             [ fons, 'font-style', 'font-style' ],
             [ fons, 'font-variant', 'font-variant' ],
-            [ fons, 'letter-spacing', 'letter-spacing' ]
+            [ fons, 'letter-spacing', 'letter-spacing' ],
+            [ fons, 'text-transform', 'text-transform' ]
         ],
 
         /**@const
