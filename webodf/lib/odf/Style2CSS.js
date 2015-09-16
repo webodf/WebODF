@@ -124,7 +124,8 @@ odf.Style2CSS = function Style2CSS() {
             // this sets the element background, not just the text background
             [ fons, 'background-color', 'background-color' ],
             [ fons, 'font-weight', 'font-weight' ],
-            [ fons, 'font-style', 'font-style' ]
+            [ fons, 'font-style', 'font-style' ],
+            [ fons, 'font-variant', 'font-variant' ]
         ],
 
         /**@const
