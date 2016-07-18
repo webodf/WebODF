@@ -96,13 +96,13 @@ MESSAGE ( STATUS "external downloads will be stored/expected in: ${EXTERNALS_DOW
 ExternalProject_Add(
     ClosureCompiler
     DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-    URL "http://dl.google.com/closure-compiler/compiler-20150505.tar.gz"
-    URL_MD5 dea8e282c316316daeb39fcd5708d369
+    URL "http://dl.google.com/closure-compiler/compiler-20160713.tar.gz"
+    URL_MD5 5e29d367d8310d568ada6b8df1260bab
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
 )
-set(CLOSURE_JAR ${CMAKE_BINARY_DIR}/ClosureCompiler-prefix/src/ClosureCompiler/compiler.jar)
+set(CLOSURE_JAR ${CMAKE_BINARY_DIR}/ClosureCompiler-prefix/src/ClosureCompiler/closure-compiler-v20160713.jar)
 
 # Rhino
 ExternalProject_Add(

@@ -26,12 +26,12 @@
 
 /**
  * @constructor
- * @param runner {UnitTestRunner}
+ * @param {!core.UnitTestRunner} runner
  * @implements {core.UnitTest}
  */
 core.Base64Tests = function Base64Tests(runner) {
     "use strict";
-    var t, r = runner, base64 = new core.Base64();
+    var t = {}, r = runner, base64 = new core.Base64();
 
     function testConvertByteArrayToBase64() {
         var a = new Uint8Array(new ArrayBuffer(3));

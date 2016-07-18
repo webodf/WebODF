@@ -40,7 +40,7 @@ gui.StyleSummary = function StyleSummary(styles) {
      *
      * @param {!string} section Section (e.g., style:text-properties)
      * @param {!string} propertyName Property (e.g., fo:font-weight)
-     * @return {!Array.<!string|undefined>}
+     * @return {!Array.<!string>}
      */
     function getPropertyValues(section, propertyName) {
         var cacheKey = section + "|" + propertyName,

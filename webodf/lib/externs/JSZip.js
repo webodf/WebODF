@@ -16,7 +16,7 @@ https://github.com/nodeca/pako/blob/master/LICENSE
     var globalScope = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {}),
         externs = globalScope.externs || (globalScope.externs = {});
     externs.JSZip = e();
-}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+}(function(){var define,module,exports;if(define||module||exports){console.log("");}return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 // private property
 var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
@@ -499,7 +499,7 @@ Usage:
 /**
  * Representation a of zip file in js
  * @constructor
- * @param {(String|ArrayBuffer|Uint8Array)=} data the data to load, if any (optional).
+ * @param {(string|ArrayBuffer|Uint8Array)=} data the data to load, if any (optional).
  * @param {Object=} options the options for creating this objects (optional).
  */
 function JSZip(data, options) {
@@ -641,7 +641,7 @@ var Uint8ArrayWriter = _dereq_('./uint8ArrayWriter');
 /**
  * Returns the raw data of a ZipObject, decompress the content if necessary.
  * @param {ZipObject} file the file to use.
- * @return {String|ArrayBuffer|Uint8Array|Buffer} the data.
+ * @return {string|ArrayBuffer|Uint8Array|Buffer} the data.
  */
 var getRawData = function(file) {
     if (file._data instanceof CompressedObject) {
@@ -666,7 +666,7 @@ var getRawData = function(file) {
 /**
  * Returns the data of a ZipObject in a binary form. If the content is an unicode string, encode it.
  * @param {ZipObject} file the file to use.
- * @return {String|ArrayBuffer|Uint8Array|Buffer} the data.
+ * @return {string|ArrayBuffer|Uint8Array|Buffer} the data.
  */
 var getBinaryData = function(file) {
     var result = getRawData(file),
@@ -687,7 +687,7 @@ var getBinaryData = function(file) {
 /**
  * Transform this._data into a string.
  * @param {function(!string):!string} filter a function String -> String, applied if not null on the result.
- * @return {String} the string representing this._data.
+ * @return {string} the string representing this._data.
  */
 var dataToString = function(asUTF8) {
     var result = getRawData(this);
@@ -717,7 +717,7 @@ var dataToString = function(asUTF8) {
  * A simple object representing a file in the zip file.
  * @constructor
  * @param {string} name the name of the file
- * @param {String|ArrayBuffer|Uint8Array|Buffer} data the data
+ * @param {string|ArrayBuffer|Uint8Array|Buffer} data the data
  * @param {Object} options the options of the file
  */
 var ZipObject = function(name, data, options) {
@@ -838,7 +838,7 @@ var prepareFileAttrs = function(o) {
  * Add a file in the current folder.
  * @private
  * @param {string} name the name of the file
- * @param {String|ArrayBuffer|Uint8Array|Buffer} data the data of the file
+ * @param {string|ArrayBuffer|Uint8Array|Buffer} data the data of the file
  * @param {Object} o the options of the file
  * @return {Object} the new file.
  */
@@ -983,8 +983,7 @@ var generateCompressedObjectFrom = function(file, compression) {
  * @return {object} the zip parts.
  */
 var generateZipParts = function(name, file, compressedObject, offset) {
-    var data = compressedObject.compressedContent,
-        utfEncodedFileName = utils.transformTo("string", utf8.utf8encode(file.name)),
+    var utfEncodedFileName = utils.transformTo("string", utf8.utf8encode(file.name)),
         comment = file.comment || "",
         utfEncodedComment = utils.transformTo("string", utf8.utf8encode(comment)),
         useUTF8ForFileName = utfEncodedFileName.length !== file.name.length,
@@ -1137,7 +1136,7 @@ var out = {
     /**
      * Read an existing zip and merge the data in the current JSZip object.
      * The implementation is in jszip-load.js, don't forget to include it.
-     * @param {String|ArrayBuffer|Uint8Array|Buffer} stream  The stream to load
+     * @param {string|ArrayBuffer|Uint8Array|Buffer} stream  The stream to load
      * @param {Object} options Options for loading the stream.
      *  options.base64 : is the stream in base64 ? default : false
      * @return {JSZip} the current JSZip object
@@ -1176,7 +1175,7 @@ var out = {
      * Add a file to the zip file, or search a file.
      * @param   {string|RegExp} name The name of the file to add (if data is defined),
      * the name of the file to find (if no data) or a regex to match files.
-     * @param   {String|ArrayBuffer|Uint8Array|Buffer} data  The file data, either raw or base64 encoded
+     * @param   {string|ArrayBuffer|Uint8Array|Buffer} data  The file data, either raw or base64 encoded
      * @param   {Object} o     File options
      * @return  {JSZip|Object|Array} this JSZip object (when adding a file),
      * a file (when searching by string) or an array of files (when searching by regex).
@@ -1204,7 +1203,7 @@ var out = {
 
     /**
      * Add a directory to the zip file, or search.
-     * @param   {String|RegExp} arg The name of the directory to add, or a regex to search folders.
+     * @param   {string|RegExp} arg The name of the directory to add, or a regex to search folders.
      * @return  {JSZip} an object with the new directory as the root, or an array containing matching folders.
      */
     folder: function(arg) {
@@ -1266,7 +1265,7 @@ var out = {
      * - base64, (deprecated, use type instead) true to generate base64.
      * - compression, "STORE" by default.
      * - type, "base64" by default. Values are : string, base64, uint8array, arraybuffer, blob.
-     * @return {String|Uint8Array|ArrayBuffer|Buffer|Blob} the zip file
+     * @return {string|Uint8Array|ArrayBuffer|Buffer|Blob} the zip file
      */
     generate: function(options) {
         options = extend(options || {}, {
@@ -1705,7 +1704,7 @@ var utf8border = function(buf, max) {
 
 // convert array to string
 var buf2string = function (buf) {
-    var str, i, out, c, c_len;
+    var i, out, c, c_len;
     var len = buf.length;
 
     // Reserve max possible length (2 words per char)
@@ -1762,7 +1761,7 @@ var buf2string = function (buf) {
 /**
  * Transform a javascript string into an array (typed if possible) of bytes,
  * UTF-8 encoded.
- * @param {String} str the string to encode
+ * @param {string} str the string to encode
  * @return {Array|Uint8Array|Buffer} the UTF-8 encoded string.
  */
 exports.utf8encode = function utf8encode(str) {
@@ -1778,7 +1777,7 @@ exports.utf8encode = function utf8encode(str) {
  * Transform a bytes array (or a representation) representing an UTF-8 encoded
  * string into a javascript string.
  * @param {Array|Uint8Array|Buffer} buf the data de decode
- * @return {String} the decoded string.
+ * @return {string} the decoded string.
  */
 exports.utf8decode = function utf8decode(buf) {
     if (support.nodebuffer) {
@@ -1814,7 +1813,7 @@ var nodeBuffer = _dereq_('./nodeBuffer');
 /**
  * Convert a string to a "binary string" : a string containing only char codes between 0 and 255.
  * @param {string} str the string to transform.
- * @return {String} the binary string.
+ * @return {string} the binary string.
  */
 exports.string2binary = function(str) {
     var result = "";
@@ -1861,7 +1860,7 @@ function identity(input) {
 
 /**
  * Fill in an array with a string.
- * @param {String} str the string to use.
+ * @param {string} str the string to use.
  * @param {Array|ArrayBuffer|Uint8Array|Buffer} array the array to fill in (will be mutated).
  * @return {Array|ArrayBuffer|Uint8Array|Buffer} the updated array.
  */
@@ -1875,7 +1874,7 @@ function stringToArrayLike(str, array) {
 /**
  * Transform an array-like object to a string.
  * @param {Array|ArrayBuffer|Uint8Array|Buffer} array the array to transform.
- * @return {String} the result.
+ * @return {string} the result.
  */
 function arrayLikeToString(array) {
     // Performances notes :
@@ -2034,8 +2033,8 @@ transform["nodebuffer"] = {
  * Transform an input into any type.
  * The supported output type are : string, array, uint8array, arraybuffer, nodebuffer.
  * If no output type is specified, the unmodified input will be returned.
- * @param {String} outputType the output type.
- * @param {String|Array|ArrayBuffer|Uint8Array|Buffer} input the input to convert.
+ * @param {string} outputType the output type.
+ * @param {string|Array|ArrayBuffer|Uint8Array|Buffer} input the input to convert.
  * @throws {Error} an Error if the browser doesn't support the requested output type.
  */
 exports.transformTo = function(outputType, input) {
@@ -2057,7 +2056,7 @@ exports.transformTo = function(outputType, input) {
  * Return the type of the input.
  * The type will be in a format valid for JSZip.utils.transformTo : string, array, uint8array, arraybuffer.
  * @param {Object} input the input to identify.
- * @return {String} the (lowercase) type of the input.
+ * @return {string} the (lowercase) type of the input.
  */
 exports.getTypeOf = function(input) {
     if (typeof input === "string") {
@@ -2079,7 +2078,7 @@ exports.getTypeOf = function(input) {
 
 /**
  * Throw an exception if the type is not supported.
- * @param {String} type the type to check.
+ * @param {string} type the type to check.
  * @throws {Error} an Error if the browser doesn't support the requested type.
  */
 exports.checkSupport = function(type) {
@@ -2125,7 +2124,7 @@ exports.findCompression = function(compressionMethod) {
 /**
 * Cross-window, cross-Node-context regular expression detection
 * @param  {Object}  object Anything
-* @return {Boolean}        true if the object is a regular expression,
+* @return {boolean}        true if the object is a regular expression,
 * false otherwise
 */
 exports.isRegExp = function (object) {
@@ -2147,7 +2146,7 @@ var jszipProto = _dereq_('./object');
 /**
  * All the entries in the zip file.
  * @constructor
- * @param {String|ArrayBuffer|Uint8Array} data the binary stream to load.
+ * @param {string|ArrayBuffer|Uint8Array} data the binary stream to load.
  * @param {Object} loadOptions Options for loading the stream.
  */
 function ZipEntries(data, loadOptions) {
@@ -2326,7 +2325,7 @@ ZipEntries.prototype = {
     },
     /**
      * Read a zip file and create ZipEntries.
-     * @param {String|ArrayBuffer|Uint8Array|Buffer} data the binary string representing a zip file.
+     * @param {string|ArrayBuffer|Uint8Array|Buffer} data the binary string representing a zip file.
      */
     load: function(data) {
         this.prepareReader(data);
@@ -2571,7 +2570,7 @@ ZipEntry.prototype = {
 
     /**
      * Find the unicode path declared in the extra field, if any.
-     * @return {String} the unicode path, null otherwise.
+     * @return {string} the unicode path, null otherwise.
      */
     findExtraFieldUnicodePath: function() {
         var upathField = this.extraFields[0x7075];
@@ -2595,7 +2594,7 @@ ZipEntry.prototype = {
 
     /**
      * Find the unicode comment declared in the extra field, if any.
-     * @return {String} the unicode comment, null otherwise.
+     * @return {string} the unicode comment, null otherwise.
      */
     findExtraFieldUnicodeComment: function() {
         var ucommentField = this.extraFields[0x6375];

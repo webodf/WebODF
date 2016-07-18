@@ -211,6 +211,9 @@ odf.LayoutTests = function LayoutTests(runner) {
             // This enables cross-browser tests to be written for cases where Chrome & FF perform different conversions
             // on the computed value (e.g., vertical-align with a %, FF converts to pixels, while Chrome returns the
             // original string).
+            if (typeof a !== "string") {
+                a = String(a);
+            }
             if (b.split("|").indexOf(a) !== -1) {
                 a = b;
             }
