@@ -205,6 +205,20 @@ function quit(exitCode) {"use strict"; }
 /**
  * @typedef {!Object}
  */
+Packages.java;
+/**
+ * @typedef {!Object}
+ */
+Packages.java.io;
+/**
+ * @constructor
+ * @extends Packages.java.io.Reader
+ * @param {!string} path
+ */
+Packages.java.io.FileReader = function (path) {"use strict"; };
+/**
+ * @typedef {!Object}
+ */
 Packages.javax;
 /**
  * @namespace

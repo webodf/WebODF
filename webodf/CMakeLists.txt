@@ -99,6 +99,11 @@ add_custom_target(webodf.css.js-target DEPENDS webodf.css.js)
 # Windows has a command-line limit of around 8,000 chars, so files to be compiled are supplied to CC using the --flagfile
 # option to help keep the length of the compilation command as small as possible.
 SET(CLOSURE_ERROR_OPTION_LIST
+    "--language_in ECMASCRIPT3"
+    "--language_out ECMASCRIPT3"
+    "--use_types_for_optimization"
+    #    "--new_type_inf"
+    "--hide_warnings_for=synthetic"
     "--jscomp_error accessControls"
     "--jscomp_error ambiguousFunctionDecl"
     "--jscomp_error checkEventfulObjectDisposal"
@@ -122,11 +127,11 @@ SET(CLOSURE_ERROR_OPTION_LIST
     "--jscomp_error missingGetCssName"
     "--jscomp_error missingProperties"
     "--jscomp_error missingProvide"
-    "--jscomp_off missingRequire"
+    "--jscomp_off   missingRequire"
     "--jscomp_error missingReturn"
     "--jscomp_error msgDescriptions"
     "--jscomp_error newCheckTypes"
-    "--jscomp_off nonStandardJsDocs"
+    "--jscomp_off   nonStandardJsDocs"
     "--jscomp_error strictModuleDepCheck"
     "--jscomp_error suspiciousCode"
     "--jscomp_error typeInvalidation"

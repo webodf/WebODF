@@ -159,7 +159,8 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
      * correctly.
      */
     function checkMimeType(t, path, callback) {
-        runtime.readFile(path, "binary", function (err, bytes) {
+        runtime.readFile(path, "binary", function (err, bytes_array) {
+            var bytes = /**@type{!Uint8Array}*/(bytes_array);
             t.err = err;
             r.shouldBeNull(t, "t.err");
             t.mimetype = runtime.byteArrayToString(bytes.subarray(30, 73), "utf8");
