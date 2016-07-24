@@ -383,7 +383,7 @@ odf.Formatting = function Formatting() {
         }
 
         /**
-         * @param {!Array.<!Object.<string,!Object.<string,number>>>} usedStyleMap
+         * @param {!Object.<!string,!Object.<string,!Object.<string,number>>>} usedStyleMap
          */
         function chainStyles(usedStyleMap) {
             Object.keys(usedStyleMap).forEach(function (styleFamily) {

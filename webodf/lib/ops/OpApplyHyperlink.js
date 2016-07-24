@@ -101,7 +101,8 @@ ops.OpApplyHyperlink = function OpApplyHyperlink() {
             linkNode = createHyperlink(ownerDocument, hyperlink);
             node.parentNode.insertBefore(linkNode, node);
             linkNode.appendChild(node);
-            if (modifiedParagraphs.indexOf(paragraph) === -1) {
+            if (paragraph !== null
+                    && modifiedParagraphs.indexOf(paragraph) === -1) {
                 modifiedParagraphs.push(paragraph);
             }
         });

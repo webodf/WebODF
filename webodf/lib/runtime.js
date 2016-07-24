@@ -1834,10 +1834,9 @@ var webodf = {};
             }
             runtime.setCurrentDirectory(path);
             function inner_run() {
-                var script, path, args, argv, result; // hide variables
                 // execute script and make arguments available via argv
                 /*jslint evil: true*/
-                result = /**@type{!number}*/(eval(codestring));
+                var result = /**@type{!number}*/(eval(codestring));
                 /*jslint evil: false*/
                 if (result) {
                     runtime.exit(result);

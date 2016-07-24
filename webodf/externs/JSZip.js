@@ -53,7 +53,7 @@ function JSZip() { "use strict"; }
 JSZip.prototype.file = function(filename, data, options) { "use strict"; };
 
 /**
- * @type {!Array.<!ZipObject>}
+ * @type {!Object.<!string,!ZipObject>}
  */
 JSZip.prototype.files;
 
