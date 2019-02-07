@@ -120,7 +120,7 @@ set(RHINO ${CMAKE_BINARY_DIR}/Rhino-prefix/src/Rhino/js.jar)
 ExternalProject_Add(
     JsDoc
     DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
-    URL "http://jsdoc-toolkit.googlecode.com/files/jsdoc_toolkit-2.4.0.zip"
+    URL "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsdoc-toolkit/jsdoc_toolkit-2.4.0.zip"
     URL_MD5 a8f78f5ecd24b54501147b2af341a231
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
