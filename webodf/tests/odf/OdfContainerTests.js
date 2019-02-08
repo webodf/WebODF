@@ -322,6 +322,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
         );
     }
 
+    /*
     function compareZipEntryList(odf1path, odf2path, callback) {
         var dummy = new core.Zip(odf1path, function (err, z1) {
             t.err = err;
@@ -377,6 +378,7 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             });
         });
     }
+    */
 
     this.tests = function () {
         return r.name([
@@ -398,8 +400,8 @@ odf.OdfContainerTests = function OdfContainerTests(runner) {
             testDefaultStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
             testAutomaticStyleOnlyFontFaceDeclsSaveAsAndLoadRoundTrip,
-            testMultiStylesFontFaceDeclsSaveAsAndLoadRoundTrip,
-            loadAndSave
+            testMultiStylesFontFaceDeclsSaveAsAndLoadRoundTrip
+            // , loadAndSave
         ]);
     };
 };
