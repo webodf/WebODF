@@ -1,5 +1,17 @@
---- ./util.c_	2011-04-20 11:22:46.558521731 +0200
-+++ ./util.c	2011-04-20 11:23:23.999880771 +0200
+diff -Naurw jscoverage-0.5.1-orig/js/Makefile.in jscoverage-0.5.1/js/Makefile.in
+--- jscoverage-0.5.1-orig/js/Makefile.in	2010-09-23 14:00:00.000000000 +0200
++++ jscoverage-0.5.1/js/Makefile.in	2019-02-07 23:57:30.292080849 +0100
+@@ -431,6 +431,7 @@
+ NSPR_STATIC_PATH = $(DIST)/lib
+ endif
+ 
++CXXFLAGS += -fpermissive
+ ifdef MOZ_SHARK
+ CFLAGS += -F/System/Library/PrivateFrameworks
+ CXXFLAGS += -F/System/Library/PrivateFrameworks
+diff -Naurw jscoverage-0.5.1-orig/util.c jscoverage-0.5.1/util.c
+--- jscoverage-0.5.1-orig/util.c	2010-09-23 14:00:00.000000000 +0200
++++ jscoverage-0.5.1/util.c	2019-02-07 23:58:18.369297990 +0100
 @@ -478,6 +478,10 @@
          p->next = head;
          head = p;

@@ -231,7 +231,7 @@ else()
         DOWNLOAD_DIR ${EXTERNALS_DOWNLOAD_DIR}
         URL "http://siliconforks.com/jscoverage/download/jscoverage-0.5.1.tar.bz2"
         URL_MD5 a70d79a6759367fbcc0bcc18d6866ff3
-        PATCH_COMMAND  cat ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch | patch -p0
+        PATCH_COMMAND  cat ${CMAKE_CURRENT_SOURCE_DIR}/JSCoverage.patch | patch -p1
         CONFIGURE_COMMAND "./configure"
         BUILD_COMMAND make -j${NProcessors}
         BUILD_IN_SOURCE 1
