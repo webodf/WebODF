@@ -28,6 +28,12 @@ For building now in the same directory where either of above commands were done 
 
 A successful run will yield the file "webodf.js" in the subfolder "build/webodf/" (among other things), from where you can then copy it and use for your website.
 
+### Dependencies on Ubuntu
+
+For a Ubuntu 18.04 distribution you can satisfy the build dependencies with:
+
+    apt-get install libqt5webkit5-dev default-jdk
+
 
 ## Building WebODF on Windows
 
